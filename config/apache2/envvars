@@ -1,0 +1,10 @@
+# Here is where we can set defaults for Apache2 environment variables
+# These values are from /etc/apache2/apache2.conf
+# You can uncomment them to use them or add them to your
+# own environment variables if you want to customize the server.
+# export APACHE_RUN_USER=www-data
+# export APACHE_RUN_GROUP=www-data
+# export APACHE_PID_FILE=/var/run/apache2/apache2.pid
+export APACHE_PID_FILE=/var/run/apache2/apache2.pid
+export APACHE_LOCK_DIR=/var/lock/apache2
+export APACHE_LOG_DIR=/var/log/apache2
