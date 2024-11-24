@@ -43,6 +43,11 @@
                 </a>
             </li>
             <li class="nav-item pb-2">
+                <a href="{{ route('admin.dictionary') }}" class="nav-link navbar-header text-white">
+                    <i class="bi bi-archive-fill"></i> Регистратура
+                </a>
+            </li>
+            <li class="nav-item pb-2">
                 <a href="#accounts" class="nav-link text-white toggle-collapse navbar-header" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="accounts" id="accountsToggle">
                     <i class="bi bi-file-earmark-text"></i> Учётные записи
                 </a>

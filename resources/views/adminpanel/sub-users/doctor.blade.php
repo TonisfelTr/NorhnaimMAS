@@ -59,7 +59,7 @@
                     <td>{{ $doctor->birth_at }}</td>
                     <td>{{ $doctor->address_job }}</td>
                     <td>
-                        <a class="btn btn-info btn-sm" href="{{ route('admin.user_edit', $doctors->id) }}">Редактирование</a>
+                        <a class="btn btn-info btn-sm" href="{{ route('admin.user_edit', $doctor->id) }}">Редактирование</a>
                         <button class="btn btn-danger btn-sm user-delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#user-delete-modal">Удалить</button>
                     </td>
                 </tr>

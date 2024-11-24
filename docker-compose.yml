@@ -25,6 +25,28 @@ services:
             - pgsql
             - redis
             - memcached
+
+    laravel.worker:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.3
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.3/worker
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - redis
+        command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+        restart: always
+
     pgsql:
         image: 'postgres:15'
         ports:
@@ -50,6 +72,7 @@ services:
                 - '${DB_USERNAME}'
             retries: 3
             timeout: 5s
+
     redis:
         image: 'redis:alpine'
         ports:
@@ -65,12 +88,14 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+
     memcached:
         image: 'memcached:alpine'
         ports:
             - '${FORWARD_MEMCACHED_PORT:-11211}:11211'
         networks:
             - sail
+
     pgadmin4:
         image: 'dpage/pgadmin4:latest'
         ports:
@@ -99,9 +124,11 @@ services:
                 - '${DB_USERNAME}'
             retries: 3
             timeout: 5s
+
 networks:
     sail:
         driver: bridge
+
 volumes:
     sail-pgsql:
         driver: local

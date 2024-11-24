@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Carbon;
 
 class Doctor extends Model
 {
@@ -17,6 +18,10 @@ class Doctor extends Model
     protected $casts = [
         "birth_at" => "date:d.m.Y"
     ];
+
+    public function getBirthAtAttribute($value) {
+        return Carbon::parse($value)->format('d.m.Y');
+    }
 
     public function user(): MorphOne {
         return $this->morphOne(User::class, 'userable');

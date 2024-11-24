@@ -86,6 +86,35 @@
                         <label for="user-balance" class="form-label">Баланс пользователя</label>
                         <input class="form-control" type="number" step="0.05" id="user-balance" name="balance" value="{{ old('balance', $user->balance) }}">
                     </div>
+                    <div class="mb-3">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td class="text-center" colspan="3">Транзакции с балансом</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">Причина</td>
+                                    <td class="text-center">Старый баланс</td>
+                                    <td class="text-center">Новый баланс</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if($transactions->isEmpty())
+                                    <tr>
+                                        <td colspan="3" class="text-center"><span class="bi bi-patch-question"></span> История транзакций пуста</td>
+                                    </tr>
+                                @else
+                                    @foreach($transactions as $transaction)
+                                    <tr>
+                                        <td>{{ $transaction->reason }}</td>
+                                        <td>{{ $transaction->old_balance }}</td>
+                                        <td>{{ $transaction->new_balance }}</td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         @if($user->id != 1)
                             <button class="btn btn-danger me-md-2" id="user-delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#user-delete-modal"><i class="bi bi-trash3"></i> Удалить пользователя</button>

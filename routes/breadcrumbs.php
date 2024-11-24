@@ -59,44 +59,44 @@ if (!Breadcrumbs::exists('admin.main')) {
 
     Breadcrumbs::for('admin.dictionary', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
-        $trail->push('Регистратура и словари', route('admin.dictionary'));
+        $trail->push('Словари', route('admin.dictionary'));
     });
 
     Breadcrumbs::for('admin.dictionary.clinics', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
-        $trail->push('Регистратура и словари', route('admin.dictionary'));
         $trail->push('Клиники', route('admin.dictionary.clinics'));
+    });
+
+    Breadcrumbs::for('admin.dictionary.clinics.edit', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Клиники', route('admin.dictionary.clinics'));
+        $trail->push('Редактирование клиники');
     });
 
     Breadcrumbs::for('admin.dictionary.drugs', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
-        $trail->push('Регистратура и словари', route('admin.dictionary'));
         $trail->push('Лекарства', route('admin.dictionary.drugs'));
     });
 
     Breadcrumbs::for('admin.dictionary.drugs.edit', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
-        $trail->push('Регистратура и словари', route('admin.dictionary'));
         $trail->push('Лекарства', route('admin.dictionary.drugs'));
         $trail->push('Редактирование');
     });
 
     Breadcrumbs::for('admin.dictionary.drugs.new', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
-        $trail->push('Регистратура и словари', route('admin.dictionary'));
         $trail->push('Лекарства', route('admin.dictionary.drugs'));
         $trail->push('Добавление нового');
     });
 
     Breadcrumbs::for('admin.dictionary.diagnoses', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
-        $trail->push('Регистратура и словари', route('admin.dictionary'));
         $trail->push('Диагнозы', route('admin.dictionary.diagnoses'));
     });
 
     Breadcrumbs::for('admin.dictionary.diagnoses_edit', function (BreadcrumbTrail $trail) {
        $trail->push('Главная', route('admin.main'));
-       $trail->push('Регистратура и словари', route('admin.dictionary'));
        $trail->push('Диагнозы', route('admin.dictionary.diagnoses'));
        $trail->push('Редактирование', route('admin.dictionary.diagnoses.edit', 1));
     });

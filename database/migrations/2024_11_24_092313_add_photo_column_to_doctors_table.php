@@ -12,10 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('doctors', function (Blueprint $table) {
-            $table->float('min_price')
-                ->default(1000);
-            $table->float('max_price')
-                ->default(5000);
+            $table->string('photo')
+                  ->nullable();
         });
     }
 
@@ -25,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('doctors', function (Blueprint $table) {
-            $table->dropColumn('min_price');
-            $table->dropColumn('max_price');
+            $table->dropColumn('photo');
         });
     }
 };

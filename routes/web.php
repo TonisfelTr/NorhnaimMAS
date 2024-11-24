@@ -3,10 +3,14 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', \App\Http\Controllers\Main\IndexController::class)->name('main.index');
-Route::get('/clinics', [\App\Http\Controllers\Main\ClinicController::class, 'index'])->name('main.clinics');
 Route::get('/medicines', \App\Http\Controllers\Main\MedicineController::class)->name('main.medicines');
 Route::get('/privacy-policy', \App\Http\Controllers\Main\MedicineController::class)->name('main.policy');
 Route::get('/feedback', \App\Http\Controllers\Main\FeedbackController::class)->name('main.feedback');
+
+Route::prefix('/clinics')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics');
+    Route::get('/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'index'])->name('main.clinics.form');
+});
 
 Route::prefix('/log/')->group(function () {
     Route::get('/out', [\App\Http\Controllers\UserController::class, 'logout'])->name('actions.logout');
@@ -61,7 +65,8 @@ Route::prefix('/admin/')->middleware(\App\Http\Middleware\AdminGroupMiddleware::
            Route::get('/', [\App\Http\Controllers\Adminpanel\ClinicController::class, 'index'])->name('admin.dictionary.clinics');
            Route::match(['get', 'post'], '/create', [\App\Http\Controllers\Adminpanel\ClinicController::class, 'store'])->name('admin.dictionary.clinics.new');
            Route::get('/delete', [\App\Http\Controllers\Adminpanel\ClinicController::class, 'store'])->name('admin.dictionary.clinics.delete');
-           Route::match(['get', 'post'], 'edit/{clinic}', [\App\Http\Controllers\Adminpanel\ClinicController::class, 'edit'])->name('admin.dictionary.clinics.edit');
+           Route::get('/edit/{clinic}', [\App\Http\Controllers\Adminpanel\ClinicController::class, 'edit'])->name('admin.dictionary.clinics.edit');
+           Route::post('/save/{clinic}', [\App\Http\Controllers\Adminpanel\ClinicController::class, 'save'])->name('admin.dictionary.clinics.save');
        });
 
        Route::prefix('/drugs/')->group(function () {
