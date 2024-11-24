@@ -53,4 +53,11 @@ class Clinic extends Model
 
         return asset('assets/images/backgrounds/feedback_placeholder.webp');
     }
+
+    public function hasFeedback(): bool {
+        return $this->feedbacks()
+                    ->where('user_id', auth()->user()->id)
+                    ->where('clinic_id', $this->id)
+                    ->count();
+    }
 }

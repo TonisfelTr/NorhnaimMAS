@@ -10,6 +10,7 @@ Route::get('/feedback', \App\Http\Controllers\Main\FeedbackController::class)->n
 Route::prefix('/clinics')->group(function () {
     Route::get('/', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics');
     Route::get('/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'index'])->name('main.clinics.form');
+    Route::post('/feedback/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'feedback'])->name('main.clinics.form.feedback-create');
 });
 
 Route::prefix('/log/')->group(function () {

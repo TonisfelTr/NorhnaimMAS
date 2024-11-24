@@ -35,4 +35,8 @@ class Patient extends Model
     public function fullName(): string {
         return "{$this->surname}, {$this->name} {$this->patronym}";
     }
+
+    public function trimmedName(): string {
+        return "{$this->surname}, {$this->name}";
+    }
 }

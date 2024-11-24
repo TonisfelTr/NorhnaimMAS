@@ -34,7 +34,7 @@
                             <div class="card-body flex-grow-1">
                                 <h3 class="card-title">{{ $clinic->name }}</h3>
                                 <p class="card-text">{{ $clinic->address }}</p>
-                                <p class="card-text">{{ $clinic->description }}</p>
+                                <p class="card-text">{!! $clinic->description !!}</p>
                             </div>
                             <!-- Кнопка внизу карточки -->
                             <a href="{{ route('main.clinics.form', $clinic->id) }}"
