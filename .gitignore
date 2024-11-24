@@ -21,3 +21,4 @@ docker-compose.yml
 /public/parser/
 /public/assets/images
 /resources/sass/assets/images/
+./pgadmin4.db
