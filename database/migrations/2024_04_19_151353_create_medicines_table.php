@@ -16,10 +16,10 @@ return new class extends Migration
             $table->id();
             $table->string('name', 50);
             $table->enum('group', (array)MedicineTypesEnum::class);
-            $table->float('ht_output');
-            $table->json('receptor_activity');
-            $table->json('doses');
-            $table->json('medicine_form');
+            $table->string('latin_name');
+            $table->float('ht_output_from');
+            $table->float('ht_output_to');
+            $table->json('forms');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -1,0 +1,553 @@
+//@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..9001,100..900&display=swap')
+
+@keyframes grow
+    100%
+        transform: scale(1)
+    200%
+        transform: scale(2)
+
+$doctor-block__color: #048696
+$select__color: #0681d7
+
+body
+    font-family: "Montserrat", sans-serif
+    font-optical-sizing: auto
+    font-weight: 300
+    font-style: normal
+
+.d-flex.justify-content-right,
+.d-inline-flex.justify-content-right
+    width: 100%
+    justify-content: right
+
+.site-title__header, .site-title__description
+    text-shadow: 2px 2px #41464b
+
+.site-title__header
+    letter-spacing: -2px
+    font-size: 55px
+    border-bottom: 1px solid #ccc
+    padding-bottom: 8px
+    margin-right: 50px
+    color: white
+
+.site-title__description
+    color: white
+
+.subblock__header
+    letter-spacing: -2px
+    font-weight: 400
+    padding-bottom: 5px
+
+input
+    letter-spacing: -1px
+
+.authorization-block
+    border: 1px solid #999
+    border-radius: 5px
+    padding: 25px
+    background: white
+
+footer
+    display: flex
+    flex-direction: column
+    border-top: 3px solid #444
+    padding-top: 20px
+    min-height: 300px
+    margin-top: 50px
+    background: #048696
+    color: #eee
+
+    p
+        width: 100%
+        text-align: center
+
+    ul.link-list
+        list-style: none
+        width: 100%
+        padding-left: 0
+
+        li a
+            color: white
+            text-decoration: none
+            font-weight: 400
+            font-size: 18px
+            padding-right: 30px
+
+        li:last-child a
+            padding-right: 0
+
+        li a:hover
+            font-weight: 600
+            transition: 500ms
+            padding-right: 28px
+
+        li:last-child a:hover
+            padding-right: 0
+
+    a.privacy-policy__link
+        color: #f7f8fa
+        margin: 0 auto
+        padding-top: 15px
+        text-decoration: none
+        border-bottom: 1px solid white
+        padding-bottom: 2px
+
+    a:hover
+        font-weight: 600
+        transition: 500ms
+
+section.main
+    padding-top: 50px
+
+h3.block__header
+    padding-bottom: 15px
+
+.block__body
+
+    .block__text
+        padding-bottom: 20px
+
+section.header
+    width: 100%
+    background: url('assets/images/doctors.webp') no-repeat
+    background-size: cover
+    height: 500px
+    padding-top: 50px
+
+header
+    position: sticky
+
+    ul.nav
+        background-color: rgba(255, 255, 255, 0.5)
+        border-bottom-left-radius: 10px
+        border-bottom-right-radius: 10px
+
+        li
+            padding: 10px
+
+            a
+                color: #000 !important
+
+            button
+                color: #000 !important
+
+        li.active
+            background-color: white
+            height: 100%
+
+            a
+                color: black !important
+                text-shadow: none
+
+            button
+                color: black !important
+                text-shadow: none
+
+.grecaptcha-badge
+    visibility: hidden
+
+.vertical-input-group input:not(:last-child),
+.vertical-input-group input:not(:first-child),
+.vertical-input-group textarea:not(:first-child),
+.vertical-input-group textarea:not(:last-child),
+.vertical-input-group select:not(:first-child),
+.vertical-input-group select:not(:last-child)
+    border-radius: 0
+    border-bottom: unset
+
+.vertical-input-group input:first-child,
+.vertical-input-group textarea:first-child,
+.vertical-input-group select:first-child
+    border-bottom-left-radius: 0
+    border-bottom-right-radius: 0
+    border-top-left-radius: 4px
+    border-top-right-radius: 4px
+
+.vertical-input-group input:last-child,
+.vertical-input-group textarea:last-child,
+.vertical-input-group select:last-child
+    border-top-left-radius: 0
+    border-top-right-radius: 0
+    border-bottom-left-radius: 4px
+    border-bottom-right-radius: 4px
+    border-bottom: 1px solid #ccc
+
+select:has(option[value=""][selected])
+    color: #595c5f
+
+#tooltip
+    width: max-content
+    position: absolute
+    top: 0
+    left: 0
+    background: #222
+    color: white
+    font-weight: bold
+    padding: 5px
+    border-radius: 4px
+    font-size: 90%
+
+#tooltip[data-popper-placement^='top'] > #arrow
+    bottom: -4px
+
+#arrow,
+#arrow::before
+    position: absolute
+    width: 8px
+    height: 8px
+    background: inherit
+
+#arrow
+    visibility: unset
+    bottom: -4px
+    width: 1px
+    background: unset
+
+
+#arrow::before
+    visibility: visible
+    content: ''
+    transform: rotate(45deg)
+    background: #222
+    color: white
+
+abbr
+    text-decoration: underline dotted
+
+main
+    padding-top: 20px
+
+section
+    text-align: left
+
+    h1.container__header
+        font-size: 35px
+
+        &.greater
+            font-size: 45px
+
+        span
+            color: #0681d7
+
+section.cities
+
+    p.section-cities__p
+        text-align: left
+        padding-bottom: 30px
+        font-size: 21px
+
+    picture img
+        height: 650px
+        width: 290px
+
+        &.ic-slide
+            transition: 1s
+            transform: scale(1.1)
+
+    div.images-container
+        display: inline-flex
+        justify-content: space-between
+        cursor: pointer
+
+        div.images-container__square-top picture img
+            height: 300px
+
+        .images-container__big-left picture img
+            max-height: 630px
+            max-width: 290px
+            min-height: 630px
+            min-width: 290px
+
+    div.images-container__part
+        display: flex
+        justify-content: space-between
+        flex-direction: column
+
+    div.images-container__square-part
+        display: inline-flex
+        justify-content: space-between
+
+    div.images-container__small-bottom
+        max-width: 910px
+        max-height: 300px
+        width: 910px
+        height: 300px
+        overflow-x: hidden
+
+        picture img
+            max-height: 300px
+            max-width: 910px
+            height: 300px
+            width: 910px
+
+    .images-container__big-left
+        margin-right: 20px
+
+        .images-container__overlay
+            display: flex
+            justify-content: center
+            position: absolute
+            width: 290px
+            margin: 0px auto
+            height: 650px
+            z-index: 5
+            background-color: rgba(81, 70, 70, 0.4784313725)
+
+        p
+            margin: auto auto
+            color: white
+            font-size: 25px
+
+    .images-container__square-top
+        margin-right: 20px
+
+        .images-container__overlay
+            display: flex
+            justify-content: center
+            position: absolute
+            width: 290px
+            height: 300px
+            z-index: 5
+            background-color: #5146467a
+
+            p
+                margin: auto auto
+                color: white
+                font-size: 25px
+
+    .images-container__small-bottom .images-container__overlay
+        display: flex
+        justify-content: center
+        position: absolute
+        width: 940px
+        height: 300px
+        z-index: 5
+        background-color: #5146467a
+
+        p
+            margin: auto auto
+            color: white
+            font-size: 25px
+
+    .images-container__with-overlay
+        overflow: hidden
+        position: relative
+
+        img
+            height: 650px
+            width: 290px
+            transition: transform 1s
+
+        &.ic-slide img
+            transform: scale(1.1)
+
+picture img,
+picture source
+    background-color: #8f8f8f
+
+section.information
+    width: 100%
+
+    div.information__block
+        display: flex
+        flex-direction: column
+        justify-content: space-between
+        border: 1px solid #666
+        border-radius: 6px
+        text-align: center
+        margin: 20px
+
+        picture img
+            width: 322px
+            height: 200px
+            margin-bottom: 20px
+            border-top-left-radius: 6px
+            border-top-right-radius: 6px
+
+div.modal
+
+    div.modal-header
+        border-bottom: unset !important
+        text-align: center
+
+    div.modal-content
+        padding: 30px
+
+    div.modal-footer
+        border-top: unset !important
+
+        button
+            margin-bottom: 10px
+
+.full-width
+    width: 100%
+
+.full-width__viewport
+    width: 50vw
+
+ul.abilities__main
+    width: 100%
+    text-align: right
+    list-style: none
+
+    > li
+        padding-top: 30px
+        padding-bottom: 30px
+        position: relative
+        z-index: 2
+
+        &.abilities__bg-diagnostic
+            background-image: url('assets/images/abilities/diagnostic.png')
+            background-size: 230px
+            background-repeat: no-repeat
+            background-position: 35vw 100px
+
+        &.abilities__bg-cure
+            background: url('assets/images/abilities/cure.png')
+            background-size: 230px
+            background-repeat: no-repeat
+            background-position: 35vw 100px
+
+        &.abilities__bg-medicines
+            background: url('assets/images/abilities/medicines.png')
+            background-size: 230px
+            background-repeat: no-repeat
+            background-position: 35vw 100px
+
+        &.abilities__bg-library
+            background: url('assets/images/abilities/library.png')
+            background-size: 230px
+            background-repeat: no-repeat
+            background-position: 35vw 100px
+
+        &.abilities__bg-law
+            background: url('assets/images/abilities/law.png')
+            background-size: 230px
+            background-repeat: no-repeat
+            background-position: 35vw 100px
+
+    h1.abilities__header
+        font-size: 55px
+        background: rgba(7, 206, 201, 0.2)
+        padding-right: 35px
+
+    ul
+        list-style: none
+        text-align: left
+
+        li
+            margin: 15px
+
+    picture
+        position: absolute
+        z-index: 1
+        left: 0
+
+section.advertisement
+    margin: 35px auto
+
+    div.doctor-block
+        background: $doctor-block__color
+
+        .row
+            img
+                height: 380px
+                margin-top: 25px
+
+            div.doctor-block__text
+                color: white
+                font-weight: 400
+                font-size: 35px
+                padding: 120px
+
+    p.section-advertisement__p
+        text-align: left
+        padding-bottom: 30px
+        font-size: 21px
+
+    div.card
+        display: flex
+        flex-direction: column
+        height: 550px
+
+        h5.card-header
+            height: 60px
+            padding: 15px
+
+        .card-body
+            display: flex
+            flex-direction: column
+            justify-content: space-between
+            flex-grow: 1
+
+            .card-title.card-unhead
+                padding-top: 10px
+
+            ul
+                margin-bottom: auto
+
+
+            .btn-group
+                margin-top: auto
+
+            .tarrif-description
+                margin-top: 25px
+
+.line__low_case
+    margin-bottom: 0.45rem
+
+h1.text-price span,
+.card-title
+    color: $doctor-block__color
+
+.bs-carousel-dark-arrow
+
+    .carousel-control-next-icon,
+    .carousel-control-prev-icon
+        color: #048696
+
+.pl-8
+    padding-left: 8rem !important
+
+.pl-10
+    padding-left: 10rem !important
+
+.font-35
+    font-size: 35px
+
+.color-arrow
+    color: #048696
+
+.feedback-slider__image
+    width: 290px
+    height: 400px
+    background-color: $doctor-block__color
+    padding: 0
+    position: relative
+
+    img
+        background-color: transparent
+        color: white
+        text-align: center
+        width: 290px
+        height: 450px
+        border-radius: 6px
+
+.feedback-container
+    display: flex
+    align-items: center
+    height: 100%
+
+.carousel-indicators [data-bs-target]
+    background-color: #3ba
+
+section.clinics,
+section.doctors
+
+    .container
+        h1 span
+            color: $select__color
+
+section.clinics + section.advertisement
+    background-color: $doctor-block__color
