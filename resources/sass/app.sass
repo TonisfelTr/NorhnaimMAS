@@ -7,7 +7,7 @@
         transform: scale(2)
 
 $doctor-block__color: #048696
-$select__color: #0681d7
+$select__color: #aed0ea
 
 body
     font-family: "Montserrat", sans-serif
@@ -598,9 +598,93 @@ section.clinic-card
     picture source,
     picture img
         background-color: #8f8f8f
+        width: 100% !important
+        height: 758px
+        object-fit: cover
+
+    #clinicPhotosCarousel__container
+        width: 100%
+
+    #reviewsCarousel
+
+        .carousel-inner
+            width: 85%
+            margin: 0 auto
+
+        .carousel-control-prev,
+        .carousel-control-next
+            z-index: 5
+
+        .carousel-control-prev
+            left: -40px
+            color: black
+
+        .carousel-control-next
+            right: -40px
+            color: black
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon
+            width: 30px
+            height: 30px
+
+        .carousel-item .card
+            height: 400px
+
+            .pl-3
+                margin-left: 21px
+
+        .carousel-container
+            width: 100% /* Контейнер занимает всю ширину */
+            max-width: 100%
+            overflow: hidden /* Убирает лишние области */
+            position: relative
+
+        .carousel img
+            width: 100% /* Картинки растягиваются на всю ширину */
+            height: auto /* Сохраняет пропорции */
+            object-fit: cover /* Убедитесь, что изображения "обрезаются", а не сжимаются */
+
+section.clinics
+
+    .card picture img
+        width: 300px
+        height: 270px
+        object-fit: cover
+
+section.doctor-card
+
+    h1 span
+        color: $select__color
+
+    padding-top: 20px
+
+    h1
+        color: $select__color
+
+    h2 span
+        color: $select__color
+
+    .map-block
+        width: 100%
+        height: 500px
+
+    strong
+        font-weight: 600
+
+    .badge
+        font-size: 19px
+        font-weight: 500
+        margin: 3px
+        background-color: #0e8482 !important
+
+    picture source,
+    picture img
+        background-color: #8f8f8f
         width: 310px
         height: 230px
         object-fit: cover
+        border-radius: 6px
 
     .carousel-inner
         width: 85%
@@ -629,11 +713,52 @@ section.clinic-card
         .pl-3
             margin-left: 21px
 
-section.clinics
+section.blog
 
-    .card picture img
-        width: 300px
-        height: 270px
-        object-fit: cover
+    .magnifier-block
+        border-radius: 6px
+        border-top: 1px solid #ced4da !important
+        border-bottom: 1px solid #ced4da !important
+        border-left: 1px solid #ced4da !important
+        border-right: 0
+        background-color: #fff
+        color: #6c757d
 
+    h1 span
+        color: $doctor-block__color
+
+    input.with-btn-filter
+        border-right: 0
+
+    button.btn-filter
+        border-top: 1px solid #ced4da !important
+        border-bottom: 1px solid #ced4da !important
+
+section.categories
+
+    .categories-list
+        padding-top: 14px
+        padding-bottom: 14px
+        background-color: $doctor-block__color
+
+    a.link-category
+        color: black
+        background: white
+        padding: 4px 12px
+        border-radius: 4px
+        margin: 0 12px
+        font-size: 14px
+        text-decoration: none
+
+        &:hover
+            color: black
+            background-color: $select__color
+
+        &:active
+            color: black
+            background: gray
+
+        &.active
+            background-color: #51625e
+            color: white
 

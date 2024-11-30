@@ -39,6 +39,13 @@ if (!Breadcrumbs::exists('admin.main')) {
         $trail->push('Доктора', route('admin.users.doctors'));
     });
 
+    Breadcrumbs::for('admin.users.doctors.edit', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Пользователи', route('admin.users'));
+        $trail->push('Доктора', route('admin.users.doctors'));
+        $trail->push('Редактирование');
+    });
+
     Breadcrumbs::for('admin.users.patient_new', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
         $trail->push('Пользователи', route('admin.users'));
@@ -55,6 +62,18 @@ if (!Breadcrumbs::exists('admin.main')) {
     Breadcrumbs::for('admin.groups', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
         $trail->push('Группы пользователей', route('admin.groups'));
+    });
+
+    Breadcrumbs::for('admin.group.edit', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Группы', route('admin.groups'));
+        $trail->push('Редактирование группы');
+    });
+
+    Breadcrumbs::for('admin.group.new', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Группы', route('admin.groups'));
+        $trail->push('Создание группы');
     });
 
     Breadcrumbs::for('admin.dictionary', function (BreadcrumbTrail $trail) {
@@ -99,5 +118,22 @@ if (!Breadcrumbs::exists('admin.main')) {
        $trail->push('Главная', route('admin.main'));
        $trail->push('Диагнозы', route('admin.dictionary.diagnoses'));
        $trail->push('Редактирование', route('admin.dictionary.diagnoses.edit', 1));
+    });
+
+    Breadcrumbs::for('admin.blog.categories', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Категории блога', route('admin.blog.categories'));
+    });
+
+    Breadcrumbs::for('admin.blog.categories.new', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Категории блога', route('admin.blog.categories'));
+        $trail->push('Создание категории', route('admin.blog.categories.new'));
+    });
+
+    Breadcrumbs::for('admin.blog.categories.edit', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Категории блога', route('admin.blog.categories'));
+        $trail->push('Редактирование категории');
     });
 }

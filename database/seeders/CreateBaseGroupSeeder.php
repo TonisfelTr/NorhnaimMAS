@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Group;
 use Illuminate\Database\Seeder;
 
 class CreateBaseGroupSeeder extends Seeder
@@ -11,6 +12,8 @@ class CreateBaseGroupSeeder extends Seeder
      */
     public function run(): void
     {
+        Group::truncate();
+
         $defaultGroup = new \App\Models\Group();
         $defaultGroup->name = 'Пользователи';
         $defaultGroup->slug = 'users';

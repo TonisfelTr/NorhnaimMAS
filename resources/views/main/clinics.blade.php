@@ -12,12 +12,11 @@
                     <div class="row g-0">
                         <div class="col-md-2 position-relative">
                             <picture>
-                                <source srcset="{{ $clinic->getWebpPhoto() ?? asset('assets/images/backgrounds/feedback_placeholder.webp') }}"
+                                <source srcset="{{ $clinic->getCoverWebpPhoto() ?? asset('assets/images/backgrounds/feedback_placeholder.webp') }}"
                                         type="image/webp">
-                                <img src="{{ $clinic->photo }}"
+                                <img src="{{ $clinic->coverPhoto() }}"
                                      class="img-fluid rounded-start" alt="Нет фотографии">
                             </picture>
-                            <!-- Прогрессбар с отступом -->
                             <div class="progress position-absolute progress-image__in"
                                  role="progressbar"
                                  aria-label="Отзывы"
@@ -36,7 +35,6 @@
                                 <p class="card-text">{{ $clinic->address }}</p>
                                 <p class="card-text">{!! $clinic->description !!}</p>
                             </div>
-                            <!-- Кнопка внизу карточки -->
                             <a href="{{ route('main.clinics.form', $clinic->id) }}"
                                class="btn btn-primary position-absolute doctor-card__button">
                                 Посмотреть карточку клиники <span class="bi bi-chevron-double-right"></span>
@@ -74,7 +72,6 @@
                                 <img src="{{ asset('assets/images/backgrounds/feedback_placeholder.png') }}"
                                      class="img-fluid rounded-start" alt="Нет фотографии">
                             </picture>
-                            <!-- Прогрессбар с отступом -->
                             <div class="progress position-absolute progress-image__in"
                                  role="progressbar"
                                  aria-label="Отзывы"
@@ -92,17 +89,19 @@
                                 <h3 class="card-title">{{ $doctor->fullName() }}</h3>
                                 <h5>{{ $doctor->status }}</h5>
                                 <h6>
-                                    @if($doctor->min_price > 0)
-                                        от {{ $doctor->min_price }}₽
+                                    @if($lowPrice = $doctor->lowestPrice())
+                                        от {{ $lowPrice }}₽
                                     @endif
-                                    @if($doctor->max_price > 0 && $doctor->max_price > $doctor->min_price)
-                                        до {{ $doctor->max_price }}₽
+                                    @if($doctor->highPrice() > $lowPrice)
+                                        до {{ $doctor->highPrice() }}₽
                                     @endif
                                 </h6>
+                                <p class="card-text"><strong>Стаж:</strong> {{ $doctor->experience }}</p>
                                 <p class="card-text">{{ $doctor->address_job }}</p>
+                                <p class="card-text"><a href="{{ route('main.clinics.form', $doctor->clinic_id) }}">{{ $doctor->clinic->name }}</a></p>
+                                <p class="card-text">{{ Str::limit($doctor->about, 300) }}</p>
                             </div>
-                            <!-- Кнопка внизу карточки -->
-                            <a href="..."
+                            <a href="{{ route('main.doctors.form', $doctor->id) }}"
                                class="btn btn-primary position-absolute doctor-card__button">
                                 Посмотреть карточку врача <span class="bi bi-chevron-double-right"></span>
                             </a>

@@ -23,23 +23,47 @@
                     {{ session('success') }}
                 </div>
             @endif
-            <div class="pt-5 row">
-                <div class="col-md-3">
-                    <picture>
-                        <source srcset="{{ $clinic->getWebpPhoto() }}" type="image/webp">
-                        <img src="{{ $clinic->photo ?? asset('assets/images/backgrounds/feedback_placeholder.png') }}">
-                    </picture>
+            <div class="pt-5 row justify-content-center">
+                <div class="col-md-12 d-flex justify-content-center">
+                    <div class="carousel-container" id="clinicPhotosCarousel__container">
+                        <div id="clinicPhotosCarousel" class="carousel slide w-100" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                @forelse($clinic->photos as $index => $photo)
+                                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                        <picture>
+                                            <source srcset="{{ asset('storage/' . $photo->photo) }}" type="image/webp">
+                                            <img src="{{ asset('storage/' . $photo->photo) }}" class="d-block w-100" alt="Фото клиники" loading="lazy">
+                                        </picture>
+                                    </div>
+                                @empty
+                                    <div class="carousel-item active">
+                                        <picture>
+                                            <source srcset="{{ asset('assets/images/backgrounds/clinic_placeholder.webp') }}" type="image/webp">
+                                            <img src="{{ asset('assets/images/backgrounds/clinic_placeholder.png') }}" class="d-block w-100" alt="Фото клиники" loading="lazy">
+                                        </picture>
+                                    </div>
+                                @endforelse
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#clinicPhotosCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#clinicPhotosCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-12 mt-4">
                     {!! $clinic->description !!}
                     <p><strong>Адрес: </strong>{{ $clinic->address }}</p>
                     @if($clinic->phone)
-                        <p><strong>Телефон приёмной: </strong><a
-                                href="tel:{{ $clinic->phone }}">{{ $clinic->phone }}</a></p>
+                        <p><strong>Телефон приёмной: </strong><a href="tel:{{ $clinic->phone }}">{{ $clinic->phone }}</a></p>
                     @endif
                 </div>
             </div>
-            @if($clinic->services()->isNotEmpty())
+        @if($clinic->services()->isNotEmpty())
                 <div class="pt-5 row">
                     <h2>Услуги</h2>
                     <div class="col-md-12">

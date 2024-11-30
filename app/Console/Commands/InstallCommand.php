@@ -66,6 +66,10 @@ class InstallCommand extends Command
             '--class' => 'AdminUserSeeder'
         ]);
 
+        $this->info('Creating "cache" table');
+        Artisan::call('cache:table');
+        Artisan::call('migrate');
+
         return Command::SUCCESS;
     }
 }

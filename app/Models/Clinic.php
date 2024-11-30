@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -17,16 +18,6 @@ class Clinic extends Model
     protected $casts = [
         'created_at' => 'datetime:d.m.Y H:i:s'
     ];
-
-    public function getPhotoAttribute($value): string
-    {
-        if (!is_null($value)) {
-            return asset('storage/' . $value);
-        }
-
-        return asset('assets/images/backgrounds/feedback_placeholder.png');
-    }
-
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d.m.Y H:i:s');
@@ -43,21 +34,39 @@ class Clinic extends Model
         return DB::table('services')->where('clinic_id', $this->id)->get();
     }
 
-    public function getWebpPhoto(): string
+    public function getCoverWebpPhoto(): string
     {
-        if (!empty($this->attributes['photo'])) {
-            $unformatPhoto = pathinfo($this->attributes['photo'], PATHINFO_FILENAME) . '.webp';
+        $coverPhoto = $this->photos()->where('is_cover', true)->first();
 
-            return asset('storage/photos/' . $unformatPhoto);
+        if ($coverPhoto && !empty($coverPhoto->photo)) {
+            $unformatPhoto = pathinfo($coverPhoto->photo, PATHINFO_FILENAME) . '.webp';
+
+            return asset('storage/clinic_photos/' . $unformatPhoto);
         }
 
         return asset('assets/images/backgrounds/feedback_placeholder.webp');
     }
+
 
     public function hasFeedback(): bool {
         return $this->feedbacks()
                     ->where('user_id', auth()->user()->id)
                     ->where('clinic_id', $this->id)
                     ->count();
+    }
+
+    public function photos(): HasMany {
+        return $this->hasMany(ClinicPhoto::class);
+    }
+
+    public function coverPhoto(): ?string
+    {
+        $coverPhoto = $this->photos()->where('is_cover', true)->first();
+
+        if ($coverPhoto) {
+            return asset('storage/clinic_photos/' . $coverPhoto->photo);
+        }
+
+        return asset('assets/images/backgrounds/feedback_placeholder.png');
     }
 }

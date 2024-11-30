@@ -61,15 +61,55 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="pt-3 row image-container">
-                    <picture class="col-md-3">
-                        <source srcset="{{ $clinic->getWebpPhoto() }}" type="image/webp">
-                        <img class="pt-2" src="{{ $clinic->photo ?? asset('assets/images/backgrounds/feedback_placeholder.png') }}" alt="Фото клиники">
-                    </picture>
-                    <div class="col-md-6">
-                        <label for="photo" class="form-label">Фотография</label>
-                        <input id="photo" name="photo" class="form-control" type="file" accept=".jpeg, .jpg, .png, .webp" value="{{ old('photo') ?? $clinic->photo }}">
+                <div class="pt-3">
+                    <label for="photos" class="form-label">Фотографии клиники</label>
+                    <div id="clinicPhotosCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @forelse($clinic->photos as $index => $photo)
+                                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                    <picture class="d-block w-100">
+                                        <source srcset="{{ asset('storage/' . $photo->photo) }}" type="image/webp">
+                                        <img src="{{ asset('storage/' . $photo->photo) }}" class="d-block w-100" alt="Фото клиники">
+                                    </picture>
+                                </div>
+                            @empty
+                                <div class="carousel-item active">
+                                    <picture>
+                                        <source srcset="{{ asset('assets/images/backgrounds/clinic_placeholder.webp') }}" type="image/webp">
+                                        <img src="{{ asset('assets/images/backgrounds/clinic_placeholder.png') }}" class="d-block w-100" alt="Фото клиники">
+                                    </picture>
+                                </div>
+                            @endforelse
+                        </div>
+                        <!-- Навигация карусели -->
+                        <button class="carousel-control-prev" type="button" data-bs-target="#clinicPhotosCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#clinicPhotosCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
+
+                    <div class="pt-3">
+                        <label for="photos" class="form-label">Добавить фотографии</label>
+                        <input id="photos" name="photos[]" class="form-control" type="file" accept=".jpeg, .jpg, .png, .webp" multiple>
+                    </div>
+
+                    <!-- Поле для выбора обложки -->
+                    @if($clinic->photos->count())
+                        <div class="pt-3">
+                            <label for="cover_photo_index" class="form-label">Выберите обложку</label>
+                            <select id="cover_photo_index" name="cover_photo_index" class="form-control">
+                                @foreach($clinic->photos as $index => $photo)
+                                    <option value="{{ $index }}" {{ $photo->is_cover ? 'selected' : '' }}>
+                                        Фото {{ $index + 1 }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
                 </div>
             </div>
         </form>

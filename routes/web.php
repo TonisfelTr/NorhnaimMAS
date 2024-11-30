@@ -11,6 +11,19 @@ Route::prefix('/clinics')->group(function () {
     Route::get('/', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics');
     Route::get('/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'index'])->name('main.clinics.form');
     Route::post('/feedback/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'feedback'])->name('main.clinics.form.feedback-create');
+    Route::get('/filter/{city_name}', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics.filters.city');
+});
+
+Route::prefix('/doctors')->group(function () {
+    Route::get('/{clinic_id}', [\App\Http\Controllers\Main\DoctorController::class, 'index'])->name('main.doctors.form');
+    Route::post('/feedback/{doctor_id}', [\App\Http\Controllers\Main\DoctorController::class, 'feedback'])->name('main.doctors.form.feedback-create');
+});
+
+Route::prefix('/blog')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Main\BlogController::class, 'list'])->name('main.blog');
+    Route::prefix('/category')->group(function () {
+        Route::get('/{category_id}', [\App\Http\Controllers\Main\BlogController::class, 'list'])->name('main.blog.category');
+    });
 });
 
 Route::prefix('/log/')->group(function () {
@@ -46,6 +59,8 @@ Route::prefix('/admin/')->middleware(\App\Http\Middleware\AdminGroupMiddleware::
            Route::get('/', [ \App\Http\Controllers\Adminpanel\DoctorController::class, 'index'])->name('admin.users.doctors');
            Route::match(['get', 'post'], '/create', [ \App\Http\Controllers\Adminpanel\DoctorController::class, 'store'])->name('admin.users.doctors.new');
            Route::get('/delete', [ \App\Http\Controllers\Adminpanel\DoctorController::class, 'delete'])->name('admin.users.doctors.delete');
+           Route::get('/edit/{doctor_id}', [\App\Http\Controllers\Adminpanel\DoctorController::class, 'edit'])->name('admin.users.doctors.edit');
+           Route::post('/save/{doctor_id}', [\App\Http\Controllers\Adminpanel\DoctorController::class, 'save'])->name('admin.users.doctors.save');
        });
 
        Route::prefix('/banned')->group(function () {
@@ -55,8 +70,10 @@ Route::prefix('/admin/')->middleware(\App\Http\Middleware\AdminGroupMiddleware::
 
    Route::prefix('/groups/')->group(function () {
        Route::get('/', [\App\Http\Controllers\Adminpanel\GroupController::class, 'index'])->name('admin.groups');
-       Route::get('/create', [\App\Http\Controllers\Adminpanel\GroupController::class, 'index'])->name('admin.groups.new');
-       Route::get('/edit/{group}', [\App\Http\Controllers\Adminpanel\GroupController::class, 'index'])->name('admin.groups.edit');
+       Route::get('/create', [\App\Http\Controllers\Adminpanel\GroupController::class, 'create'])->name('admin.groups.new');
+       Route::post('/store', [\App\Http\Controllers\Adminpanel\GroupController::class, 'create'])->name('admin.groups.store');
+       Route::get('/edit/{group}', [\App\Http\Controllers\Adminpanel\GroupController::class, 'edit'])->name('admin.groups.edit');
+       Route::post('/save/{group}', [\App\Http\Controllers\Adminpanel\GroupController::class, 'save'])->name('admin.groups.save');
    });
 
    Route::prefix('/dictionary/')->group(function () {
@@ -89,4 +106,12 @@ Route::prefix('/admin/')->middleware(\App\Http\Middleware\AdminGroupMiddleware::
    });
 
    Route::get('/feedbacks', \App\Http\Controllers\Adminpanel\IndexController::class)->name('admin.feedbacks');
+
+   Route::prefix('/blog/')->group(function () {
+       Route::get('/', [\App\Http\Controllers\Adminpanel\BlogController::class, 'listCategories'])->name('admin.blog.categories');
+       Route::get('/edit/{category_id}', [\App\Http\Controllers\Adminpanel\BlogController::class, 'edit'])->name('admin.blog.categories.edit');
+       Route::post('/save/{category_id}', [\App\Http\Controllers\Adminpanel\BlogController::class, 'save'])->name('admin.blog.categories.save');
+       Route::get('/new', [\App\Http\Controllers\Adminpanel\BlogController::class, 'create'])->name('admin.blog.categories.new');
+       Route::post('/store', [\App\Http\Controllers\Adminpanel\BlogController::class, 'store'])->name('admin.blog.categories.create');
+   });
 });

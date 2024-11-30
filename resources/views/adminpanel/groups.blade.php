@@ -19,6 +19,7 @@
                     <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none">
                         <a href="#">Удалить</a>
                     </div>
+                    <a class="btn btn-success" href="{{ route('admin.groups.new') }}"><i class="bi bi-file-plus"></i> Создать группу</a>
                 </div>
                 <div class="right-side">
                     <div class="input-group mb-3">

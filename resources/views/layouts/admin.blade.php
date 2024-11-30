@@ -112,7 +112,7 @@
                 <div class="collapse" id="blog">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
-                            <a href="{{ route('admin.users.patients') }}" class="nav-link text-white">
+                            <a href="{{ route('admin.blog.categories') }}" class="nav-link text-white">
                                 <i class="bi bi-bookmark"></i> Категории
                             </a>
                         </li>

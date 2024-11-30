@@ -11,15 +11,22 @@ use Illuminate\Support\Facades\Http;
 
 class ClinicController extends Controller
 {
-    public function list() {
-        $clinics = Clinic::paginate(12, ['*'], 'clinics_page');
-        $doctors = Doctor::paginate(12, ['*'], 'doctors_page');
+    public function list(string $city_name = null) {
+        if (is_null($city_name)) {
+            $clinics = Clinic::whereNot('id', 0)->paginate(12, ['*'], 'clinics_page');
+            $doctors = Doctor::paginate(12, ['*'], 'doctors_page');
+        } else {
+            $clinics = Clinic::whereNot('id', 0)
+                             ->where('city', $city_name)
+                             ->paginate(12, ['*'], 'clinics_page');
+            $doctors = Doctor::where('city', $city_name)->paginate(12, ['*'], 'doctors_page');
+        }
 
         return view('main.clinics', compact('clinics', 'doctors'));
     }
 
     public function index(int $clinic_id) {
-        $clinic = Clinic::with('feedbacks')->findOrFail($clinic_id);
+        $clinic = Clinic::with('feedbacks', 'photos')->findOrFail($clinic_id);
 
         $address = $clinic->address;
         $apiKey = env('YANDEX_MAPS_API_KEY');
