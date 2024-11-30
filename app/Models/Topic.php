@@ -37,4 +37,11 @@ class Topic extends Model
         // Возвращаем путь к placeholder, если фото не задано
         return asset('assets/images/placeholders/topic_placeholder.webp');
     }
+
+    public function getContentAttribute($value) {
+        $allowedTags = '<p><a><strong><em><ul><li><ol><blockquote><h1><h2><h3><h4><h5><h6><img><br><hr><pre>';
+
+        return strip_tags($value, $allowedTags);
+    }
+
 }

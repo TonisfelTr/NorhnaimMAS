@@ -19,4 +19,10 @@ class BlogController extends Controller
 
         return view('main.blog', compact('categories', 'topics', 'category_id'));
     }
+
+    public function index(int $topic_id) {
+        $topic = Topic::findOrFail($topic_id);
+
+        return view();
+    }
 }
