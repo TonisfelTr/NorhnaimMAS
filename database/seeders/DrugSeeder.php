@@ -40,7 +40,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Хлорпромазин",
                 "latin"             => 'Chlorpromazinum',
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Аминазин",
@@ -140,7 +140,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Левомепромазин",
                 "latin"             => 'Levomepromazinum',
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"     => true,
                 "generics"          => [
                     "Тизерцин",
@@ -243,7 +243,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Промазин",
                 "latin"             => 'Promazinum',
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Промазин",
@@ -349,7 +349,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Тиоридазин",
                 "latin"             => "Thioridazinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Тиоридазин",
@@ -442,7 +442,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Хлорпротиксен",
                 "latin"             => 'Chlorprotixenum',
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Хлорпротиксен",
@@ -546,7 +546,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Галоперидол",
                 "latin"             => 'Haloperidolum',
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Галоперидол",
@@ -684,7 +684,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Флупентиксол",
                 "latin"             => 'Flupentixolum',
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Флюанксол",
@@ -837,7 +837,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Флуфеназин",
                 "latin"             => "Fluphenazinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Моден-депо",
@@ -974,7 +974,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Зуклопентиксол",
                 "latin"             => "Zuclopenthixolum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Клопиксол",
@@ -1118,7 +1118,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Сульпирид",
                 "latin"             => "Sulpiridum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Эглонил",
@@ -1253,7 +1253,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Клозапин",
                 "latin"             => "Clozapinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Лепонекс",
@@ -1391,7 +1391,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Рисперидон",
                 "latin"             => "Risperidonum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Рисполепт",
@@ -1513,7 +1513,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Палиперидон",
                 "latin"             => "Paliperidonum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Инвега",
@@ -1637,7 +1637,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Оланзапин",
                 "latin"             => "Olanzapinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Зипрекса",
@@ -1759,7 +1759,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Арипипразол",
                 "latin"             => "Aripiprazolum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Абилифай",
@@ -1879,7 +1879,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Луразидон",
                 "latin"             => "Lurasidonum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Латуда",
@@ -1982,7 +1982,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Перициазин",
                 "latin"             => "Periciazinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Неулептил",
@@ -2080,7 +2080,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Тиаприд",
                 "latin"             => "Tiapridum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Тиапридал",
@@ -2179,7 +2179,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Амисульпирид",
                 "latin"             => "Amisulpridum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Солиан",
@@ -2283,7 +2283,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Карипразин",
                 "latin"             => "Cariprazinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Реагила",
@@ -2360,7 +2360,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Кветиапин",
                 "latin"             => "Quetiapinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Сероквель",
@@ -2473,7 +2473,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Сертиндол",
                 "latin"             => "Sertindolum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Сердолект",
@@ -2541,7 +2541,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Трифлуоперазин",
                 "latin"             => "Trifluoperazinum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Трифтал",
@@ -2630,7 +2630,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Зипрасидон",
                 "latin"             => "Ziprasidonum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Зелдокс",
@@ -2714,7 +2714,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Галоперидол деканоат",
                 "latin"             => "Haloperidolum Decanoatum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Галоперидол-Деканоат",
@@ -2765,7 +2765,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Флуфеназин деканоат",
                 "latin"             => "Fluphenazinum Decanoatum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Модитен-Депо",
@@ -2812,7 +2812,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Зуклопентиксол деканоат",
                 "latin"             => "Zuclopenthixolum Decanoatum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Клопиксол-Депо",
@@ -2861,7 +2861,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Флупентиксол деканоат",
                 "latin"             => "Flupentixolum Decanoatum",
-                "group"             => MedicineTypesEnum::Antipsychotic,
+                "group"             => MedicineTypesEnum::Antipsychotic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Флюанксол-Депо",
@@ -2909,7 +2909,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Амитриптилин",
                 "latin"             => "Amitriptylinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Амитриптилин",
@@ -2987,7 +2987,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Имипрамин",
                 "latin"             => "Imipraminum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Мелипрамин",
@@ -3061,7 +3061,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Кломипрамин",
                 "latin"             => "Clomipraminum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Анафранил",
@@ -3141,7 +3141,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Миртазапин",
                 "latin"             => "Mirtazapinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Ремерон",
@@ -3207,7 +3207,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Миансерин",
                 "latin"             => "Mianserinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Леривон",
@@ -3272,7 +3272,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Флувоксамин",
                 "latin"             => "Fluvoxaminum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Феварин",
@@ -3339,7 +3339,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Флуоксетин",
                 "latin"             => "Fluoxetinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Прозак",
@@ -3413,7 +3413,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Эсциталопрам",
                 "latin"             => "Escitalopramum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Ципралекс",
@@ -3482,7 +3482,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Циталопрам",
                 "latin"             => "Citalopramum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Циталопрам",
@@ -3546,7 +3546,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Пипофезин",
                 "latin"             => "Pipofezinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Азафен",
@@ -3605,7 +3605,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Пароксетин",
                 "latin"             => "Paroxetinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Паксил",
@@ -3672,7 +3672,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Дулоксетин",
                 "latin"             => "Duloxetinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Симбалта",
@@ -3737,7 +3737,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Венлафаксин",
                 "latin"             => "Venlafaxinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Велаксин",
@@ -3808,7 +3808,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Сертралин",
                 "latin"             => "Sertralinum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Золофт",
@@ -3876,7 +3876,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Тразодон",
                 "latin"             => "Trazodonum",
-                "group"             => MedicineTypesEnum::Antidepressant,
+                "group"             => MedicineTypesEnum::Antidepressant->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Триттико",
@@ -3942,7 +3942,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Алпразолам",
                 "latin"             => "Alprazolamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Алзолам",
@@ -4003,7 +4003,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Феназепам",
                 "latin"             => "Phenazepamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Феназепам",
@@ -4069,7 +4069,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Диазепам",
                 "latin"             => "Diazepamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Сибазон",
@@ -4140,7 +4140,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Клоназепам",
                 "latin"             => "Clonazepamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Клоназепам",
@@ -4204,7 +4204,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Лоразепам",
                 "latin"             => "Lorazepamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Лорафен",
@@ -4271,7 +4271,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Гидазепам",
                 "latin"             => "Gidazepamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Гидазепам",
@@ -4328,7 +4328,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Тофизепам",
                 "latin"             => "Tofisopamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Грандаксин",
@@ -4383,7 +4383,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Хлордиазепоксид",
                 "latin"             => "Chlordiazepoxidum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Элениум",
@@ -4443,7 +4443,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Медазепам",
                 "latin"             => "Medazepamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Рудотель",
@@ -4503,7 +4503,7 @@ class DrugSeeder extends Seeder
                 "name"              => "Оксазепам",
                 "latin"             => "Oxazepamum",
                 "preferential"      => true,
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "generics"          => [
                     "Тазепам",
                     "Оксазепам",
@@ -4563,7 +4563,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Нитразепам",
                 "latin"             => "Nitrazepamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Радедорм",
@@ -4621,7 +4621,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Мидазолам",
                 "latin"             => "Midazolamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Дормикум",
@@ -4681,7 +4681,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Клобазам",
                 "latin"             => "Clobazamum",
-                "group"             => MedicineTypesEnum::Anxiolytic,
+                "group"             => MedicineTypesEnum::Anxiolytic->value,
                 "preferential"      => true,
                 "generics"          => [
                     "Фризиум",
@@ -4739,7 +4739,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Тригексифенидил",
                 "latin"             => "Trihexyphenidylum",
-                "group"             => MedicineTypesEnum::Anticholinergic,
+                "group"             => MedicineTypesEnum::Anticholinergic->value,
                 "generics"          => [
                     "Циклодол",
                     "Тригексифенидил",
@@ -4789,7 +4789,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Бипериден",
                 "latin"             => "Biperidenum",
-                "group"             => MedicineTypesEnum::Anticholinergic,
+                "group"             => MedicineTypesEnum::Anticholinergic->value,
                 "generics"          => [
                     "Акинетон",
                 ],
@@ -4841,7 +4841,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Амантадин",
                 "latin"             => "Amantadinum",
-                "group"             => MedicineTypesEnum::Anticholinergic,
+                "group"             => MedicineTypesEnum::Anticholinergic->value,
                 "generics"          => [
                     "Мидантан",
                     "Амантадин",
@@ -4891,7 +4891,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Вальпроевая кислота",
                 "latin"             => "Acidum Valproicum",
-                "group"             => MedicineTypesEnum::MoodStabilizer,
+                "group"             => MedicineTypesEnum::MoodStabilizer->value,
                 "generics"          => [
                     "Депакин",
                     "Конвулекс",
@@ -4950,7 +4950,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Карбамазепин",
                 "latin"             => "Carbamazepinum",
-                "group"             => MedicineTypesEnum::MoodStabilizer,
+                "group"             => MedicineTypesEnum::MoodStabilizer->value,
                 "generics"          => [
                     "Финлепсин",
                     "Тегретол",
@@ -5004,7 +5004,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Ламотриджин",
                 "latin"             => "Lamotriginum",
-                "group"             => MedicineTypesEnum::MoodStabilizer,
+                "group"             => MedicineTypesEnum::MoodStabilizer->value,
                 "generics"          => [
                     "Ламиктал",
                     "Ламотриджин",
@@ -5054,7 +5054,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Литий",
                 "latin"             => "Lithium",
-                "group"             => MedicineTypesEnum::MoodStabilizer,
+                "group"             => MedicineTypesEnum::MoodStabilizer->value,
                 "generics"          => [
                     "Литий Карбонат",
                     "Литий Цитрат",
@@ -5106,7 +5106,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Кофеин",
                 "latin"             => "Caffeinum",
-                "group"             => MedicineTypesEnum::Psychostimulators,
+                "group"             => MedicineTypesEnum::Psychostimulators->value,
                 "generics"          => [
                     "Кофеин-бензоат натрия",
                     "Кофеин",
@@ -5162,7 +5162,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Пропранолол",
                 "latin"             => "Propranololum",
-                "group"             => MedicineTypesEnum::BetaAdrenolytics,
+                "group"             => MedicineTypesEnum::BetaAdrenolytics->value,
                 "generics"          => [
                     "Анаприлин",
                     "Пропранолол",
@@ -5218,7 +5218,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Атенолол",
                 "latin"             => "Atenololum",
-                "group"             => MedicineTypesEnum::BetaAdrenolytics,
+                "group"             => MedicineTypesEnum::BetaAdrenolytics->value,
                 "generics"          => [
                     "Атенолол",
                 ],
@@ -5266,7 +5266,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Метопролол",
                 "latin"             => "Metoprololum",
-                "group"             => MedicineTypesEnum::BetaAdrenolytics,
+                "group"             => MedicineTypesEnum::BetaAdrenolytics->value,
                 "generics"          => [
                     "Эгилок",
                     "Метопролол",
@@ -5315,7 +5315,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Бисопролол",
                 "latin"             => "Bisoprololum",
-                "group"             => MedicineTypesEnum::BetaAdrenolytics,
+                "group"             => MedicineTypesEnum::BetaAdrenolytics->value,
                 "generics"          => [
                     "Конкор",
                     "Бисопролол",
@@ -5365,7 +5365,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Золпидем",
                 "latin"             => "Zolpidemum",
-                "group"             => MedicineTypesEnum::Hypnotics,
+                "group"             => MedicineTypesEnum::Hypnotics->value,
                 "generics"          => [
                     "Санвал",
                     "Золпидем",
@@ -5415,7 +5415,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Зопиклон",
                 "latin"             => "Zopiclonum",
-                "group"             => MedicineTypesEnum::Hypnotics,
+                "group"             => MedicineTypesEnum::Hypnotics->value,
                 "generics"          => [
                     "Имован",
                     "Зопиклон",
@@ -5464,7 +5464,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Алимемазин",
                 "latin"             => "Alimemazinum",
-                "group"             => MedicineTypesEnum::Hypnotics,
+                "group"             => MedicineTypesEnum::Hypnotics->value,
                 "generics"          => [
                     "Тералиген",
                     "Алимемазин",
@@ -5518,7 +5518,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Донепезил",
                 "latin"             => "Donepezilum",
-                "group"             => MedicineTypesEnum::AChEInhibitor,
+                "group"             => MedicineTypesEnum::AChEInhibitor->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Арисепт",
@@ -5568,7 +5568,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Ривастигмин",
                 "latin"             => "Rivastigminum",
-                "group"             => MedicineTypesEnum::AChEInhibitor,
+                "group"             => MedicineTypesEnum::AChEInhibitor->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Экселон",
@@ -5624,7 +5624,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Галантамин",
                 "latin"             => "Galantaminum",
-                "group"             => MedicineTypesEnum::AChEInhibitor,
+                "group"             => MedicineTypesEnum::AChEInhibitor->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Реминил",
@@ -5677,7 +5677,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Пирацетам",
                 "latin"             => "Piracetamum",
-                "group"             => MedicineTypesEnum::Nootropic,
+                "group"             => MedicineTypesEnum::Nootropic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Ноотропил",
@@ -5726,7 +5726,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Фонтурацетам",
                 "latin"             => "Fonturacetamum",
-                "group"             => MedicineTypesEnum::Nootropic,
+                "group"             => MedicineTypesEnum::Nootropic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Фенотропил",
@@ -5769,7 +5769,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Фенибут",
                 "latin"             => "Phenibutum",
-                "group"             => MedicineTypesEnum::Nootropic,
+                "group"             => MedicineTypesEnum::Nootropic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Фенибут",
@@ -5812,7 +5812,7 @@ class DrugSeeder extends Seeder
             [
                 "name"              => "Винпоцетин",
                 "latin"             => "Vinpocetinum",
-                "group"             => MedicineTypesEnum::Nootropic,
+                "group"             => MedicineTypesEnum::Nootropic->value,
                 "preferential"      => false,
                 "generics"          => [
                     "Кавинтон",
