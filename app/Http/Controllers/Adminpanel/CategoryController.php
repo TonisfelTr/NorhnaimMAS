@@ -14,23 +14,23 @@ class BlogController extends Controller
         return view('adminpanel.categories', compact('categories'));
     }
 
-    public function edit(int $category_id) {
+    public function editCategory(int $category_id) {
         $category = TopicsCategory::findOrFail($category_id);
 
         return view('adminpanel.service.category_edit', compact('category'));
     }
 
-    public function create() {
+    public function createCategory() {
         return view('adminpanel.service.category_new');
     }
 
-    public function store(Request $request) {
+    public function storeCategory(Request $request) {
         TopicsCategory::create($request->post());
 
         return redirect()->route('admin.blog.categories')->with('success', 'Категория была создана.');
     }
 
-    public function save(Request $request, int $category_id) {
+    public function saveCategory(Request $request, int $category_id) {
 
     }
 }
