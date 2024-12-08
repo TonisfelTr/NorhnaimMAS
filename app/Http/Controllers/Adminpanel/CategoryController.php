@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\Adminpanel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MassDeleteRequest;
+use App\Http\Requests\SaveCategoriesRequest;
 use App\Models\TopicsCategory;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function list() {
-        $categories = TopicsCategory::paginate(10);
+    public function list(Request $request) {
+        if ($search = $request->get('search')) {
+            $categories = TopicsCategory::where('name', 'ilike', "%$search%")->paginate(10);
+        } else {
+            $categories = TopicsCategory::paginate(10);
+        }
 
         return view('adminpanel.categories', compact('categories'));
     }
@@ -25,12 +31,49 @@ class CategoryController extends Controller
     }
 
     public function store(Request $request) {
+        if (!group()->blog_new_category) {
+            return redirect()->back()->withErrors('У вас недостаточно прав.');
+        }
+
         TopicsCategory::create($request->post());
 
         return redirect()->route('admin.blog.categories')->with('success', 'Категория была создана.');
     }
 
-    public function save(Request $request, int $category_id) {
+    public function save(SaveCategoriesRequest $request, int $category_id) {
+        $category = TopicsCategory::findOrFail($category_id);
+        $category->name = $request->post('name');
+        $category->save();
 
+        return redirect()->route('admin.blog.categories')->with([
+            'status' => 'categories.success',
+            'message' => 'Категория была успешно отредактирована.'
+        ]);
+    }
+
+    public function delete(int $category_id) {
+        if (!group()->blog_remove_category) {
+            return redirect()->back()->withErrors('У вас недостаточно прав.');
+        }
+
+        TopicsCategory::findOrFail($category_id)->delete();
+
+        return redirect()->back()->with([
+            'status' => 'categories.success',
+            'message' => 'Категория была успешно удалена.'
+        ]);
+    }
+
+    public function massDelete(MassDeleteRequest $request) {
+        if (!group()->blog_remove_category) {
+            return redirect()->back()->withErrors('У вас недостаточно прав.');
+        }
+
+        TopicsCategory::whereIn('id', $request->post('selected'))->delete();
+
+        return redirect()->back()->with([
+            'status' => 'categories.success',
+            'message' => 'Категории были успешно удалены.'
+        ]);
     }
 }
