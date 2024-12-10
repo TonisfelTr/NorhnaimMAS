@@ -24,9 +24,12 @@
         <div class="d-inline-flex justify-content-between w-100">
             <div class="left-side">
                 <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
-                <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none">
-                    <a href="#">Удалить</a>
-                    <a href="#">Заблокировать</a>
+                <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 1000;">
+                    @if(group()->patient_delete)
+                        <button type="button" class="dropdown-item bulk-action-btn" data-action="{{ route('admin.users.patients.mass-delete') }}" style="width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer;">
+                            Удалить
+                        </button>
+                    @endif
                 </div>
                 <a class="btn btn-success" href="{{ route('admin.users.patients.new') }}"><i class="bi bi-file-plus"></i> Создать запись</a>
             </div>
@@ -78,8 +81,14 @@
                         <td>{{ $patient->diagnose?->decipher() ?? 'не поставлен' }}</td>
                         <td>{{ $patient->disability ? 'есть': 'нет'}}</td>
                         <td>
-                            <a class="btn btn-light btn-sm" href="{{ route('admin.users.patients.edit', $patient->id) }}"><i class="bi bi-pen"></i></a>
-                            <button class="btn btn-light btn-sm delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal"><i class="bi bi-trash"></i></button>
+                            @if(group()->patient_edit)
+                                <a class="btn btn-light btn-sm" href="{{ route('admin.users.patients.edit', $patient->id) }}"><i class="bi bi-pen"></i></a>
+                            @endif
+                            @if(group()->patient_delete)
+                                <a class="btn btn-light btn-sm delete-btn" href="{{ route('admin.users.patients.delete', $patient->id) }}">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

@@ -32,10 +32,26 @@ class PatientController extends Controller
         }
     }
 
-    public function delete(MassDeleteRequest $request): RedirectResponse {
-        Patient::whereIn('id', $request->all()->selected)->delete();
+    public function delete(int $patient_id): RedirectResponse {
+        Patient::find($patient_id)->delete();
 
-        return redirect()->route('admin.users.patients')->with('Запись врача была успешно удалена!');
+        return redirect()->route('admin.users.patients')->with([
+            'message' => 'Запись пациента была удалена.',
+            'status' => 'patients.success'
+        ]);
+    }
+
+    public function massDelete(MassDeleteRequest $request): RedirectResponse {
+        if (!group()->patient_delete) {
+            return redirect()->back()->withErrors('У вас недостаточно прав.');
+        }
+
+        Patient::whereIn('id', $request->post('selected'))->delete();
+
+        return redirect()->back()->with([
+            'message' => 'Выбранные записи пациентов были удалены.',
+            'status' => 'patients.success'
+        ]);
     }
 
     public function edit(int $patient_id): View {
