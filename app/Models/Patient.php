@@ -12,9 +12,7 @@ use Illuminate\Support\Carbon;
 class Patient extends Model
 {
     use HasFactory;
-
     public const USER_TYPE = User::TYPE_PATIENT;
-
     protected $guarded = [];
     protected $casts = [
         "birth_at" => "date:d.m.Y"

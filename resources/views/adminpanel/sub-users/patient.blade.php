@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 @section('title', 'Пациенты')
 @section('assets')
+    @vite(['resources/js/mass_delete.js'])
 @endsection
-
 @section('main')
     <h1>Пациенты</h1>
     {{ Breadcrumbs::render('admin.users.patients') }}
@@ -10,6 +10,15 @@
         @if(session()->has('status') && session()->get('status') == 'patients.success')
             <div class="alert alert-success">
                 {{ session()->get('message') }}
+            </div>
+        @elseif($errors->isNotEmpty())
+            <div class="alert alert-danger">
+                Вышли следующие ошибки:
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
         <div class="d-inline-flex justify-content-between w-100">
@@ -30,7 +39,8 @@
             </div>
         </div>
     </div>
-    <form action="#" method="post">
+    <form id="bulk-action-form" method="post" enctype="multipart/form-data">
+        @csrf
         <table class="table">
             <thead>
             <tr>
@@ -66,18 +76,17 @@
                         <td>{{ $patient->fullName() }}</td>
                         <td>{{ $patient->birth_at}}</td>
                         <td>{{ $patient->diagnose?->decipher() ?? 'не поставлен' }}</td>
-                        <td>{{ $patient->disability ?: 'неизвестно'}}</td>
+                        <td>{{ $patient->disability ? 'есть': 'нет'}}</td>
                         <td>
-                            <a class="btn btn-info btn-sm" href="{{ route('admin.user_edit', $patient->id) }}">Редактирование</a>
-                            <button class="btn btn-danger btn-sm user-delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#user-delete-modal">Удалить</button>
+                            <a class="btn btn-light btn-sm" href="{{ route('admin.users.patients.edit', $patient->id) }}"><i class="bi bi-pen"></i></a>
+                            <button class="btn btn-light btn-sm delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal"><i class="bi bi-trash"></i></button>
                         </td>
                     </tr>
                 @endforeach
             @endif
             </tbody>
         </table>
-        {{ $patients->links() }}
-        <x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить этих пользователей?" button=".user-delete-btn" message-box="user-delete-modal"/>
+        {{ $patients->links('pagination::bootstrap-5') }}
     </form>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -115,3 +124,4 @@
         });
     </script>
 @endsection
+<x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить этих пациентов?" button=".delete-btn" message-box="delete-modal"/>
