@@ -26,50 +26,61 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        $this->info('Seed diagnoses to database...');
+        $this->warn('Seed diagnoses to database...');
         Artisan::call('db:seed', [
             '--class' => 'DiagnosesFillSeeder',
         ]);
 
-        $this->info('Seed clinics records by factory...');
+        $this->warn('Seed clinics records by factory...');
         Artisan::call('db:seed', [
             '--class' => 'ClinicFillByFactorySeeder',
         ]);
 
-        $this->info('Seed doctors records by factory...');
+        $this->warn('Seed doctors records by factory...');
         Artisan::call('db:seed', [
             '--class' => 'DoctorFillByFactorySeeder',
         ]);
 
-        $this->info('Make record for ID 0 to private practice...');
+        $this->warn('Make record for ID 0 to private practice...');
         Artisan::call('db:seed', [
            '--class' => 'CreateNullClinicSeeder'
         ]);
 
-        $this->info('Seed side effects...');
+        $this->warn('Seed side effects...');
         Artisan::call('db:seed', [
             '--class' => 'SideEffectsFillSeeder'
         ]);
 
-        $this->info('Seed drugs...');
+        $this->warn('Seed contraindications...');
+        Artisan::call('db:seed', [
+            '--class' => 'ContraindicationsSeeder'
+        ]);
+
+        $this->warn('Seed drugs...');
         Artisan::call('db:seed', [
             '--class' => 'DrugSeeder'
         ]);
 
-        $this->info('Seed base groups...');
+        $this->warn('Seed base groups...');
         Artisan::call('db:seed', [
             '--class' => 'CreateBaseGroupSeeder'
         ]);
 
-        $this->info('Seed admin user...');
+        $this->warn('Seed admin user...');
         Artisan::call('db:seed', [
             '--class' => 'AdminUserSeeder'
         ]);
 
-        $this->info('Creating "cache" table');
+        $this->warn('Creating "cache" table...');
         Artisan::call('cache:table');
         Artisan::call('migrate');
 
+        $this->warn('Seed settings...');
+        Artisan::call('db:seed', [
+           '--class' => 'SettingsItemsSeeder'
+        ]);
+
+        $this->info('Install has been completed successfully.');
         return Command::SUCCESS;
     }
 }

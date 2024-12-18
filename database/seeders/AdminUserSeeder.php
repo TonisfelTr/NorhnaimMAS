@@ -20,7 +20,8 @@ class AdminUserSeeder extends Seeder
             'login' => 'Admin',
             'password' => Hash::make('password'),
             'email' => 'admin@admin.ru',
-            'email_verified_at' => Carbon::now()
+            'email_verified_at' => Carbon::now(),
+            'group_id' => 2
                      ]);
     }
 }

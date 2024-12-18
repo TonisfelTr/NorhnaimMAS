@@ -5,18 +5,16 @@ namespace Database\Seeders;
 use App\Enums\ContraindicationsTypesEnum;
 use App\Enums\MedicineTypesEnum;
 use App\Enums\SideEffectsEnum;
-use App\Enums\SymptomsEnum;
 use App\Models\ContraindicationsType;
 use App\Models\Diagnose;
-use app\Models\DiagnoseSymptom;
 use App\Models\Drug;
 use App\Models\MedicineContraindication;
 use App\Models\MedicineIndication;
 use App\Models\Receptor;
 use App\Models\SideEffect;
-use app\Models\Symptom;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -5859,7 +5857,6 @@ class DrugSeeder extends Seeder
         ];
 
 // Добавление лекарств в реестр
-        try {
             // Данные для заполнения
             $resultArray = array_merge(
                 $antipsychotics,
@@ -5890,11 +5887,11 @@ class DrugSeeder extends Seeder
                 // Добавление абсолютных противопоказаний
                 if (!empty($drugData['contraindications'])) {
                     foreach ($drugData['contraindications'] as $contraindicationCode) {
-                        $contraindicationType = ContraindicationsType::where('code', $contraindicationCode)->first();
+                        $contraindicationType = ContraindicationsType::where('code', $contraindicationCode)->firstOrFail();
                         if ($contraindicationType) {
                             DB::table('medicine_contraindications')->insert([
                                 'drug_id'             => $drug->id,
-                                'type'                => '0', // Абсолютное противопоказание
+                                'type'                => '1', // Абсолютное противопоказание
                                 'contraindication_id' => $contraindicationType->id,
                                 'created_at'          => Carbon::now(),
                                 'updated_at'          => Carbon::now(),
@@ -5906,11 +5903,11 @@ class DrugSeeder extends Seeder
                 // Добавление относительных противопоказаний
                 if (!empty($drugData['dangerous'])) {
                     foreach ($drugData['dangerous'] as $contraindicationCode) {
-                        $contraindicationType = ContraindicationsType::where('code', $contraindicationCode)->first();
+                        $contraindicationType = ContraindicationsType::where('code', $contraindicationCode)->firstOrFail();
                         if ($contraindicationType) {
                             DB::table('medicine_contraindications')->insert([
                                 'drug_id'             => $drug->id,
-                                'type'                => '1', // Относительное противопоказание
+                                'type'                => '2', // Относительное противопоказание
                                 'contraindication_id' => $contraindicationType->id,
                                 'created_at'          => Carbon::now(),
                                 'updated_at'          => Carbon::now(),
@@ -5930,7 +5927,7 @@ class DrugSeeder extends Seeder
                 // Добавление показаний к применению
                 if (!empty($drugData['indications'])) {
                     foreach ($drugData['indications'] as $indicationCode) {
-                        $diagnose = Diagnose::where('code', $indicationCode)->first();
+                        $diagnose = Diagnose::where('code', 'like', "%$indicationCode%")->firstOrFail();
                         if ($diagnose) {
                             MedicineIndication::create([
                                 'medicine_id' => $drug->id,
@@ -5954,7 +5951,11 @@ class DrugSeeder extends Seeder
 
                 // Добавление побочных эффектов
                 foreach ($drugData['side_effects'] as $sideEffect) {
-                    $firstSideEffect = SideEffect::where('code', $sideEffect->value)->first();
+                    $matched = match ($sideEffect->value) {
+//                        234 => 239,
+                        default => $sideEffect->value
+                    };
+                    $firstSideEffect = SideEffect::where('code', $matched)->firstOrFail();
                     if ($firstSideEffect) {
                         DB::table('medicine_side_effects')->insert([
                             'drug_id'        => $drug->id,
@@ -5967,8 +5968,5 @@ class DrugSeeder extends Seeder
                     }
                 }
             }
-        } catch (\Exception $e) {
-            echo "Ошибка: " . $e->getMessage() . "\n";
-        }
     }
 }

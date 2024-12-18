@@ -12,7 +12,6 @@ class SideEffectsFillSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void {
-        $array = [];
         SideEffect::truncate();
         foreach (SideEffectsEnum::cases() as $sideEffect) {
             switch ($sideEffect) {
@@ -339,16 +338,6 @@ class SideEffectsFillSeeder extends Seeder
                     ];
                     SideEffect::create($array);
                     break;
-
-                case SideEffectsEnum::BloodPressureLability:
-                    $array = [
-                        'name'        => 'Лабильность кровянного давления',
-                        'code'        => 37,
-                        'description' => '',
-                    ];
-                    SideEffect::create($array);
-                    break;
-
                 case SideEffectsEnum::IntraventricularConductionDisorder:
                     $array = [
                         'name'        => 'Нарушение внутрижелудочковой проводимости',
@@ -1445,14 +1434,6 @@ class SideEffectsFillSeeder extends Seeder
                     ];
                     SideEffect::create($array);
                     break;
-                case SideEffectsEnum::Sedation:
-                    $array = [
-                        'name' => 'Седация',
-                        'code' => 160,
-                        'description' => ''
-                    ];
-                    SideEffect::create($array);
-                    break;
 
                 case SideEffectsEnum::PsychomotorDisorders:
                     $array = [
@@ -1992,11 +1973,11 @@ class SideEffectsFillSeeder extends Seeder
                     ];
                     SideEffect::create($array);
                     break;
-                case SideEffectsEnum::HighBloodPressure:
+                case SideEffectsEnum::IncreasedBloodPressure:
                     $array = [
-                        'name' => 'Повышение артериального давления',
+                        'name' => 'Повышенное артериальное давление',
                         'code' => 221,
-                        'description' => ''
+                        'description' => 'Состояние, характеризующееся повышением уровня артериального давления выше нормы, что может сопровождаться головной болью, головокружением или ухудшением общего самочувствия.'
                     ];
                     SideEffect::create($array);
                     break;
@@ -2035,12 +2016,11 @@ class SideEffectsFillSeeder extends Seeder
                     ];
                     SideEffect::create($array);
                     break;
-
-                case SideEffectsEnum::ElevatedLiverEnzymes:
+                case SideEffectsEnum::LiverEnzymeIncrease:
                     $array = [
-                        'name' => 'Повышение ферментов печени',
-                        'code' => 226,
-                        'description' => ''
+                        'name'        => 'Повышение уровня печеночных ферментов',
+                        'code'        => 226,
+                        'description' => 'Состояние, при котором в крови наблюдается увеличение активности печеночных ферментов (АЛТ, АСТ, ГГТ), что может указывать на повреждение клеток печени.'
                     ];
                     SideEffect::create($array);
                     break;
@@ -2080,12 +2060,11 @@ class SideEffectsFillSeeder extends Seeder
                     ];
                     SideEffect::create($array);
                     break;
-
-                case SideEffectsEnum::KidneyFunctionImpairment:
+                case SideEffectsEnum::KidneyImpairment:
                     $array = [
-                        'name' => 'Нарушение функции почек',
-                        'code' => 231,
-                        'description' => ''
+                        'name'        => 'Нарушение функции почек',
+                        'code'        => 231,
+                        'description' => 'Состояние, при котором наблюдается ухудшение работы почек, что может проявляться снижением клубочковой фильтрации и накоплением токсинов в организме.'
                     ];
                     SideEffect::create($array);
                     break;
@@ -2107,16 +2086,6 @@ class SideEffectsFillSeeder extends Seeder
                     ];
                     SideEffect::create($array);
                     break;
-
-                case SideEffectsEnum::Sleepwalking:
-                    $array = [
-                        'name' => 'Лунатизм',
-                        'code' => 234,
-                        'description' => ''
-                    ];
-                    SideEffect::create($array);
-                    break;
-
                 case SideEffectsEnum::Amnesia:
                     $array = [
                         'name' => 'Амнезия',
@@ -2135,11 +2104,55 @@ class SideEffectsFillSeeder extends Seeder
                     SideEffect::create($array);
                     break;
 
+                case SideEffectsEnum::MuscleCramps:
+                    $array = [
+                        'name' => 'Мышечные судороги',
+                        'code' => 237,
+                        'description' => 'Непроизвольные и болезненные сокращения мышц, возникающие внезапно.'
+                    ];
+                    SideEffect::create($array);
+                    break;
+
                 case SideEffectsEnum::MuscleSpasms:
                     $array = [
                         'name' => 'Мышечные спазмы',
-                        'code' => 237,
-                        'description' => ''
+                        'code' => 238,
+                        'description' => 'Резкие и непроизвольные мышечные сокращения, приводящие к боли или дискомфорту.'
+                    ];
+                    SideEffect::create($array);
+                    break;
+
+                case SideEffectsEnum::SleepWalking:
+                    $array = [
+                        'name' => 'Лунатизм',
+                        'code' => 234,
+                        'description' => 'Состояние, при котором человек ходит или выполняет действия во сне, не осознавая этого.'
+                    ];
+                    SideEffect::create($array);
+
+                case SideEffectsEnum::KidneyFunctionImpairment:
+                    $array = [
+                        'name' => 'Нарушение функции почек',
+                        'code' => 240,
+                        'description' => 'Снижение способности почек эффективно фильтровать отходы и поддерживать баланс жидкости в организме.'
+                    ];
+                    SideEffect::create($array);
+                    break;
+
+                case SideEffectsEnum::ElevatedLiverEnzymes:
+                    $array = [
+                        'name' => 'Повышенные печеночные ферменты',
+                        'code' => 241,
+                        'description' => 'Повышенные уровни ферментов печени, что может свидетельствовать о повреждении или воспалении печени.'
+                    ];
+                    SideEffect::create($array);
+                    break;
+
+                case SideEffectsEnum::HighBloodPressure:
+                    $array = [
+                        'name' => 'Повышенное артериальное давление',
+                        'code' => 242,
+                        'description' => 'Состояние, при котором артериальное давление в сосудах превышает нормальные показатели.'
                     ];
                     SideEffect::create($array);
                     break;

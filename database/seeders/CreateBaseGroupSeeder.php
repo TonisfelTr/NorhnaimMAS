@@ -23,8 +23,9 @@ class CreateBaseGroupSeeder extends Seeder
         $adminGroup->name = 'Администратор';
         $adminGroup->slug = 'admin';
         $adminGroup->adminpanel_see = true;
+        $adminGroup->user_create = true;
         $adminGroup->user_edit = true;
-        $adminGroup->user_banning = true;
+        $adminGroup->banning_user = true;
         $adminGroup->user_change_role = true;
         $adminGroup->user_remove = true;
         $adminGroup->group_add = true;
@@ -42,6 +43,7 @@ class CreateBaseGroupSeeder extends Seeder
         $adminGroup->blog_new_category = true;
         $adminGroup->blog_edit_category = true;
         $adminGroup->blog_remove_category = true;
+
         $adminGroup->save();
     }
 }

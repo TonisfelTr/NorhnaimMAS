@@ -498,6 +498,28 @@ class DiagnosesFillSeeder extends Seeder
                 ],
                 'criteria'    => [3, 1],
             ],
+            [
+                'code'        => 'F32.3',
+                'title'       => 'Тяжелый депрессивный эпизод с психотическими симптомами',
+                'description' => 'Эпизод тяжелой депрессии, сопровождающийся бредом, галлюцинациями или психомоторными нарушениями.',
+                'relatives'   => ['F32.2', 'F33.3'],
+                'exceptions'  => ['F20.0', 'F25.1'],
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::DepressedMood,
+                        SymptomsEnum::LossOfInterestInOtherActivities,
+                        SymptomsEnum::PsychoticFeatures,
+                    ],
+                    'relative' => [
+                        SymptomsEnum::Fatigue,
+                        SymptomsEnum::SleepDisturbance,
+                        SymptomsEnum::WeightLoss,
+                        SymptomsEnum::Guilt,
+                    ],
+                ],
+                'criteria'    => [3, 2],
+            ],
+
             // F44.*: Диссоциативные расстройства
             [
                 'code'        => 'F44.0',
@@ -573,6 +595,54 @@ class DiagnosesFillSeeder extends Seeder
                     ],
                 ],
                 'criteria'    => [1, 1],
+            ],
+            [
+                'code'        => 'F44.3',
+                'title'       => 'Транс состояния и одержимость',
+                'description' => 'Расстройства, характеризующиеся временной потерей личной идентичности или полного осознания окружающей среды, сопровождающиеся ощущением одержимости или нахождения в трансовом состоянии.',
+                'relatives'   => ['F44.0', 'F44.4'],
+                'exceptions'  => ['F20.0', 'F48.1'],
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::AlteredConsciousness, // Изменённое сознание
+                        SymptomsEnum::LossOfIdentity,       // Потеря идентичности
+                        SymptomsEnum::UncontrolledMovements // Неконтролируемые движения
+                    ],
+                    'relative' => [
+                        SymptomsEnum::MemoryLoss,           // Потеря памяти
+                        SymptomsEnum::Distress,             // Дистресс
+                        SymptomsEnum::SocialWithdrawal,     // Социальная изоляция
+                        SymptomsEnum::DepressedMood,        // Подавленное настроение
+                        SymptomsEnum::Fatigue,              // Усталость или потеря энергии
+                        SymptomsEnum::Anhedonia,            // Потеря интереса или удовольствия
+                        SymptomsEnum::Agitation,            // Ажитация или возбуждение
+                        SymptomsEnum::PoorConcentration     // Плохая концентрация
+                    ],
+                ],
+                'criteria'    => [2, 2], // 2 обязательных и 2 относительных симптома
+            ],
+            [
+                'code'        => 'F44.81',
+                'title'       => 'Диссоциативное ступорозное состояние',
+                'description' => 'Состояние, характеризующееся значительным снижением или отсутствием произвольных движений и речи, несмотря на сохранность сознания и восприятия.',
+                'relatives'   => ['F44.2', 'F44.4'],
+                'exceptions'  => ['F20.0', 'F32.3'],
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::AlteredConsciousness,       // Изменённое сознание
+                        SymptomsEnum::PsychomotorRetardation,     // Психомоторная заторможенность
+                        SymptomsEnum::UncontrolledMovements       // Неконтролируемые движения
+                    ],
+                    'relative' => [
+                        SymptomsEnum::Distress,                   // Дистресс
+                        SymptomsEnum::SocialWithdrawal,           // Социальная изоляция
+                        SymptomsEnum::Fatigue,                    // Усталость или потеря энергии
+                        SymptomsEnum::DepressedMood,              // Подавленное настроение
+                        SymptomsEnum::PoorConcentration,          // Плохая концентрация
+                        SymptomsEnum::MemoryLoss                  // Потеря памяти
+                    ],
+                ],
+                'criteria'    => [2, 2], // 2 обязательных и 2 относительных симптома
             ],
             // F48
             [
@@ -7109,6 +7179,27 @@ class DiagnosesFillSeeder extends Seeder
                 'criteria'    => [2, 1]
             ],
             [
+                'code'        => 'F45.41',
+                'title'       => 'Хроническая соматоформная боль',
+                'description' => 'Длительная и стойкая боль, не связанная с органическим поражением тела, часто обусловленная психологическими факторами.',
+                'relatives'   => ['F45.0', 'F45.1', 'F45.2'],
+                'exceptions'  => ['G89.4', 'M79.7'],
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::ChronicPain,
+                        SymptomsEnum::Distress,
+                        SymptomsEnum::PsychologicalFactors,
+                    ],
+                    'relative' => [
+                        SymptomsEnum::Fatigue,
+                        SymptomsEnum::SleepDisturbance,
+                        SymptomsEnum::DepressedMood,
+                        SymptomsEnum::Anxiety,
+                    ],
+                ],
+                'criteria'    => [2, 2],
+            ],
+            [
                 'code'        => 'F45.8',
                 'title'       => 'Другие соматоформные расстройства',
                 'description' => 'Различные соматоформные симптомы, не вписывающиеся в другие категории.',
@@ -8466,6 +8557,107 @@ class DiagnosesFillSeeder extends Seeder
                     ],
                 ],
                 'criteria'    => [2, 1],
+            ],
+            [
+                'code'        => 'G40.9',
+                'title'       => 'Эпилепсия неуточненная',
+                'description' => 'Состояние, характеризующееся повторяющимися эпилептическими приступами, причина которых не определена.',
+                'relatives'   => ['G40.0', 'G40.1', 'G40.2', 'G40.3'],
+                'exceptions'  => ['R56.8', 'F44.5'],
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::UncontrolledMovements,
+                        SymptomsEnum::LossOfConsciousness,
+                        SymptomsEnum::MuscleSpasms,
+                    ],
+                    'relative' => [
+                        SymptomsEnum::Aura,
+                        SymptomsEnum::Confusion,
+                        SymptomsEnum::Fatigue,
+                        SymptomsEnum::Amnesia,
+                    ],
+                ],
+                'criteria'    => [2, 1],
+            ],
+            [
+                'code'        => 'G20',
+                'title'       => 'Болезнь Паркинсона',
+                'description' => 'Хроническое нейродегенеративное заболевание центральной нервной системы, характеризующееся медленной прогрессией и проявляющееся нарушениями двигательной активности.',
+                'relatives'   => ['G21.1', 'G21.2'], // Паркинсонизм и вторичные формы
+                'exceptions'  => ['F03', 'G25.0'],   // Исключения: деменция неуточненная, эссенциальный тремор
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::Bradykinesia,         // Замедленность движений
+                        SymptomsEnum::RestingTremor,       // Тремор в покое
+                        SymptomsEnum::MuscleRigidity,      // Мышечная ригидность
+                    ],
+                    'relative' => [
+                        SymptomsEnum::PosturalInstability, // Нарушение осанки и равновесия
+                        SymptomsEnum::DepressedMood,       // Подавленное настроение
+                        SymptomsEnum::SleepDisturbances,   // Нарушение сна
+                        SymptomsEnum::Fatigue,             // Усталость или потеря энергии
+                    ],
+                ],
+                'criteria'    => [3, 1], // 3 обязательных симптома и 1 относительный
+            ],
+            [
+                'code'        => 'R25.1',
+                'title'       => 'Тремор',
+                'description' => 'Непроизвольные ритмичные колебания какой-либо части тела, вызванные непроизвольным сокращением мышц.',
+                'relatives'   => ['G20', 'G40.9'], // Связанные диагнозы
+                'exceptions'  => ['F45.41', 'F91.2'], // Исключаемые диагнозы
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::MuscleSpasms,
+                        SymptomsEnum::UncontrolledMovements,
+                    ],
+                    'relative' => [
+                        SymptomsEnum::Fatigue,
+                        SymptomsEnum::PsychologicalFactors,
+                        SymptomsEnum::Agitation,
+                    ],
+                ],
+                'criteria'    => [2, 1],
+            ],
+            [
+                'code'        => 'G47.0',
+                'title'       => 'Расстройства засыпания и поддержания сна [инсомния]',
+                'description' => 'Характеризуется затруднением засыпания, поддержания сна или преждевременным пробуждением, приводящим к нарушению дневного функционирования. Диагноз ставится, если эти симптомы сохраняются в течение длительного времени и не связаны с физиологическими или медицинскими причинами.',
+                'relatives'   => ['F51.0', 'G47.1'],
+                'exceptions'  => ['F32.2', 'F32.3'], // Уточнено на основании МКБ-10
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::Insomnia,
+                        SymptomsEnum::Fatigue,
+                        SymptomsEnum::PoorConcentration,
+                    ],
+                    'relative' => [
+                        SymptomsEnum::Anxiety,
+                        SymptomsEnum::Irritability,
+                        SymptomsEnum::Restlessness,
+                    ],
+                ],
+                'criteria'    => [2, 1], // Требуется минимум два обязательных и один относительный симптом
+            ],
+            [
+                'code'        => 'G47.1',
+                'title'       => 'Гиперсомния',
+                'description' => 'Расстройство, характеризующееся чрезмерной сонливостью, которая проявляется длительным сном ночью или эпизодами сна в течение дня. Часто связано с недостаточной эффективностью сна или медицинскими состояниями.',
+                'relatives'   => ['F51.1', 'G47.0'],
+                'exceptions'  => ['F32.3', 'F33.3'], // Уточнено на основании МКБ-10
+                'symptoms'    => [
+                    'required' => [
+                        SymptomsEnum::Hypersomnia,
+                        SymptomsEnum::Fatigue,
+                        SymptomsEnum::PoorJudgement,
+                    ],
+                    'relative' => [
+                        SymptomsEnum::MemoryLoss,
+                        SymptomsEnum::Irritability,
+                        SymptomsEnum::AppetiteChanges,
+                    ],
+                ],
+                'criteria'    => [2, 1], // Требуется минимум два обязательных и один относительный симптом
             ],
         ];
 
