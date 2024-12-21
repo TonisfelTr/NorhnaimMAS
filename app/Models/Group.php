@@ -15,4 +15,6 @@ class Group extends Model
     public function getMembersCount(): int {
         return User::whereGroupId($this->id)->get()->count();
     }
+
+
 }

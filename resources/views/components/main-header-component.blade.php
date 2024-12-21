@@ -21,8 +21,8 @@
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('main.blog') }}">Блог</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Юриспруденция</a></li>
-                        <li><a class="dropdown-item" href="#">Научная библиотека</a></li>
+                        <li><a class="dropdown-item" href="{{ route('main.jurisprudence') }}">Юриспруденция</a></li>
+                        <li><a class="dropdown-item" href="{{ route('main.articles') }}">Научная библиотека</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">

@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Создание пользователя')
+@section('title', 'Редактирование записи на приём')
 @section('assets')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.bootstrap5.min.css">
@@ -23,9 +23,9 @@
 @section('main')
     <div class="container-fluid">
         <h1>Создание записи на приём</h1>
-        {{ Breadcrumbs::render('admin.dictionary.create') }}
+        {{ Breadcrumbs::render('admin.dictionary.edit') }}
         <div class="container-fluid">
-            <form class="col-md-6~ mt-5" action="{{ route('admin.dictionary.registration.store') }}" method="post" enctype="multipart/form-data">
+            <form class="col-md-6~ mt-5" action="{{ route('admin.dictionary.registration.save', $record->id) }}" method="post" enctype="multipart/form-data">
                 @csrf
                 @recaptcha
                 @if(session()->has('success'))
@@ -34,7 +34,7 @@
                     </div>
                 @elseif($errors->isNotEmpty())
                     <div class="alert alert-danger">
-                        При создании записи в регистратуру произошли следующие ошибки:
+                        При редактировании записи в регистратуру произошли следующие ошибки:
                         <ol>
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -47,7 +47,7 @@
                         <label for="patient-field" class="form-label">Пациент</label>
                         <select id="patient-field" name="patient_id" class="form-control" required>
                             @foreach($patients as $patient)
-                                <option value="{{ $patient->id }}">{{ $patient->surname }}, {{ $patient->name }} {{ $patient->patronym }}, д/р {{ $patient->birth_at }}</option>
+                                <option value="{{ $patient->id }}" @if($record->patient_id == $patient->id) selected @endif>{{ $patient->surname }}, {{ $patient->name }} {{ $patient->patronym }}, д/р {{ $patient->birth_at }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -55,13 +55,17 @@
                         <label for="doctor-field" class="form-label">Доктор</label>
                         <select id="doctor-field" name="doctor_id" class="form-control" required>
                             @foreach($doctors as $doctor)
-                                <option value="{{ $doctor->id }}">{{ $doctor->surname }}, {{ $doctor->name }} {{ $doctor->patronym }}, д/р {{ $doctor->birth_at }}</option>
+                                <option value="{{ $doctor->id }}" @if($record->doctor_id == $doctor->id) selected @endif>{{ $doctor->surname }}, {{ $doctor->name }} {{ $doctor->patronym }}, д/р {{ $doctor->birth_at }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="session-picker">
                         <label for="for_datetime" class="form-label">Время приёма</label>
-                        <input type="text" name="for_datetime" id="for_datetime" placeholder="Выберите дату и время" class="form-control" />
+                        <input type="text" name="for_datetime" id="for_datetime" placeholder="Выберите дату и время" class="form-control" value="{{ $record->for_datetime }}"/>
+                    </div>
+                    <div class="mt-3">
+                        <input type="checkbox" name="appointment" id="appointment" @if($record->appointment) checked @endif>
+                        <label for="appointment" class="form-label">Принят на приём</label>
                     </div>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
                         <button class="btn btn-outline-success btn-sm" type="submit"><i class="bi bi-box-arrow-down"></i> Сохранить изменения</button>

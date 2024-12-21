@@ -19,29 +19,12 @@ class User extends Authenticatable
     const TYPE_DOCTOR = 1;
     const TYPE_PATIENT = 2;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'group_id',
-        'type',
-        'correspondence_id'
-    ];
+    protected $guarded = [];
 
     protected $with = [
         //'group'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',

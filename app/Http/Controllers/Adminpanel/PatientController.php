@@ -4,16 +4,25 @@ namespace App\Http\Controllers\Adminpanel;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDeleteRequest;
-use App\Http\Requests\SavePatientsRequest;
+use App\Http\Requests\PatientUpdateRequest;
 use App\Http\Requests\UserRoleStoreRequest;
 use App\Models\Patient;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PatientController extends Controller
 {
-    public function index(): View {
-        $patients = Patient::paginate(20);
+    public function index(Request $request): View {
+        if ($request->has('search')) {
+            $search = $request->get('search');
+            $patients = Patient::where('surname', 'ilike', "%$search%")
+                    ->orWhere('name', 'ilike', "%$search%")
+                    ->orWhere('patronym', 'ilike', "%$search%")
+                    ->paginate(20);
+        } else {
+            $patients = Patient::paginate(20);
+        }
 
         return view('adminpanel.sub-users.patient', compact('patients'));
     }
@@ -60,7 +69,7 @@ class PatientController extends Controller
         return view('adminpanel.service.patient_edit', compact('patient'));
     }
 
-    public function save(SavePatientsRequest $request, int $patient_id) {
+    public function save(PatientUpdateRequest $request, int $patient_id) {
         $patient = Patient::findOrFail($patient_id);
         $patient->name = $request->post('name');
         $patient->surname = $request->post('surname');

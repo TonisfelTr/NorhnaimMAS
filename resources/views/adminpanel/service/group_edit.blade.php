@@ -47,10 +47,10 @@
                     </select>
                 </div>
                 <div class="pt-4">
-                    <label for="user_banning" class="form-label">Блокировка пользователей</label>
-                    <select name="user_banning" id="user_banning" class="form-control">
-                        <option value="1" @if($group->user_banning) selected @endif>Разрешено</option>
-                        <option value="0" @if(!$group->user_banning) selected @endif>Запрещено</option>
+                    <label for="banning_user" class="form-label">Блокировка пользователей</label>
+                    <select name="banning_user" id="user_banning" class="form-control">
+                        <option value="1" @if($group->banning_user) selected @endif>Разрешено</option>
+                        <option value="0" @if(!$group->banning_user) selected @endif>Запрещено</option>
                     </select>
                 </div>
                 <div class="pt-4">

@@ -3,16 +3,15 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
-class SaveRegistryRecordRequest extends FormRequest
+class LawyerUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Auth::user()->group->adminpanel_see && Auth::user()->group->registry_edit;
+        return is_authed() && group()->lawyer_edit;
     }
 
     /**
@@ -23,7 +22,13 @@ class SaveRegistryRecordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string',
+            'surname' => 'required|string',
+            'profession' => 'required|string',
+            'skills' => 'required|array',
+            'base_price' => 'numeric',
+            'experience' => 'numeric',
+            'phone' => 'required',
         ];
     }
 }

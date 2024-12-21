@@ -23,6 +23,11 @@
             overflow-y: auto;
             height: 100vh;
         }
+
+        td .btn-light {
+            background: white;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -43,7 +48,7 @@
                 </a>
             </li>
             <li class="nav-item pb-2">
-                <a href="{{ route('admin.dictionary') }}" class="nav-link navbar-header text-white">
+                <a href="{{ route('admin.dictionary.registration') }}" class="nav-link navbar-header text-white">
                     <i class="bi bi-archive-fill"></i> Регистратура
                 </a>
             </li>
@@ -102,6 +107,11 @@
                                 <i class="bi bi-hospital"></i> Клиники
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.jurisprudence.lawyers') }}" class="nav-link text-white">
+                                <i class="bi bi-briefcase"></i> Юристы
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>
@@ -117,7 +127,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('admin.users.doctors') }}" class="nav-link text-white">
+                            <a href="{{ route('admin.blog.topics') }}" class="nav-link text-white">
                                 <i class="bi bi-blockquote-left"></i> Статьи
                             </a>
                         </li>

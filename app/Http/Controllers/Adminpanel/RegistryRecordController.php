@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Adminpanel;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegistryRecordDeleteRequest;
-use App\Http\Requests\SaveRegistryRecordRequest;
+use App\Http\Requests\RegistryRecordUpdateRequest;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\RegistryRecord;
@@ -127,7 +127,7 @@ class RegistryRecordController extends Controller
         return view('adminpanel.service.registry_edit', compact('record', 'doctors', 'patients'));
     }
 
-    public function save(SaveRegistryRecordRequest $request, int $record_id) {
+    public function save(RegistryRecordUpdateRequest $request, int $record_id) {
         $formattedDT = Carbon::parse($request->post('for_datetime'))->format('Y-m-d H:i:s');
 
         $record = RegistryRecord::findOrFail($record_id);

@@ -4,14 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserRoleStoreRequest extends FormRequest
+class UserChangePasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return auth()->user() && group()->user_change_password;
     }
 
     /**
@@ -21,12 +21,9 @@ class UserRoleStoreRequest extends FormRequest
      */
     public function rules(): array
     {
-        if (request()->method() == 'GET') {
-            return [];
-        } elseif (request()->method() == 'POST') {
-            return [
-                ''
-            ];
-        }
+        return [
+            'password' => 'required|string|min:8', // Рекомендуется добавить минимальную длину
+            'password_confirmation' => 'required|same:password' // Убедитесь, что поле имеет правильное имя
+        ];
     }
 }

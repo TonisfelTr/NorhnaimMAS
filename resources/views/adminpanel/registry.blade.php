@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'Регистратура')
-
 @section('assets')
+    @vite(['resources/js/mass_delete.js'])
 @endsection
 @section('main')
     <div class="container-fluid">
@@ -13,23 +13,27 @@
                     {{ session()->get('message') }}
                 </div>
             @endif
-            <div class="d-inline-flex justify-content-between w-100">
-                <div class="left-side">
-                    <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
-                    <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none">
-                        <a href="#">Отменить запись</a>
-                    </div>
+        </div>
+        <div class="d-inline-flex justify-content-between w-100">
+            <div class="left-side">
+                <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
+                <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 1000;">
+                    <button type="button" class="dropdown-item bulk-action-btn" data-action="{{ route('admin.dictionary.registration.mass-delete') }}" style="width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer;">
+                        Отменить запись
+                    </button>
                 </div>
-                <div class="right-side">
-                    <div class="input-group mb-3">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1">
-                        <button class="btn btn-outline-secondary" type="button">Искать</button>
-                    </div>
-                </div>
+                <a class="btn btn-success" href="{{ route('admin.dictionary.registration.create') }}"><i class="bi bi-file-plus"></i> Создать запись</a>
+            </div>
+            <div class="right-side">
+                <form class="input-group mb-3" method="get" enctype="multipart/form-data" action="{{ route('admin.dictionary.registration') }}">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input name="search" type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1" value="{{ request()->get('search') }}">
+                    <button class="btn btn-outline-secondary" type="submit">Искать</button>
+                </form>
             </div>
         </div>
-        <form action="#" method="post">
+        <form id="bulk-action-form" method="post" enctype="multipart/form-data">
+            @csrf
             <table class="table">
                 <thead>
                     <tr>
@@ -55,7 +59,7 @@
                 <tbody>
                 @if($records->isEmpty())
                     <tr>
-                        <td colspan="6" class="text-center"><i class="bi bi-info-circle-fill"></i> Нет записей в регистратуру.</td>
+                        <td colspan="7" class="text-center"><i class="bi bi-info-circle-fill"></i> Нет записей в регистратуру.</td>
                     </tr>
                 @endif
                 @foreach($records as $record)
@@ -65,18 +69,18 @@
                         <td>{{ $record->patient->fullName() }}</td>
                         <td>{{ $record->doctor->fullName() }}</td>
                         <td>{{ $record->for_datetime }}</td>
-                        <td><{{ $record->appointment }}/td>
+                        <td>{{ $record->appointment ? 'принят' : 'не принят' }}</td>
                         <td>
-                            <a class="btn btn-info btn-sm" href="{{ route('admin.registry.edit', $record->id) }}">Редактирование</a>
-                            <button class="btn btn-danger btn-sm registry-delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#registry-delete-modal">Отменить запись</button>
+                            <a class="btn btn-light btn-sm" href="{{ route('admin.dictionary.registration.edit', $record->id) }}"><i class="bi bi-pen"></i></a>
+                            <a class="btn btn-light btn-sm delete-btn" href="{{ route('admin.dictionary.registration.delete', $record->id) }}">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </td>
-                        <td></td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
-            {{ $records->links() }}
-            <x-danger-dialog-component title="Удаление" message="Вы действительно хотите отменить эти группы?" button=".registry-delete-btn" message-box="registry-delete-modal"/>
+            {{ $records->links('pagination::bootstrap-5') }}
         </form>
     </div>
     <script>
@@ -115,3 +119,4 @@
         });
     </script>
 @endsection
+<x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить эти записи?" button=".delete-btn" message-box="delete-modal"/>

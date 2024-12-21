@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Adminpanel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserChangePasswordRequest;
 use App\Http\Requests\UserEditRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Jobs\BalanceTransactionJob;
@@ -19,104 +20,100 @@ use Illuminate\View\View;
 
 class UsersController extends Controller
 {
-    public function list(Request $request) {
-        if ($request->has('search')) {
-            $searchingStr = $request->get('search');
-
-            $users = User::whereRaw("login ILIKE ?", ['%' . $searchingStr . '%'])
-                         ->orWhereRaw("email ILIKE ?", ['%' . $searchingStr . '%'])
-                         ->paginate(20);
-        } else {
-            $users = User::paginate(20);
-        }
+    public function list(Request $request): View
+    {
+        $search = $request->get('search');
+        $users = User::query()
+                     ->when($search, function ($query, $search) {
+                         $query->where('login', 'ilike', "%$search%")
+                               ->orWhere('email', 'ilike', "%$search%");
+                     })
+                     ->paginate(20);
 
         return view('adminpanel.users', compact('users'));
     }
 
-    public function create(): View {
-        $groups = Group::all();
-        $doctors = Doctor::all();
-        $patients = Patient::all();
-
-        return view('adminpanel.service.user_add', compact('groups', 'doctors', 'patients'));
+    public function create(): View
+    {
+        return view('adminpanel.service.user_add', [
+            'groups' => Group::all(),
+            'doctors' => Doctor::all(),
+            'patients' => Patient::all(),
+        ]);
     }
 
-    public function store(UserStoreRequest $request) {
-        $user = new User();
-        $user->login = $request->post('login');
-        $user->email = $request->post('email');
-        $user->email_verified_at = $request->post('email_verified_at');
-        $user->password = Hash::make($request->post('password'));
-        $user->group_id = $request->post('group_id');
-        $user->balance = $request->post('balance');
+    public function store(UserStoreRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+        $data['password'] = Hash::make($data['password']);
+        $user = User::create($data);
 
-        if ($user->save()) {
+        if ($data['balance']) {
             DB::table('balance_transactions')->insert([
                 'user_id' => $user->id,
-                'reason' => 'При создании, баланс установлен в ' . $user->balance,
-                'old_balance' => '0',
-                'new_balance' => $user->balance
+                'reason' => "При создании, баланс установлен в {$data['balance']}",
+                'old_balance' => 0,
+                'new_balance' => $data['balance'],
             ]);
         }
 
-        return redirect()->route('admin.users')->with([
-            'status' => 'users.success',
-            'message' => 'Пользователь был успешно добавлен.'
+        return redirect()->route('admin.users')->with('success', 'Пользователь был успешно добавлен.');
+    }
+
+    public function edit(int $userID): View
+    {
+        return view('adminpanel.service.user_edit', [
+            'user' => User::findOrFail($userID),
+            'groups' => Group::all(['name', 'id']),
+            'doctors' => Doctor::all(['name', 'surname', 'patronym', 'id']),
+            'patients' => Patient::all(['name', 'surname', 'patronym', 'id']),
+            'transactions' => DB::table('balance_transactions')->where('user_id', $userID)->get(),
         ]);
     }
 
-    public function edit(int $userID): View {
-        $user = User::whereId($userID)->first();
-        $groups = Group::get(['name', 'id']);
-        $doctors = Doctor::get(['name', 'surname', 'patronym', 'id']);
-        $patients = Patient::get(['name', 'surname', 'patronym', 'id']);
-        $transactions = DB::table('balance_transactions')->where('user_id', $userID)->get();
+    public function save(UserEditRequest $request, int $user_id): RedirectResponse
+    {
+        $user = User::findOrFail($user_id);
+        $data = $request->validated();
 
-        return view('adminpanel.service.user_edit', compact('user', 'groups', 'doctors', 'patients', 'transactions'));
+        $user->update($data);
+
+        if ($data['balance']) {
+            $adminID = Auth::id();
+            BalanceTransactionJob::dispatch(
+                "Баланс изменён администратором с ID {$adminID}",
+                $user_id,
+                $data['balance']
+            );
+        }
+
+        return redirect()->route('admin.users')->with('success', "Данные пользователя {$user->login} были успешно обновлены!");
     }
 
-    public function save(UserEditRequest $request, int $user_id): RedirectResponse {
-        $information = $request->all();
-        $user = User::find($user_id);
-        $user->login = $information['login'];
-        $user->email = $information['email'];
-        $user->email_verified_at = $information['email_verified_at'];
-        $user->userable_id = $information['userable_id'] ?? 1;
-        $user->userable_type = $information['userable_type'];
-        $user->group_id = $information['group_id'];
-        $user->save();
-
-        $administratorID = Auth::user()->id;
-        BalanceTransactionJob::dispatch("Баланс изменён администратором с ID {$administratorID}", $user_id, $information['balance']);
-
-        return redirect()->route('admin.users')->with([
-            'message' => "Данные пользователя {$user->login} были успешно обновлёны!",
-            'status' => 'users.success'
-                                                      ]);
-    }
-
-    public function delete(int $userID)
+    public function delete(int $userID): RedirectResponse
     {
         if ($userID == 1) {
-            return redirect()->back()->withErrors('Нельзя удалить пользователя с ID 1');
+            return redirect()->back()->withErrors('Нельзя удалить пользователя с ID 1.');
         }
 
-        User::findOrFail($userID)->delete();
+        User::findOrFail($userID)->forceDelete();
 
-        return redirect()->route('admin.users')->with([
-                'message' => "Пользователь был удалён.",
-                'status' => 'users.success'
-            ]);
+        return redirect()->route('admin.users')->with('success', 'Пользователь был удалён.');
     }
 
-    public function massDelete(Request $request) {
-        $users = $request->post('selected');
+    public function massDelete(Request $request): RedirectResponse
+    {
+        $userIDs = $request->input('selected', []);
+        User::whereIn('id', $userIDs)->forceDelete();
 
-        User::whereIn('id', $users)->delete();
+        return redirect()->back()->with('success', 'Выделенные пользователи были удалены.');
+    }
 
-        return redirect()->back()->with([
-            'message' => 'Выделенные пользователи были удалены.',
-            'status' => 'users.success'
-        ]);
+    public function changePassword(UserChangePasswordRequest $request, int $user_id): RedirectResponse
+    {
+        $user = User::findOrFail($user_id);
+        $user->update(['password' => Hash::make($request->post('password'))]);
+
+        return redirect()->route('admin.users')->with('success', 'Пароль был изменён.');
     }
 }

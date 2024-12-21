@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'Доктора')
 @section('assets')
+    @vite(['resources/js/mass_delete.js'])
 @endsection
 @section('main')
     <h1>Доктора</h1>
@@ -9,11 +10,16 @@
         <div class="d-inline-flex justify-content-between w-100">
             <div class="left-side">
                 <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
-                <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none">
-                    <a href="#">Удалить</a>
-                    <a href="#">Заблокировать</a>
+                <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 1000;">
+                    @permission('doctors_remove')
+                    <button type="button" class="dropdown-item bulk-action-btn" data-action="{{ route('admin.users.doctors.mass-delete') }}" style="width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer;">
+                        Удалить
+                    </button>
+                    @endpermission
                 </div>
-                <a class="btn btn-success" href="{{ route('admin.users.doctors.new') }}"><i class="bi bi-file-plus"></i> Создать запись</a>
+                @permission('doctors_add')
+                    <a class="btn btn-success" href="{{ route('admin.users.doctors.new') }}"><i class="bi bi-file-plus"></i> Создать запись</a>
+                @endpermission
             </div>
             <div class="right-side">
                 <div class="input-group mb-3">
@@ -24,7 +30,8 @@
             </div>
         </div>
     </div>
-    <form action="#" method="post">
+    <form id="bulk-action-form" method="post" enctype="multipart/form-data">
+        @csrf
         <table class="table">
         <thead>
         <tr>
@@ -58,16 +65,21 @@
                     <td>{{ $doctor->birth_at }}</td>
                     <td>{{ $doctor->address_job }}</td>
                     <td>
-                        <a class="btn btn-info btn-sm" href="{{ route('admin.users.doctors.edit', $doctor->id) }}">Редактирование</a>
-                        <button class="btn btn-danger btn-sm user-delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#user-delete-modal">Удалить</button>
+                        @permission('doctors_edit')
+                            <a class="btn btn-light btn-sm" href="{{ route('admin.users.doctors.edit', $doctor->id) }}"><i class="bi bi-pen"></i></a>
+                        @endpermission
+                        @permission('doctors_remove')
+                        <a class="btn btn-light btn-sm delete-btn" href="{{ route('admin.users.doctors.delete', $doctor->id) }}">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                        @endpermission
                     </td>
                 </tr>
             @endforeach
         @endif
         </tbody>
     </table>
-        {{ $doctors->links() }}
-        <x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить этих пользователей?" button=".user-delete-btn" message-box="user-delete-modal"/>
+        {{ $doctors->links('pagination::bootstrap-5') }}
     </form>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -105,3 +117,4 @@
         });
     </script>
 @endsection
+<x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить этих докторов?" button=".delete-btn" message-box="delete-modal"/>

@@ -18,6 +18,7 @@ class ClinicFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'description' => fake()->text(),
         ];

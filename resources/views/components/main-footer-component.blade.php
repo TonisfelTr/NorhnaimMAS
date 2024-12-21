@@ -1,10 +1,10 @@
 <footer>
     <nav class="pb-5">
         <ul class="d-inline-flex justify-content-center link-list">
-            <li class=""><a href="{{ route('main.index') }}">Главная</a></li>
-            <li class=""><a href="{{ route('main.medicines') }}">Зарегистрированные лекарства</a></li>
-            <li class=""><a href="{{ route('main.clinics') }}">Клиники и врачи</a></li>
-            <li class=""><a href="{{ route('main.feedback') }}">Обратная связь</a></li>
+            <li><a href="{{ route('main.index') }}">Главная</a></li>
+            <li><a href="{{ route('main.clinics') }}">Врачи и клиники</a></li>
+            <li><a href="{{ route('main.medicines') }}">Зарегистрированные лекарства</a></li>
+            <li><a href="{{ route('main.feedback') }}">Обратная связь</a></li>
         </ul>
     </nav>
     <div class="copyrights">

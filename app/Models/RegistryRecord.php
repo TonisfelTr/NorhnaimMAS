@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 
 class RegistryRecord extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $guarded = [];
 
@@ -22,7 +22,7 @@ class RegistryRecord extends Model
         return $this->belongsTo(Doctor::class);
     }
 
-    public function getForDatetimeAttribute(): string {
-        return Carbon::from($this->for_datetime)->format("d.m.Y H:i");
+    public function getForDatetimeAttribute($value): string {
+        return Carbon::parse($value)->format("d.m.Y H:i");
     }
 }

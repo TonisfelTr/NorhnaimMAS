@@ -2,6 +2,21 @@
 @section('title', 'Главная')
 @section('assets')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* Стили для подсказки */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            visibility: hidden; /* Изначально скрыто */
+            z-index: 1000; /* Чтобы подсказка была выше других элементов */
+        }
+    </style>
 @endsection
 @section('main')
     <div class="container-fluid">
@@ -23,62 +38,66 @@
                         <canvas id="medicine-statistic" class="chart-statistic-large"></canvas>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-12 col-lg-4">
-                    <canvas id="analyses-statistic" class="chart-statistic-large"></canvas>
+                <div class="col-lg-4">
+                    <canvas id="pointStyleChart" width="600" height="400"></canvas>
+                    <div id="tooltip" class="tooltip"></div>
                 </div>
+            </div>
+            <div class="row d-inline-flex justify-content-between">
+
             </div>
         </div>
     </div>
     <script>
-        const dataUsers = {
-            labels: [
-                'Доктора',
-                'Пациенты',
-                'Администрация'
-            ],
-            datasets: [{
-                label: 'Соотношение пользователей',
-                data: [{{ $doctorsCount }}, {{ $patientCount }}, {{ $adminsCount }}],
-                backgroundColor: [
-                    '#efefef',
-                    'rgb(54, 162, 235)',
-                    'orange'
+        document.addEventListener('DOMContentLoaded', function () {
+            const dataUsers = {
+                labels: [
+                    'Доктора',
+                    'Пациенты',
+                    'Администрация'
                 ],
-                hoverOffset: 4
-            }]
-        }
-        const configUsers = {
-            type: 'doughnut',
-            data: dataUsers
-        }
-        const dataDictionary = {
-            labels: [
-                'Клиники',
-                'Лекарства',
-                'Диагнозы'
-            ],
-            datasets: [{
-                label: 'Соотношение словарей',
-                data: [{{ $clinicsCount }}, {{ $drugsCount }}, {{ $diagnosesCount }}],
-                backgroundColor: [
-                    '#af7b4d',
-                    'rgb(84,42,0)',
-                    '#3c8517'
+                datasets: [{
+                    label: 'Соотношение пользователей',
+                    data: [{{ $doctorsCount }}, {{ $patientCount }}, {{ $adminsCount }}],
+                    backgroundColor: [
+                        '#efefef',
+                        'rgb(54, 162, 235)',
+                        'orange'
+                    ],
+                    hoverOffset: 4
+                }]
+            }
+            const configUsers = {
+                type: 'doughnut',
+                data: dataUsers
+            }
+            const dataDictionary = {
+                labels: [
+                    'Клиники',
+                    'Лекарства',
+                    'Диагнозы'
                 ],
-                hoverOffset: 4
-            }]
-        }
-        const configDictionary = {
-            type: 'doughnut',
-            data: dataDictionary
-        }
+                datasets: [{
+                    label: 'Соотношение словарей',
+                    data: [{{ $clinicsCount }}, {{ $drugsCount }}, {{ $diagnosesCount }}],
+                    backgroundColor: [
+                        '#af7b4d',
+                        'rgb(84,42,0)',
+                        '#3c8517'
+                    ],
+                    hoverOffset: 4
+                }]
+            }
+            const configDictionary = {
+                type: 'doughnut',
+                data: dataDictionary
+            }
 
-        const userChart = document.getElementById('user-statistic');
-        const medicineChart = document.getElementById('medicine-statistic');
-        const analysesChart = document.getElementById('analyses-statistic');
+            const userChart = document.getElementById('user-statistic');
+            const medicineChart = document.getElementById('medicine-statistic');
 
-        new Chart(userChart, configUsers);
-        new Chart(medicineChart, configDictionary);
-        new Chart(analysesChart, configUsers);
+            new Chart(userChart, configUsers);
+            new Chart(medicineChart, configDictionary)
+        });
     </script>
 @endsection

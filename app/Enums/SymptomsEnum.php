@@ -5,6 +5,9 @@ namespace App\Enums;
 
 enum SymptomsEnum: string
 {
+    case LossOfConsciousness = 'Потеря сознания';
+    case Aura = 'Предшествующие приступу ощущения';
+    case MuscleSpasms = 'Мускульные спазмы';
     // Маниакальные симптомы
     case ElevatedMood = 'Повышенное настроение';
     case Irritability = 'Раздражительность';
@@ -29,7 +32,9 @@ enum SymptomsEnum: string
     case AppetiteChanges = 'Изменения аппетита';
     case WeightChanges = 'Изменения массы тела';
     case SelfHarm = 'Самоповреждение';
-
+    case AlteredConsciousness = 'Изменённое сознание';
+    case LossOfIdentity = 'Потеря идентичности';
+    case UncontrolledMovements = 'Неконтролируемые движения';
     // Тревожные симптомы
     case PanicAttacks = 'Панические атаки';
     case ChronicAnxiety = 'Хроническая тревога';
@@ -42,7 +47,9 @@ enum SymptomsEnum: string
     case Sweating = 'Потливость';
     case HotFlushes = 'Приливы жара';
     case Dizziness = 'Головокружение';
-
+    case MemoryLoss = 'Потеря памяти';
+    case Distress = 'Дистресс';
+    case PsychologicalFactors = 'Психологические факторы';
     // Психотические симптомы
     case Hallucinations = 'Галлюцинации';
     case Delusions = 'Бред';
@@ -306,6 +313,8 @@ enum SymptomsEnum: string
     const DisorganizedSpeech        = 'Дезорганизованная речь';
     const RemissionState            = 'Состояние ремиссии';
     const PoorSocialSkills          = 'Бедные социальные навыки';
+    const RestingTremor             = 'Тремор в покое';
+    const SleepDisturbances         = 'Нарушения сна';
     case Disorganization = 'Дезорганизация';
     case InappropriateAffect = 'Неадекватный аффект';
     case Mutism = 'Мутаизм';

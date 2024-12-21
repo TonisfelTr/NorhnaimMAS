@@ -1,9 +1,8 @@
 @extends('layouts.admin')
 @section('title', 'Пользователи')
 @section('assets')
-
+    @vite(['resources/js/mass_delete.js'])
 @endsection
-
 @section('main')
     <div class="container-fluid">
         <h1>Пользователи</h1>
@@ -14,24 +13,28 @@
                     {{ session()->get('message') }}
                 </div>
             @endif
-            <div class="d-inline-flex justify-content-between w-100">
-                <div class="left-side">
-                    <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
-                    <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none">
-                        <a href="#">Удалить</a>
-                        <a href="#">Заблокировать</a>
-                    </div>
+        </div>
+        <div class="d-inline-flex justify-content-between w-100">
+            <div class="left-side">
+                <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
+                <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 1000;">
+                    <button type="button" class="dropdown-item bulk-action-btn delete-btn" data-action="{{ route('admin.users.mass-delete') }}" style="width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer;">
+                        Удалить
+                    </button>
                 </div>
-                <div class="right-side">
-                    <div class="input-group mb-3">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1">
-                        <button class="btn btn-outline-secondary" type="button">Искать</button>
-                    </div>
-                </div>
+                <a class="btn btn-success" href="{{ route('admin.users.create') }}"><i class="bi bi-file-plus"></i> Создать запись</a>
+            </div>
+            <div class="right-side">
+                <form class="input-group mb-3" method="get" enctype="multipart/form-data" action="{{ route('admin.users') }}">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input name="search" type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1" value="{{ request()->get('search') }}">
+                    <button class="btn btn-outline-secondary" type="submit">Искать</button>
+                </form>
             </div>
         </div>
-        <form action="#" method="post">
+        <form id="bulk-action-form" method="post" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="_method" id="bulk-method" value="POST">
             <table class="table">
                 <thead>
                     <tr>
@@ -55,7 +58,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($users as $user)
+                    @forelse($users as $user)
                     <tr>
                         <td><input type="checkbox" name="selected[]" title="Выделить" value="{{ $user->id }}" /></td>
                         <td>{{ $user->id }}</td>
@@ -64,16 +67,22 @@
                         <td>{{ $user->getUserType() }}</td>
                         <td>{{ $user->group->name }}</td>
                         <td>
-                            <a class="btn btn-info btn-sm" href="{{ route('admin.user_edit', $user->id) }}">Редактирование</a>
-                            <button class="btn btn-danger btn-sm user-delete-btn" type="button">Удалить</button>
+                            <a class="btn btn-light btn-sm" href="{{ route('admin.users.edit', $user->id) }}"><i class="bi bi-pen"></i></a>
+                            @if ($user->id != 1)
+                                <a class="btn btn-light btn-sm delete-btn" href="{{ route('admin.users.delete', $user->id) }}">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            @endif
                         </td>
-                        <td></td>
                     </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td class="text-center" colspan="7"><i class="bi bi-info-circle-fill"></i> Записей не найдено.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
             {{ $users->links() }}
-            <x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить этих пользователей?" button=".user-delete-btn" message-box="user-delete-modal"/>
         </form>
     </div>
     <script>
@@ -112,3 +121,4 @@
         });
     </script>
 @endsection
+<x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить этих пользователей?" button=".delete-btn" message-box="delete-modal"/>

@@ -47,8 +47,8 @@
                     </select>
                 </div>
                 <div class="pt-4">
-                    <label for="user_banning" class="form-label">Блокировка пользователей</label>
-                    <select name="user_banning" id="user_banning" class="form-control">
+                    <label for="banning_user" class="form-label">Блокировка пользователей</label>
+                    <select name="banning_user" id="user_banning" class="form-control">
                         <option value="0">Запрещено</option
                         ><option value="1">Разрешено</option>
                     </select>

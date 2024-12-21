@@ -23,7 +23,9 @@ export default defineConfig({
                 'resources/sass/components.sass',
                 'resources/js/app.js',
                 'resources/js/admin_app.js',
-                'resources/js/selectize.js'
+                'resources/js/selectize.js',
+                'resources/js/mass_delete.js',
+                'resources/js/registry_script.js'
             ],
             refresh: true,
         }),

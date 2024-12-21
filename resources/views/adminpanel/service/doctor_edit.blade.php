@@ -23,7 +23,16 @@
     <div class="container-fluid">
         <h1>Редактирование записи доктора "{{ $doctor->surname }}, {{ $doctor->name }}"</h1>
         {{ Breadcrumbs::render('admin.users.doctors.edit') }}
-        <form class="row" enctype="multipart/form-data" method="post" action="{{ route('admin.users.doctors.save', $doctor->id) }}">
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        <form class="row" enctype="multipart/form-data" method="post" action="{{ route('admin.users.doctors.update', $doctor->id) }}">
             @csrf
             <div class="col-md-6">
                 <div class="mb-3">

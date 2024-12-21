@@ -10,4 +10,7 @@ class Lawyer extends Model
     use HasFactory;
 
     protected $guarded = [];
+    protected $casts = [
+      'skills' => 'array'
+    ];
 }

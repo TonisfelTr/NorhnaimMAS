@@ -16,14 +16,14 @@
             <div class="d-inline-flex justify-content-between w-100">
                 <div class="left-side">
                     <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
-                    @if(group()->blog_remove_category)
+                    @permission('blog_remove_category')
                         <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 1000;">
                             <button type="button" class="dropdown-item bulk-action-btn" data-action="{{ route('admin.blog.categories.mass-delete') }}" style="width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer;">
                                 Удалить
                             </button>
                         </div>
                     @endif
-                    @if(group()->blog_new_category)
+                    @permission('blog_new_category')
                         <a class="btn btn-success" href="{{ route('admin.blog.categories.new') }}"><i class="bi bi-file-plus"></i> Создать запись</a>
                     @endif
                 </div>
@@ -58,10 +58,10 @@
                         <td>{{ $category->id }}</td>
                         <td>{{ $category->name }}</td>
                         <td>
-                            @if(group()->blog_edit_category)
+                            @permission('blog_edit_category')
                                 <a class="btn btn-light btn-sm" href="{{ route('admin.blog.categories.edit', $category->id) }}"><i class="bi bi-pen"></i></a>
                             @endif
-                            @if(group()->blog_remove_category)
+                            @permission('blog_remove_category')
                                 <a class="btn btn-light btn-sm delete-btn" href="{{ route('admin.blog.categories.delete', $category->id) }}">
                                     <i class="bi bi-trash"></i>
                                 </a>

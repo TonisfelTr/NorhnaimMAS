@@ -12,13 +12,25 @@
                 <div class="alert alert-success">
                     {{ session()->get('message') }}
                 </div>
+            @elseif($errors->any())
+                <div class="alert alert-danger">
+                    Возникли ошибки:
+                    <ul>
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
             <div class="d-inline-flex justify-content-between w-100">
                 <div class="left-side">
                     <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
                     <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none">
-                        <a href="#">Удалить</a>
+                        <a href="#" id="popup-mass-delete-button" data-bs-toggle="modal" data-bs-target="#delete-modal">Удалить</a>
                     </div>
+                    <a class="btn btn-success" href="{{ route('admin.dictionary.clinics.create') }}">
+                        <i class="bi bi-file-plus"></i> Добавить клинику
+                    </a>
                 </div>
                 <form class="right-side" method="get">
                     <div class="input-group mb-3">
@@ -29,7 +41,7 @@
                 </form>
             </div>
         </div>
-        <form action="#" method="post">
+        <form action="{{ route("admin.dictionary.clinics.mass-delete") }}" method="post" id="table-form">
             @csrf
             <table class="table">
                 <thead>
@@ -66,16 +78,15 @@
                             <td>{{ $clinic->address }}</td>
                             <td>{{ $clinic->created_at }}</td>
                             <td>
-                                <a class="btn btn-info btn-sm" href="{{ route('admin.dictionary.clinics.edit', $clinic->id) }}">Редактирование</a>
-                                <button class="btn btn-danger btn-sm clinic-delete-btn" type="button" data-bs-toggle="modal" data-bs-target="#clinic-delete-modal">Удалить</button>
+                                <a class="btn btn-light btn-sm" href="{{ route('admin.dictionary.clinics.edit', $clinic->id) }}"><i class="bi bi-pen"></i></a>
+                                <a class="btn btn-light btn-sm drug-delete-btn" href="{{ route('admin.dictionary.clinics.delete', $clinic->id) }}"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
                     @endforeach
                 @endif
                 </tbody>
             </table>
-            {{ $clinics->links() }}
-            <x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить эти группы?" button=".clinic-delete-btn" message-box="clinic-delete-modal"/>
+            {{ $clinics->links('pagination::bootstrap-5') }}
         </form>
     </div>
     <script>
@@ -114,3 +125,4 @@
         });
     </script>
 @endsection
+<x-danger-dialog-component title="Удаление" message="Вы действительно хотите удалить эти клиники?" button="delete-btn" message-box="delete-modal"/>

@@ -8,12 +8,42 @@
 
 $doctor-block__color: #048696
 $select__color: #008cff
+$border__color: #013a42
 
-body
-    font-family: "Montserrat", sans-serif
-    font-optical-sizing: auto
-    font-weight: 300
-    font-style: normal
+html, body
+    margin: 0
+    padding: 0
+    height: 100%  // Убедитесь, что высота страницы 100%
+    display: flex
+    flex-direction: column
+    font-family: Montserrat
+
+section.header
+    background-color: #333
+    color: white
+    padding: 20px
+    text-align: center
+
+    div.container
+        height: 290px
+        text-align: left
+
+main
+    flex: 1  // Основной контент заполняет оставшееся пространство
+    width: 100%
+    box-sizing: border-box  // Учитывает отступы в расчёте ширины
+
+footer
+    display: flex
+    flex-direction: column
+    justify-content: center
+    align-items: center
+    border-top: 3px solid #444
+    padding: 20px
+    min-height: 300px
+    background: #048696
+    color: #eee
+    margin-top: 0  // Убираем лишние отступы
 
 .d-flex.justify-content-right,
 .d-inline-flex.justify-content-right
@@ -54,7 +84,7 @@ footer
     border-top: 3px solid #444
     padding-top: 20px
     min-height: 300px
-    margin-top: 50px
+    margin-top: 0  // Убираем отступ, чтобы он не отталкивался от контента
     background: #048696
     color: #eee
 
@@ -713,16 +743,16 @@ section.doctor-card
         .pl-3
             margin-left: 21px
 
-section.blog
+.magnifier-block
+    border-radius: 6px
+    border-top: 1px solid #ced4da !important
+    border-bottom: 1px solid #ced4da !important
+    border-left: 1px solid #ced4da !important
+    border-right: 0
+    background-color: #fff
+    color: #6c757d
 
-    .magnifier-block
-        border-radius: 6px
-        border-top: 1px solid #ced4da !important
-        border-bottom: 1px solid #ced4da !important
-        border-left: 1px solid #ced4da !important
-        border-right: 0
-        background-color: #fff
-        color: #6c757d
+section.blog
 
     h1 span
         color: $doctor-block__color
@@ -762,3 +792,122 @@ section.categories
             background-color: #51625e
             color: white
 
+section.topics
+
+    .blog__card
+        border: 1px $border__color
+
+    picture source,
+    picture img
+        width: 190px
+        height: 190px
+
+.link-remove-underline
+    text-decoration: none
+
+section.article
+
+    h1 span
+        color: $select__color
+
+    p.articles__description
+        font-size: 16px
+
+    .article-card__body
+        border: 1px solid $border__color
+        border-radius: 6px
+        padding: 20px
+
+.not-found picture img,
+.not-found picture source
+    width: 300px
+    height: 290px
+
+section.jurisprudence-header
+
+    h1 span
+        color: $select__color
+
+section.advertisment
+    position: relative
+    text-align: left
+    color: white
+
+    div.container-fluid
+        padding: 0
+
+    picture img,
+    picture source
+        width: 100%
+        height: 400px
+        object-fit: cover
+        object-position: top
+
+    .overlay-text
+        position: absolute
+        top: 50%
+        left: 25%
+        transform: translate(-50%, -50%)
+        padding: 20px
+        border-radius: 10px
+        max-width: 40%
+        text-shadow: 3px 1px 2px rgb(0, 0, 0)
+        font-size: 30px
+
+section.solutions
+
+    h2 span
+        color: $select__color
+
+    .Lawyer__card
+        position: relative
+        overflow: hidden
+        width: 100%
+        height: 400px
+        border: 1px solid #ddd
+
+        .corner
+            position: absolute
+            top: 0
+            left: 0
+            width: 150px
+            height: 150px
+            overflow: hidden
+
+            img,
+            source
+                position: absolute
+                top: 0
+                left: 0
+                width: 100%
+                height: 100%
+                clip-path: polygon(0 0, 100% 0, 0 100%)
+
+        .Lawyer__card-author-block
+            text-align: right
+            padding: 25px 30px
+
+        .Lawyer__card-solutions
+            padding-top: 40px !important
+            padding-left: 20px !important
+
+            h4
+                font-size: 20px
+
+            ul
+                font-size: 14px
+                margin-left: -20px
+
+            p span
+                color: $doctor-block__color
+                font-size: 20px
+
+        .Lawyer__card-description
+            padding-bottom: 14px
+            padding-left: 14px
+
+            strong
+                font-weight: 600
+
+.font-12
+    font-size: 12px

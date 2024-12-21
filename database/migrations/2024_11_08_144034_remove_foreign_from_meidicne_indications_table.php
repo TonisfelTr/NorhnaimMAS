@@ -23,7 +23,7 @@ return new class extends Migration
     {
         Schema::table('medicine_indications', function (Blueprint $table) {
             $table->foreign('medicine_id', 'fk_medicine_indication_to_medicine_id')
-                  ->on('medicines')
+                  ->on('drugs')
                   ->references('id')
                   ->cascadeOnDelete();
         });

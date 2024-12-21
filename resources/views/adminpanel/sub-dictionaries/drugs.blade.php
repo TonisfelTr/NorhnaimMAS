@@ -26,7 +26,7 @@
                 <form class="right-side" method="get">
                     <div class="input-group mb-3">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1" name="search">
+                        <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1" name="search" value="{{ request()->get('search') }}">
                         <button class="btn btn-outline-secondary" type="button">Искать</button>
                     </div>
                 </form>
@@ -65,8 +65,8 @@
                             <td>{{ $drug->name }}</td>
                             <td>{{ $drug->groupName() }}</td>
                             <td>
-                                <a class="btn btn-info btn-sm" href="{{ route('admin.dictionary.drugs.edit', $drug->id) }}">Редактирование</a>
-                                <a class="btn btn-danger btn-sm drug-delete-btn" href="{{ route('admin.dictionary.drugs.delete', $drug->id) }}">Удалить</a>
+                                <a class="btn btn-light btn-sm" href="{{ route('admin.dictionary.drugs.edit', $drug->id) }}"><i class="bi bi-pen"></i></a>
+                                <a class="btn btn-light btn-sm drug-delete-btn" href="{{ route('admin.dictionary.drugs.delete', $drug->id) }}"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
                     @endforeach

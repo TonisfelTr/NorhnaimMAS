@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Adminpanel;
 use App\Enums\MedicineTypesEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDeleteRequest;
-use App\Http\Requests\SaveDrugRequest;
-use App\Http\Requests\StoreDrugRequest;
+use App\Http\Requests\DrugUpdateRequest;
+use App\Http\Requests\DrugStoreRequest;
 use App\Models\ContraindicationsType;
 use App\Models\Diagnose;
 use App\Models\Drug;
@@ -14,18 +14,27 @@ use app\Models\MedicineContraindication;
 use app\Models\MedicineIndication;
 use App\Models\SideEffect;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DrugController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $drugs = Drug::orderBy('id')->paginate(20);
+        if ($request->has('search')) {
+            $search = $request->get('search');
+            $drugs = Drug::where('name', 'ilike', "%$search%")
+                ->orWhere('latin_name', 'ilike', "%$search%")
+                ->orderBy('id')
+                ->paginate(20);
+        } else {
+            $drugs = Drug::orderBy('id')->paginate(20);
+        }
 
         return view('adminpanel.sub-dictionaries.drugs', compact('drugs'));
     }
 
-    public function store(StoreDrugRequest $request)
+    public function store(DrugStoreRequest $request)
     {
         if ($request->getMethod() == 'POST') {
             $data = $request->post();
@@ -144,14 +153,14 @@ class DrugController extends Controller
     {
         $drug = Drug::with([
             'contraindications' => function ($query) {
-                $query->where('type', 0);
+                $query->where('type', 1);
             },
             'dangerous'         => function ($query) {
-                $query->where('type', 1);
+                $query->where('type', 2);
             },
             'receptors',
             'side_effects',
-            'diagnoses'
+            'diagnoses',
         ])->findOrFail($drugID);
 
         $groups = Drug::select('group')->distinct()->get();
@@ -184,7 +193,7 @@ class DrugController extends Controller
         );
     }
 
-    public function save(SaveDrugRequest $request, int $drugID): RedirectResponse
+    public function save(DrugUpdateRequest $request, int $drugID): RedirectResponse
     {
         $drug = Drug::findOrFail($drugID);
 
@@ -287,7 +296,7 @@ class DrugController extends Controller
             DB::table('generics')
                 ->insert([
                     'drug_id' => $drugID,
-                    'name' => $generic
+                    'name' => $generic,
                 ]);
         }
 

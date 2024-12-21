@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Создание пользователя')
+@section('title', 'Создание записи в регистратуру')
 @section('assets')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.bootstrap5.min.css">
@@ -62,6 +62,10 @@
                     <div class="session-picker">
                         <label for="for_datetime" class="form-label">Время приёма</label>
                         <input type="text" name="for_datetime" id="for_datetime" placeholder="Выберите дату и время" class="form-control" />
+                    </div>
+                    <div class="mt-3">
+                        <input type="checkbox" name="appointment" id="appointment">
+                        <label for="appointment" class="form-label">Принят на приём</label>
                     </div>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
                         <button class="btn btn-outline-success btn-sm" type="submit"><i class="bi bi-box-arrow-down"></i> Сохранить изменения</button>

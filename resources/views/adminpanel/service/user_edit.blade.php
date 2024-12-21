@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Редактирование пользователя')
+@section('title', 'Редактирование пользователя ' . $user->email)
 @section('assets')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.bootstrap5.min.css">
@@ -22,10 +22,10 @@
 @section('main')
     <div class="container-fluid">
         <h1>Пользователь {{ $user->login }}</h1>
-        {{ Breadcrumbs::render('admin.user_edit') }}
+        {{ Breadcrumbs::render('admin.users.edit') }}
         <div class="container-fluid">
             <div class="row">
-                <form class="col-md-6 mt-5" action="{{ route('admin.user_changes_save', $user->id) }}" method="post" enctype="multipart/form-data">
+                <form class="col-md-6 mt-5" action="{{ route('admin.users.save', $user->id) }}" method="post" enctype="multipart/form-data">
                     @csrf
                     @recaptcha
                     @if(session()->has('success'))
@@ -122,7 +122,8 @@
                         <button class="btn btn-outline-success btn-sm" type="submit"><i class="bi bi-box-arrow-down"></i> Сохранить изменения</button>
                     </div>
                 </form>
-                <form class="col-md-6 mt-5" action="#" method="post" enctype="multipart/form-data">
+                <form class="col-md-6 mt-5" action="{{ route('admin.users.edit.password', $user->id) }}" method="post" enctype="multipart/form-data">
+                    @csrf
                     <h3>Смена пароля</h3>
                     <div class="mb-3">
                         <label for="password-field" class="form-label">Новый пароль</label>
@@ -130,7 +131,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="password-confirm-field" class="form-label">Повторите пароль</label>
-                        <input id="password-confirm-field" class="form-control" type="password" name="password-confirm" placeholder="{{ $password }}" autocomplete="new-password" required/>
+                        <input id="password-confirm-field" class="form-control" type="password" name="password_confirmation" placeholder="{{ $password }}" autocomplete="new-password" required/>
                     </div>
                     <p><strong>Сгенерированный пароль:</strong> {{ $password }}</p>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">

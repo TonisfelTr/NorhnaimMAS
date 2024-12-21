@@ -1,17 +1,21 @@
-<div class="modal fade" id="{{ $messageBox }}" aria-hidden="true" aria-labelledby="title-h5" tabindex="-1">
+<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="title-h5">{{ $title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-            </div>
-            <div class="modal-body">
-                <p>{{ $message }}</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline-danger" type="submit" @if($actionLink) formaction="{{ $actionLink }}" @endif>Удалить</button>
-                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Отмена</button>
-            </div>
+            <form id="modal-form" method="post">
+                @csrf
+                <input type="hidden" name="_method" value="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    {{ $message }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-danger modal-submit">Подтверждаю</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

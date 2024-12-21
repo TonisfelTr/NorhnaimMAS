@@ -240,9 +240,8 @@ enum SideEffectsEnum: int
     case Amnesia = 235;
     case BitterTaste = 236;
     case MuscleCramps =237;
-    const MuscleSpasms             = 238;
-    const Sleepwalking             = 239;
-    const KidneyFunctionImpairment = 240;
-    const ElevatedLiverEnzymes     = 241;
-    const HighBloodPressure        = 242;
+    case MuscleSpasms             = 238;
+    case KidneyFunctionImpairment = 240;
+    case ElevatedLiverEnzymes     = 241;
+    case HighBloodPressure        = 242;
 }

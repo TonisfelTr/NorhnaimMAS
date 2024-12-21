@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Adminpanel;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MassDeleteRequest;
-use App\Http\Requests\SaveCategoriesRequest;
+use App\Http\Requests\CategoriesUpdateRequest;
 use App\Models\TopicsCategory;
 use Illuminate\Http\Request;
 
@@ -40,7 +40,7 @@ class CategoryController extends Controller
         return redirect()->route('admin.blog.categories')->with('success', 'Категория была создана.');
     }
 
-    public function save(SaveCategoriesRequest $request, int $category_id) {
+    public function save(CategoriesUpdateRequest $request, int $category_id) {
         $category = TopicsCategory::findOrFail($category_id);
         $category->name = $request->post('name');
         $category->save();

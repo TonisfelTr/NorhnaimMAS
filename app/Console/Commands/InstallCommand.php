@@ -61,6 +61,11 @@ class InstallCommand extends Command
             '--class' => 'DrugSeeder'
         ]);
 
+        $this->warn('Seed lawyers...');
+        Artisan::call('db:seed', [
+            '--class' => 'LawyersFillSeeder'
+        ]);
+
         $this->warn('Seed base groups...');
         Artisan::call('db:seed', [
             '--class' => 'CreateBaseGroupSeeder'

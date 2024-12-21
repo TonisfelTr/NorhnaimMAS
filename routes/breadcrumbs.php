@@ -21,10 +21,16 @@ if (!Breadcrumbs::exists('admin.main')) {
         $trail->push('Пользователи', route('admin.users'));
     });
 
-    Breadcrumbs::for('admin.user_edit', function (BreadcrumbTrail $trail) {
+    Breadcrumbs::for('admin.users.new', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
         $trail->push('Пользователи', route('admin.users'));
-        $trail->push('Редактирование записи', route('admin.user_edit', Route::getCurrentRoute()->parameter('user_id')));
+        $trail->push('Создание пользователя', route('admin.users.create'));
+    });
+
+    Breadcrumbs::for('admin.users.edit', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Пользователи', route('admin.users'));
+        $trail->push('Редактирование записи', route('admin.users.edit', Route::getCurrentRoute()->parameter('user_id')));
     });
 
     Breadcrumbs::for('admin.users.patients', function (BreadcrumbTrail $trail) {
@@ -59,6 +65,13 @@ if (!Breadcrumbs::exists('admin.main')) {
         $trail->push('Заблокированные', route('admin.users.banned'));
     });
 
+    Breadcrumbs::for('admin.users.banned.new', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Пользователи', route('admin.users'));
+        $trail->push('Заблокированные', route('admin.users.banned'));
+        $trail->push('Блокировка пользователя');
+    });
+
     Breadcrumbs::for('admin.groups', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
         $trail->push('Группы пользователей', route('admin.groups'));
@@ -78,12 +91,30 @@ if (!Breadcrumbs::exists('admin.main')) {
 
     Breadcrumbs::for('admin.dictionary', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
-        $trail->push('Словари', route('admin.dictionary'));
+        $trail->push('Регистратура', route('admin.dictionary.registration'));
+    });
+
+    Breadcrumbs::for('admin.dictionary.create', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Регистратура', route('admin.dictionary.registration'));
+        $trail->push('Создание записи');
+    });
+
+    Breadcrumbs::for('admin.dictionary.edit', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Регистратура', route('admin.dictionary.registration'));
+        $trail->push('Редактирование записи');
     });
 
     Breadcrumbs::for('admin.dictionary.clinics', function (BreadcrumbTrail $trail) {
         $trail->push('Главная', route('admin.main'));
         $trail->push('Клиники', route('admin.dictionary.clinics'));
+    });
+
+    Breadcrumbs::for('admin.dictionary.clinics.create', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Клиники', route('admin.dictionary.clinics'));
+        $trail->push('Создание клиники', route('admin.dictionary.clinics.create'));
     });
 
     Breadcrumbs::for('admin.dictionary.clinics.edit', function (BreadcrumbTrail $trail) {
@@ -135,5 +166,21 @@ if (!Breadcrumbs::exists('admin.main')) {
         $trail->push('Главная', route('admin.main'));
         $trail->push('Категории блога', route('admin.blog.categories'));
         $trail->push('Редактирование категории');
+    });
+
+    Breadcrumbs::for('admin.blog.topics', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Статьи');
+    });
+
+    Breadcrumbs::for('admin.jurisprudence.lawyers', function (BreadcrumbTrail $trail) {
+        $trail->push('Главная', route('admin.main'));
+        $trail->push('Юристы');
+    });
+
+    Breadcrumbs::for('admin.jurisprudence.lawyers.new', function (BreadcrumbTrail $trail) {
+       $trail->push('Главная', route('admin.main'));
+       $trail->push('Юристы', route('admin.jurisprudence.lawyers'));
+       $trail->push('Создание записи юриста');
     });
 }

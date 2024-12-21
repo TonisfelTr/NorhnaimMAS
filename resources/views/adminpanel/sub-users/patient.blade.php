@@ -25,7 +25,7 @@
             <div class="left-side">
                 <button id="dropdownHeadBulkAction" class="btn btn-outline-warning dropdown-button">C выделенными</button>
                 <div id="dropdownHeadBulkContent" class="dropdown-content" style="display: none; position: absolute; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); z-index: 1000;">
-                    @if(group()->patient_delete)
+                    @permission('patient_delete')
                         <button type="button" class="dropdown-item bulk-action-btn" data-action="{{ route('admin.users.patients.mass-delete') }}" style="width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer;">
                             Удалить
                         </button>
@@ -33,13 +33,13 @@
                 </div>
                 <a class="btn btn-success" href="{{ route('admin.users.patients.new') }}"><i class="bi bi-file-plus"></i> Создать запись</a>
             </div>
-            <div class="right-side">
+            <form class="right-side" method="get">
                 <div class="input-group mb-3">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1">
-                    <button class="btn btn-outline-secondary" type="button">Искать</button>
+                    <input type="text" class="form-control" placeholder="Поиск" aria-label="Поиск" aria-describedby="basic-addon1" name="search">
+                    <button class="btn btn-outline-secondary" type="submit">Искать</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
     <form id="bulk-action-form" method="post" enctype="multipart/form-data">
@@ -81,10 +81,10 @@
                         <td>{{ $patient->diagnose?->decipher() ?? 'не поставлен' }}</td>
                         <td>{{ $patient->disability ? 'есть': 'нет'}}</td>
                         <td>
-                            @if(group()->patient_edit)
+                            @permission('patient_edit')
                                 <a class="btn btn-light btn-sm" href="{{ route('admin.users.patients.edit', $patient->id) }}"><i class="bi bi-pen"></i></a>
                             @endif
-                            @if(group()->patient_delete)
+                            @permission('patient_delete')
                                 <a class="btn btn-light btn-sm delete-btn" href="{{ route('admin.users.patients.delete', $patient->id) }}">
                                     <i class="bi bi-trash"></i>
                                 </a>
