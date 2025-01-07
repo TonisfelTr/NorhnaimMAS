@@ -15,7 +15,7 @@ class UserEditRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return is_authed() && group()->user_edit;
     }
 
     public function messages(): array {
@@ -70,7 +70,8 @@ class UserEditRequest extends FormRequest
                     }
                 }
             }],
-            'userable_type' => 'required|in:' . implode(',', ['\App\Models\Doctor', '\App\Models\Patient', 'administrators', ''])
+            'userable_type' => 'required|in:' . implode(',', ['\App\Models\Doctor', '\App\Models\Patient', 'administrators', '']),
+            'balance' => 'numeric'
         ];
     }
 }

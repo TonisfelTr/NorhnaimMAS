@@ -2,7 +2,6 @@ import './bootstrap';
 import { createApp } from 'vue';
 import MedicineTable from './vue/MedicineTable.vue';
 import LineCheckBox from './vue/LineCheckBox.vue';
-import DrugForm from './vue/DrugForm.vue';
 import { computePosition, flip, shift, offset, arrow } from '@floating-ui/dom';
 
 document.addEventListener('DOMContentLoaded', function () {

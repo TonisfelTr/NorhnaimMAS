@@ -74,15 +74,4 @@
             </div>
         </form>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('input[required]').forEach(e => {
-                var star = document.createElement('span');
-                star.innerText = '*';
-                star.style.color = 'red';
-
-                e.parentElement.querySelector('label').append(star);
-            })
-        });
-    </script>
 @endsection

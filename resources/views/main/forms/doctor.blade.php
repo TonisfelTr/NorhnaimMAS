@@ -1,7 +1,7 @@
 @extends('layouts.welcome')
 @section('title', "Доктор {$doctor->fullName()}")
 @section('assets')
-    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ env('YANDEX_MAPS_API_KEY') }}&lang=ru_RU"
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ config('yandex.yandex_key') }}&lang=ru_RU"
             type="text/javascript"></script>
     <script src="https://cdn.tiny.cloud/1/50lnun2el7cthnznyggpogomkmz8m7e51t8s7rkiuos53fjm/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 @endsection

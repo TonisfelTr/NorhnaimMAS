@@ -86,4 +86,49 @@ class Drug extends Model
             get: fn () => DB::table('generics')->where('drug_id', $this->id)->pluck('name')->toArray()
         );
     }
+
+    /**
+     * Получение отформатированных данных форм препарата.
+     *
+     * @return array
+     */
+    public function getFormattedForms(): array
+    {
+        $data = json_decode($this->forms, true);
+
+        $result = [];
+
+        foreach ($data as $form => $details) {
+            if ($form === 'tablets') {
+                $result['tablets'] = collect($details)->map(function ($count, $dose) {
+                    if (is_array($count)) {
+                        // Если $count массив, перечисляем количества
+                        $counts = implode(', ', array_map(fn($qty) => "{$qty} шт", $count));
+                        return "{$dose} мг - {$counts}";
+                    }
+                    return "{$dose} мг - {$count} шт";
+                })->toArray();
+            } elseif ($form === 'dragees') {
+                $result['dragees'] = collect($details)->map(function ($count, $dose) {
+                    if (is_array($count)) {
+                        $counts = implode(', ', array_map(fn($qty) => "{$qty} шт", $count));
+                        return "{$dose} мг - {$counts}";
+                    }
+                    return "{$dose} мг - {$count} шт";
+                })->toArray();
+            } elseif ($form === 'ampules') {
+                $result['ampules'] = collect($details)->flatMap(function ($innerDetails, $dose) {
+                    return collect($innerDetails)->map(function ($count, $volume) use ($dose) {
+                        if (is_array($count)) {
+                            $counts = implode(', ', array_map(fn($qty) => "{$qty} шт", $count));
+                            return "{$dose} мг - {$volume} мл по {$counts} в упаковке";
+                        }
+                        return "{$dose} мг - {$volume} мл по {$count} шт в упаковке";
+                    });
+                })->toArray();
+            }
+        }
+
+        return $result;
+    }
 }

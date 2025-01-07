@@ -42,7 +42,7 @@
                                         <div class="col-md-6">
                                             <h4>Занимается:</h4>
                                             <ul>
-                                                @foreach(json_decode($lawyer->skills) as $skill)
+                                                @foreach($lawyer->skills as $skill)
                                                     <li>{{ $skill }}</li>
                                                 @endforeach
                                             </ul>
@@ -100,7 +100,7 @@
                                                 <div class="col-md-6">
                                                     <h4>Занимается:</h4>
                                                     <ul>
-                                                        @foreach(json_decode($lawyer->skills) as $skill)
+                                                        @foreach($lawyer->skills as $skill)
                                                             <li>{{ $skill }}</li>
                                                         @endforeach
                                                     </ul>

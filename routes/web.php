@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Doctors\PrescriptionsController;
+use App\Http\Controllers\Main\DoctorController;
+use App\Http\Controllers\PrescriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', \App\Http\Controllers\Main\IndexController::class)->name('main.index');
@@ -7,16 +10,18 @@ Route::get('/medicines', \App\Http\Controllers\Main\MedicineController::class)->
 Route::get('/privacy-policy', \App\Http\Controllers\Main\MedicineController::class)->name('main.policy');
 Route::get('/feedback', \App\Http\Controllers\Main\FeedbackController::class)->name('main.feedback');
 
-Route::prefix('/clinics')->group(function () {
-    Route::get('/', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics');
-    Route::get('/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'index'])->name('main.clinics.form');
-    Route::post('/feedback/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'feedback'])->name('main.clinics.form.feedback-create');
-    Route::get('/filter/{city_name}', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics.filters.city');
-});
+Route::prefix('/dictionary')->group(function () {
+    Route::prefix('/clinics')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics');
+        Route::get('/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'index'])->name('main.clinics.form');
+        Route::post('/feedback/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'feedback'])->name('main.clinics.form.feedback-create');
+        Route::get('/filter/{city_name}', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics.filters.city');
+    });
 
-Route::prefix('/doctors')->group(function () {
-    Route::get('/{clinic_id}', [\App\Http\Controllers\Main\DoctorController::class, 'index'])->name('main.doctors.form');
-    Route::post('/feedback/{doctor_id}', [\App\Http\Controllers\Main\DoctorController::class, 'feedback'])->name('main.doctors.form.feedback-create');
+    Route::prefix('/doctors')->group(function () {
+        Route::get('/{clinic_id}', [\App\Http\Controllers\Main\DoctorController::class, 'index'])->name('main.doctors.form')->where('clinic_id', '\d+');
+        Route::post('/feedback/{doctor_id}', [\App\Http\Controllers\Main\DoctorController::class, 'feedback'])->name('main.doctors.form.feedback-create');
+    });
 });
 
 Route::prefix('/blog')->group(function () {
@@ -175,3 +180,20 @@ Route::prefix('/admin/')->middleware(\App\Http\Middleware\AdminGroupMiddleware::
       Route::post('/update/{lawyer_id}', [\App\Http\Controllers\Adminpanel\LawyerController::class, 'update'])->name('admin.jurisprudence.lawyers.update');
    });
 });
+
+Route::prefix('/doctors')->group(function () {
+   Route::get('/', [\App\Http\Controllers\Doctors\IndexController::class, 'index'])->name('doctors.main');
+
+   Route::prefix('/prescriptions')->group(function () {
+       Route::get('/', [\App\Http\Controllers\Doctors\PrescriptionsController::class, 'index'])->name('doctors.prescriptions');
+       Route::get('/create', [\App\Http\Controllers\Doctors\PrescriptionsController::class, 'create'])->name('doctors.prescriptions.new');
+       Route::post('/store', [\App\Http\Controllers\Doctors\PrescriptionsController::class, 'store'])->name('doctors.prescriptions.store');
+   });
+
+
+});
+Route::get('/generate-prescription', [\App\Http\Controllers\Doctors\PrescriptionsController::class, 'generatePrescription']);
+Route::post('/prescriptions/print', [PrescriptionsController::class, 'print'])->name('prescriptions.print');
+Route::get('/prescriptions/print/{id}', [PrescriptionsController::class, 'printFromTable'])->name('prescriptions.print.from_table');
+
+

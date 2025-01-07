@@ -65,40 +65,16 @@ class User extends Authenticatable
     }
 
     public function hasPermission(string $permission): bool {
-        return $this->group->getAttribute($permission);
+        return is_authed() && $this->group()->where($permission, true);
     }
 
     public function getUserType(): string {
-        try {
-            $relatedModel = $this->userable;
-            $result       = null;
-
-            if ($relatedModel) {
-                $className = get_class($relatedModel);
-                $constName = "{$className}::USER_TYPE";
-
-                if (defined($constName)) {
-                    $result = constant($constName);
-                }
-            }
-
-            if (is_null($result)) {
-                if ($this->userable_type == 'administrators') {
-                    $result = 3;
-                } else {
-                    $result = 4;
-                }
-            }
-
-            return match ($result) {
-                1       => 'Доктор',
-                2       => 'Пациент',
-                3       => 'Администрация',
-                default => 'Не установлено'
-            };
-        } catch (LogicException $exception) {
-            return 'Не установлено';
-        }
+        return match($this->userable_type) {
+            '\App\Models\Doctor' => 'Доктор',
+            '\App\Models\Patient' => 'Пациент',
+            'administrators' => 'Администрация',
+            default => 'Не установлено'
+        };
     }
 
     public function formattedBalance() {

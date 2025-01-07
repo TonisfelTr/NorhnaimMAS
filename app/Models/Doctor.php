@@ -85,6 +85,13 @@ class Doctor extends Model
         return "{$this->surname}, {$this->name} {$this->patronym}";
     }
 
+    public function shortFullName(): string {
+        $name = ucfirst(substr($this->name, 0, 1));
+        $patronym = ucfirst(substr($this->patronym, 0, 1));
+
+        return "{$this->surname} $name. $patronym.";
+    }
+
     public function feedbacks(): HasMany {
         return $this->hasMany(DoctorFeedback::class, 'doctor_id', 'id');
     }

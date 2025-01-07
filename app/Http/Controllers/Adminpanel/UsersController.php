@@ -77,7 +77,7 @@ class UsersController extends Controller
         $data = $request->validated();
 
         $user->update($data);
-
+dd($request->all());
         if ($data['balance']) {
             $adminID = Auth::id();
             BalanceTransactionJob::dispatch(

@@ -14,7 +14,6 @@ enum MedicineTypesEnum: string
     case BetaAdrenolytics  = '8';
     case Hypnotics         = '9';
     case Psychostimulators = '10';
-
     case Nootropic = '11';
     public static function getMatched(int $parameter): string {
         return match ($parameter) {

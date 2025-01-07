@@ -35,7 +35,7 @@
                 @else
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ auth()->user()->login }}     <span class="badge text-bg-primary">{{ auth()->user()->formattedBalance() }} ₽</span>
+                            {{ auth()->user()->login }} <span class="badge text-bg-primary">{{ auth()->user()->formattedBalance() }} ₽</span>
                         </a>
                         <ul class="dropdown-menu">
                             @permission('adminpanel_see')
@@ -43,7 +43,7 @@
                                         <i class="bi bi-gear"></i> Панель управления</a></li>
                                 <li><hr class="dropdown-divider"></li>
                             @endpermission
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-hospital"></i> Панель доктора</a></li>
+                            <li><a class="dropdown-item" href="{{ route('doctors.main') }}"><i class="bi bi-hospital"></i> Панель доктора</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-file-medical"></i> Панель пациента</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ route('actions.logout') }}"><i class="bi bi-box-arrow-left"></i> Выход</a></li>
