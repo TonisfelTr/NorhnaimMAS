@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('medicine_id');
             $table->enum('type', [ 1, 2 ])
                 ->comment('1 - absolute, 2 - relative');
-            $table->enum('contraindication_id', (array)ContraindicationsTypesEnum::class);
+            $table->unsignedBigInteger('contraindication_id');
             $table->timestamps();
 
             $table->foreign('medicine_id', 'fk_medicine_id_from_medicine_contraindications')

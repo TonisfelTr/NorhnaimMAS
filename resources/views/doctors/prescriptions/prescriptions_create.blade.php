@@ -2,6 +2,7 @@
 @section('title', 'Выписка рецептов')
 @section('assets')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
 @endsection
 @section('sub-main')
     <div class="p-4">
@@ -107,6 +108,7 @@
             // Асинхронная загрузка пациентов
             $('#patient_id').select2({
                 placeholder: 'Выберите пациента',
+                theme: 'bootstrap-5',
                 ajax: {
                     url: '/api/doctors/search-patients',
                     dataType: 'json',
@@ -142,6 +144,7 @@
             // Асинхронная загрузка препаратов
             $('#drug_id').select2({
                 placeholder: 'Выберите препарат',
+                theme: 'bootstrap-5',
                 ajax: {
                     url: '/api/doctors/search-drugs',
                     dataType: 'json',
@@ -443,6 +446,26 @@
 
             // Проверяем форму при загрузке страницы
             checkFormCompletion()
+
+            $('#drug_form').on('change', function() {
+                const selectedForm = $(this).val();
+                const filteredData = drugData.filter(item => item.form === selectedForm);
+
+                $('#dosage').empty().prop('disabled', false);
+                [...new Set(filteredData.map(item => item.dose))].forEach(dose => $('#dosage').append(new Option(dose, dose)));
+
+                if (selectedForm === 'Ампулы') {
+                    $('#ampule_volume').empty().prop('disabled', false);
+                    [...new Set(filteredData.map(item => item.volume))].forEach(volume => $('#ampule_volume').append(new Option(volume, volume)));
+                    $('#ampule_volume_block').show();
+                } else {
+                    $('#ampule_volume').empty().prop('disabled', true);
+                    $('#ampule_volume_block').hide();
+                }
+
+                $('#quantity').empty().prop('disabled', false);
+                [...new Set(filteredData.map(item => item.count))].forEach(count => $('#quantity').append(new Option(count, count)));
+            });
         });
     </script>
 @endsection

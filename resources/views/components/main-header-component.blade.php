@@ -35,14 +35,15 @@
                 @else
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ auth()->user()->login }} <span class="badge text-bg-primary">{{ auth()->user()->formattedBalance() }} ₽</span>
+                            {{ auth()->user()->login }}
+                            <span class="badge text-bg-primary">{{ auth()->user()->balance }} ₽</span>
                         </a>
                         <ul class="dropdown-menu">
-                            @permission('adminpanel_see')
-                                <li><a class="dropdown-item" href="{{ route('admin.main') }}">
+                            @can('adminpanel_see')
+                                <li><a class="dropdown-item" href="{{ route('filament.admin.pages.dashboard') }}">
                                         <i class="bi bi-gear"></i> Панель управления</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                            @endpermission
+                            @endcan
                             <li><a class="dropdown-item" href="{{ route('doctors.main') }}"><i class="bi bi-hospital"></i> Панель доктора</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-file-medical"></i> Панель пациента</a></li>
                             <li><hr class="dropdown-divider"></li>

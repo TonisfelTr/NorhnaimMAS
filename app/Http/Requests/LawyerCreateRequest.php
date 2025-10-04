@@ -11,7 +11,7 @@ class LawyerCreateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return is_authed() && group()->lawyer_add;
+        return is_authed() && auth()->user()->can('lawyer_add');
     }
 
     /**

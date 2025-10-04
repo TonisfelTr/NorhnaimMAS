@@ -27,8 +27,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('doctors', function (Blueprint $table) {
-            $table->dropForeign('fk_doctors_to_clinics_table');
-            $table->dropColumn('clinic_id');
+            // Проверка существования внешнего ключа перед его удалением
+            if (Schema::hasColumn('doctors', 'clinic_id')) {
+                $table->dropForeign(['clinic_id']); // безопаснее без имени constraint
+                $table->dropColumn('clinic_id');
+            }
         });
     }
 };

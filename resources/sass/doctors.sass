@@ -1,4 +1,5 @@
 $doctor-main-theme: #09c2c2
+$doctor-active-theme: #0799d1
 $navbar-label-color: white
 $navbar-label-active-color: #e0e0e0
 
@@ -38,7 +39,6 @@ body
     padding: 0
 
 nav.navbar
-    background-color: $doctor-main-theme !important
     width: 100%
 
     a
@@ -46,6 +46,9 @@ nav.navbar
 
         &.active
             color: $navbar-label-active-color !important
+
+    &.bg-body-hospital
+        background-color: $doctor-main-theme !important
 
 #usage_instructions
 
@@ -105,3 +108,48 @@ table.prescripted_list
 
 .styled-table tbody tr:hover
     background-color: #ddd
+
+.doctor-checkbox__wrapper
+    margin-top: 10px
+
+    .doctor-checkbox__body
+        width: 19px
+        height: 19px
+        border: 1px solid #aaa
+        border-radius: 4px
+        margin-top: 4px
+        margin-right: 8px
+        cursor: pointer
+        user-select: none
+
+        &.checked
+            background: $doctor-active-theme
+
+            & span
+                display: block
+                color: #fff
+                bottom: 2px
+                position: relative
+                text-align: center
+                font-size: 14px
+                font-weight: 800
+
+        & span
+            display: none
+
+option.placeholder,
+option.placeholder[selected],
+select option.placeholder[selected]
+    color: #ccc
+
+.font-12,
+table.font-12 *
+    font-size: 12px !important
+
+table
+
+    & .table__contraindications-column
+        width: 25vw
+
+    & .table__indications-column
+        width: 25vw

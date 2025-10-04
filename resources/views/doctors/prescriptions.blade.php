@@ -1,6 +1,6 @@
 @extends('layouts.doctor')
 @section('main')
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg bg-body-hospital">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -10,6 +10,7 @@
                     <li class="nav-item"><a class="nav-link @if(is_route('doctors.prescriptions')) active @endif" href="{{ route('doctors.prescriptions') }}">Списки</a></li>
                     <li class="nav-item"><a class="nav-link @if(is_route('doctors.prescriptions.new')) active @endif" href="{{ route('doctors.prescriptions.new') }}">Выписать рецепт</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('doctors.prescriptions.new') }}">Выписать из медкарты</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('doctors.prescriptions.base') }}">База лекарств</a></li>
                 </ul>
             </div>
         </div>

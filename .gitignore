@@ -22,3 +22,7 @@ docker-compose.yml
 /public/assets/images
 /resources/sass/assets/images/
 ./pgadmin4.db
+/config/apache2/
+/config/php/
+/pgadmin-data/
+/init.sql/

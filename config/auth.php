@@ -112,4 +112,8 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    'auth' => [
+        'guard' => env('FILAMENT_AUTH_GUARD', 'web'),
+        'name_attribute' => 'login',
+    ],
 ];

@@ -12,7 +12,7 @@ class DiagnoseManageRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return is_authed() && group()->diagnose_edit;
+        return is_authed() && auth()->user()->can('diagnose_edit');
     }
 
     /**

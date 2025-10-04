@@ -8,7 +8,7 @@ class DoctorUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return is_authed() && group()->doctor_edit;
+        return is_authed() && auth()->user()->can('doctor_edit');
     }
 
     public function rules(): array

@@ -11,7 +11,7 @@ class PatientUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user() && group()->patient_edit;
+        return auth()->user() && auth()->user()->can('patient_edit');
     }
 
     /**

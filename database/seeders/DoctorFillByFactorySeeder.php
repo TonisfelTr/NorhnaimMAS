@@ -13,6 +13,8 @@ class DoctorFillByFactorySeeder extends Seeder
      */
     public function run(): void
     {
+        Doctor::truncate();
+
         Doctor::factory()
             ->count(15)
             ->create();

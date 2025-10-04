@@ -10,57 +10,7 @@
         <hr>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-4">
-                    <h3>База лекарств</h3>
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>Препарат</th>
-                            <th>Формы и дозировки</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($drugs as $drug)
-                            <tr>
-                                <td>{{ $drug->name }}</td>
-                                <td>
-                                    @php
-                                        $formattedForms = $drug->getFormattedForms();
-                                    @endphp
-                                    @if(empty($formattedForms))
-                                        <span>Формы не указаны.</span>
-                                    @else
-                                        <ul>
-                                            @foreach($formattedForms as $form => $details)
-                                                <li>
-                                                    <strong>
-                                                        @if($form === 'tablets')
-                                                            Таблетки:
-                                                        @elseif($form === 'dragees')
-                                                            Драже:
-                                                        @elseif($form === 'ampules')
-                                                            Ампулы:
-                                                        @else
-                                                            {{ ucfirst($form) }}:
-                                                        @endif
-                                                    </strong>
-                                                    <ul>
-                                                        @foreach($details as $detail)
-                                                            <li>{{ $detail }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                    {{ $drugs->links('pagination::bootstrap-5') }}
-                </div>
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <h3>Выписано Вами на сегодня</h3>
                     <table class="styled-table">
                         <tbody>

@@ -2,28 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use LogicException;
+use Illuminate\Support\Facades\Cache;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia, FilamentUser, HasAvatar
 {
-    use HasFactory, Notifiable, SoftDeletes;
-
-    const TYPE_DOCTOR = 1;
-    const TYPE_PATIENT = 2;
+    use HasRoles, HasFactory, Notifiable, SoftDeletes, InteractsWithMedia;
 
     protected $guarded = [];
 
-    protected $with = [
-        //'group'
-    ];
+    protected $appends = ['name'];
 
     protected $hidden = [
         'password',
@@ -40,44 +39,65 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function scopeDoctors(Builder $query): void {
-        $query->where('type', self::TYPE_DOCTOR);
-    }
-
-    public function scopePatients(Builder $query): void {
-        $query->where('type', self::TYPE_DOCTOR);
-    }
-
-    public function scopeNotBanned(Builder $query): void {
-        $query->whereNotIn('id', Banned::all('user_id'));
-    }
-
-    public function userable(): MorphTo|null {
-        if ($this->userable_type != 'administrators') {
-            return $this->morphTo();
-        } else {
-            return null;
+    public function getLoginAttribute($value): string
+    {
+        if (!Cache::has("users.{$this->id}.login")) {
+            Cache::set("users.{$this->id}.login", $value);
         }
+
+        return Cache::get("users.{$this->id}.login");
     }
 
-    public function group(): BelongsTo {
-        return $this->belongsTo(\App\Models\Group::class);
+    public function setLoginAttribute($value)
+    {
+        Cache::set("users.{$this->id}.login", $value);
+        $this->attributes['login'] = $value;
     }
 
-    public function hasPermission(string $permission): bool {
-        return is_authed() && $this->group()->where($permission, true);
+    public function getBalanceAttribute($value): string
+    {
+        if (!Cache::has("users.{$this->id}.balance")) {
+            Cache::set("users.{$this->id}.balance", $value);
+        }
+
+        return number_format(Cache::get("users.{$this->id}.balance"), 2, thousands_separator: ' ');
     }
 
-    public function getUserType(): string {
-        return match($this->userable_type) {
-            '\App\Models\Doctor' => 'Доктор',
-            '\App\Models\Patient' => 'Пациент',
-            'administrators' => 'Администрация',
-            default => 'Не установлено'
-        };
+    public function setBalanceAttribute($value): string
+    {
+        Cache::set("users.{$this->id}.balance", $value);
+        $this->attributes['balance'] = $value;
     }
 
-    public function formattedBalance() {
-        return number_format($this->balance, 2, '.', ' ');
+    public function getNameAttribute(): string
+    {
+        return $this->login ?? $this->email ?? 'Администратор';
+    }
+
+    public function doctor(): HasOne
+    {
+        return $this->hasOne(Doctor::class);
+    }
+
+    public function patient(): HasOne
+    {
+        return $this->hasOne(Patient::class);
+    }
+
+    public function nurse(): HasOne
+    {
+        return $this->hasOne(Nurse::class);
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar
+            ? asset('storage/' . $this->avatar)
+            : null;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->hasPermissionTo('adminpanel_see');
     }
 }

@@ -5,68 +5,84 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Clinic extends Model
+class Clinic extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $guarded = [];
+
     protected $casts = [
-        'created_at' => 'datetime:d.m.Y H:i:s'
+        'created_at' => 'datetime:d.m.Y H:i:s',
     ];
-    public function getCreatedAtAttribute($value)
+
+    // Форматированная дата создания
+    public function getCreatedAtAttribute($value): string
     {
         return Carbon::parse($value)->format('d.m.Y H:i:s');
     }
-    public function feedbacks(): HasMany {
+
+    // Отношение к отзывам
+    public function feedbacks(): HasMany
+    {
         return $this->hasMany(ClinicFeedback::class);
     }
 
-    public function rating(): float {
-        return round($this->feedbacks()->avg('mark'), 2) ?? 0;
+    // Средний рейтинг клиники
+    public function rating(): float
+    {
+        return round($this->feedbacks()->avg('mark') ?? 0, 2);
     }
 
-    public function services(): Collection {
-        return DB::table('services')->where('clinic_id', $this->id)->get();
+    // Проверка, оставил ли текущий пользователь отзыв
+    public function hasFeedback(): bool
+    {
+        return $this->feedbacks()
+            ->where('user_id', auth()->id())
+            ->exists();
     }
 
+    // Отношение к услугам
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
+
+    // Основное изображение клиники (оригинал)
+    public function coverPhoto(): string
+    {
+        $media = $this->getFirstMedia('photos');
+
+        return $media
+            ? $media->getUrl()
+            : asset('assets/images/backgrounds/feedback_placeholder.png');
+    }
+
+    // Основное изображение клиники в формате WebP
     public function getCoverWebpPhoto(): string
     {
-        $coverPhoto = $this->photos()->where('is_cover', true)->first();
+        $media = $this->getFirstMedia('photos');
 
-        if ($coverPhoto && !empty($coverPhoto->photo)) {
-            $unformatPhoto = pathinfo($coverPhoto->photo, PATHINFO_FILENAME) . '.webp';
-
-            return asset('storage/clinic_photos/' . $unformatPhoto);
-        }
-
-        return asset('assets/images/backgrounds/feedback_placeholder.webp');
+        return $media
+            ? $media->getUrl('webp')
+            : asset('assets/images/backgrounds/feedback_placeholder.webp');
     }
 
-
-    public function hasFeedback(): bool {
-        return $this->feedbacks()
-                    ->where('user_id', auth()->user()->id)
-                    ->where('clinic_id', $this->id)
-                    ->count();
-    }
-
-    public function photos(): HasMany {
-        return $this->hasMany(ClinicPhoto::class);
-    }
-
-    public function coverPhoto(): ?string
+    // Регистрация коллекций медиа
+    public function registerMediaCollections(): void
     {
-        $coverPhoto = $this->photos()->where('is_cover', true)->first();
-
-        if ($coverPhoto) {
-            return asset('storage/clinic_photos/' . $coverPhoto->photo);
-        }
-
-        return asset('assets/images/backgrounds/feedback_placeholder.png');
+        $this->addMediaCollection('photos')->singleFile();
     }
+
+    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    {
+        $this->addMediaConversion('webp')
+            ->format('webp')
+            ->width(1024)
+            ->queued();
+    }
+
 }

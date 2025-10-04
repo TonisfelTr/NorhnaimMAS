@@ -6,15 +6,12 @@ import { computePosition, flip, shift, offset, arrow } from '@floating-ui/dom';
 
 document.addEventListener('DOMContentLoaded', function () {
     var app = createApp({})
-
     function selector(CSSSelector, parentNode = null) {
         return parentNode ? parentNode.querySelector(CSSSelector) : document.querySelector(CSSSelector)
     }
-
     function selectorAll(CSSSelector, parentNode = null) {
         return parentNode ? parentNode.querySelectorAll(CSSSelector) : document.querySelectorAll(CSSSelector)
     }
-
     function lcb_checking() {
         var input = selector('input[type="checkbox"]', this);
         var lcb_switcher = selector('.line-checkbox__switcher', this);
@@ -27,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
             lcb_switcher.classList.add('checked')
         }
     }
-
     function makeBallons() {
         const tooltip = selector('#tooltip');
         const tooltipContent = selector('.tooltip-inner', tooltip);
@@ -81,15 +77,12 @@ document.addEventListener('DOMContentLoaded', function () {
             abbr.addEventListener('mouseleave', hideTooltip);
         });
     }
-
     function show(CSSSelector, displayProperty = 'block') {
         selectorAll(CSSSelector).forEach(DOMElement => DOMElement.style.display = displayProperty)
     }
-
     function hide(CSSSelector) {
         selectorAll(CSSSelector).forEach(DOMElement => DOMElement.style.display = 'none')
     }
-
     function update() {
         computePosition(selector('abbr'), tooltip, {
             placement: 'top',
@@ -116,13 +109,11 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
     function showTooltip(event) {
         event.preventDefault();
         tooltip.style.display = 'block';
         update();
     }
-
     function hideTooltip() {
         tooltip.style.display = 'none';
     }

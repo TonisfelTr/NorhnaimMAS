@@ -15,7 +15,7 @@ class UserEditRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return is_authed() && group()->user_edit;
+        return is_authed() && auth()->user()->can('user_edit');
     }
 
     public function messages(): array {

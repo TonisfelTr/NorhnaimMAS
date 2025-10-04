@@ -12,7 +12,8 @@ class PatientSeeder extends Seeder
      */
     public function run(): void
     {
-        // Создаём 50 записей для пациентов
+        Patient::truncate();
+
         Patient::factory()->count(50)->create();
     }
 }

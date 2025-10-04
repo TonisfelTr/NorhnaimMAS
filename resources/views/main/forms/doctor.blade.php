@@ -1,5 +1,5 @@
 @extends('layouts.welcome')
-@section('title', "Доктор {$doctor->fullName()}")
+@section('title', "Доктор {$doctor->full_name}")
 @section('assets')
     <script src="https://api-maps.yandex.ru/2.1/?apikey={{ config('yandex.yandex_key') }}&lang=ru_RU"
             type="text/javascript"></script>

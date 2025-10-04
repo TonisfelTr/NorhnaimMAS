@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Clinic;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +23,8 @@ class DoctorFactory extends Factory
             'patronym' => fake()->firstNameMale(),
             'birth_at' => fake()->date(),
             'address_job' => fake()->address(),
-            'clinic_id' => 1
+            'clinic_id' => Clinic::inRandomOrder()->value('id'),
+            'profession' => 'психиатр'
         ];
     }
 }

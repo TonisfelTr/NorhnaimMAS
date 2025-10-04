@@ -5,6 +5,7 @@ import path from 'path';
 
 export default defineConfig({
     server: {
+        port: 5175,
         hmr: {
             host: 'localhost'
         }
@@ -27,6 +28,7 @@ export default defineConfig({
                 'resources/js/selectize.js',
                 'resources/js/mass_delete.js',
                 'resources/js/registry_script.js',
+                'resources/js/medical_card.js'
             ],
             refresh: true,
         }),

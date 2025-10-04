@@ -11,7 +11,7 @@ class ClinicManipulationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return is_authed() && (group()->clinic_add || group()->clinic_edit);
+        return is_authed() && (auth()->user()->can('clinic_add') || auth()->user()->can('clinic_edit'));
     }
 
     public function rules(): array

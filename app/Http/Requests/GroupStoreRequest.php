@@ -9,7 +9,7 @@ class GroupStoreRequest extends FormRequest
     public function authorize(): bool
     {
         // Разрешить выполнение запроса
-        return is_authed() && group()->group_add;
+        return is_authed() && auth()->user()->can('group_add');
     }
 
     public function rules(): array

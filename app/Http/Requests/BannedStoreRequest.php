@@ -11,7 +11,7 @@ class BannedStoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return group()->banning_user;
+        return auth()->user()->can('banning_user');
     }
 
     public function rules(): array

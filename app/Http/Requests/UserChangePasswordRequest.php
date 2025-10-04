@@ -11,7 +11,7 @@ class UserChangePasswordRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user() && group()->user_change_password;
+        return auth()->user() && auth()->user()->can('user_change_password');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\SecureCookies;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -14,13 +15,14 @@ class Kernel extends HttpKernel
      * @var array<int, class-string|string>
      */
     protected $middleware = [
-        \App\Http\Middleware\AdminGroupMiddleware::class,
+        \App\Http\Middleware\AdminpanelMiddleware::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \App\Http\Middleware\TrimStrings::class,
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \Illuminate\Http\Middleware\HandleCors::class,
+        SecureCookies::class
     ];
 
     /**
@@ -63,5 +65,8 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
     ];
 }

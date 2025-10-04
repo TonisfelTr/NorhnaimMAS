@@ -3,6 +3,7 @@
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Role;
 
 function is_route(string|array $routeName): bool
 {
@@ -51,10 +52,10 @@ function getPluralForm($number, $one, $few, $many)
     return $many;
 }
 
-function group(): \App\Models\Group|false {
+function role(): \Spatie\Permission\Models\Role|false {
     if (!is_authed()) {
         return false;
     }
 
-    return Auth::user()->group;
+    return Auth::user()->role();
 }

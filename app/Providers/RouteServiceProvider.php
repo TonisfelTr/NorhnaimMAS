@@ -7,6 +7,9 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -36,5 +39,9 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
+
+        Route::aliasMiddleware('role', RoleMiddleware::class);
+        Route::aliasMiddleware('permission', PermissionMiddleware::class);
+        Route::aliasMiddleware('role_or_permission', RoleOrPermissionMiddleware::class);
     }
 }

@@ -10,7 +10,7 @@ services:
             - 'host.docker.internal:host-gateway'
         ports:
             - '8080:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - '${VITE_PORT:-5175}:${VITE_PORT:-5173}'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
@@ -23,8 +23,8 @@ services:
             - sail
         depends_on:
             - pgsql
+            - rabbitmq
             - redis
-            - memcached
 
     laravel.worker:
         build:
@@ -43,8 +43,8 @@ services:
         networks:
             - sail
         depends_on:
-            - redis
-        command: php artisan queue:work --sleep=3 --tries=3 --timeout=90
+            - rabbitmq
+        command: php artisan queue:work rabbitmq --queue=${RABBITMQ_QUEUE:-default} --sleep=3 --tries=3 --timeout=90
         restart: always
 
     pgsql:
@@ -62,37 +62,37 @@ services:
         networks:
             - sail
         healthcheck:
-            test:
-                - CMD
-                - pg_isready
-                - '-q'
-                - '-d'
-                - '${DB_DATABASE}'
-                - '-U'
-                - '${DB_USERNAME}'
+            test: [ "CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}" ]
+            retries: 3
+            timeout: 5s
+
+    rabbitmq:
+        image: 'rabbitmq:3-management-alpine'
+        ports:
+            - '5672:5672'
+            - '15672:15672'
+        environment:
+            RABBITMQ_DEFAULT_USER: '${RABBITMQ_USER:-guest}'
+            RABBITMQ_DEFAULT_PASS: '${RABBITMQ_PASSWORD:-guest}'
+        networks:
+            - sail
+        healthcheck:
+            test: rabbitmq-diagnostics -q ping
             retries: 3
             timeout: 5s
 
     redis:
-        image: 'redis:alpine'
+        image: redis:7-alpine
         ports:
             - '${FORWARD_REDIS_PORT:-6379}:6379'
         volumes:
             - 'sail-redis:/data'
-        networks:
-            - sail
-        healthcheck:
-            test:
-                - CMD
-                - redis-cli
-                - ping
-            retries: 3
-            timeout: 5s
-
-    memcached:
-        image: 'memcached:alpine'
-        ports:
-            - '${FORWARD_MEMCACHED_PORT:-11211}:11211'
+        command: [
+            "redis-server",
+            "--appendonly", "yes",          # AOF-персистентность
+            "--maxmemory", "512mb",         # подбери под хост
+            "--maxmemory-policy", "noeviction" # чтобы кэш не выталкивался
+        ]
         networks:
             - sail
 
@@ -114,16 +114,26 @@ services:
         networks:
             - sail
         healthcheck:
-            test:
-                - CMD
-                - pg_isready
-                - '-q'
-                - '-d'
-                - '${DB_DATABASE}'
-                - '-U'
-                - '${DB_USERNAME}'
+            test: [ "CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}" ]
             retries: 3
             timeout: 5s
+
+    ollama:
+        image: ollama/ollama:latest
+        container_name: ollama
+        restart: unless-stopped
+        ports:
+            - "11434:11434"           # REST API
+        volumes:
+            - ollama-data:/root/.ollama
+        networks:
+            - sail
+        # Разблочить на проде. Понадобится GPU для того, чтобы это всё работало быстро, т.к. нагрузка может быть огромной.
+        # deploy:
+        #   resources:
+        #     reservations:
+        #       devices:
+        #         - capabilities: ["gpu"]
 
 networks:
     sail:
@@ -131,6 +141,8 @@ networks:
 
 volumes:
     sail-pgsql:
+        driver: local
+    ollama-data:
         driver: local
     sail-redis:
         driver: local

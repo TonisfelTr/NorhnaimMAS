@@ -11,7 +11,7 @@ class PrescriptionStoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return is_authed() && in_array(auth()->user()->getUserType(), ['Администрация', 'Доктор']);
+        return is_authed() && auth()->user()->hasRole(['admins', 'doctors']);
     }
 
     /**

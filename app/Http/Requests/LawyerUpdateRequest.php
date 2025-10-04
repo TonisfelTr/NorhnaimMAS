@@ -11,7 +11,7 @@ class LawyerUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return is_authed() && group()->lawyer_edit;
+        return is_authed() && auth()->user()->can('lawyer_edit');
     }
 
     /**

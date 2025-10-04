@@ -91,7 +91,7 @@
                         </div>
                         <div class="col-md-10 d-flex flex-column">
                             <div class="card-body flex-grow-1">
-                                <h3 class="card-title">{{ $doctor->fullName() }}</h3>
+                                <h3 class="card-title">{{ $doctor->full_name }}</h3>
                                 <h5>{{ $doctor->status }}</h5>
                                 <h6>
                                     @if($lowPrice = $doctor->lowestPrice())

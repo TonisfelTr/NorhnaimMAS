@@ -9,17 +9,13 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ClinicFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake()->company(),
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
+            'city' => fake()->city(),
             'description' => fake()->text(),
         ];
     }

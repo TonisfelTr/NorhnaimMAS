@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AuthorizationRequest;
-use app\Models\Banned;
-use app\Models\Rule;
+use App\Models\Banned;
+use App\Models\Rule;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
     public function login(AuthorizationRequest $request) {
-        if (Auth::attempt(["email" => $request->email, "password" => $request->password], $request->remember_me)) {
+        if (Auth::attempt(["email" => $request->email, "password" => $request->password], (bool)$request->remember_me)) {
             $banned = Banned::where('user_id', User::where('email', $request->email)->first()->id);
             if ($banned->count() === 0) {
                 return redirect()->back();

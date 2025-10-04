@@ -23,8 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('drugs', function (Blueprint $table) {
-            $table->json('receptors');
-            $table->json('generics');
+            $table->json('receptors')->nullable();
+            $table->json('generics')->nullable();
         });
     }
 };

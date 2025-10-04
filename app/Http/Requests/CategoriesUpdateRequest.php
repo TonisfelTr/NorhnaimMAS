@@ -11,7 +11,7 @@ class CategoriesUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return group()->blog_edit_category;
+        return auth()->user()->can('blog_edit_category');
     }
 
     /**

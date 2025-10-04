@@ -9,7 +9,7 @@ class DoctorStoreRequest extends FormRequest
     public function authorize(): bool
     {
         // Разрешить выполнение запроса
-        return is_authed() && group()->doctor_add;
+        return is_authed() && auth()->user()->can('doctor_add');
     }
 
     public function rules(): array
