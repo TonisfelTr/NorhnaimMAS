@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
@@ -21,8 +22,9 @@ class Drug extends Model
     protected $guarded = [];
     protected $appends = ['generics'];
 
-    public function groupName(): string {
-        return match($this->group) {
+    public function groupName(): string
+    {
+        return match ($this->group) {
             '1' => 'антипсихотик',
             '2' => 'антидепрессант',
             '3' => 'стабилизатор настроения',
@@ -37,53 +39,69 @@ class Drug extends Model
         };
     }
 
-    public function latinName(): Attribute {
+    public function latinName(): Attribute
+    {
         return $this->latin_name();
     }
 
-    public function latin_name(): Attribute {
+    public function latin_name(): Attribute
+    {
         return Attribute::make(
-            get: fn ($value) => ucfirst($value)
+            get: fn($value) => ucfirst($value)
         );
     }
 
-    public function name(): Attribute {
+    public function name(): Attribute
+    {
         return Attribute::make(
-            get: fn ($value) => ucfirst($value)
+            get: fn($value) => ucfirst($value)
         );
     }
 
-    public function scopeAntipsychotics(Builder $query): void {
+    public function scopeAntipsychotics(Builder $query): void
+    {
         $query->where('group', MedicineTypesEnum::Antipsychotic);
     }
 
-    public function scopeAntidepressants(Builder $query): void {
+    public function scopeAntidepressants(Builder $query): void
+    {
         $query->where('group', MedicineTypesEnum::Antidepressant);
     }
 
-    public function contraindications(): BelongsToMany {
+    public function indications(): HasMany
+    {
+        return $this->hasMany(MedicineIndication::class, 'medicine_id');
+    }
+
+    public function contraindications(): BelongsToMany
+    {
         return $this->belongsToMany(ContraindicationsType::class, MedicineContraindication::class, 'drug_id', 'contraindication_id');
     }
 
-    public function dangerous(): BelongsToMany {
+    public function dangerous(): BelongsToMany
+    {
         return $this->contraindications();
     }
 
-    public function receptors(): BelongsToMany {
+    public function receptors(): BelongsToMany
+    {
         return $this->belongsToMany(Receptor::class, 'drug_receptors', 'drug_id', 'receptor_id');
     }
 
-    public function diagnoses(): BelongsToMany{
+    public function diagnoses(): BelongsToMany
+    {
         return $this->belongsToMany(Diagnose::class, 'medicine_indications', 'medicine_id', 'diagnose_id');
     }
 
-    public function side_effects(): BelongsToMany {
+    public function side_effects(): BelongsToMany
+    {
         return $this->belongsToMany(SideEffect::class, 'medicine_side_effects');
     }
 
-    protected function generics(): Attribute {
+    protected function generics(): Attribute
+    {
         return Attribute::make(
-            get: fn () => DB::table('generics')->where('drug_id', $this->id)->pluck('name')->toArray()
+            get: fn() => DB::table('generics')->where('drug_id', $this->id)->pluck('name')->toArray()
         );
     }
 }

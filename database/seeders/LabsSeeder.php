@@ -30,7 +30,7 @@ class LabsSeeder extends Seeder
                     $newLabParameter->group = $lab['group'];
                     $newLabParameter->normal_values = json_encode($lab['normal_values'] ?? null);
                     $newLabParameter->allowed_values = json_encode($lab['allowed_values'] ?? null);
-                    $newLabParameter->notes = $lab['notes'];
+                    $newLabParameter->notes = $lab['notes'] ?? null;
                     $newLabParameter->save();
 
                     if (isset($lab['ref_ranges'])) {

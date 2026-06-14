@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class LabResearch extends Model
 {
@@ -16,6 +18,27 @@ class LabResearch extends Model
         'updated_at' => 'datetime:d.m.Y H:i'
     ];
 
+    public function scopeLastBlood(Builder $query): void
+    {
+        $query->where('sample_type', 'кровь')
+            ->whereIn('created_at', function($query) {
+                $query->select(DB::raw('MAX(created_at)'))
+                        ->from('lab_researches')
+                        ->where('sample_type', 'кровь')
+                        ->groupBy('patient_id');
+        });
+    }
+
+    public function scopeLastUrinal(Builder $query): void
+    {
+        $query->where('sample_type', 'моча')
+            ->whereIn('created_at', function($query) {
+                $query->select(DB::raw('MAX(created_at)'))
+                        ->from('lab_researches')
+                        ->where('sample_type', 'моча')
+                        ->groupBy('patient_id');
+        });
+    }
 
     public function patient(): BelongsTo
     {

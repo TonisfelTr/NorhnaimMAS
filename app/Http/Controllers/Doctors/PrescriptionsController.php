@@ -7,29 +7,21 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PrescriptionStoreRequest;
 use App\Jobs\PrescriptionsJob;
 use App\Models\ContraindicationsType;
+use App\Models\Doctor;
 use App\Models\Drug;
 use App\Models\MedicalPrescription;
 use App\Models\Patient;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use InvalidArgumentException;
 use Spatie\Permission\Models\Role;
 
 class PrescriptionsController extends Controller
 {
-    private function getMonthInRussian($month)
-    {
-        $months = [
-            '01' => 'января', '02' => 'февраля', '03' => 'марта', '04' => 'апреля',
-            '05' => 'мая', '06' => 'июня', '07' => 'июля', '08' => 'августа',
-            '09' => 'сентября', '10' => 'октября', '11' => 'ноября', '12' => 'декабря',
-        ];
-
-        return $months[$month] ?? 'месяц';
-    }
-
     private function toGenitiveCase($latinName)
     {
         $exceptions = [
@@ -138,10 +130,18 @@ class PrescriptionsController extends Controller
     {
         $patient = Patient::findOrFail($request->post('patient_id'));
         $drug = Drug::findOrFail($request->post('drug_id'));
+        $doctor = Doctor::findOrFail(auth()->user()->doctor->id);
+
+        $patientNameInitial = mb_substr($patient->name ?? '', 0, 1, 'UTF-8');
+        $patientPatronymInitial = mb_substr($patient->patronym ?? '', 0, 1, 'UTF-8');
 
         $data = [
             'doctor_name' => $this->getDoctorFullName(),
-            'patient_name' => "{$patient->surname} " . substr($patient->name, 0, 1) . ". " . substr($patient->patronym, 0, 1) . ".",
+
+            'patient_name' => trim(
+                "{$patient->surname} {$patientNameInitial}. {$patientPatronymInitial}."
+            ),
+
             'generic_name' => $drug->latin_name,
             'drug_form' => $request->drug_form,
             'dosage' => $request->dosage,
@@ -149,19 +149,24 @@ class PrescriptionsController extends Controller
             'standards' => $request->standard,
             'usage_instructions' => $request->usage_instructions,
             'prescription_form' => $drug->strict ? '№ 148-1/88-у' : '№ 107-1/у',
-            'issued_at' => now(),
+            'issued_at' => now()->toDateTimeString(),
             'validity_period' => $request->validity_period,
             'birth_at' => Carbon::parse($request->birth_at)->format('Y-m-d'),
+            'patient_id' => $patient->id,
         ];
 
         if ($drug->strict) {
+
+
             $data['series'] = $this->getPrescriptionSeriesByDoctorAddress($doctor->address_job);
             $data['number'] = $this->generatePrescriptionNumber($data['series']);
         }
 
         PrescriptionsJob::dispatch($data);
 
-        return redirect()->route('doctors.prescriptions')->with('success', 'Рецепт успешно создан.');
+        return redirect()
+            ->route('doctors.patients.medical_card', $request->patient_id)
+            ->with('success', 'Рецепт успешно создан.');
     }
 
     public function print(Request $request)
@@ -281,7 +286,6 @@ class PrescriptionsController extends Controller
             $ids = json_decode($request->get('contraindications_ids'), true);
 
             if (is_array($ids) && count($ids)) {
-                // Предположим: у тебя есть связь drugs → drug_contraindication (many-to-many)
                 $query->whereDoesntHave('contraindications', function ($q) use ($ids) {
                     $q->whereIn('contraindication_id', $ids);
                 });
@@ -304,5 +308,12 @@ class PrescriptionsController extends Controller
         $groups = MedicineTypesEnum::getAllMatches();
 
         return view('doctors.prescriptions.prescriptions_base', compact('drugs', 'groups', 'contraindications'));
+    }
+
+    public function repeatPrescription(MedicalPrescription $prescription): RedirectResponse
+    {
+        $prescription->replicate()->save();
+
+        return redirect()->back();
     }
 }

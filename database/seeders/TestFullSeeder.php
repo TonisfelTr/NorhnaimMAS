@@ -3,4842 +3,932 @@
 namespace Database\Seeders;
 
 use App\Models\Test;
-use App\Models\TestInterpretation;
-use App\Models\TestItem;
-use App\Models\TestItemOption;
-use App\Models\TestKey;
-use App\Models\TestSection;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TestFullSeeder extends Seeder
 {
     public function run(): void
     {
-        TestInterpretation::truncate();
-        TestKey::truncate();
-        TestItemOption::truncate();
-        TestItem::truncate();
-        TestSection::truncate();
-        Test::truncate();
-
-        // Шкала депрессии Зунга (SDS)
-        $test = Test::create([
-            'code' => 'SDS',
-            'name' => 'Шкала депрессии Зунга (SDS)',
-            'description' => 'Шкала самодиагностики уровня депрессии',
-            'status' => 'часто',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую себя подавленным и грустным",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Утром я чувствую себя хуже всего",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне хочется плакать или я плачу",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "У меня плохо спится по ночам",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я ем так же, как обычно",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне приятно общаться с противоположным полом",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я замечаю, что теряю вес",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Меня беспокоят запоры",
-            'order' => 8
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Моё сердце бьётся быстрее, чем обычно",
-            'order' => 9
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я устаю без видимой причины",
-            'order' => 10
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я мыслю так же ясно, как всегда",
-            'order' => 11
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне легко выполнять то, что я делаю",
-            'order' => 12
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую беспокойство и не могу усидеть на месте",
-            'order' => 13
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "У меня есть надежда на будущее",
-            'order' => 14
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я более раздражителен, чем обычно",
-            'order' => 15
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне легко принимать решения",
-            'order' => 16
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую, что полезен и нужен",
-            'order' => 17
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я живу достаточно полной жизнью",
-            'order' => 18
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я считаю себя интересным человеком",
-            'order' => 19
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я наслаждаюсь тем, что раньше доставляло удовольствие",
-            'order' => 20
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда или редко',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда или постоянно',
-            'value' => 4,
-            'order' => 3
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем вопросам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        TestInterpretation::insert([
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 20,
-                'max_score' => 44,
-                'text' => 'Норма',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 45,
-                'max_score' => 59,
-                'text' => 'Лёгкая депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 60,
-                'max_score' => 69,
-                'text' => 'Умеренная депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 70,
-                'max_score' => 80,
-                'text' => 'Тяжёлая депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-        ]);
-
-
-
-        // Шкала депрессии Бека (BDI)
-        $test = Test::create([
-            'code' => 'BDI',
-            'name' => 'Шкала депрессии Бека (BDI)',
-            'description' => 'Классическая шкала для оценки выраженности депрессии',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я не чувствую себя расстроенным",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую себя унылым большую часть времени",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую себя несчастным всё время",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я такой несчастный, что не могу этого вынести",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я не чувствую себя обделённым",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую, что меня недооценивают",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую себя неудачником",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую, что всё в жизни бесполезно",
-            'order' => 8
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я не испытываю чувства вины",
-            'order' => 9
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я часто чувствую вину",
-            'order' => 10
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую себя плохим человеком",
-            'order' => 11
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я ненавижу себя",
-            'order' => 12
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я не думаю, что выгляжу хуже других",
-            'order' => 13
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я обеспокоен своей внешностью",
-            'order' => 14
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я считаю, что выгляжу непривлекательно",
-            'order' => 15
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я думаю, что отвратителен",
-            'order' => 16
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я могу работать так же хорошо, как и раньше",
-            'order' => 17
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне трудно заставить себя делать что-либо",
-            'order' => 18
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я должен прилагать большие усилия, чтобы начать что-либо",
-            'order' => 19
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я вообще ничего не делаю",
-            'order' => 20
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем нет',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Немного',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно',
-            'value' => 3,
-            'order' => 3
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем вопросам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        TestInterpretation::insert([
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 0,
-                'max_score' => 9,
-                'text' => 'Норма',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 10,
-                'max_score' => 18,
-                'text' => 'Лёгкая депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 19,
-                'max_score' => 29,
-                'text' => 'Умеренная депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 30,
-                'max_score' => 63,
-                'text' => 'Тяжёлая депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-        ]);
-
-        // HADS (тревожность)
-        $test = Test::create([
-            'code' => 'HADS-A',
-            'name' => 'HADS (тревожность)',
-            'description' => 'Подшкала тревожности госпитальной шкалы HADS',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую напряжение, мне не по себе",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "У меня бывают вспышки паники",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую, как у меня дрожат руки",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне кажется, что я нахожусь на грани срыва",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую беспокойство",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне трудно уснуть из-за беспокойства",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "У меня появляется ощущение страха без причины",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем вопросам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        TestInterpretation::insert([
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 0,
-                'max_score' => 7,
-                'text' => 'Норма',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 8,
-                'max_score' => 10,
-                'text' => 'Пограничное состояние',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 11,
-                'max_score' => 21,
-                'text' => 'Выраженная тревога',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-        ]);
-
-
-
-        // GAD-7
-        $test = Test::create([
-            'code' => 'GAD7',
-            'name' => 'GAD-7',
-            'description' => 'Шкала генерализованного тревожного расстройства',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Чувствовали ли вы себя нервным, тревожным или напряжённым?",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Не могли перестать волноваться или контролировать беспокойство?",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Слишком сильно волновались по различным поводам?",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "С трудом могли расслабиться?",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Чувствовали себя настолько беспокойно, что вам было трудно усидеть на месте?",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Легко раздражались или становились раздражённым?",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Чувствовали страх, будто что-то ужасное может произойти?",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем вопросам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        TestInterpretation::insert([
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 0,
-                'max_score' => 4,
-                'text' => 'Минимальная тревожность',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 5,
-                'max_score' => 9,
-                'text' => 'Лёгкая тревожность',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 10,
-                'max_score' => 14,
-                'text' => 'Умеренная тревожность',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 15,
-                'max_score' => 21,
-                'text' => 'Тяжёлая тревожность',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-        ]);
-
-        // PHQ-9
-        $test = Test::create([
-            'code' => 'PHQ9',
-            'name' => 'PHQ-9',
-            'description' => 'Шкала самодиагностики депрессии PHQ-9',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Малый интерес или удовольствие от дел",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Чувство подавленности, безысходности",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Проблемы со сном: трудно заснуть, спать слишком много или прерывается сон",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Усталость или недостаток энергии",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Потеря аппетита или переедание",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Чувство никчемности или вины",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Затруднения с концентрацией внимания",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Замедленность движений или, наоборот, беспокойство",
-            'order' => 8
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мысли о причинении себе вреда или смерти",
-            'order' => 9
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Беспокоило несколько дней',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Более половины дней',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти каждый день',
-            'value' => 3,
-            'order' => 3
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем вопросам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        TestInterpretation::insert([
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 0,
-                'max_score' => 4,
-                'text' => 'Минимальная депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 5,
-                'max_score' => 9,
-                'text' => 'Лёгкая депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 10,
-                'max_score' => 14,
-                'text' => 'Умеренная депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 15,
-                'max_score' => 19,
-                'text' => 'Умеренно тяжёлая депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 20,
-                'max_score' => 27,
-                'text' => 'Тяжёлая депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-        ]);
-
-
-
-        // HADS (депрессия)
-        $test = Test::create([
-            'code' => 'HADS-D',
-            'name' => 'HADS (депрессия)',
-            'description' => 'Подшкала депрессии госпитальной шкалы HADS',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я в хорошем настроении",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всё время',
-            'value' => 3,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 1,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не чувствую этого',
-            'value' => 0,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я смеюсь с удовольствием",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всё время',
-            'value' => 3,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 1,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не чувствую этого',
-            'value' => 0,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую радость",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всё время',
-            'value' => 3,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 1,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не чувствую этого',
-            'value' => 0,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую себя бодро",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всё время',
-            'value' => 3,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 1,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не чувствую этого',
-            'value' => 0,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую удовольствие от обычных занятий",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всё время',
-            'value' => 3,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 1,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не чувствую этого',
-            'value' => 0,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую интерес к происходящему",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всё время',
-            'value' => 3,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 1,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не чувствую этого',
-            'value' => 0,
-            'order' => 3
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую, что моя жизнь наполнена смыслом",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всё время',
-            'value' => 3,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 1,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не чувствую этого',
-            'value' => 0,
-            'order' => 3
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем вопросам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        TestInterpretation::insert([
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 0,
-                'max_score' => 7,
-                'text' => 'Норма',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 8,
-                'max_score' => 10,
-                'text' => 'Пограничное состояние',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'test_id' => $test->id,
-                'key_id' => $key->id,
-                'min_score' => 11,
-                'max_score' => 21,
-                'text' => 'Выраженная депрессия',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-        ]);
-
-        // EPQ (Айзенк)
-        $test = Test::create([
-            'code' => 'EPQ',
-            'name' => 'Опросник Айзенка (EPQ)',
-            'description' => 'Шкала для оценки экстраверсии, нейротизма и психотизма',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-        $itemIds = [];
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Любите ли вы бывать в шумных компаниях?",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Да',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Нет',
-            'value' => 0,
-            'order' => 1
-        ]);
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Часто ли вы смеётесь над неприличными шутками?",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Да',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Нет',
-            'value' => 0,
-            'order' => 1
-        ]);
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Считаете ли вы себя беззаботным человеком?",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Да',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Нет',
-            'value' => 0,
-            'order' => 1
-        ]);
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Нравится ли вам быть в центре внимания?",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Да',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Нет',
-            'value' => 0,
-            'order' => 1
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала EPQ',
-            'description' => 'Подсчёт баллов экстраверсии/нейротизма',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-
-
-        // PANSS
-        $test = Test::create([
-            'code' => 'PANSS',
-            'name' => 'PANSS (позитивные/негативные симптомы)',
-            'description' => 'Оценка симптоматики при шизофрении',
-            'status' => 'официально',
-            'type' => 'клинический'
-        ]);
-
-        $section = TestSection::create([
-            'test_id' => $test->id,
-            'title' => 'Позитивная симптоматика'
-        ]);
-        $itemIds = [];
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Бредовые идеи",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Концептуальные расстройства мышления",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Галлюцинаторное поведение",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Шкала - ' . $section->title,
-            'description' => 'Сумма по разделу ' . $section->title,
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        $section = TestSection::create([
-            'test_id' => $test->id,
-            'title' => 'Негативная симптоматика'
-        ]);
-        $itemIds = [];
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Эмоциональная отгороженность",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Пассивность в социальной жизни",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Плохой контакт с окружающими",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Шкала - ' . $section->title,
-            'description' => 'Сумма по разделу ' . $section->title,
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        $section = TestSection::create([
-            'test_id' => $test->id,
-            'title' => 'Общая психопатология'
-        ]);
-        $itemIds = [];
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Тревожность",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Чувство вины",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'section_id' => $section->id,
-            'text' => "Напряжённость",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        for ($v = 1; $v <= 7; $v++) {
-            TestItemOption::create([
-                'item_id' => $item->id,
-                'label' => strval($v),
-                'value' => $v,
-                'order' => $v
-            ]);
-        }
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Шкала - ' . $section->title,
-            'description' => 'Сумма по разделу ' . $section->title,
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        // Шкала депрессии Гамильтона (HAMD)
-        $test = Test::create([
-            'code' => 'HAMD',
-            'name' => 'Шкала депрессии Гамильтона (HAMD)',
-            'description' => 'Клиническое интервью для оценки выраженности депрессии',
-            'status' => 'официально',
-            'type' => 'интервью'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Депрессия (грусть, печаль, безысходность)",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Чувство вины",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Суицидальные мысли",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Бессонница (в начале ночи)",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Бессонница (в середине ночи)",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Бессонница (под утро)",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Работоспособность и интерес к деятельности",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем пунктам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-
-
-        // Шкала депрессии Монтгомери-Асберг (MADRS)
-        $test = Test::create([
-            'code' => 'MADRS',
-            'name' => 'Шкала депрессии Монтгомери-Асберг (MADRS)',
-            'description' => 'Интервью для оценки тяжести депрессии',
-            'status' => 'официально',
-            'type' => 'интервью'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Явное подавленное настроение",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Пониженный интерес",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Снижение сна",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Снижение аппетита",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Затруднённое мышление",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Внутреннее напряжение",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Пессимистические мысли",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 6
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем пунктам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-        // Y-BOCS
-        $test = Test::create([
-            'code' => 'YBOCS',
-            'name' => 'Y-BOCS',
-            'description' => 'Шкала оценки обсессивно-компульсивных симптомов',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Сколько времени в день вы заняты навязчивыми мыслями?",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько они мешают вашей повседневной деятельности?",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько они вызывают у вас дискомфорт?",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько вы стараетесь им сопротивляться?",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько вы контролируете навязчивости?",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Сколько времени уходит на компульсивные действия?",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько они мешают вашей повседневной деятельности?",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько они вызывают у вас дискомфорт?",
-            'order' => 8
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько вы стараетесь им сопротивляться?",
-            'order' => 9
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Насколько вы контролируете компульсии?",
-            'order' => 10
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '0',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 4
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по 10 пунктам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-
-
-        // SCL-90-R
-        $test = Test::create([
-            'code' => 'SCL90',
-            'name' => 'SCL-90-R',
-            'description' => 'Симптоматический чек-лист 90',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Усталость или слабость",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Нарушения сна",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Слишком быстрая раздражительность",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Невозможность сосредоточиться",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Напряжённость или беспокойство",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мысли о смерти или самоубийстве",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Ощущение, что окружающие наблюдают за вами",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Проблемы с желудком",
-            'order' => 8
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Чувство вины",
-            'order' => 9
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Навязчивые мысли",
-            'order' => 10
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Совсем не беспокоило',
-            'value' => 0,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Слабо беспокоило',
-            'value' => 1,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Умеренно беспокоило',
-            'value' => 2,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Сильно беспокоило',
-            'value' => 3,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Очень сильно беспокоило',
-            'value' => 4,
-            'order' => 4
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по всем пунктам',
-            'item_ids' => json_encode($itemIds)
-        ]);
-// BPRS
-        $test = Test::create([
-            'code' => 'BPRS',
-            'name' => 'BPRS',
-            'description' => 'Краткая психиатрическая рейтинговая шкала',
-            'status' => 'официально',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Тревожность",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '7',
-            'value' => 7,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Эмоциональная отрешенность",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '7',
-            'value' => 7,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Концептуальные расстройства мышления",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '7',
-            'value' => 7,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Враждебность",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '7',
-            'value' => 7,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Подозрительность",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '7',
-            'value' => 7,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Необычные восприятия",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '7',
-            'value' => 7,
-            'order' => 6
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Психомоторное возбуждение",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '1',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '2',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '3',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '4',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '5',
-            'value' => 5,
-            'order' => 4
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '6',
-            'value' => 6,
-            'order' => 5
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => '7',
-            'value' => 7,
-            'order' => 6
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Сумма баллов по 7-балльной шкале',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
-
-
-        // CAPE-42
-        $test = Test::create([
-            'code' => 'CAPE42',
-            'name' => 'CAPE-42',
-            'description' => 'Шкала оценки психотических переживаний',
-            'status' => 'часто',
-            'type' => 'опросник'
-        ]);
-
-        $itemIds = [];
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Иногда мне кажется, что люди читают мои мысли",
-            'order' => 1
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Редко',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда',
-            'value' => 5,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я слышу голос, когда никто не говорит",
-            'order' => 2
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Редко',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда',
-            'value' => 5,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне кажется, что за мной следят",
-            'order' => 3
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Редко',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда',
-            'value' => 5,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Мне тяжело испытывать радость",
-            'order' => 4
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Редко',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда',
-            'value' => 5,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую себя не таким, как другие люди",
-            'order' => 5
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Редко',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда',
-            'value' => 5,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я вижу вещи, которых не видят другие",
-            'order' => 6
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Редко',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда',
-            'value' => 5,
-            'order' => 4
-        ]);
-        $item = TestItem::create([
-            'test_id' => $test->id,
-            'text' => "Я чувствую, что мои мысли не мои",
-            'order' => 7
-        ]);
-        $itemIds[] = $item->id;
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Никогда',
-            'value' => 1,
-            'order' => 0
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Редко',
-            'value' => 2,
-            'order' => 1
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Иногда',
-            'value' => 3,
-            'order' => 2
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Часто',
-            'value' => 4,
-            'order' => 3
-        ]);
-        TestItemOption::create([
-            'item_id' => $item->id,
-            'label' => 'Почти всегда',
-            'value' => 5,
-            'order' => 4
-        ]);
-
-        $key = TestKey::create([
-            'test_id' => $test->id,
-            'title' => 'Общая шкала',
-            'description' => 'Частота психотических симптомов',
-            'item_ids' => json_encode($itemIds)
-        ]);
-
+        DB::transaction(function () {
+            DB::table('tests')->truncate();
+            DB::table('test_answers')->truncate();
+            DB::table('test_assignments')->truncate();
+            DB::table('test_interpretations')->truncate();
+            DB::table('test_item_options')->truncate();
+            DB::table('test_items')->truncate();
+            DB::table('test_keys')->truncate();
+            DB::table('test_open_responses')->truncate();
+            DB::table('test_response_codes')->truncate();
+            DB::table('test_results')->truncate();
+            DB::table('test_rubric_scores')->truncate();
+            DB::table('test_rubrics')->truncate();
+            DB::table('test_sections')->truncate();
+            DB::table('test_session_protocols')->truncate();
+            DB::table('test_sessions')->truncate();
+            DB::table('test_stimuli')->truncate();
+
+            $this->seedPHQ9();
+            $this->seedGAD7();
+            $this->seedHADS();
+            $this->seedPCL5();
+            $this->seedASRS();
+            $this->seedEPDS();
+            $this->seedCAGEAID();
+            $this->seedDAST10();
+            $this->seedAUDITC();
+            $this->seedSDS();
+            $this->seedSAS();
+            $this->seedBDI2();
+            $this->seedBAI();
+            $this->seedK10();
+            $this->seedPSS10();
+            $this->seedWHO5();
+            $this->seedPCPTSD5();
+            $this->seedSCOFF();
+
+            // ⚠️ RORSCHACH и PICAS4 здесь НЕ создаём: они под stimuli/open responses.
+        });
     }
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
+
+    private function resetTestByCode(string $code): void
+    {
+        DB::table('tests')->where('code', $code)->delete();
+    }
+
+    /**
+     * Создаёт шкальный тест (1 секция) + одинаковые опции для всех вопросов + ключи.
+     * Пишем так, будто tests.instructions/tests.estimated_minutes/tests.resource_profile уже существуют.
+     */
+    private function createScaleTest(
+        string $code,
+        string $name,
+        ?string $description,
+        ?string $instructions,
+        ?int $estimatedMinutes,
+        ?array $resourceProfile,
+        array $itemsTexts,
+        array $options,   // [['label'=>'...', 'value'=>0], ...]
+        array $keys       // [['title'=>'...', 'item_ids'=>[1,2,3]], ...]
+    ): int {
+        $this->resetTestByCode($code);
+
+        $testId = DB::table('tests')->insertGetId([
+            'name' => $name,
+            'code' => $code,
+            'description' => $description,
+            'instructions' => $instructions,
+            'estimated_minutes' => $estimatedMinutes,
+            'resource_profile' => $resourceProfile ? json_encode($resourceProfile, JSON_UNESCAPED_UNICODE) : null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $sectionId = DB::table('test_sections')->insertGetId([
+            'test_id' => $testId,
+            'title' => 'Основной раздел',
+            'order' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $itemIds = [];
+        foreach ($itemsTexts as $idx => $text) {
+            $itemIds[] = DB::table('test_items')->insertGetId([
+                'test_id' => $testId,
+                'section_id' => $sectionId,
+                'text' => $text,
+                'order' => $idx + 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        foreach ($itemIds as $itemId) {
+            foreach ($options as $ord => $opt) {
+                DB::table('test_item_options')->insert([
+                    'item_id' => $itemId,
+                    'label' => $opt['label'],
+                    'value' => (int)$opt['value'],
+                    'order' => $ord + 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        foreach ($keys as $k) {
+            DB::table('test_keys')->insert([
+                'test_id' => $testId,
+                'title' => $k['title'],
+                'description' => $k['description'] ?? null,
+                'item_ids' => json_encode(array_values($k['item_ids']), JSON_UNESCAPED_UNICODE),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $testId;
+    }
+
+    // ---------------------------------------------------------------------
+    // Options
+    // ---------------------------------------------------------------------
+
+    private function optLikert0to3(): array
+    {
+        return [
+            ['label' => 'Совсем не про меня', 'value' => 0],
+            ['label' => 'Иногда',            'value' => 1],
+            ['label' => 'Часто',             'value' => 2],
+            ['label' => 'Почти постоянно',   'value' => 3],
+        ];
+    }
+
+    private function optLikert0to4(): array
+    {
+        return [
+            ['label' => 'Никогда',      'value' => 0],
+            ['label' => 'Редко',        'value' => 1],
+            ['label' => 'Иногда',       'value' => 2],
+            ['label' => 'Часто',        'value' => 3],
+            ['label' => 'Очень часто',  'value' => 4],
+        ];
+    }
+
+    private function optLikert1to5(): array
+    {
+        // удобно для K10/WHO-5, где “1..5” логичнее, но у нас value может быть любым int
+        return [
+            ['label' => 'Никогда',            'value' => 1],
+            ['label' => 'Редко',              'value' => 2],
+            ['label' => 'Иногда',             'value' => 3],
+            ['label' => 'Часто',              'value' => 4],
+            ['label' => 'Почти постоянно',    'value' => 5],
+        ];
+    }
+
+    private function optYesNo01(): array
+    {
+        return [
+            ['label' => 'Нет', 'value' => 0],
+            ['label' => 'Да',  'value' => 1],
+        ];
+    }
+
+    private function optWHO5_0to5(): array
+    {
+        return [
+            ['label' => 'Никогда', 'value' => 0],
+            ['label' => 'Редко', 'value' => 1],
+            ['label' => 'Иногда', 'value' => 2],
+            ['label' => 'Часто', 'value' => 3],
+            ['label' => 'Большую часть времени', 'value' => 4],
+            ['label' => 'Постоянно', 'value' => 5],
+        ];
+    }
+
+    private function optZung1to4(): array
+    {
+        // Для SDS/SAS (Zung): 1..4
+        return [
+            ['label' => 'Очень редко или никогда', 'value' => 1],
+            ['label' => 'Иногда',                 'value' => 2],
+            ['label' => 'Часто',                  'value' => 3],
+            ['label' => 'Почти всегда',           'value' => 4],
+        ];
+    }
+
+    // ---------------------------------------------------------------------
+    // Resource profiles (алгоритм, не нейросеть)
+    // ---------------------------------------------------------------------
+
+    private function rp(string $title, string $about, array $bands): array
+    {
+        // bands: [['min'=>0,'max'=>4,'label'=>'...','text'=>'...'], ...]
+        return [
+            'title' => $title,
+            'about' => $about,
+            'bands' => $bands,
+        ];
+    }
+
+    // ---------------------------------------------------------------------
+    // Seeds
+    // ---------------------------------------------------------------------
+
+    private function seedPHQ9(): void
+    {
+        $items = [
+            'Я теряю интерес или удовольствие от привычных занятий.',
+            'Я чувствую грусть, подавленность или безнадёжность.',
+            'Мне трудно заснуть, я часто просыпаюсь или, наоборот, слишком много сплю.',
+            'Я быстро устаю или ощущаю недостаток энергии.',
+            'У меня снижен аппетит или, наоборот, я переедаю.',
+            'Я плохо думаю о себе и часто себя обвиняю.',
+            'Мне трудно сосредоточиться (например, при чтении или просмотре видео).',
+            'Я двигаюсь/говорю медленнее обычного или, наоборот, я суетлив(а) и не могу усидеть.',
+            'Мне приходят мысли, что лучше бы меня не было, или мысли причинить себе вред.',
+        ];
+
+        $this->createScaleTest(
+            'PHQ9',
+            'PHQ-9',
+            'Краткий опросник для оценки выраженности депрессивных симптомов.',
+            "Инструкция:\n- Отвечайте, насколько это было характерно для вас в последнее время.\n- Выберите один вариант на каждый пункт.\n- Здесь нет «правильных» и «неправильных» ответов.\n- Если какой-то пункт вызывает сильный дискомфорт — сообщите врачу.",
+            3,
+            $this->rp('Ресурс', 'Оценка возможного истощения ресурса на фоне депрессивных симптомов (алгоритм).', [
+                ['min'=>0,  'max'=>4,  'label'=>'Ресурс сохранён',   'text'=>'Признаков выраженного истощения по этому тесту не видно.'],
+                ['min'=>5,  'max'=>9,  'label'=>'Ресурс снижен',     'text'=>'Возможна умеренная усталость/снижение тонуса. Полезны сон и щадящий режим.'],
+                ['min'=>10, 'max'=>14, 'label'=>'Ресурс истощается', 'text'=>'Есть признаки заметного снижения ресурса. Желательна поддержка и обсуждение с врачом.'],
+                ['min'=>15, 'max'=>27, 'label'=>'Низкий ресурс',     'text'=>'Высокая нагрузка на ресурс. Рекомендуется очная оценка и план помощи.'],
+            ]),
+            $items,
+            $this->optLikert0to3(),
+            [
+                ['title' => 'Суммарный балл PHQ-9', 'item_ids' => [1,2,3,4,5,6,7,8,9]],
+            ]
+        );
+    }
+
+    private function seedGAD7(): void
+    {
+        $items = [
+            'Я чувствую нервозность, тревогу или внутреннее напряжение.',
+            'Мне трудно остановить или контролировать беспокойство.',
+            'Я слишком часто беспокоюсь о разных вещах.',
+            'Мне трудно расслабиться.',
+            'Я настолько беспокоен(на), что мне трудно усидеть на месте.',
+            'Я легко раздражаюсь или становлюсь раздражительным(ой).',
+            'Я боюсь, что может случиться что-то плохое.',
+        ];
+
+        $this->createScaleTest(
+            'GAD7',
+            'GAD-7',
+            'Краткий опросник для скрининга выраженности тревожных симптомов.',
+            "Инструкция:\n- Выберите вариант, который лучше описывает ваше состояние.\n- Отвечайте, опираясь на последние дни/недели.\n- Если сомневаетесь — выбирайте наиболее частый вариант.",
+            2,
+            $this->rp('Ресурс', 'Оценка нагрузки на ресурс из-за тревоги (алгоритм).', [
+                ['min'=>0,  'max'=>4,  'label'=>'Низкая нагрузка', 'text'=>'Тревога, вероятно, не оказывает значимого влияния на ресурс.'],
+                ['min'=>5,  'max'=>9,  'label'=>'Умеренная нагрузка', 'text'=>'Тревога может отнимать силы и внимание. Полезны техники саморегуляции.'],
+                ['min'=>10, 'max'=>14, 'label'=>'Высокая нагрузка', 'text'=>'Тревога заметно влияет на ресурс. Желательно обсудить поддержку с врачом.'],
+                ['min'=>15, 'max'=>21, 'label'=>'Очень высокая нагрузка', 'text'=>'Тревога существенно истощает ресурс. Рекомендуется очная оценка и план помощи.'],
+            ]),
+            $items,
+            $this->optLikert0to3(),
+            [
+                ['title' => 'Суммарный балл GAD-7', 'item_ids' => [1,2,3,4,5,6,7]],
+            ]
+        );
+    }
+
+    private function seedHADS(): void
+    {
+        $items = [
+            'Я чувствую внутреннее напряжение без видимой причины.',
+            'Мне трудно получать удовольствие от привычных вещей.',
+            'Я часто испытываю тревожное ожидание.',
+            'Я чувствую замедленность, и мне всё даётся с трудом.',
+            'Мне трудно расслабиться, даже когда есть возможность.',
+            'Я чувствую упадок сил или безжизненность.',
+            'Я часто ощущаю беспокойство и не могу успокоиться.',
+            'Я замечаю, что теряю интерес ко многим вещам.',
+            'Я испытываю приступы страха или паники.',
+            'Мне сложно радоваться будущему.',
+            'У меня бывают ощущения «нервной дрожи» или внутреннего напряжения.',
+            'Я редко испытываю удовольствие от того, что раньше радовало.',
+            'Я ощущаю выраженную тревогу или страх без явной причины.',
+            'Мне кажется, что я утратил(а) вкус к жизни.',
+        ];
+
+        $this->createScaleTest(
+            'HADS',
+            'HADS — Госпитальная шкала тревоги и депрессии',
+            'Оценка тревоги и депрессивных проявлений (две шкалы).',
+            "Инструкция:\n- Ответьте на все 14 утверждений.\n- Выберите один вариант на каждое утверждение.\n- Ориентируйтесь на самочувствие в последнее время.",
+            4,
+            $this->rp('Ресурс', 'Обобщённая оценка ресурса по тревоге/депрессии (алгоритм).', [
+                ['min'=>0,  'max'=>7,  'label'=>'Ресурс сохранён', 'text'=>'По шкале выраженной нагрузки на ресурс не видно.'],
+                ['min'=>8,  'max'=>10, 'label'=>'Ресурс снижен', 'text'=>'Пограничные проявления: ресурс может снижаться, избегайте перегрузок.'],
+                ['min'=>11, 'max'=>21, 'label'=>'Низкий ресурс', 'text'=>'Клинически значимые проявления: вероятно высокая нагрузка на ресурс.'],
+            ]),
+            $items,
+            $this->optLikert0to3(),
+            [
+                ['title' => 'HADS-A (тревога)',   'item_ids' => [1,3,5,7,9,11,13]],
+                ['title' => 'HADS-D (депрессия)', 'item_ids' => [2,4,6,8,10,12,14]],
+            ]
+        );
+    }
+
+    private function seedPCL5(): void
+    {
+        $items = [
+            'Мне приходят навязчивые, неприятные воспоминания о тяжёлом событии.',
+            'Мне снятся неприятные сны, связанные с тяжёлым событием.',
+            'Иногда я будто снова переживаю тяжёлое событие (как будто это происходит сейчас).',
+            'Я сильно переживаю, когда что-то напоминает мне о тяжёлом событии.',
+            'У меня бывают выраженные телесные реакции на напоминания (сердцебиение, потливость и т.п.).',
+            'Я стараюсь избегать мыслей, чувств или воспоминаний о тяжёлом событии.',
+            'Я стараюсь избегать ситуаций, мест или людей, которые напоминают о тяжёлом событии.',
+            'У меня ухудшается память на важные части тяжёлого события.',
+            'У меня появляются устойчивые негативные убеждения о себе, других или мире.',
+            'Я часто обвиняю себя или других в том, что произошло.',
+            'Я испытываю выраженные негативные эмоции (страх, гнев, стыд, вина).',
+            'Мне становится труднее интересоваться тем, что раньше было важно.',
+            'Я чувствую отстранённость или отчуждённость от людей.',
+            'Мне трудно испытывать положительные чувства.',
+            'Я становлюсь раздражительным(ой) или у меня бывают вспышки гнева.',
+            'Я веду себя рискованно или импульсивно.',
+            'Я постоянно настороже, напряжён(а), «как на охране».',
+            'Я легко пугаюсь или вздрагиваю.',
+            'Мне трудно сосредоточиться.',
+            'У меня проблемы со сном (трудно заснуть/просыпаюсь/сон беспокойный).',
+        ];
+
+        $this->createScaleTest(
+            'PCL5',
+            'PCL-5 (ПТСР, DSM-5)',
+            'Опросник для оценки выраженности симптомов посттравматического стресса.',
+            "Инструкция:\n- Отвечайте, насколько это было характерно для вас в последнее время.\n- Выберите один вариант на каждый пункт.\n- Если вопрос вызывает сильные переживания — сообщите врачу.",
+            7,
+            $this->rp('Ресурс', 'Нагрузка на ресурс при посттравматических симптомах (алгоритм).', [
+                ['min'=>0,  'max'=>20, 'label'=>'Низкая нагрузка', 'text'=>'Выраженной нагрузки по тесту не видно.'],
+                ['min'=>21, 'max'=>33, 'label'=>'Умеренная нагрузка', 'text'=>'Симптомы могут снижать ресурс. Полезно обсудить поддержку/режим.'],
+                ['min'=>34, 'max'=>80, 'label'=>'Высокая нагрузка', 'text'=>'Возможен клинически значимый уровень симптомов. Рекомендуется очная оценка и план помощи.'],
+            ]),
+            $items,
+            $this->optLikert0to3(),
+            [
+                ['title' => 'Суммарный балл PCL-5', 'item_ids' => [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]],
+            ]
+        );
+    }
+
+    private function seedASRS(): void
+    {
+        $items = [
+            // Часть A (1..6)
+            'Мне трудно завершать детали проекта, когда самое интересное уже сделано.',
+            'Мне трудно поддерживать внимание на однообразной работе.',
+            'Когда со мной разговаривают напрямую, мне сложно удерживать внимание.',
+            'Мне трудно организовать дела и задачи.',
+            'Я часто откладываю дела, требующие долгих умственных усилий.',
+            'Я часто теряю вещи (ключи, телефон, документы).',
+
+            // Часть B (7..18)
+            'Мне трудно усидеть на месте, я часто ерзаю.',
+            'Я часто чувствую внутреннее беспокойство.',
+            'Я могу перебивать других, не дожидаясь очереди.',
+            'Мне трудно ждать своей очереди (в очередях, в разговоре).',
+            'Я часто говорю больше, чем нужно.',
+            'Я могу начинать делать что-то, не дослушав инструкцию до конца.',
+            'Я часто делаю ошибки из-за невнимательности.',
+            'Мне трудно следовать плану, даже если он понятен.',
+            'Я легко отвлекаюсь на посторонние стимулы.',
+            'Я часто забываю о повседневных делах (встречи, звонки).',
+            'Я могу принимать импульсивные решения, о которых потом жалею.',
+            'Мне сложно сохранять порядок в вещах/пространстве.',
+        ];
+
+        $this->createScaleTest(
+            'ASRS',
+            'ASRS v1.1 (Adult ADHD)',
+            'Скрининг симптомов дефицита внимания/гиперактивности у взрослых.',
+            "Инструкция:\n- Отвечайте, насколько это характерно для вас.\n- Старайтесь отвечать быстро и честно.\n- Если сомневаетесь — выбирайте более частый вариант.",
+            5,
+            $this->rp('Ресурс', 'Нагрузка на ресурс из-за невнимательности/импульсивности (алгоритм, по сумме).', [
+                ['min'=>18, 'max'=>29, 'label'=>'Низкая нагрузка', 'text'=>'Выраженной нагрузки по сумме ответов не видно.'],
+                ['min'=>30, 'max'=>44, 'label'=>'Умеренная нагрузка', 'text'=>'Есть признаки, которые могут мешать в быту/работе.'],
+                ['min'=>45, 'max'=>72, 'label'=>'Высокая нагрузка', 'text'=>'Симптомы могут существенно влиять на ресурс и эффективность. Желательна очная оценка.'],
+            ]),
+            $items,
+            $this->optLikert1to5(), // ASRS часто 0..4, но нам важно стабильное суммирование; тут 1..5 (18..90). В интерпретации учитываем это.
+            [
+                ['title' => 'ASRS — Часть A',     'item_ids' => [1,2,3,4,5,6]],
+                ['title' => 'ASRS — Часть B',     'item_ids' => [7,8,9,10,11,12,13,14,15,16,17,18]],
+                ['title' => 'ASRS — общий балл',  'item_ids' => [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]],
+            ]
+        );
+    }
+
+    private function seedEPDS(): void
+    {
+        $items = [
+            'Я могу смеяться и видеть смешное в ситуации.',
+            'Я с радостью жду приятных событий.',
+            'Я без причины виню себя, когда что-то идёт не так.',
+            'Я испытываю тревогу или беспокойство без явной причины.',
+            'Я пугаюсь или испытываю паническое чувство без причины.',
+            'Мне трудно справляться с делами.',
+            'Мне трудно спать из-за тревожных мыслей.',
+            'Я чувствую грусть или подавленность.',
+            'Я так несчастен(на), что могу плакать.',
+            'У меня были мысли причинить себе вред.',
+        ];
+
+        $this->createScaleTest(
+            'EPDS',
+            'EPDS — Эдинбургская шкала послеродовой депрессии',
+            'Скрининг депрессивных симптомов в послеродовом периоде (может применяться и шире по показаниям врача).',
+            "Инструкция:\n- Выберите вариант, который лучше всего описывает ваше состояние в последнее время.\n- Отвечайте на все пункты.\n- Если возникают тяжёлые мысли — обязательно сообщите врачу.",
+            4,
+            $this->rp('Ресурс', 'Оценка снижения ресурса при депрессивных симптомах (алгоритм).', [
+                ['min'=>0,  'max'=>8,  'label'=>'Ресурс сохранён', 'text'=>'По сумме выраженной нагрузки не видно.'],
+                ['min'=>9,  'max'=>12, 'label'=>'Ресурс снижен', 'text'=>'Возможны умеренные проявления. Полезна поддержка и наблюдение.'],
+                ['min'=>13, 'max'=>30, 'label'=>'Низкий ресурс', 'text'=>'Высокая вероятность клинически значимых проявлений. Рекомендуется очная оценка.'],
+            ]),
+            $items,
+            $this->optLikert0to3(),
+            [
+                ['title' => 'Суммарный балл EPDS', 'item_ids' => [1,2,3,4,5,6,7,8,9,10]],
+            ]
+        );
+    }
+
+    private function seedCAGEAID(): void
+    {
+        $items = [
+            'У меня возникало желание сократить употребление алкоголя или других веществ.',
+            'Меня раздражали замечания окружающих по поводу моего употребления.',
+            'Я испытывал(а) чувство вины из-за употребления алкоголя или других веществ.',
+            'Мне приходилось употреблять с утра, чтобы прийти в норму (снять похмелье/дискомфорт).',
+        ];
+
+        $this->createScaleTest(
+            'CAGEAID',
+            'CAGE-AID (алкоголь/наркотики)',
+            'Краткий скрининг проблемного употребления алкоголя/веществ.',
+            "Инструкция:\n- Отвечайте «Да/Нет».\n- Важно отвечать честно — это нужно для оценки рисков и подбора помощи.\n- Если есть сомнения — выбирайте вариант, который чаще подходит.",
+            1,
+            $this->rp('Ресурс', 'Оценка риска снижения ресурса из-за употребления (алгоритм).', [
+                ['min'=>0, 'max'=>0, 'label'=>'Низкий риск', 'text'=>'По тесту признаков проблемного употребления не выявлено.'],
+                ['min'=>1, 'max'=>1, 'label'=>'Умеренный риск', 'text'=>'Есть отдельные признаки. Полезно обсудить привычки и стресс-нагрузку с врачом.'],
+                ['min'=>2, 'max'=>4, 'label'=>'Повышенный риск', 'text'=>'Вероятны значимые проблемы. Рекомендуется консультация и план поддержки.'],
+            ]),
+            $items,
+            $this->optYesNo01(),
+            [
+                ['title' => 'Суммарный балл CAGE-AID', 'item_ids' => [1,2,3,4]],
+            ]
+        );
+    }
+
+    private function seedDAST10(): void
+    {
+        $items = [
+            'Я употреблял(а) вещества не по назначению.',
+            'Я злоупотреблял(а) несколькими веществами одновременно.',
+            'Я могу обходиться без веществ, когда хочу.',
+            'Я испытывал(а) «провалы» памяти или стыда из-за употребления.',
+            'Мне было плохо из-за употребления (здоровье/психика).',
+            'У меня были конфликты с близкими из-за употребления.',
+            'Я испытывал(а) проблемы на работе/учёбе из-за употребления.',
+            'Я попадал(а) в неприятности/рисковые ситуации из-за употребления.',
+            'Я испытывал(а) симптомы отмены или сильную тягу.',
+            'Я пытался(ась) сократить или прекратить, но не получалось.',
+        ];
+
+        $this->createScaleTest(
+            'DAST10',
+            'DAST-10',
+            'Скрининг проблем, связанных с употреблением веществ (кроме алкоголя).',
+            "Инструкция:\n- Отвечайте «Да/Нет».\n- Отвечайте честно — это важно для оценки рисков.\n- При дискомфорте сообщите врачу.",
+            2,
+            $this->rp('Ресурс', 'Уровень риска и нагрузки на ресурс (алгоритм).', [
+                ['min'=>0, 'max'=>0, 'label'=>'Нет признаков', 'text'=>'Признаков проблемного употребления по тесту не выявлено.'],
+                ['min'=>1, 'max'=>2, 'label'=>'Низкий риск', 'text'=>'Есть отдельные признаки. Полезно обсудить с врачом.'],
+                ['min'=>3, 'max'=>5, 'label'=>'Умеренный риск', 'text'=>'Риск выражен. Рекомендуется консультация и поддержка.'],
+                ['min'=>6, 'max'=>8, 'label'=>'Высокий риск', 'text'=>'Вероятны серьёзные трудности. Нужна очная оценка и план помощи.'],
+                ['min'=>9, 'max'=>10, 'label'=>'Очень высокий риск', 'text'=>'Рекомендуется срочная очная оценка и активная помощь.'],
+            ]),
+            $items,
+            $this->optYesNo01(),
+            [
+                ['title' => 'Суммарный балл DAST-10', 'item_ids' => [1,2,3,4,5,6,7,8,9,10]],
+            ]
+        );
+    }
+
+    private function seedAUDITC(): void
+    {
+        $items = [
+            'Как часто я употребляю алкоголь?',
+            'Сколько стандартных порций алкоголя я обычно выпиваю за один раз?',
+            'Как часто я выпиваю 6 и более порций за один раз?',
+        ];
+
+        // AUDIT-C обычно 0..4 за каждый вопрос
+        $options = [
+            ['label' => '0', 'value' => 0],
+            ['label' => '1', 'value' => 1],
+            ['label' => '2', 'value' => 2],
+            ['label' => '3', 'value' => 3],
+            ['label' => '4', 'value' => 4],
+        ];
+
+        $this->createScaleTest(
+            'AUDITC',
+            'AUDIT-C',
+            'Краткий скрининг рискованного употребления алкоголя (3 вопроса).',
+            "Инструкция:\n- Выберите наиболее подходящий вариант по частоте/количеству.\n- Отвечайте честно — это помогает оценить риски.",
+            1,
+            $this->rp('Ресурс', 'Риск и возможная нагрузка на ресурс из-за алкоголя (алгоритм).', [
+                ['min'=>0, 'max'=>2, 'label'=>'Низкий риск', 'text'=>'По тесту риск низкий.'],
+                ['min'=>3, 'max'=>4, 'label'=>'Умеренный риск', 'text'=>'Есть признаки рискованного употребления.'],
+                ['min'=>5, 'max'=>7, 'label'=>'Высокий риск', 'text'=>'Риск выражен. Рекомендуется обсудить снижение употребления.'],
+                ['min'=>8, 'max'=>12, 'label'=>'Очень высокий риск', 'text'=>'Высокая вероятность проблем. Рекомендуется очная консультация.'],
+            ]),
+            $items,
+            $options,
+            [
+                ['title' => 'Суммарный балл AUDIT-C', 'item_ids' => [1,2,3]],
+            ]
+        );
+    }
+
+    private function seedSDS(): void
+    {
+        $items = [
+            'Я чувствую упадок настроения.',
+            'Утром мне труднее всего.',
+            'Я легко плачу или чувствую желание плакать.',
+            'Мне трудно заснуть.',
+            'Я ем столько же, сколько обычно.',
+            'Я всё ещё получаю удовольствие от интимной близости.',
+            'Я замечаю, что худею/теряю вес.',
+            'У меня бывают запоры.',
+            'Моё сердце бьётся быстрее, чем обычно.',
+            'Я устаю без особой причины.',
+            'Мой ум ясный.',
+            'Мне трудно делать обычные дела.',
+            'Я беспокоен(на), мне трудно сидеть спокойно.',
+            'Я надеюсь на будущее.',
+            'Я раздражителен(на) сильнее обычного.',
+            'Мне легко принимать решения.',
+            'Я чувствую себя полезным(ой) и нужным(ой).',
+            'Моя жизнь довольно наполненная.',
+            'Я чувствую, что другие были бы счастливее без меня.',
+            'Я всё ещё наслаждаюсь тем, что делаю.',
+        ];
+
+        $this->createScaleTest(
+            'SDS',
+            'Zung SDS — Шкала самооценки депрессии',
+            'Шкала для самооценки депрессивных проявлений (20 пунктов).',
+            "Инструкция:\n- Выберите вариант, который лучше всего описывает ваше состояние.\n- Отвечайте, не задерживаясь долго на одном пункте.",
+            6,
+            $this->rp('Ресурс', 'Оценка снижения ресурса при депрессивных проявлениях (алгоритм, по сырому баллу 20..80).', [
+                ['min'=>20, 'max'=>44, 'label'=>'Норма', 'text'=>'Выраженной нагрузки по шкале не видно.'],
+                ['min'=>45, 'max'=>59, 'label'=>'Лёгкие/умеренные проявления', 'text'=>'Ресурс может снижаться. Полезны поддержка и наблюдение.'],
+                ['min'=>60, 'max'=>69, 'label'=>'Выраженные проявления', 'text'=>'Высокая нагрузка на ресурс. Рекомендуется очная оценка.'],
+                ['min'=>70, 'max'=>80, 'label'=>'Тяжёлые проявления', 'text'=>'Очень высокая нагрузка. Нужна очная оценка и помощь.'],
+            ]),
+            $items,
+            $this->optZung1to4(),
+            [
+                ['title' => 'Суммарный балл SDS (RAW)', 'item_ids' => [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]],
+            ]
+        );
+    }
+
+    private function seedSAS(): void
+    {
+        $items = [
+            'Я чувствую тревогу или внутреннее напряжение.',
+            'Мне бывает страшно без явной причины.',
+            'Я легко пугаюсь.',
+            'Я чувствую, что могу «сорваться».',
+            'Я ощущаю дрожь или дрожание.',
+            'У меня болит голова.',
+            'Меня беспокоят боли в шее/спине.',
+            'Я чувствую слабость и быстро устаю.',
+            'Мне трудно расслабиться.',
+            'Я замечаю учащённое сердцебиение.',
+            'У меня бывают головокружения.',
+            'Я испытываю чувство нехватки воздуха.',
+            'У меня бывают ощущения онемения/покалывания.',
+            'Я чаще потею.',
+            'Я чувствую дискомфорт в желудке.',
+            'Меня беспокоят проблемы со сном.',
+            'Я испытываю беспокойство из-за мелочей.',
+            'Я чувствую раздражительность.',
+            'Мне трудно сосредоточиться.',
+            'Я чувствую, что тревога мешает жить.',
+        ];
+
+        $this->createScaleTest(
+            'SAS',
+            'Zung SAS — Шкала самооценки тревоги',
+            'Шкала для самооценки тревожных проявлений (20 пунктов).',
+            "Инструкция:\n- Выберите вариант, который лучше описывает ваше состояние.\n- Отвечайте честно и без длительных раздумий.",
+            6,
+            $this->rp('Ресурс', 'Оценка нагрузки на ресурс при тревоге (алгоритм, по сырому баллу 20..80).', [
+                ['min'=>20, 'max'=>44, 'label'=>'Норма', 'text'=>'Выраженной нагрузки не видно.'],
+                ['min'=>45, 'max'=>59, 'label'=>'Лёгкая/умеренная тревога', 'text'=>'Тревога может снижать ресурс. Полезны техники саморегуляции.'],
+                ['min'=>60, 'max'=>74, 'label'=>'Выраженная тревога', 'text'=>'Высокая нагрузка. Желательна очная оценка.'],
+                ['min'=>75, 'max'=>80, 'label'=>'Тяжёлая тревога', 'text'=>'Очень высокая нагрузка. Нужна очная помощь.'],
+            ]),
+            $items,
+            $this->optZung1to4(),
+            [
+                ['title' => 'Суммарный балл SAS (RAW)', 'item_ids' => [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]],
+            ]
+        );
+    }
+
+    private function seedBDI2(): void
+    {
+        $items = [
+            'Я чувствую грусть.',
+            'Я потерял(а) интерес к будущему.',
+            'Я считаю себя неудачником.',
+            'Я меньше получаю удовольствия от того, что раньше нравилось.',
+            'Я часто чувствую вину.',
+            'Я ощущаю, что меня за что-то наказали.',
+            'Я недоволен(на) собой.',
+            'Я обвиняю себя чаще обычного.',
+            'У меня бывают мысли причинить себе вред.',
+            'Мне чаще хочется плакать.',
+            'Я стал(а) более раздражительным(ой).',
+            'Я утратил(а) интерес к людям.',
+            'Мне труднее принимать решения.',
+            'Я чувствую себя менее ценным(ой).',
+            'У меня меньше энергии.',
+            'У меня нарушен сон.',
+            'Я быстрее устаю.',
+            'У меня изменился аппетит.',
+            'Мне трудно сосредоточиться.',
+            'Я меньше интересуюсь интимной близостью.',
+            'Я чувствую, что мне очень тяжело жить.',
+        ];
+
+        $this->createScaleTest(
+            'BDI2',
+            'BDI-II (Бек, депрессия)',
+            'Опросник Бека для оценки выраженности депрессии.',
+            "Инструкция:\n- Отмечайте, насколько утверждение отражает ваше состояние.\n- Если какой-то пункт тяжело читать — сообщите врачу.",
+            7,
+            $this->rp('Ресурс', 'Снижение ресурса при депрессии (алгоритм, 0..63).', [
+                ['min'=>0,  'max'=>13, 'label'=>'Минимальные проявления', 'text'=>'Ресурс в целом сохранён.'],
+                ['min'=>14, 'max'=>19, 'label'=>'Лёгкие проявления', 'text'=>'Ресурс может быть снижен.'],
+                ['min'=>20, 'max'=>28, 'label'=>'Умеренные проявления', 'text'=>'Заметная нагрузка на ресурс.'],
+                ['min'=>29, 'max'=>63, 'label'=>'Тяжёлые проявления', 'text'=>'Высокая нагрузка. Рекомендуется очная оценка и помощь.'],
+            ]),
+            $items,
+            $this->optLikert0to3(),
+            [
+                ['title' => 'Суммарный балл BDI-II', 'item_ids' => [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]],
+            ]
+        );
+    }
+
+    private function seedBAI(): void
+    {
+        $items = [
+            'Я ощущаю онемение или покалывание.',
+            'Меня охватывает чувство жара.',
+            'У меня дрожат ноги.',
+            'Я не могу расслабиться.',
+            'Я боюсь, что произойдёт худшее.',
+            'У меня кружится голова.',
+            'У меня учащается сердцебиение.',
+            'Я чувствую неуверенность.',
+            'Я испытываю чувство ужаса.',
+            'Я нервничаю.',
+            'У меня дрожат руки.',
+            'Я ощущаю дрожь.',
+            'Мне трудно дышать.',
+            'Я боюсь потерять контроль.',
+            'Мне трудно глотать.',
+            'Я испытываю страх.',
+            'У меня ощущение «ватных» ног.',
+            'Я испытываю головокружение.',
+            'У меня бывают приливы жара/холода.',
+            'У меня потеют ладони.',
+            'Я ощущаю напряжение в теле.',
+        ];
+
+        $this->createScaleTest(
+            'BAI',
+            'BAI (Бек, тревога)',
+            'Опросник Бека для оценки выраженности тревоги.',
+            "Инструкция:\n- Отвечайте, насколько это было характерно для вас в последнее время.\n- Выберите один вариант на каждый пункт.",
+            7,
+            $this->rp('Ресурс', 'Нагрузка на ресурс при тревоге (алгоритм, 0..63).', [
+                ['min'=>0,  'max'=>7,  'label'=>'Минимальная тревога', 'text'=>'Ресурс сохранён.'],
+                ['min'=>8,  'max'=>15, 'label'=>'Лёгкая тревога', 'text'=>'Возможна умеренная нагрузка.'],
+                ['min'=>16, 'max'=>25, 'label'=>'Умеренная тревога', 'text'=>'Заметная нагрузка на ресурс.'],
+                ['min'=>26, 'max'=>63, 'label'=>'Сильная тревога', 'text'=>'Высокая нагрузка. Рекомендуется очная оценка.'],
+            ]),
+            $items,
+            $this->optLikert0to3(),
+            [
+                ['title' => 'Суммарный балл BAI', 'item_ids' => [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]],
+            ]
+        );
+    }
+
+    private function seedK10(): void
+    {
+        $items = [
+            'Я чувствовал(а) себя уставшим(ей) без причины.',
+            'Я чувствовал(а) нервозность.',
+            'Я был(а) настолько нервным(ой), что ничто не могло успокоить.',
+            'Я чувствовал(а) безнадёжность.',
+            'Я чувствовал(а) беспокойство или тревогу.',
+            'Я был(а) настолько беспокойным(ой), что не мог(ла) усидеть.',
+            'Я чувствовал(а) подавленность.',
+            'Мне казалось, что всё даётся с трудом.',
+            'Мне было трудно чем-то заинтересоваться.',
+            'Я чувствовал(а), что я ничего не стою.',
+        ];
+
+        // K10 обычно 1..5; мы используем value 1..5
+        $this->createScaleTest(
+            'K10',
+            'K10 — Шкала психологического дистресса (10)',
+            'Оценка психологического дистресса за последние недели.',
+            "Инструкция:\n- Выберите частоту/выраженность для каждого утверждения.\n- Ориентируйтесь на последнее время.",
+            3,
+            $this->rp('Ресурс', 'Нагрузка на ресурс при дистрессе (алгоритм, 10..50 по нашей шкале 1..5).', [
+                ['min'=>10, 'max'=>19, 'label'=>'Низкий дистресс', 'text'=>'Ресурс в целом сохранён.'],
+                ['min'=>20, 'max'=>24, 'label'=>'Умеренный дистресс', 'text'=>'Ресурс может снижаться.'],
+                ['min'=>25, 'max'=>29, 'label'=>'Высокий дистресс', 'text'=>'Заметная нагрузка на ресурс.'],
+                ['min'=>30, 'max'=>50, 'label'=>'Очень высокий дистресс', 'text'=>'Высокая нагрузка. Рекомендуется очная оценка.'],
+            ]),
+            $items,
+            $this->optLikert1to5(),
+            [
+                ['title' => 'K10: суммарный балл', 'item_ids' => [1,2,3,4,5,6,7,8,9,10]],
+            ]
+        );
+    }
+
+    private function seedPSS10(): void
+    {
+        $items = [
+            'Я чувствовал(а), что не могу контролировать важные вещи в жизни.',
+            'Я был(а) уверен(а), что справлюсь с личными проблемами.',
+            'Я чувствовал(а), что всё идёт так, как надо.',
+            'Я был(а) раздражён(а) из-за событий, которые не мог(ла) контролировать.',
+            'Я чувствовал(а) нервное напряжение и стресс.',
+            'Я чувствовал(а), что справляюсь со всеми делами.',
+            'Я был(а) раздражён(а) из-за того, что происходило.',
+            'Мне казалось, что я всё держу под контролем.',
+            'Я злился(ась) из-за вещей, которые были вне моего контроля.',
+            'Мне казалось, что трудности накапливаются так, что я не справлюсь.',
+        ];
+
+        $this->createScaleTest(
+            'PSS10',
+            'PSS-10 — Шкала воспринимаемого стресса (10)',
+            'Оценка субъективно воспринимаемого стресса.',
+            "Инструкция:\n- Отвечайте, как часто это было с вами в последнее время.\n- Выберите один вариант на каждый пункт.",
+            3,
+            $this->rp('Ресурс', 'Нагрузка на ресурс при стрессе (алгоритм, 0..40).', [
+                ['min'=>0,  'max'=>13, 'label'=>'Низкий стресс', 'text'=>'Ресурс в целом сохранён.'],
+                ['min'=>14, 'max'=>26, 'label'=>'Умеренный стресс', 'text'=>'Ресурс может снижаться. Полезно разгрузить режим.'],
+                ['min'=>27, 'max'=>40, 'label'=>'Высокий стресс', 'text'=>'Высокая нагрузка. Рекомендуется обсудить поддержку.'],
+            ]),
+            $items,
+            $this->optLikert0to4(), // 0..4
+            [
+                ['title' => 'PSS-10: суммарный балл', 'item_ids' => [1,2,3,4,5,6,7,8,9,10]],
+            ]
+        );
+    }
+
+    private function seedWHO5(): void
+    {
+        $items = [
+            'Я чувствовал(а) себя бодрым(ой) и в хорошем настроении.',
+            'Я чувствовал(а) себя спокойным(ой) и расслабленным(ой).',
+            'Я чувствовал(а) себя активным(ой) и энергичным(ой).',
+            'Я просыпался(ась) свежим(ей) и отдохнувшим(ей).',
+            'Моя повседневная жизнь была наполнена интересными вещами.',
+        ];
+
+        $this->createScaleTest(
+            'WHO5',
+            'WHO-5 — Индекс благополучия (5)',
+            'Короткий индекс субъективного благополучия.',
+            "Инструкция:\n- Оцените, насколько часто это было характерно для вас.\n- Отвечайте, опираясь на последнее время.",
+            2,
+            $this->rp('Ресурс', 'Индекс благополучия как маркер ресурса (алгоритм, 0..25).', [
+                ['min'=>0,  'max'=>7,  'label'=>'Низкий ресурс', 'text'=>'Благополучие снижено. Рекомендуется оценка причин и поддержка.'],
+                ['min'=>8,  'max'=>13, 'label'=>'Сниженный ресурс', 'text'=>'Ресурс может быть снижен. Полезна поддержка режима/сна.'],
+                ['min'=>14, 'max'=>19, 'label'=>'Умеренный ресурс', 'text'=>'Ресурс в целом достаточный.'],
+                ['min'=>20, 'max'=>25, 'label'=>'Высокий ресурс', 'text'=>'Ресурс и благополучие выражены хорошо.'],
+            ]),
+            $items,
+            $this->optWHO5_0to5(), // 0..5
+            [
+                ['title' => 'WHO-5: суммарный балл (0–25)', 'item_ids' => [1,2,3,4,5]],
+            ]
+        );
+    }
+
+    private function seedPCPTSD5(): void
+    {
+        $items = [
+            'У меня бывают навязчивые воспоминания или сны о тяжёлом событии.',
+            'Я стараюсь избегать напоминаний о тяжёлом событии.',
+            'Я постоянно настороже или легко пугаюсь.',
+            'Я чувствую отстранённость от людей или потерю интереса.',
+            'Я испытываю чувство вины или обвиняю себя/других из-за произошедшего.',
+        ];
+
+        $this->createScaleTest(
+            'PCPTSD5',
+            'PC-PTSD-5 — скрининг ПТСР (5)',
+            'Короткий скрининг посттравматических симптомов.',
+            "Инструкция:\n- Ответьте «Да/Нет» на каждый пункт.\n- Отвечайте честно, ориентируясь на последнее время.",
+            1,
+            $this->rp('Ресурс', 'Риск нагрузки на ресурс при ПТСР-симптомах (алгоритм).', [
+                ['min'=>0, 'max'=>1, 'label'=>'Низкий риск', 'text'=>'Риск выраженных симптомов по скринингу невысок.'],
+                ['min'=>2, 'max'=>2, 'label'=>'Умеренный риск', 'text'=>'Есть признаки. Полезно уточнить у врача.'],
+                ['min'=>3, 'max'=>5, 'label'=>'Высокий риск', 'text'=>'Высокая вероятность значимых симптомов. Рекомендуется очная оценка.'],
+            ]),
+            $items,
+            $this->optYesNo01(),
+            [
+                ['title' => 'PC-PTSD-5: количество «Да»', 'item_ids' => [1,2,3,4,5]],
+            ]
+        );
+    }
+
+    private function seedSCOFF(): void
+    {
+        $items = [
+            'Я вызываю рвоту из-за ощущения переедания.',
+            'Я переживаю, что теряю контроль над тем, сколько я ем.',
+            'Я терял(а) больше 6–7 кг за короткое время.',
+            'Я считаю себя полным(ой), хотя окружающие так не считают.',
+            'Еда занимает слишком много места в моих мыслях.',
+        ];
+
+        $this->createScaleTest(
+            'SCOFF',
+            'SCOFF — скрининг расстройств пищевого поведения (5)',
+            'Короткий скрининг рисков расстройств пищевого поведения.',
+            "Инструкция:\n- Ответьте «Да/Нет» на каждый вопрос.\n- Отвечайте честно — это помогает вовремя заметить риски.",
+            1,
+            $this->rp('Ресурс', 'Риск и возможная нагрузка на ресурс (алгоритм).', [
+                ['min'=>0, 'max'=>0, 'label'=>'Низкий риск', 'text'=>'По тесту признаки РПП не выявлены.'],
+                ['min'=>1, 'max'=>1, 'label'=>'Умеренный риск', 'text'=>'Есть отдельные признаки. Полезно обсудить с врачом.'],
+                ['min'=>2, 'max'=>5, 'label'=>'Повышенный риск', 'text'=>'Вероятны значимые риски. Рекомендуется консультация.'],
+            ]),
+            $items,
+            $this->optYesNo01(),
+            [
+                ['title' => 'Количество ответов «Да»', 'item_ids' => [1,2,3,4,5]],
+            ]
+        );
+    }
+
+    private function seedPCPTSD5_placeholder(): void {}
+
+    private function seedCAGEAID_placeholder(): void {}
+
+    private function seedPCL5_placeholder(): void {}
+
+    private function seedEPDS_placeholder(): void {}
+
+    private function seedGAD7_placeholder(): void {}
+
+    private function seedHADS_placeholder(): void {}
+
+    private function seedPHQ9_placeholder(): void {}
+
+    private function seedWHO5_placeholder(): void {}
+
+    private function seedSCOFF_placeholder(): void {}
+
+    private function seedK10_placeholder(): void {}
+
+    private function seedPSS10_placeholder(): void {}
+
+    private function seedASRS_placeholder(): void {}
+
+    // -------------------------------------------------------
+    // НЕДОСТАЮЩИЕ ПО СПИСКУ В tests (для полноты системы)
+    // -------------------------------------------------------
+
+    private function seedAUDITC_placeholder(): void {}
+    private function seedDAST10_placeholder(): void {}
+    private function seedSDS_placeholder(): void {}
+    private function seedSAS_placeholder(): void {}
+    private function seedBDI2_placeholder(): void {}
+    private function seedBAI_placeholder(): void {}
+
+    // -------------------------------------------------------
+    // ⚠️ ВАЖНО: ТЫ ЕЩЁ ПИСАЛ ПРО "PC-PTSD-5" и "PC-PTSD-5 — скрининг ПТСР (5)".
+    // Он уже реализован в seedPCPTSD5().
+    // -------------------------------------------------------
 }

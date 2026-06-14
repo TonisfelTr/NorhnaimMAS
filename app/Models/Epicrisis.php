@@ -17,15 +17,20 @@ class Epicrisis extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function diagnose(): BelongsTo
+    {
+        return $this->belongsTo(Diagnose::class);
+    }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class);
+    }
+
     public function symptoms(): BelongsToMany
     {
         return $this->belongsToMany(Symptom::class, 'epicrisis_symptoms')
             ->withPivot(['doctor_id','active','created_at','updated_at'])
             ->withTimestamps();
-    }
-
-    public function epicrisisSymptoms(): HasMany
-    {
-        return $this->hasMany(EpicrisisSymptom::class);
     }
 }

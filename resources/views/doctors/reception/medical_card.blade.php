@@ -1,149 +1,14 @@
 @extends('doctors.reception')
 @section('title', "{$patient->getFullNameWithInitials()} - медицинская карта пациента")
 @section('assets')
-    <style>
-        :root {
-            --mc-surface: #fff;
-            --mc-border: #e9eef3;
-            --mc-muted: #6b7280;
-            --mc-radius: 12px;
-            --mc-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 16px rgba(15, 23, 42, .03);
-        }
-
-        /* Узкая центральная колонка */
-        .mc-wrap {
-            max-width: 1490px;
-            margin: 0 auto;
-        }
-
-        /* Карточка шапки и элементы ленты */
-        .mc-card {
-            background: var(--mc-surface);
-            border: 1px solid var(--mc-border);
-            border-radius: var(--mc-radius);
-            box-shadow: var(--mc-shadow);
-        }
-
-        .mc-card .card-body {
-            padding: 1rem 1.25rem;
-        }
-
-        /* Аватар */
-        .mc-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 9999px;
-            background: #f3f4f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Блок табов как на макете: мягкие «пилюли» на светлой подложке */
-        .mc-tabs {
-            background: #f9fafb;
-            border-top: 1px solid var(--mc-border);
-            border-bottom-left-radius: var(--mc-radius);
-            border-bottom-right-radius: var(--mc-radius);
-            padding: .5rem 1rem 0;
-        }
-
-        .mc-tabs .nav {
-            gap: .25rem;
-        }
-
-        .mc-tabs .nav-link {
-            color: var(--mc-muted);
-            border: 0;
-            border-radius: 9999px;
-            padding: .35rem .75rem;
-            font-weight: 500;
-        }
-
-        .mc-tabs .nav-link:hover {
-            background: #eef2f7;
-            color: #111827;
-        }
-
-        .mc-tabs .nav-link.active {
-            background: rgba(13, 110, 253, .10);
-            color: #0d6efd;
-        }
-
-        /* Контент табов */
-        .mc-pane {
-            padding: 1rem 0;
-        }
-
-        /* Плейсхолдеры помягче */
-        .placeholder {
-            opacity: .55
-        }
-
-        /* Кнопка редактирования в шапке — маленькая, справа */
-        .btn-edit {
-            white-space: nowrap;
-        }
-
-        .nav-link.active[data-bs-toggle="tab"] {
-            background: transparent;
-            border-bottom: 3px solid #0a58ca;
-            border-radius: 0;
-        }
-
-        #suneditor_anamnesisEditor {
-            font-family: 'Trebuchet MS';
-        }
-
-        .label-required::after {
-            content: " *";
-            color: #dc3545; /* bootstrap danger */
-            font-weight: 700;
-            margin-left: 2px;
-        }
-
-        .tooltip {
-            text-align: left !important;
-        }
-
-        #modalAddAnamnesis .modal-dialog {
-            max-width: 90%; /* например, 90% от ширины окна */
-        }
-
-        #aiPanel {
-            position: relative;
-        }
-
-        .ai-loading {
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, .7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
-        }
-
-        #aiSymptoms .form-check.text-muted {
-            opacity: .7;
-        }
-
-        #pane-manual .form-label {
-            margin-bottom: .125rem;
-        }
-
-        /* меньше стандартного .5rem */
-        #pane-manual .input-group {
-            margin-top: .25rem;
-        }
-
-        #aiTabs {
-            --bs-nav-tabs-border-color: white;
-        }
-    </style>
+    @vite('resources/sass/medical_card.sass')
+    @vite('resources/js/medical_card.js')
 @endsection
 @section('sub-main')
-    <div class="p-4">
+    <div id="medicalCardRoot"
+         class="p-4"
+         data-active-tab="{{ session('active_tab') }}"
+         data-address-suggest-url="{{ route('api-search-address') }}">
         <div class="mc-wrap">
 
             <div class="mc-card mb-2">
@@ -180,19 +45,28 @@
                             <div class="text-warning small">
                                 <i class="bi bi-exclamation-triangle"></i> Не зарегистрирован в системе!
                             </div>
-                        @else()
+                        @else
                             <span class="text-info">Зарегистрирован в системе!</span>
                         @endif
                     </div>
 
                 </div>
 
-                {{-- Tabs (под шапкой, как на макете) --}}
                 <div class="mc-tabs">
                     <ul class="nav" id="cardTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-anamnesis"
-                                    type="button">Анамнез
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-patient-info" type="button">
+                                Общая информация
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-docs" type="button">
+                                Документы
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-anamnesis" type="button">
+                                Анамнез
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -201,8 +75,18 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-epicrisis"
+                                    type="button">Эпикриз
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-tests" type="button">
                                 Тесты
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-contacts" type="button">
+                                Контакты
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -210,22 +94,766 @@
                                 Препараты и рецепты
                             </button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-epicrisis"
-                                    type="button">Эпикриз
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-docs" type="button">
-                                Документы
-                            </button>
-                        </li>
                     </ul>
                 </div>
             </div>
 
             <div class="tab-content">
-                <div class="tab-pane fade show active mc-pane" id="pane-anamnesis" role="tabpanel">
+                <div class="tab-pane fade show active mc-pane"
+                     id="pane-patient-info"
+                     role="tabpanel">
+                    <div class="patient-info-dashboard">
+                        <div class="patient-info-hero">
+                            <div class="patient-info-hero__content">
+                                <div class="patient-info-hero__eyebrow">
+                                    <i class="bi bi-person-vcard"></i>
+                                    Карточка пациента
+                                </div>
+                                <h2 class="patient-info-hero__title">Общая информация</h2>
+                                <div class="patient-info-hero__subtitle">
+                                    Редактирование основных регистрационных данных: ФИО, дата рождения, пол,
+                                    паспорт, адрес прописки, адрес фактического проживания, контакты и номер медицинской карты.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="patient-info-side-card">
+                            <div class="patient-info-side-card__title">Краткая сводка</div>
+                            <div class="patient-info-summary-list">
+                                <div class="patient-info-summary-item">
+                                    <div class="patient-info-summary-item__icon"><i class="bi bi-hash"></i></div>
+                                    <div>
+                                        <div class="patient-info-summary-item__label">Номер медкарты</div>
+                                        <div class="patient-info-summary-item__value">
+                                            {{ $patient->medcard_number ?? '—' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="patient-info-summary-item">
+                                    <div class="patient-info-summary-item__icon"><i class="bi bi-geo-alt"></i></div>
+                                    <div>
+                                        <div class="patient-info-summary-item__label">Адрес прописки</div>
+                                        <div class="patient-info-summary-item__value">
+                                            {{ $patient->address_registration ?? '—' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="patient-info-summary-item">
+                                    <div class="patient-info-summary-item__icon"><i class="bi bi-house-heart"></i></div>
+                                    <div>
+                                        <div class="patient-info-summary-item__label">Фактический адрес</div>
+                                        <div class="patient-info-summary-item__value">
+                                            {{ $patient->address_residence ?? '—' }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="patient-info-summary-item">
+                                    <div class="patient-info-summary-item__icon"><i class="bi bi-building"></i></div>
+                                    <div>
+                                        <div class="patient-info-summary-item__label">Место работы</div>
+                                        <div class="patient-info-summary-item__value">
+                                            {{ $patient->job_organization }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="patient-info-summary-item">
+                                    <div class="patient-info-summary-item__icon"><i class="bi bi-envelope"></i></div>
+                                    <div>
+                                        <div class="patient-info-summary-item__label">Email</div>
+                                        <div class="patient-info-summary-item__value">{{ $patient->email ?? '—' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @php
+                        $patientAddressSuggestUrl = \Illuminate\Support\Facades\Route::has('api-search-address')
+                            ? route('api-search-address')
+                            : (\Illuminate\Support\Facades\Route::has('api.addresses.suggest')
+                                ? route('api.addresses.suggest')
+                                : (\Illuminate\Support\Facades\Route::has('addresses.suggest') ? route('addresses.suggest') : ''));
+                        $patientInsuranceSuggestUrl = \Illuminate\Support\Facades\Route::has('api-search-organization')
+                            ? route('api-search-organization')
+                            : (\Illuminate\Support\Facades\Route::has('api.insurance-organizations.suggest')
+                                ? route('api.insurance-organizations.suggest')
+                                : (\Illuminate\Support\Facades\Route::has('insurance-organizations.suggest') ? route('insurance-organizations.suggest') : ''));
+                    @endphp
+
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            Возникли ошибки при сохранении карты пациента:
+                            <ul>
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form class="patient-info-form-card"
+                          method="post"
+                          data-address-suggest-url="{{ $patientAddressSuggestUrl }}"
+                          data-insurance-suggest-url="{{ $patientInsuranceSuggestUrl }}"
+                          action="{{ \Illuminate\Support\Facades\Route::has('doctors.patients.update') ? route('doctors.patients.update', $patient->id) : url()->current() }}">
+                        @csrf
+
+                        <div class="patient-info-form-card__head">
+                            <div>
+                                <div class="patient-info-form-card__title">Данные пациента</div>
+                                <div class="patient-info-form-card__hint">
+                                    После сохранения данные обновятся в шапке медицинской карты и в регистрационных сведениях пациента.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="patient-info-form-sections">
+                            <section class="patient-info-section patient-info-section--main">
+                                <div class="patient-info-section-title">
+                                    <i class="bi bi-person-lines-fill text-primary"></i>
+                                    <span class="patient-info-section-title__text">
+                                        <span>Основные данные</span>
+                                        <span class="patient-info-section-title__hint">ФИО, дата рождения, номер карты, СНИЛС и данные страхового полиса.</span>
+                                    </span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label label-required" for="patientSurname">Фамилия</label>
+                                        <input id="patientSurname"
+                                               type="text"
+                                               name="surname"
+                                               class="form-control"
+                                               required
+                                               maxlength="255"
+                                               value="{{ old('surname', $patient->surname) }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label label-required" for="patientName">Имя</label>
+                                        <input id="patientName"
+                                               type="text"
+                                               name="name"
+                                               class="form-control"
+                                               required
+                                               maxlength="255"
+                                               value="{{ old('name', $patient->name) }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="patientPatronym">Отчество</label>
+                                        <input id="patientPatronym"
+                                               type="text"
+                                               name="patronym"
+                                               class="form-control"
+                                               maxlength="255"
+                                               value="{{ old('patronym', $patient->patronym) }}">
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="patientBirthAt">Дата рождения</label>
+                                        <input id="patientBirthAt"
+                                               type="date"
+                                               name="birth_at"
+                                               class="form-control"
+                                               value="{{ old('birth_at', $patient->birth_at ? \Illuminate\Support\Carbon::parse($patient->birth_at)->format('Y-m-d') : '') }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="patientGender">Пол</label>
+                                        <select id="patientGender" name="gender" class="form-select">
+                                            <option value="" @selected(old('gender', $patient->gender) === null || old('gender', $patient->gender) === '')>Не указан</option>
+                                            <option value="M" @selected(old('gender', $patient->gender) === 'M')>Мужской</option>
+                                            <option value="F" @selected(old('gender', $patient->gender) === 'F')>Женский</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="patientBirthPlace">Место рождения</label>
+                                        <input id="patientBirthPlace"
+                                               type="text"
+                                               name="birth_place"
+                                               class="form-control"
+                                               maxlength="255"
+                                               placeholder="Например: г. Томск, Томская область"
+                                               value="{{ old('birth_place', $patient->birth_place) }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="patientMedicalCardNumber">Номер медкарты</label>
+                                        <input id="patientMedicalCardNumber"
+                                               type="text"
+                                               name="medcard_number"
+                                               class="form-control"
+                                               maxlength="100"
+                                               placeholder="Например: 000123"
+                                               value="{{ old('medcard_number', $patient->medcard_number ?? '') }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="patientSnils">СНИЛС</label>
+                                        <input id="patientSnils"
+                                               type="text"
+                                               name="snils"
+                                               class="form-control js-mask-snils"
+                                               maxlength="14"
+                                               inputmode="numeric"
+                                               autocomplete="off"
+                                               placeholder="000-000-000 00"
+                                               value="{{ old('snils', $patient->snils ?? '') }}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="patientEmail">Email</label>
+                                        <input id="patientEmail"
+                                               type="email"
+                                               name="email"
+                                               class="form-control js-mask-email"
+                                               maxlength="255"
+                                               inputmode="email"
+                                               autocomplete="email"
+                                               placeholder="patient@example.ru"
+                                               value="{{ old('email', $patient->email ?? '') }}">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label" for="patientInsuranceCompany">Страховая организация</label>
+                                        <div class="patient-info-address-wrap">
+                                            <input id="patientInsuranceCompany"
+                                                   type="text"
+                                                   name="insurance_company"
+                                                   class="form-control js-insurance-part js-insurance-autocomplete"
+                                                   maxlength="255"
+                                                   autocomplete="off"
+                                                   data-suggest-box="#patientInsuranceCompanySuggest"
+                                                   placeholder="Начните вводить название страховой"
+                                                   title="Введите название или дважды кликните, чтобы открыть список популярных страховых"
+                                                   value="{{ old('insurance_company', $patient->insurance_company) }}">
+                                            <div id="patientInsuranceCompanySuggest" class="patient-info-address-suggest"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="patientInsurancePolicyNumber">Номер полиса</label>
+                                        <input id="patientInsurancePolicyNumber"
+                                               type="text"
+                                               name="oms"
+                                               class="form-control js-insurance-part js-mask-policy"
+                                               maxlength="32"
+                                               inputmode="text"
+                                               autocomplete="off"
+                                               placeholder="ОМС: 16 цифр / ДМС: серия и номер"
+                                               value="{{ old('oms', $patient->oms ?? '') }}">
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="patient-info-section patient-info-section--main">
+                                <div class="patient-info-section-title">
+                                    <i class="bi bi-briefcase text-primary"></i>
+                                    <span class="patient-info-section-title__text">
+                                        <span>Социальные и трудовые сведения</span>
+                                        <span class="patient-info-section-title__hint">Профессия, место работы и отметки, которые уже есть в таблице пациентов.</span>
+                                    </span>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="patientProfession">Профессия</label>
+                                        <input id="patientProfession"
+                                               type="text"
+                                               name="profession"
+                                               class="form-control"
+                                               maxlength="255"
+                                               placeholder="Например: бухгалтер, водитель, пенсионер"
+                                               value="{{ old('profession', $patient->profession) }}">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="patientAddressJob">Место работы / организация</label>
+                                        <input id="patientAddressJob"
+                                               type="text"
+                                               name="job_organization"
+                                               class="form-control"
+                                               maxlength="500"
+                                               placeholder="Название организации или место работы"
+                                               value="{{ old('job_organization', $patient->job_organization) }}">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="patient-info-check-grid">
+                                            <label class="patient-info-check-card" for="patientSociallyDangerous">
+                                                <input type="hidden" name="socially_dangerous" value="0">
+                                                <input id="patientSociallyDangerous"
+                                                       class="form-check-input"
+                                                       type="checkbox"
+                                                       name="socially_dangerous"
+                                                       value="1"
+                                                    @checked((bool)$patient->socially_dangerous)>
+                                                <span>
+                                                    <span class="patient-info-check-card__title">Социально опасный</span>
+                                                    <span class="patient-info-check-card__hint d-block">Отметка для регистрационных и медицинских предупреждений.</span>
+                                                </span>
+                                            </label>
+
+                                            <label class="patient-info-check-card" for="patientDisability">
+                                                <input type="hidden" name="disability" value="0">
+                                                <input id="patientDisability"
+                                                       class="form-check-input"
+                                                       type="checkbox"
+                                                       name="disability"
+                                                       value="1"
+                                                    @checked((bool)$patient->disability)>
+                                                <span>
+                                                    <span class="patient-info-check-card__title">Инвалидность</span>
+                                                    <span class="patient-info-check-card__hint d-block">Наличие действующего статуса инвалида</span>
+                                                </span>
+                                            </label>
+
+                                            <label class="patient-info-check-card" for="patientMarried">
+                                                <input type="hidden" name="married" value="0">
+                                                <input id="patientMarried"
+                                                       class="form-check-input"
+                                                       type="checkbox"
+                                                       name="married"
+                                                       value="1"
+                                                    @checked((bool)$patient->married)>
+                                                <span>
+                                                    <span class="patient-info-check-card__title">Состоит в браке</span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="patient-info-section patient-info-section--passport">
+                                <div class="patient-info-section-title">
+                                    <i class="bi bi-passport text-primary"></i>
+                                    <span class="patient-info-section-title__text">
+                                        <span>Паспорт</span>
+                                        <span class="patient-info-section-title__hint">Серия, номер, дата выдачи, код подразделения и орган выдачи.</span>
+                                    </span>
+                                </div>
+                                <div class="row g-3">
+
+                                    <div class="col-md-2">
+                                        <label class="form-label" for="patientPassportSeries">Серия</label>
+                                        <input id="patientPassportSeries"
+                                               type="text"
+                                               name="passport_series"
+                                               class="form-control js-passport-part js-mask-digits"
+                                               maxlength="4"
+                                               inputmode="numeric"
+                                               autocomplete="off"
+                                               data-mask-max="4"
+                                               placeholder="0000"
+                                               value="{{ $patient->serial }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="patientPassportNumber">Номер</label>
+                                        <input id="patientPassportNumber"
+                                               type="text"
+                                               name="passport_number"
+                                               class="form-control js-passport-part js-mask-digits"
+                                               maxlength="6"
+                                               inputmode="numeric"
+                                               autocomplete="off"
+                                               data-mask-max="6"
+                                               placeholder="000000"
+                                               value="{{ $patient->number }}">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="patientPassportIssuedAt">Дата выдачи</label>
+                                        <input id="patientPassportIssuedAt"
+                                               type="date"
+                                               name="passport_issued_at"
+                                               class="form-control js-passport-part"
+                                               value="{{ $patient->issued_at }}">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="patientPassportDepartmentCode">Код подразделения</label>
+                                        <input id="patientPassportDepartmentCode"
+                                               type="text"
+                                               name="passport_department_code"
+                                               class="form-control js-passport-part js-mask-department-code"
+                                               maxlength="7"
+                                               inputmode="numeric"
+                                               autocomplete="off"
+                                               placeholder="000-000"
+                                               value="{{ $patient->department_code }}">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="patientPassportIssuedBy">Кем выдан</label>
+                                        <textarea id="patientPassportIssuedBy"
+                                                  name="passport_issued_by"
+                                                  class="form-control js-passport-part"
+                                                  rows="2"
+                                                  maxlength="500"
+                                                  placeholder="Наименование органа, выдавшего паспорт">{{ $patient->issued_by }}</textarea>
+                                    </div>
+
+                                </div>
+                            </section>
+
+                            <section class="patient-info-section patient-info-section--addresses">
+                                <div class="patient-info-section-title">
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                    <span class="patient-info-section-title__text">
+                                        <span>Адреса</span>
+                                        <span class="patient-info-section-title__hint">Адрес прописки и фактического проживания с подсказками DaData и автоподстановкой индекса.</span>
+                                    </span>
+                                </div>
+
+                                <div class="patient-info-address-card">
+                                    <div class="patient-info-address-card__head">
+                                        <div>
+                                            <div class="patient-info-address-card__title">Адрес прописки</div>
+                                            <div class="patient-info-address-card__hint">Начните вводить город, улицу, дом или квартиру — адрес можно выбрать из подсказки.</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="patient-info-address-grid">
+                                        <div class="patient-info-address-grid__address">
+                                            <div class="patient-info-address-wrap">
+                                                <label class="form-label" for="patientRegistrationAddress">Адрес с индексом</label>
+                                                <input id="patientRegistrationAddress"
+                                                       type="text"
+                                                       name="address_registration"
+                                                       class="form-control patient-info-address-input js-address-autocomplete"
+                                                       maxlength="500"
+                                                       autocomplete="off"
+                                                       data-postal-target="#patientRegistrationPostalCode"
+                                                       data-copy-to="#patientActualAddress"
+                                                       data-suggest-box="#patientRegistrationAddressSuggest"
+                                                       placeholder="Например: 634000, г Томск, ул Ижевская, д 10, кв 21"
+                                                       value="{{ old('address_registration', $patient->address_registration) }}">
+                                                <div id="patientRegistrationAddressSuggest" class="patient-info-address-suggest"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="patient-info-address-card">
+                                    <div class="patient-info-address-card__head">
+                                        <div>
+                                            <div class="patient-info-address-card__title">Адрес фактического проживания</div>
+                                            <div class="patient-info-address-card__hint">Заполните только если отличается от адреса прописки.</div>
+                                        </div>
+
+                                        <div class="patient-info-address-card__actions">
+                                            <div class="form-check mb-0">
+                                                <input class="form-check-input"
+                                                       type="checkbox"
+                                                       id="sameAsRegistrationAddress"
+                                                       data-source="#patientRegistrationAddress"
+                                                       data-target="#patientActualAddress"
+                                                    @checked($patient->address_residence !== '' && $patient->address_residence === $patient->address_registration)>
+                                                <label class="form-check-label" for="sameAsRegistrationAddress">
+                                                    Совпадает с пропиской
+                                                </label>
+                                            </div>
+                                            <button type="button"
+                                                    class="btn btn-outline-primary btn-sm"
+                                                    id="copyRegistrationAddressToActual"
+                                                    data-source="#patientRegistrationAddress"
+                                                    data-target="#patientActualAddress">
+                                                Заполнить из прописки
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="patient-info-address-grid">
+                                        <div class="patient-info-address-grid__address">
+                                            <div class="patient-info-address-wrap">
+                                                <label class="form-label" for="patientActualAddress">Адрес с индексом</label>
+                                                <input id="patientActualAddress"
+                                                       type="text"
+                                                       name="address_residence"
+                                                       class="form-control patient-info-address-input js-address-autocomplete"
+                                                       maxlength="500"
+                                                       autocomplete="off"
+                                                       data-postal-target="#patientActualPostalCode"
+                                                       data-suggest-box="#patientActualAddressSuggest"
+                                                       placeholder="Например: 634000, г Томск, ул Ижевская, д 10, кв 21"
+                                                       value="{{ old('address_residence', $patient->address_residence) }}">
+                                                <div id="patientActualAddressSuggest" class="patient-info-address-suggest"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="address" id="patientLegacyAddress" value="{{ old('address', $patient->address ?? $patient->address_registration) }}">
+                            </section>
+
+                            <section class="patient-info-section patient-info-section--comment">
+                                <div class="patient-info-section-title">
+                                    <i class="bi bi-chat-left-text text-primary"></i>
+                                    <span class="patient-info-section-title__text">
+                                        <span>Комментарий</span>
+                                        <span class="patient-info-section-title__hint">Дополнительные регистрационные примечания по пациенту.</span>
+                                    </span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label" for="patientComment">Комментарий</label>
+                                        <textarea id="patientComment"
+                                                  name="comment"
+                                                  class="form-control"
+                                                  rows="3"
+                                                  maxlength="1000"
+                                                  placeholder="Важные регистрационные примечания">{{ old('comment', $patient->comment ?? $patient->note ?? '') }}</textarea>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="patient-info-form-actions">
+                            <button type="reset" class="btn btn-light">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Сбросить
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2-circle me-1"></i> Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-pane fade mc-pane"
+                     id="pane-docs"
+                     role="tabpanel">
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            При загрузке файла произошли ошибки:
+                            <ul>
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if($documents)
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="h6 mb-1">Документы пациента</div>
+                                <div class="small text-muted">Загруженные файлы, выписки, заключения и изображения</div>
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    id="document-upload_button"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalUploadDocument">
+                                <i class="bi bi-upload me-1"></i> Загрузить документ
+                            </button>
+                        </div>
+                    @endif
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="mc-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                                             style="width: 44px; height: 44px;">
+                                            <i class="bi bi-folder2-open fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="small text-muted">Всего документов</div>
+                                            <div class="h5 mb-0">{{ isset($documents) ? $documents->count() : 0 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mc-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center"
+                                             style="width: 44px; height: 44px;">
+                                            <i class="bi bi-file-earmark-medical fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="small text-muted">Медицинские файлы</div>
+                                            <div class="h5 mb-0">{{ $medicalFilesCount }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="mc-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
+                                             style="width: 44px; height: 44px;">
+                                            <i class="bi bi-clock-history fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="small text-muted">Последнее обновление</div>
+                                            <div class="fw-semibold">
+                                                {{ isset($documents) && $documents->count() ? $documents->first()->updated_at?->format('d.m.Y H:i') : '—' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mc-card">
+                        <div class="card-body">
+                            @if(isset($documents) && $documents->count())
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Документ</th>
+                                            <th>Комментарий</th>
+                                            <th>Дата</th>
+                                            <th class="text-end" style="width: 120px;">Действия</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach($documents as $document)
+                                            <tr>
+                                                <td @if($document->medical_file)style="color: green;"@endif>
+                                                    @switch($document->fileExtension())
+                                                        @case('doc')
+                                                            <i class="bi bi-filetype-doc"></i>
+                                                            @break
+                                                        @case('docx')
+                                                            <i class="bi bi-filetype-docx"></i>
+                                                            @break
+                                                        @case('pdf')
+                                                            <i class="bi bi-filetype-pdf"></i>
+                                                            @break
+                                                        @case('txt')
+                                                            <i class="bi bi-filetype-txt"></i>
+                                                            @break
+                                                    @endswitch
+                                                </td>
+                                                <td>
+                                                    <div class="fw-semibold">{{ $document->name ?? $document->title ?? 'Документ' }}</div>
+                                                    <div class="small" style="color: green;">{{ $document->medical_file ? 'Медицинский документ' : '' }}</div>
+                                                </td>
+                                                <td>{{ $document->description ?? '—' }}</td>
+                                                <td class="text-nowrap">{{ $document->created_at?->format('d.m.Y H:i') }}</td>
+                                                <td class="text-end">
+                                                    <form class="d-inline-flex" action="{{ route('doctors.patients.documents.delete',
+                                                            [$patient->id, $document->id]) }}" method="post">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-link p-1">
+                                                            <i class="bi bi-trash" style="color: red;"></i>
+                                                        </button>
+                                                        <a href="{{ route('doctors.patients.documents.download', [$patient->id, $document->id]) }}"
+                                                           class="btn btn-link p-1"
+                                                           target="_blank"
+                                                           title="Скачать документ">
+                                                            <i class="bi bi-download"></i>
+                                                        </a>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                    {{ $documents->links() }}
+                                </div>
+                            @else
+                                <div class="text-center py-5">
+                                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
+                                         style="width: 72px; height: 72px;">
+                                        <i class="bi bi-folder2-open fs-2 text-muted"></i>
+                                    </div>
+                                    <div class="h6 mb-1">Документов пока нет</div>
+                                    <div class="text-muted small mb-3">
+                                        Здесь будут отображаться выписки, заключения, изображения и другие файлы пациента.
+                                    </div>
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-sm"
+                                            id="document-upload-panel_button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalUploadDocument">
+                                        <i class="bi bi-upload me-1"></i> Загрузка документов
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="modalUploadDocument" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <form class="modal-content" method="post" enctype="multipart/form-data">
+                                <div class="modal-header">
+                                    @csrf
+                                    <input type="file" id="document-upload__upload" name="document_upload" hidden>
+                                    <input type="hidden" name="patient_id" value="{{ $patient->id }}">
+                                    <input type="hidden" name="doctor_id" value="{{ auth()->user()->doctor->id }}">
+                                    <h5 class="modal-title">Загрузка документа</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label label-required" for="documentUploadName">Название документа</label>
+                                        <input id="documentUploadName"
+                                               type="text"
+                                               name="name"
+                                               class="form-control"
+                                               required
+                                               maxlength="255"
+                                               placeholder="Например: Заключение психиатра"
+                                               value="{{ old('name') }}">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="documentUploadComment">Комментарий</label>
+                                        <textarea id="documentUploadComment"
+                                                  name="description"
+                                                  class="form-control"
+                                                  rows="3"
+                                                  maxlength="255"
+                                                  placeholder="Краткое описание документа">{{ old('description') }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="checkbox" name="medical_file" id="medical_file">
+                                        <label for="medical_file"> Медицинский документ</label>
+                                    </div>
+                                    <div id="documentUploadDropzone" class="document-upload-dropzone" role="button" tabindex="0">
+                                        <div class="document-upload-dropzone__icon">
+                                            <i class="bi bi-cloud-arrow-up fs-3"></i>
+                                        </div>
+                                        <div class="fw-semibold">Перетащите файл сюда</div>
+                                        <div class="small text-muted mt-1">или выберите его вручную. За один раз можно загрузить только один файл.</div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="documentUploadSelectFile">
+                                            <i class="bi bi-paperclip me-1"></i> Выбрать файл
+                                        </button>
+                                    </div>
+
+                                    <div id="documentUploadFileInfo" class="document-upload-file">
+                                        <div class="d-flex align-items-center gap-2 min-w-0">
+                                            <i class="bi bi-file-earmark-medical text-primary fs-5"></i>
+                                            <div class="min-w-0">
+                                                <div id="documentUploadFileName" class="document-upload-file__name">—</div>
+                                                <div id="documentUploadFileMeta" class="document-upload-file__meta">—</div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-link text-danger p-0" id="documentUploadClearFile" title="Убрать файл">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+
+                                    <div id="documentUploadError" class="alert alert-danger d-none mt-3 mb-0"></div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-upload me-1"></i> Загрузить
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade mc-pane" id="pane-anamnesis" role="tabpanel">
                     <div class="d-flex flex-wrap gap-2 mb-2">
                         <button type="button"
                                 class="btn btn-primary btn-sm"
@@ -253,13 +881,13 @@
                                         @if(method_exists($a,'doctor') && $a->doctor)
                                             {{ $a->doctor->full_name ?? '' }}
                                         @else
-                                            Дебаггинг
+                                            —
                                         @endif
                                     </div>
                                     <div>{{ strip_tags(html_entity_decode(\Illuminate\Support\Str::limit($a->text, 260))) }}</div>
                                 </div>
                                 <div class="d-flex align-items-start gap-2">
-                                    <a href="{{ route('doctors.anamneses.show', [$patient->id, $a->id]) }}"
+                                    <a href="{{ route('doctors.patients.anamneses.show', [$patient->id, $a->id]) }}"
                                        class="btn btn-outline-secondary btn-sm">Подробнее</a>
                                 </div>
                             </div>
@@ -269,10 +897,8 @@
                     @endforelse
                 </div>
 
-                {{-- === Анализы и исследования (рыбка) === --}}
                 <div class="tab-pane fade mc-pane" id="pane-labs" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="small text-muted">Исследования</div>
                         <a href="#" class="btn btn-primary btn-sm"
                            data-bs-toggle="modal" data-bs-target="#modalAddLabOrder">
                             <i class="bi bi-plus-lg me-1"></i> Добавить
@@ -296,36 +922,38 @@
                                     @foreach($researches as $research)
                                         <tr class="placeholder-glow">
                                             <td><span class="col-7">{{ $research->laboratory }}</span></td>
-                                            <td><span class="col-6">{{ \Carbon\Carbon::parse($research->updated_at)->format('d.m.Y H:i:s') }}</span></td>
-                                            <td><span class="col-8">{{ $research->priority == 'normal' ? 'Обычный' : 'Срочный' }}</span></td>
-                                            <td>
+                                            <td><span
+                                                    class="col-6">{{ \Carbon\Carbon::parse($research->updated_at)->format('d.m.Y H:i:s') }}</span>
+                                            </td>
+                                            <td><span
+                                                    class="col-8">{{ $research->priority == 'normal' ? 'Обычный' : 'Срочный' }}</span>
+                                            </td>
+                                            <td class="text-nowrap" style="min-width: 130px;">
                                                 @switch($research->status)
                                                     @case('ordered')
-                                                        <span class="badge bg-primary col-5">Назначено</span>
+                                                        <span class="badge text-bg-primary">Назначено</span>
                                                         @break
+
                                                     @case('processing')
-                                                        <span class="badge bg-warning col-5">В работе</span>
+                                                        <span class="badge text-bg-warning">В работе</span>
                                                         @break
+
                                                     @case('ready')
-                                                        <span class="badge bg-success col-5">Выполнен</span>
+                                                        <span class="badge text-bg-success">Выполнен</span>
                                                         @break
+
+                                                    @default
+                                                        <span class="badge text-bg-light border text-muted">{{ $research->status }}</span>
                                                 @endswitch
                                             </td>
-                                            <td class="text-end">
-                                                @php
-                                                    // Сформируем карту значений параметров для просмотра (id => value)
-                                                    // Подстрой под свою модель данных, пример ниже:
-                                                    $valuesMap = collect($research->results ?? [])   // напр., relation results
-                                                        ->mapWithKeys(fn($r) => [ (string)($r->parameter_id ?? $r->lab_parameter_id ?? $r->id) => $r->value ])
-                                                        ->toArray();
-                                                @endphp
-
+                                            <td class="text-end text-nowrap" style="width: 140px;">
                                                 @if($research->status === 'ready')
-                                                    {{-- Просмотр результатов (read-only) --}}
+
                                                     <button type="button"
                                                             class="btn btn-link p-1"
                                                             title="Печать результатов"
                                                             data-research-print
+                                                            data-url="{{ route('doctors.patients.researches.print', ['patient' => $patient->id, 'labResearch' => $research->id]) }}"
                                                             data-research-id="{{ $research->id }}"
                                                             data-patient-id="{{ $patient->id }}">
                                                         <i class="bi bi-printer"></i>
@@ -335,8 +963,8 @@
                                                             title="Просмотреть результаты"
                                                             data-lab-view
                                                             data-id="{{ $research->id }}"
-                                                            data-param-ids='@json($research->parameters)'
-                                                            data-values='@json($valuesMap)'
+                                                            data-params='@json($research->params_payload ?? [])'
+                                                            data-values='@json($research->values_map ?? [])'
                                                             data-collected-at="{{ optional($research->collected_at ?? $research->planned_at)->format('Y-m-d H:i') }}"
                                                             data-laboratory="{{ $research->laboratory }}"
                                                             data-comment="{{ $research->comment }}">
@@ -348,7 +976,8 @@
                                                             title="Внести изменения"
                                                             data-lab-edit
                                                             data-id="{{ $research->id }}"
-                                                            data-param-ids='@json($research->parameters)'
+                                                            data-params='@json($research->params_payload ?? [])'
+                                                            data-values='@json($research->values_map ?? [])'
                                                             data-planned-at="{{ optional($research->planned_at)->format('Y-m-d\TH:i') }}"
                                                             data-priority="{{ $research->priority }}"
                                                             data-laboratory="{{ $research->laboratory }}"
@@ -363,8 +992,7 @@
                                                         title="Удалить"
                                                         data-lab-delete
                                                         data-id="{{ $research->id }}"
-                                                        data-delete-url="{{ route('doctors.researches.delete', ['patient' => $patient->id, 'labResearch' => $research->id]) }}"
-                                                    @disabled($research->status !== 'ordered')>
+                                                        data-delete-url="{{ route('doctors.patients.researches.delete', $research->id) }}">
                                                     <i class="bi bi-trash3 text-danger"></i>
                                                 </button>
                                             </td>
@@ -381,162 +1009,573 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="h6 mb-0">Тесты пациента</div>
                         <div>
-                            <button id="btnOpenAssignModal" class="btn btn-primary btn-sm">
+                            <button id="btnOpenAssignModal"
+                                    type="button"
+                                    class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#assignTestModal">
                                 <i class="bi bi-plus-lg me-1"></i> Добавить назначение
                             </button>
                         </div>
                     </div>
 
-                    <div id="testsDoctorArea">
-                        <!-- Изначально пусто -->
-                        <div id="testsEmpty" class="text-muted small">Назначений пока нет. Нажмите «Добавить назначение», чтобы назначить тест пациенту.</div>
+                    <div id="testsDoctorArea"
+                         data-url-assign="{{ route('doctors.patients.tests.assign', $patient) }}"
+                         data-url-assignments="{{ route('doctors.patients.tests.assignments', $patient) }}"
+                         data-url-cancel="{{ route('doctors.patients.sessions.cancel', '__SID__') }}"
+                         data-url-result="{{ route('doctors.patients.sessions.result', '__SID__') }}"
+                         data-url-finish="{{ route('doctors.patients.sessions.finish', '__SID__') }}"
+                         data-url-session-show="{{ route('doctors.patients.sessions.show', '__SID__') }}"
+                         data-url-start="{{ route('doctors.patients.tests.start', '__AID__') }}"
+                         data-tests-search="{{ route('doctors.patients.tests.list') }}"
+                         data-testing-base="{{ config('app.testing_base_url', url('/doctors/patients/testing')) }}"
+                    >
 
-                        <!-- Список назначений (заполняется JS) -->
-                        <div id="assignmentsList" style="margin-top:8px;"></div>
-                    </div>
-                </div>
-
-                {{-- === Рецепты (рыбка) === --}}
-                <div class="tab-pane fade mc-pane" id="pane-presc" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="small text-muted">Выписанные рецепты</div>
-                        <a href="#" class="btn btn-primary btn-sm disabled">
-                            <i class="bi bi-file-earmark-plus me-1"></i> Выписать рецепт
-                        </a>
-                    </div>
-                    <div class="mc-card">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table align-middle mb-0">
-                                    <thead class="table-light">
-                                    <tr>
-                                        <th>Дата</th>
-                                        <th>Препарат</th>
-                                        <th>Дозировка</th>
-                                        <th>Срок действия</th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    @for($i=0;$i<4;$i++)
-                                        <tr class="placeholder-glow">
-                                            <td><span class="placeholder col-6"></span></td>
-                                            <td><span class="placeholder col-8"></span></td>
-                                            <td><span class="placeholder col-5"></span></td>
-                                            <td><span class="placeholder col-6"></span></td>
-                                            <td class="text-end"><span
-                                                    class="btn btn-sm btn-outline-secondary disabled placeholder col-6">&nbsp;</span>
-                                            </td>
-                                        </tr>
-                                    @endfor
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="alert alert-light border mt-2 mb-0">Раздел в разработке.</div>
+                        <div id="testsEmpty" class="text-muted small">
+                            Назначений пока нет. Нажмите «Добавить назначение», чтобы назначить тест пациенту.
                         </div>
-                    </div>
-                </div>
 
-                {{-- === Эпикриз === --}}
-                <div class="tab-pane fade mc-pane" id="pane-epicrisis" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="small text-muted">Эпикризы</div>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#modalAddEpicrisis">
-                            <i class="bi bi-plus-lg me-1"></i> Добавить эпикриз
-                        </button>
+                        <div id="assignmentsList" class="mt-2"></div>
                     </div>
 
-                    @php
-                        $epicrises = method_exists($patient,'epicrises') ? $patient->epicrises()->latest()->get() : collect();
-                    @endphp
-
-                    @forelse($epicrises as $e)
-                        <div class="mc-card mb-2">
-                            <div class="card-body d-flex">
-                                <div class="me-auto">
-                                    <div class="fw-semibold">{{ $e->created_at?->format('d.m.Y') }}</div>
-                                    <div class="text-muted small mb-1">
-                                        Автор:
-                                        @if(method_exists($e,'doctor') && $e->doctor)
-                                            {{ $e->doctor->surname ?? '' }} {{ $e->doctor->name ?? '' }}
-                                        @else
-                                            —
-                                        @endif
-                                    </div>
-                                    <div>{{ \Illuminate\Support\Str::limit($e->text, 260) }}</div>
+                    <div class="modal fade" id="testStartModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Тестирование пациента</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Закрыть"></button>
                                 </div>
-                                <a class="btn btn-outline-secondary btn-sm" href="#">Открыть</a>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <div class="small text-muted">Одноразовый PIN (для персонала):</div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div id="test-pin"
+                                                 style="font-size:32px;font-weight:800;letter-spacing:2px;">—
+                                            </div>
+                                            <span id="pin-timer" class="badge text-bg-light ms-2"></span>
+                                            <button id="copy-pin" type="button"
+                                                    class="btn btn-outline-secondary btn-sm">Копировать PIN
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="small text-muted">Ссылка для пациента:</div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a id="patient-link" href="#" target="_blank" rel="noopener"
+                                               class="text-decoration-none">
+                                                <span id="patient-link-text"></span>
+                                            </a>
+                                            <button id="copy-link" type="button"
+                                                    class="btn btn-outline-secondary btn-sm">Скопировать
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3 text-center">
+                                        <div class="small text-muted mb-2">Сканируйте QR на устройстве пациента:</div>
+                                        <canvas id="pinQrCanvas" width="224" height="224"></canvas>
+                                    </div>
+
+                                    <div class="alert alert-info mb-0">
+                                        Пациент попадёт только на экран тестирования по токену. Доступ к панели врача
+                                        отсутствует.
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="open-here" type="button" class="btn btn-success">Открыть на этом
+                                        устройстве
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Готово
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="alert alert-light border">Эпикризов нет.</div>
-                    @endforelse
+                    </div>
                 </div>
 
-                {{-- === Документы (рыбка) === --}}
-                <div class="tab-pane fade mc-pane" id="pane-docs" role="tabpanel">
-                    <form class="mc-card p-3 mb-2" action="#" method="post" enctype="multipart/form-data">
+                <div class="tab-pane fade mc-pane" id="pane-contacts" role="tabpanel">
+                    <div class="contacts-dashboard">
+                        <div class="contacts-hero">
+                            <div class="contacts-hero__content">
+                                <div class="contacts-hero__eyebrow">
+                                    <i class="bi bi-person-lines-fill"></i>
+                                    Контактные лица
+                                </div>
+
+                                <h2 class="contacts-hero__title">Контакты пациента</h2>
+
+                                <div class="contacts-hero__subtitle">
+                                    Здесь можно хранить телефоны родственников, сопровождающих лиц и других контактных лиц пациента.
+                                    При необходимости данные можно быстро отредактировать или удалить.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contacts-stat-card">
+                            <div class="contacts-stat-card__icon">
+                                <i class="bi bi-telephone-forward"></i>
+                            </div>
+                            <div>
+                                <div class="contacts-stat-card__label">Добавлено контактов</div>
+                                <div class="contacts-stat-card__value">{{ $contacts->count() }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="contacts-form-card"
+                          method="post"
+                          action="{{ route('doctors.patients.contacts.store') }}">
                         @csrf
-                        <div class="mb-2 fw-semibold">Загрузить документ</div>
-                        <div class="row g-2 align-items-end">
-                            <div class="col-md-6">
-                                <label class="form-label">Файл (PDF/JPG/PNG)</label>
-                                <input class="form-control" type="file" name="file" required>
+                        <input type="hidden" name="patient_id" value="{{ $patient->id }}">
+                        <div class="contacts-form-card__head">
+                            <div>
+                                <div class="contacts-form-card__title">
+                                    <i class="bi bi-plus-circle me-1 text-primary"></i>
+                                    Добавить контакт
+                                </div>
+                                <div class="contacts-form-card__hint">
+                                    Укажите имя или роль контактного лица и номер телефона.
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Комментарий</label>
-                                <input class="form-control" type="text" name="comment"
-                                       placeholder="например, Выписка из стационара">
+                        </div>
+
+                        <div class="row g-3 align-items-end">
+                            <div class="col-lg-5 col-md-6">
+                                <label class="form-label" for="contactNameInput">Имя / кем приходится</label>
+                                <input id="contactNameInput"
+                                       type="text"
+                                       name="name"
+                                       class="form-control"
+                                       value="{{ old('name') }}"
+                                       required
+                                       maxlength="255"
+                                       placeholder="Например: Мать, Иванова Мария">
                             </div>
-                            <div class="col-md-2 text-end">
-                                <button class="btn btn-primary w-100" type="submit" disabled>
-                                    <i class="bi bi-upload me-1"></i>Загрузить
+
+                            <div class="col-lg-5 col-md-6">
+                                <label class="form-label" for="contactPhoneInput">Телефон</label>
+                                <input id="contactPhoneInput"
+                                       type="tel"
+                                       name="phone"
+                                       class="form-control js-mask-phone"
+                                       value="{{ old('phone') }}"
+                                       required
+                                       maxlength="18"
+                                       inputmode="tel"
+                                       autocomplete="tel"
+                                       placeholder="+7 (999) 999-99-99">
+                            </div>
+
+                            <div class="col-lg-2 col-md-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-lg me-1"></i>
+                                    Добавить
                                 </button>
                             </div>
                         </div>
                     </form>
 
-                    <div class="mc-card">
-                        <div class="card-body">
-                            <div class="list-group">
-                                @for($i=0;$i<3;$i++)
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center placeholder-glow">
-                                        <div>
-                                            <div class="fw-semibold"><span class="placeholder col-8"></span></div>
-                                            <div class="small text-muted"><span class="placeholder col-6"></span></div>
-                                        </div>
-                                        <i class="bi bi-box-arrow-up-right text-muted"></i>
-                                    </div>
-                                @endfor
+                    @if($contacts->count())
+                        <div class="contacts-list-card">
+                            <div class="contacts-list-head">
+                                <div class="contacts-list-title">
+                                    <i class="bi bi-card-list me-1 text-primary"></i>
+                                    Список контактов
+                                </div>
+
+                                <div class="contacts-count-pill">
+                                    <i class="bi bi-person-lines-fill"></i>
+                                    {{ $contacts->count() }}
+                                </div>
                             </div>
-                            <div class="alert alert-light border mt-3 mb-0">Раздел в разработке.</div>
+
+                            <div class="contacts-grid">
+                                @foreach($contacts as $contact)
+                                    <div class="contact-card">
+                                        <div class="contact-card__top">
+                                            <div class="contact-card__main">
+                                                <div class="contact-card__avatar">
+                                                    <i class="bi bi-person"></i>
+                                                </div>
+
+                                                <div class="min-w-0">
+                                                    <div class="contact-card__name">
+                                                        {{ $contact->name }}
+                                                    </div>
+
+                                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact->phone) }}"
+                                                       class="contact-card__phone">
+                                                        <i class="bi bi-telephone"></i>
+                                                        {{ $contact->phone }}
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <div class="contact-card__actions">
+                                                <form method="post"
+                                                      action="{{ route('doctors.patients.contacts.destroy', [$patient->id, $contact->id]) }}"
+                                                      onsubmit="return confirm('Удалить контакт «{{ $contact->name }}»?');">
+                                                    @csrf
+                                                    @method('DELETE')
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            title="Удалить контакт">
+                                                        <i class="bi bi-trash3"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <details class="contacts-edit-box">
+                                            <summary>
+                                <span class="contacts-edit-summary">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Редактировать контакт
+                                </span>
+                                            </summary>
+
+                                            <form method="post"
+                                                  action="{{ route('doctors.patients.contacts.update', [$patient->id, $contact->id]) }}"
+                                                  class="contacts-edit-form">
+                                                @csrf
+                                                @method('PUT')
+
+                                                <div class="row g-2">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Имя / кем приходится</label>
+                                                        <input type="text"
+                                                               name="name"
+                                                               class="form-control"
+                                                               value="{{ old('name', $contact->name) }}"
+                                                               required
+                                                               maxlength="255">
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Телефон</label>
+                                                        <input type="tel"
+                                                               name="phone"
+                                                               class="form-control js-mask-phone"
+                                                               value="{{ old('phone', $contact->phone) }}"
+                                                               required
+                                                               maxlength="18"
+                                                               inputmode="tel"
+                                                               autocomplete="tel"
+                                                               placeholder="+7 (999) 999-99-99">
+                                                    </div>
+                                                </div>
+
+                                                <div class="contacts-edit-form__actions">
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-check2 me-1"></i>
+                                                        Сохранить
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </details>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
+                    @else
+                        <div class="contacts-empty-state">
+                            <div class="contacts-empty-state__icon">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+
+                            <div class="contacts-empty-state__title">
+                                Контакты пока не добавлены
+                            </div>
+
+                            <div class="contacts-empty-state__text">
+                                Добавьте родственника, сопровождающего или другое контактное лицо пациента.
+                                После добавления контакт появится в этом разделе.
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="tab-pane fade mc-pane" id="pane-presc" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="small text-muted">Выписанные рецепты</div>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#prescriptionModal"
+                            data-role="open-prescription-modal"
+                        >
+                            <i class="bi bi-file-earmark-plus me-1"></i> Выписать рецепт
+                        </button>
+                    </div>
+
+                    <div class="d-flex flex-column gap-4">
+                        @foreach($prescriptions as $date => $datePrescriptions)
+
+                            <div class="prescription-date-group">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <div class="fw-semibold fs-6">
+                                        {{ \Carbon\Carbon::parse($date)->locale('ru')->isoFormat('D MMMM YYYY [года]') }}
+                                    </div>
+
+                                    <div class="flex-grow-1 border-top"></div>
+
+                                    <span class="badge text-bg-light border">
+                                {{ $datePrescriptions->count() }} препарат(ов)
+                            </span>
+                                </div>
+
+                                <div class="d-flex flex-column gap-3">
+                                    @foreach($datePrescriptions as $prescription)
+                                        <form method="post"
+                                              action="{{ route('doctors.prescriptions.repeat', $prescription->id) }}"
+                                              class="mc-card border rounded-3"
+                                              data-prescription-id="{{ $prescription->id }}">
+                                            @csrf
+
+                                            <div class="card-body p-3">
+                                                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                                                    <div>
+                                                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                                    <span class="badge text-bg-light border">
+                                                        {{ ucfirst($prescription->drug?->groupName() ?? 'Препарат') }}
+                                                    </span>
+                                                            <span class="badge text-bg-success-subtle border text-success-emphasis">
+                                                        {{ $prescription->prescription_form }}
+                                                    </span>
+                                                            @if($prescription->daily_generic_prescriptions_count > 1)
+                                                                <span class="badge text-bg-warning border text-dark">
+                                                            Выписывался {{ $prescription->daily_generic_prescriptions_count }} раза за день
+                                                        </span>
+                                                            @endif
+                                                        </div>
+
+                                                        <h6 class="mb-1">
+                                                            {{ $prescription->drug?->name ?? $prescription->generic_name }}
+                                                        </h6>
+
+                                                        <div class="small text-muted">
+                                                            Последняя выписка:
+                                                            {{ \Carbon\Carbon::parse($prescription->created_at)->format('d.m.Y H:i') }}
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex gap-2">
+                                                        <button type="button"
+                                                                class="js-print-prescription btn btn-sm btn-outline-secondary"
+                                                                title="Печать рецепта"
+                                                                data-url="{{ route('doctors.prescriptions.print.from_table', $prescription->id) }}">
+                                                            <i class="bi bi-printer"></i>
+                                                        </button>
+
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-primary"
+                                                                title="Повторить рецепт">
+                                                            <i class="bi bi-arrow-repeat"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <hr class="my-3">
+
+                                                <div class="row g-3">
+                                                    <div class="col-md-8">
+                                                        <div class="small text-muted mb-1">Схема приёма</div>
+                                                        <div class="small">
+                                                            {{ $prescription->usage_instructions }}
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="small text-muted mb-1">Кто выписал</div>
+                                                        <div>{{ $prescription->doctor_name }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
+                <div class="tab-pane fade mc-pane" id="pane-epicrisis" role="tabpanel">
+                    @php
+                        $epicrises = method_exists($patient,'epicrises') ? $patient->epicrises()->latest()->get() : collect();
+                        $epicrisesCount = $epicrises->count();
+                        $lastEpicrisis = $epicrises->first();
+                        $epicrisesWithDiagnosesCount = $epicrises->filter(fn($item) => !empty($item->mkb10))->count();
+                    @endphp
+
+                    <div class="epicrisis-dashboard">
+                        <div class="epicrisis-hero">
+                            <div class="epicrisis-hero__content">
+                                <div>
+                                    <div class="epicrisis-hero__eyebrow">
+                                        <i class="bi bi-journal-medical"></i>
+                                        Медицинские заключения
+                                    </div>
+                                    <h2 class="epicrisis-hero__title">Эпикризы пациента</h2>
+                                    <div class="epicrisis-hero__subtitle">
+                                        Быстрый просмотр сохранённых эпикризов: дата создания, автор, диагноз по МКБ-10 и краткое содержание документа.
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-primary btn-sm epicrisis-hero__action"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalAddEpicrisis">
+                                    <i class="bi bi-plus-lg me-1"></i> Добавить эпикриз
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="epicrisis-stat-card">
+                            <div class="epicrisis-stat-card__icon bg-primary-subtle text-primary">
+                                <i class="bi bi-file-earmark-medical"></i>
+                            </div>
+                            <div>
+                                <div class="epicrisis-stat-card__label">Всего эпикризов</div>
+                                <div class="epicrisis-stat-card__value">{{ $epicrisesCount }}</div>
+                            </div>
+                        </div>
+
+                        <div class="epicrisis-stat-card">
+                            <div class="epicrisis-stat-card__icon bg-success-subtle text-success">
+                                <i class="bi bi-clipboard2-pulse"></i>
+                            </div>
+                            <div>
+                                <div class="epicrisis-stat-card__label">С диагнозом</div>
+                                <div class="epicrisis-stat-card__value">{{ $epicrisesWithDiagnosesCount }}</div>
+                            </div>
+                        </div>
+
+                        <div class="epicrisis-stat-card">
+                            <div class="epicrisis-stat-card__icon bg-warning-subtle text-warning">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div>
+                                <div class="epicrisis-stat-card__label">Последний эпикриз</div>
+                                <div class="epicrisis-stat-card__value fs-6">
+                                    {{ $lastEpicrisis?->created_at?->format('d.m.Y') ?? '—' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($epicrisesCount)
+                        <div class="epicrisis-list-card">
+                            <div class="epicrisis-list-head">
+                                <div>
+                                    <div class="epicrisis-list-title">История эпикризов</div>
+                                    <div class="small text-muted">Последние записи отображаются первыми</div>
+                                </div>
+                                <span class="epicrisis-count-pill">
+                                    <i class="bi bi-list-check"></i>
+                                    {{ $epicrisesCount }} записей
+                                </span>
+                            </div>
+
+                            <div class="epicrisis-timeline">
+                                @foreach($epicrises as $e)
+                                    @php
+                                        $createdAt = $e->created_at;
+                                        $plainText = trim(strip_tags(html_entity_decode($e->text ?? '')));
+                                        $diagnosisTitle = trim($e->diagnosis_title ?? '');
+                                    @endphp
+
+                                    <div class="epicrisis-item">
+                                        <div class="epicrisis-date-badge">
+                                            <span class="epicrisis-date-badge__day">{{ $createdAt?->format('d') ?? '—' }}</span>
+                                            <span class="epicrisis-date-badge__month">{{ $createdAt?->locale('ru')->isoFormat('MMM') ?? '' }}</span>
+                                        </div>
+
+                                        <div class="epicrisis-item__main">
+                                            <div class="epicrisis-item__top">
+                                                <h3 class="epicrisis-item__title">Эпикриз от {{ $createdAt?->format('d.m.Y') ?? 'без даты' }}</h3>
+                                                <span class="badge text-bg-light border">
+                                                    {{ $createdAt?->format('H:i') ?? '—' }}
+                                                </span>
+                                            </div>
+
+                                            <div class="epicrisis-meta">
+                                                <span class="epicrisis-meta__item">
+                                                    <i class="bi bi-person-badge"></i>
+                                                    {{ $e->doctor?->full_name ?? 'Автор не указан' }}
+                                                </span>
+                                                <span class="epicrisis-meta__item">
+                                                    <i class="bi bi-calendar2-week"></i>
+                                                    {{ $createdAt?->locale('ru')->isoFormat('D MMMM YYYY [г.]') ?? 'Дата не указана' }}
+                                                </span>
+                                            </div>
+
+                                            @if(!empty($e->mkb10) || $diagnosisTitle !== '')
+                                                <div class="epicrisis-diagnosis-line">
+                                                    @if(!empty($e->mkb10))
+                                                        <span class="epicrisis-mkb-badge">
+                                                            <i class="bi bi-activity"></i>
+                                                            {{ $e->mkb10 }}
+                                                        </span>
+                                                    @endif
+                                                    @if($diagnosisTitle !== '')
+                                                        <span class="epicrisis-diagnosis-title">{{ $diagnosisTitle }}</span>
+                                                    @endif
+                                                </div>
+                                            @endif
+
+                                            <div class="epicrisis-preview">
+                                                {{ \Illuminate\Support\Str::limit(strip_tags(html_entity_decode($e->text)), 360) }}
+                                            </div>
+                                        </div>
+
+                                        <div class="epicrisis-item__actions">
+                                            <a class="btn btn-outline-primary btn-sm epicrisis-open-btn"
+                                               href="{{ route('doctors.patients.epicrisis.show', [$patient->id, $e->id]) }}">
+                                                Открыть <i class="bi bi-arrow-right-short"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <div class="epicrisis-empty-state">
+                            <div class="epicrisis-empty-state__icon">
+                                <i class="bi bi-journal-plus"></i>
+                            </div>
+                            <div class="epicrisis-empty-state__title">Эпикризов пока нет</div>
+                            <div class="epicrisis-empty-state__text">
+                                После добавления эпикриза здесь появится аккуратная история документов с диагнозами, авторами и быстрым переходом к просмотру.
+                            </div>
+                            <button class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalAddEpicrisis">
+                                <i class="bi bi-plus-lg me-1"></i> Добавить первый эпикриз
+                            </button>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
-    @php
-        $labSex = strtolower($patient->sex ?? 'any'); // 'm' | 'f' | 'any'
-        $labAge = $patient->birth_at ? \Carbon\Carbon::parse($patient->birth_at)->age : null;
-    @endphp
-    {{-- Модалка: Внести изменения (ввод результатов) --}}
+
     <div class="modal fade" id="modalAddLab" tabindex="-1" aria-hidden="true"
          data-mode="result"
          data-api-params="{{ route('api.params.search') }}"
-         data-gender="{{ strtolower($patient->gender ?? '') }}"  {{-- <- НОВОЕ --}}
-         data-sex="{{ strtolower($patient->sex ?? 'any') }}"      {{-- fallback --}}
+         data-gender="{{ strtolower($patient->gender ?? '') }}"
+         data-sex="{{ strtolower($patient->sex ?? 'any') }}"
          data-age="{{ $patient->birth_at ? \Carbon\Carbon::parse($patient->birth_at)->age : '' }}"
-         data-update-url="{{ route('doctors.researches.update', ['patient' => $patient->id, 'labResearch' => '__ID__']) }}">
+         data-update-url="{{ route('doctors.patients.researches.update', ['patient' => $patient->id, 'labResearch' => '__ID__']) }}">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <form class="modal-content" method="post"
-                  action="{{ route('doctors.researches.update', ['patient' => $patient->id, 'labResearch' => '__ID__']) }}">
+                  action="{{ route('doctors.patients.researches.update', ['patient' => $patient->id, 'labResearch' => '__ID__']) }}">
                 @csrf
 
-                {{-- важно для редактирования конкретного направления --}}
                 <input type="hidden" name="order_id" id="resultOrderId">
 
                 <div class="modal-header">
@@ -546,8 +1585,8 @@
 
                 <div class="modal-body">
                     <div class="row g-3">
-                        {{-- Левая колонка: только метаданные --}}
-                        <div class="col-lg-4">
+
+                        <div class="col-xl-4 col-lg-5">
                             <div class="border rounded p-3 h-100">
                                 <div class="mb-2">
                                     <label class="form-label">Дата/время забора</label>
@@ -577,19 +1616,19 @@
                             </div>
                         </div>
 
-                        {{-- Правая колонка: только выбранные параметры с вводом значений --}}
-                        <div class="col-lg-8">
+                        <div class="col-xl-8 col-lg-7">
                             <div class="border rounded p-3">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <div class="fw-semibold">Параметры направления <span id="selCount">(0)</span></div>
+                                    <div class="fw-semibold">Параметры направления <span id="resultSelCount">(0)</span></div>
                                     <div class="form-check small">
                                         <input class="form-check-input" type="checkbox" id="toggleHideNormal">
-                                        <label class="form-check-label" for="toggleHideNormal">Скрывать нормальные</label>
+                                        <label class="form-check-label" for="toggleHideNormal">Скрывать
+                                            нормальные</label>
                                     </div>
                                 </div>
 
                                 <div class="table-responsive">
-                                    <table class="table align-middle mb-0" id="selParamsTable">
+                                    <table class="table align-middle mb-0" id="resultParamsTable">
                                         <thead class="table-light">
                                         <tr>
                                             <th style="min-width: 280px;">Параметр</th>
@@ -612,7 +1651,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> {{-- /row --}}
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -622,7 +1661,7 @@
             </form>
         </div>
     </div>
-    {{-- Модалка: Просмотр результатов (READ-ONLY) --}}
+
     <div class="modal fade" id="modalViewLab" tabindex="-1" aria-hidden="true"
          data-api-params="{{ route('api.params.search') }}"
          data-gender="{{ strtolower($patient->gender ?? '') }}"
@@ -637,8 +1676,8 @@
 
                 <div class="modal-body">
                     <div class="row g-3">
-                        {{-- Левая колонка: метаданные --}}
-                        <div class="col-lg-4">
+
+                        <div class="col-xl-4 col-lg-5">
                             <div class="border rounded p-3 h-100">
                                 <div class="mb-2">
                                     <div class="text-muted small">Дата/время забора</div>
@@ -663,8 +1702,7 @@
                             </div>
                         </div>
 
-                        {{-- Правая колонка: таблица параметров --}}
-                        <div class="col-lg-8">
+                        <div class="col-xl-8 col-lg-7">
                             <div class="border rounded p-3">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                     <div class="fw-semibold">Параметры анализа <span id="v_selCount">(0)</span></div>
@@ -692,7 +1730,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> {{-- /row --}}
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -705,11 +1743,11 @@
          id="modalAddAnamnesis"
          tabindex="-1"
          aria-hidden="true"
-         data-api-analyze="{{ route('analyze.anamnesis') }}"
-         data-open-on-load="{{ $errors->any() ? '1' : '0' }}">>
+         data-api-analyze="{{ route('doctors.patients.analyze.anamnesis') }}"
+         data-open-on-load="{{ $errors->any() ? '1' : '0' }}">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <form class="modal-content" method="post"
-                  action="{{ route('doctors.anamneses.store', ['patient' => $patient->id]) }}">
+                  action="{{ route('doctors.patients.anamneses.store', ['patient' => $patient->id]) }}">
                 @csrf
 
                 <div class="modal-header">
@@ -787,7 +1825,6 @@
                                         <div id="aiPanel" class="border rounded p-3 position-relative">
                                             <div class="fw-semibold fs-5">Управление анализатором</div>
 
-                                            {{-- Текстовая сводка для вставки в редактор --}}
                                             <div id="aiResultBox" class="mt-2 d-none"></div>
 
                                             <div class="row mt-3 g-2">
@@ -815,33 +1852,28 @@
 
                                             <hr id="aiSep" class="my-3 d-none">
 
-                                            {{-- НОВОЕ: структурная сводка (диагноз + ключевые симптомы) --}}
                                             <div id="aiSummary" class="mb-3 d-none"></div>
 
-                                            {{-- НОВОЕ: ТОП-5 диагнозов (radio) --}}
                                             <div id="aiDiagTitle" class="mb-2 fw-semibold d-none">Предложенные диагнозы
                                                 (ТОП-5)
                                             </div>
                                             <div id="aiDiagnoses" class="ps-1 d-none"></div>
 
-                                            {{-- НОВОЕ: симптомы (checkbox) --}}
                                             <div id="aiSymTitle" class="mb-2 fw-semibold d-none">Найденные симптомы
                                             </div>
                                             <div id="aiSymptoms" class="ps-1 d-none"></div>
 
                                             <div class="form-check mt-3">
-                                                <input class="form-check-input" type="checkbox" id="m-set-current">
-                                                <label class="form-check-label" for="m-set-current">
+                                                <input class="form-check-input" type="checkbox" id="ai-set-current">
+                                                <label class="form-check-label" for="ai-set-current">
                                                     Назначить выбранный диагноз как текущий для пациента
                                                 </label>
                                             </div>
 
-                                            {{-- hidden для отправки выбора на бек при сохранении --}}
                                             <input type="hidden" id="diagCodeInput" name="diagnosis_code">
                                             <input type="hidden" id="diagTitleInput" name="diagnosis_title">
                                             <input type="hidden" id="symptomsJsonInput" name="symptoms_json">
 
-                                            {{-- оверлей загрузки --}}
                                             <div id="aiLoading" class="ai-loading d-none">
                                                 <div class="spinner-border" role="status" aria-hidden="true"></div>
                                                 <span class="ms-2">Анализируем…</span>
@@ -860,9 +1892,6 @@
                                                        placeholder="напр., F20.0 или «Параноидная шизофрения»">
                                                 <div id="diagnosisMenu" class="dropdown-menu"></div>
                                             </div>
-
-                                            <input type="hidden" id="diagCodeInput" name="diagCode">
-                                            <input type="hidden" id="diagTitleInput" name="diagTitle">
                                         </div>
 
                                         <div class="mt-3">
@@ -902,19 +1931,12 @@
                                             </div>
 
                                             <div class="form-check mt-3">
-                                                <input class="form-check-input" type="checkbox" id="m-set-current">
-                                                <label class="form-check-label" for="m-set-current">
+                                                <input class="form-check-input" type="checkbox" id="manual-set-current">
+                                                <label class="form-check-label" for="manual-set-current">
                                                     Назначить выбранный диагноз как текущий для пациента
                                                 </label>
                                             </div>
                                         </div>
-                                        @if(config('app.debug'))
-                                            <div class="mt-auto small text-muted">
-                                                Подсказка: значения из этой вкладки уйдут в форму (как и данные ИИ),
-                                                т.к. пишутся в <code>diagCodeInput</code>, <code>diagTitleInput</code> и
-                                                <code>symptomsJsonInput</code>.
-                                            </div>
-                                        @endif
                                     </div>
                                 </div>
 
@@ -936,13 +1958,14 @@
          aria-hidden="true"
          data-mode="order"
          data-api-params="{{ route('api.params.search') }}"
-         data-gender="{{ strtolower($patient->gender ?? '') }}"  {{-- <- НОВОЕ --}}
-         data-sex="{{ strtolower($patient->sex ?? 'any') }}"      {{-- fallback --}}
+         data-gender="{{ strtolower($patient->gender ?? '') }}"
+         data-sex="{{ strtolower($patient->sex ?? 'any') }}"
          data-age="{{ $patient->birth_at ? \Carbon\Carbon::parse($patient->birth_at)->age : '' }}"
          data-api-save-template="{{ route('api.store.labtemplate') }}"
          data-templates='@json($templatesMap)'>
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <form class="modal-content" method="post" action="{{ route('doctors.researches.store', $patient->id) }}">
+            <form class="modal-content" method="post"
+                  action="{{ route('doctors.patients.researches.store', $patient->id) }}">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Создать направление на анализ</h5>
@@ -951,8 +1974,8 @@
 
                 <div class="modal-body">
                     <div class="row g-3">
-                        {{-- Левая колонка: метаданные направления --}}
-                        <div class="col-lg-4">
+
+                        <div class="col-xl-4 col-lg-5">
                             <div class="border rounded p-3 h-100">
                                 <div class="mb-2">
                                     <label class="form-label">Плановая дата/время забора</label>
@@ -999,7 +2022,9 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <button class="btn btn-outline-secondary" type="button" id="btnOrderTplApply">Применить</button>
+                                        <button class="btn btn-outline-secondary" type="button" id="btnOrderTplApply">
+                                            Применить
+                                        </button>
                                     </div>
                                     <div class="form-text">Шаблон заполнит список параметров справа.</div>
                                 </div>
@@ -1007,16 +2032,18 @@
                                 <div class="mt-2">
                                     <label class="form-label">Сохранить выбранные как шаблон</label>
                                     <div class="input-group">
-                                        <input id="orderTplName" type="text" class="form-control" placeholder="Название шаблона">
-                                        <button class="btn btn-outline-primary" type="button" id="btnOrderTplSave">Сохранить</button>
+                                        <input id="orderTplName" type="text" class="form-control"
+                                               placeholder="Название шаблона">
+                                        <button class="btn btn-outline-primary" type="button" id="btnOrderTplSave">
+                                            Сохранить
+                                        </button>
                                     </div>
                                     <div class="form-text">Шаблон будет доступен только вам.</div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Правая колонка: поиск и выбранные параметры (БЕЗ значений) --}}
-                        <div class="col-lg-8">
+                        <div class="col-xl-8 col-lg-7">
                             <div class="border rounded p-3">
                                 <div class="row g-2">
                                     <div class="col-md-12">
@@ -1035,7 +2062,9 @@
                                         <input id="paramSearch" class="form-control" autocomplete="off"
                                                placeholder="напр.: Hb, натрий, «Гемоглобин»">
                                         <div id="paramMenu" class="dropdown-menu"></div>
-                                        <div class="form-text">Начните вводить название или просто кликните в поле, чтобы показать список.</div>
+                                        <div class="form-text">Начните вводить название или просто кликните в поле,
+                                            чтобы показать список.
+                                        </div>
                                     </div>
                                     <div class="col-md-5">
                                         <label class="form-label">Группа</label>
@@ -1064,11 +2093,11 @@
                                 <hr>
 
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <div class="fw-semibold">Выбранные параметры <span id="selCount">(0)</span></div>
+                                    <div class="fw-semibold">Выбранные параметры <span id="orderSelCount">(0)</span></div>
                                 </div>
 
                                 <div class="table-responsive">
-                                    <table class="table align-middle mb-0" id="selParamsTable">
+                                    <table class="table align-middle mb-0" id="orderParamsTable">
                                         <thead class="table-light">
                                         <tr>
                                             <th style="min-width:280px">Параметр</th>
@@ -1078,7 +2107,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {{-- строки добавляются JS; по строке будет hidden param_ids[] --}}
+
                                         </tbody>
                                     </table>
                                 </div>
@@ -1096,86 +2125,108 @@
             </form>
         </div>
     </div>
-    <div class="modal fade" id="modalAddEpicrisis" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <form class="modal-content" method="post" action="#">
+    <div class="modal fade epicrisis-modal-ui" id="modalAddEpicrisis" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <form class="modal-content"
+                  method="post"
+                  action="{{ route('doctors.patients.epicrisis.store', $patient->id) }}"
+                  data-diagnoses-url="/api/diagnoses">
                 @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Добавить эпикриз</h5>
+
+                <div class="modal-header border-0 pb-2">
+                    <div>
+                        <h5 class="modal-title mb-1">
+                            <i class="bi bi-journal-medical me-1"></i>
+                            Добавить эпикриз
+                        </h5>
+                        <div class="small text-muted">
+                            Поиск диагноза по МКБ-10 и форматированный текст эпикриза.
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Текст эпикриза</label>
-                        <textarea name="text" class="form-control" rows="10" required></textarea>
-                    </div>
+
+                <div class="modal-body pt-2">
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Диагноз (МКБ-10)</label>
-                            <input name="mkb10" class="form-control" placeholder="F31.1 ...">
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="epicrisis-side-card">
+                                <div class="epicrisis-section-title">Основные данные</div>
+
+                                <div class="mb-3">
+                                    <label class="form-label label-required">Дата эпикриза</label>
+                                    <input name="created_at"
+                                           type="date"
+                                           class="form-control"
+                                           value="{{ now()->format('Y-m-d') }}"
+                                           required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="epicrisisDiagnosisSelect" class="form-label">Диагноз МКБ-10</label>
+
+                                    <select id="epicrisisDiagnosisSelect"
+                                            class="form-select"
+                                            data-placeholder="Начните вводить код или название диагноза">
+                                        <option value=""></option>
+                                    </select>
+
+                                    <input id="epicrisisDiagnosisFallback"
+                                           type="text"
+                                           class="form-control mt-2 d-none"
+                                           placeholder="Если поиск недоступен, введите код МКБ-10 вручную">
+
+                                    <input type="hidden" name="diagnose_id" id="epicrisisDiagnosisId">
+                                    <input type="hidden" name="mkb10" id="epicrisisMkb10">
+                                    <input type="hidden" name="diagnosis_title" id="epicrisisDiagnosisTitle">
+                                </div>
+
+                                <div class="epicrisis-selected-diagnosis d-none" id="epicrisisSelectedDiagnosis">
+                                    <div class="small text-muted mb-1">Выбранный диагноз</div>
+                                    <div class="fw-semibold" id="epicrisisSelectedDiagnosisCode">—</div>
+                                    <div class="small" id="epicrisisSelectedDiagnosisTitle">—</div>
+                                </div>
+
+                                <hr>
+
+                                <div class="epicrisis-section-title">Шаблон</div>
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm w-100 mb-2"
+                                        data-epicrisis-template="standard">
+                                    Вставить структуру эпикриза
+                                </button>
+
+                                <div class="small text-muted">
+                                    Шаблон вставляется в редактор и дальше редактируется вручную.
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Дата</label>
-                            <input name="created_at" type="date" class="form-control"
-                                   value="{{ now()->format('Y-m-d') }}">
+
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="epicrisis-editor-card">
+                                <label for="epicrisisDocEditor" class="form-label label-required mb-2">
+                                    Текст эпикриза
+                                </label>
+                                <textarea id="epicrisisTextValue" name="text" class="d-none"></textarea>
+                                <div id="epicrisisDocEditor" class="epicrisis-doc-editor"></div>
+
+
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" type="submit">Сохранить</button>
+
+                <div class="modal-footer border-0 pt-2">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-check2-circle me-1"></i>
+                        Сохранить эпикриз
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-{{--    <div class="modal fade" id="modalAssignTest" tabindex="-1" aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-dialog-centered modal-lg">--}}
-{{--            <div class="modal-content">--}}
-{{--                <form id="formAssignTest">--}}
-{{--                    <div class="modal-header">--}}
-{{--                        <h5 class="modal-title">Назначить тест пациенту</h5>--}}
-{{--                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>--}}
-{{--                    </div>--}}
-{{--                    <div class="modal-body">--}}
-{{--                        <div class="mb-3">--}}
-{{--                            <label class="form-label">Тест</label>--}}
-{{--                            <select id="assignTestSelect" name="test_code" class="form-select" required>--}}
-{{--                                <option value="">— выберите тест —</option>--}}
-{{--                                @foreach($psyTests as $t)--}}
-{{--                                    <option value="{{ $t->code }}" data-name="{{ $t->name }}">{{ $t->name }} @if($t->minutes) — {{ $t->minutes }} мин @endif</option>--}}
-{{--                                @endforeach--}}
-{{--                            </select>--}}
-{{--                        </div>--}}
 
-{{--                        <div class="row g-2">--}}
-{{--                            <div class="col-md-6 mb-3">--}}
-{{--                                <label class="form-label">Срок (до)</label>--}}
-{{--                                <input type="date" name="due_at" class="form-control">--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-6 mb-3">--}}
-{{--                                <label class="form-label">Самостоятельная инициатива</label>--}}
-{{--                                <select name="is_self_initiated" class="form-select">--}}
-{{--                                    <option value="0">Назначено врачом</option>--}}
-{{--                                    <option value="1">Пациент может пройти самостоятельно</option>--}}
-{{--                                </select>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-
-{{--                        <div class="mb-3">--}}
-{{--                            <label class="form-label">Комментарий (необязательно)</label>--}}
-{{--                            <textarea name="notes" class="form-control" rows="2"></textarea>--}}
-{{--                        </div>--}}
-
-{{--                    </div>--}}
-{{--                    <div class="modal-footer">--}}
-{{--                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>--}}
-{{--                        <button id="btnSaveAssign" type="submit" class="btn btn-primary btn-sm">Сохранить</button>--}}
-{{--                    </div>--}}
-{{--                </form>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-
-    <!-- Modal: Просмотр результата (общий) -->
     <div class="modal fade" id="modalViewResult" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -1184,12 +2235,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="viewResultBody">
-                    <!-- наполняется JS: краткая информация, ответы, индекс, интерпретация -->
+
                 </div>
                 <div class="modal-footer">
                     <div class="me-auto small text-muted" id="viewResultFlags"></div>
                     <button id="btnVerifyResult" type="button" class="btn btn-success btn-sm">Верифицировать</button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Закрыть
+                    </button>
                 </div>
             </div>
         </div>
@@ -1202,8 +2254,1030 @@
             </div>
         </div>
     </div>
-@endsection
 
-@push('scripts')
-    @vite(['resources/js/medical_card.js'])
-@endpush
+    <div class="modal fade" id="assignTestModal" tabindex="-1" aria-hidden="true" aria-labelledby="assignTestTitle">
+        <div class="modal-dialog modal-dialog-centered">
+            <form id="assignTestForm" class="modal-content"
+                  action="{{ route('doctors.patients.tests.assign', $patient->id) }}" method="post">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignTestTitle">Назначить тест</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Выберите тест</label>
+                    <select id="assignTestSelect"
+                            name="test_id"
+                            class="form-select"
+                            placeholder="Начните вводить тест..."
+                            data-source="{{ route('api.search.tests') }}">
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Назначить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade prescription-modal-ui" id="prescriptionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable prescription-modal-compact">
+            <div class="modal-content">
+                <form id="patientPrescriptionForm"
+                      method="post"
+                      action="{{ route('doctors.prescriptions.store') }}"
+                      data-suggestions-url="{{ route('api.autofill.prescription') }}">
+                    @csrf
+                    <input type="hidden" name="patient_id" value="{{ $patient->id }}">
+                    <input type="hidden" name="usage_instructions" id="usage_instructions__">
+                    <input type="hidden" name="birth_at" id="birth_at__">
+                    <input type="hidden" name="diagnosis_code" id="diagnosis_code" value="{{ $patient->diagnose?->code }}">
+
+                    <input type="hidden" name="indicated_in_russia" id="indicated_in_russia_hidden" value="0">
+                    <input type="hidden" name="indicated_by_fda" id="indicated_by_fda_hidden" value="0">
+
+                    <div class="modal-header border-0 pb-2">
+                        <div>
+                            <h5 class="modal-title mb-1">Выписать рецепт</h5>
+                            <div class="small text-muted">Назначение препарата и оформление рецепта</div>
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    </div>
+
+                    <div class="modal-body pt-2">
+                        <div class="row g-4">
+
+                            <div class="col-xl-8 col-lg-7">
+                                <div class="alert alert-danger d-none mb-3" id="prescription_form_alert">
+                                    Текст ошибки
+                                </div>
+
+                                <div class="presc-section mb-3">
+                                    <div class="presc-section-head">
+                                        <div class="presc-section-title mb-0">Статус показания</div>
+                                        <div class="presc-section-hint">Можно выбрать только один вариант</div>
+                                    </div>
+
+                                    <div class="presc-indication-switch">
+                                        <label class="presc-radio-card">
+                                            <input type="radio" name="indication_source" value="" checked>
+                                            <span class="presc-radio-card__body">
+                                            <span class="presc-radio-card__title">Не указывать</span>
+                                            <span
+                                                class="presc-radio-card__text">Показывать все доступные препараты</span>
+                                        </span>
+                                        </label>
+
+                                        <label class="presc-radio-card">
+                                            <input type="radio" name="indication_source" value="russia">
+                                            <span class="presc-radio-card__body">
+                                            <span class="presc-radio-card__title">Показан в РФ</span>
+                                            <span class="presc-radio-card__text">Только препараты с показанием в рекомендациях РФ</span>
+                                        </span>
+                                        </label>
+
+                                        <label class="presc-radio-card">
+                                            <input type="radio" name="indication_source" value="fda">
+                                            <span class="presc-radio-card__body">
+                                            <span class="presc-radio-card__title">Показан FDA</span>
+                                            <span class="presc-radio-card__text">Только препараты с показанием FDA для этого диагноза</span>
+                                        </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="presc-section mb-3">
+                                    <div class="presc-section-title">Основное</div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-5">
+                                            <label class="form-label">Пациент</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm presc-readonly"
+                                                   value="{{ trim($patient->surname . ' ' . $patient->name . ' ' . $patient->patronym) }}"
+                                                   disabled>
+                                        </div>
+
+                                        <div class="col-md-7">
+                                            <label for="drug_id_modal" class="form-label">Лекарство</label>
+                                            <div class="presc-drug-picker">
+                                                <select id="drug_id_modal"
+                                                        name="drug_id"
+                                                        class="js-prescription-drug-select"
+                                                        data-source="{{ route('api.drugs.search') }}"
+                                                        data-placeholder="Начните вводить препарат">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                            <div class="form-text" id="drug_select_hint">
+                                                Статус показания можно использовать как фильтр списка препаратов.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="strict_message_modal" class="alert alert-warning d-none mt-3 mb-0 py-2">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                        Данный препарат отпускается по рецепту 148-1/у-88
+                                    </div>
+                                </div>
+
+                                <div class="presc-section mb-3">
+                                    <div class="presc-section-title">Параметры рецепта</div>
+
+                                    <div class="row g-3 presc-top-row">
+                                        <div class="col-md-3">
+                                            <label for="drug_form_modal" class="form-label">Форма</label>
+                                            <select id="drug_form_modal" name="drug_form"
+                                                    class="form-select form-select-sm" disabled>
+                                                <option value="">Выберите форму</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label for="dosage_modal" class="form-label">Дозировка</label>
+                                            <select id="dosage_modal" name="dosage" class="form-select form-select-sm"
+                                                    disabled>
+                                                <option value="">Выберите дозировку</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label for="quantity_modal" class="form-label"
+                                                   title="Кол-во лекарственной формы">
+                                                Кол-во формы
+                                            </label>
+                                            <select id="quantity_modal" name="quantity"
+                                                    class="form-select form-select-sm" disabled>
+                                                <option value="">Выберите количество</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <label for="standard_modal" class="form-label">Кол-во стандартов</label>
+                                            <input
+                                                class="form-control form-control-sm"
+                                                type="number"
+                                                name="standard"
+                                                id="standard_modal"
+                                                min="1"
+                                                value="1"
+                                                disabled
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-md-4" id="validity_block_modal">
+                                            <label for="validity_period_modal" class="form-label">Действителен
+                                                до</label>
+                                            <select class="form-select form-select-sm" id="validity_period_modal"
+                                                    name="validity_period">
+                                                <option value="60">60 дней</option>
+                                                <option value="365">1 год</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="presc-section mb-0">
+                                    <div class="presc-section-title">Схема приёма</div>
+
+                                    <div class="presc-regimen">
+                                        <span class="presc-regimen__label">По</span>
+
+                                        <input
+                                            class="form-control form-control-sm presc-regimen__input"
+                                            type="number"
+                                            name="taking_drug"
+                                            id="taking_drug_modal"
+                                            min="1"
+                                            max="4"
+                                            value="1"
+                                            disabled
+                                        >
+
+                                        <span id="drug_type_modal" class="presc-regimen__text">драже</span>
+
+                                        <select
+                                            id="taking_count_modal"
+                                            name="taking_count"
+                                            class="form-select form-select-sm presc-regimen__select"
+                                            disabled
+                                        >
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+
+                                        <span id="taking_time_modal" class="presc-regimen__text">раз</span>
+                                        <span class="presc-regimen__text">в день на</span>
+                                        <span id="days_count_modal" class="presc-regimen__badge">—</span>
+                                        <span id="days_label_modal" class="presc-regimen__text">дней</span>
+
+                                        <select
+                                            class="form-select form-select-sm presc-regimen__select"
+                                            name="taking_time_meal"
+                                            id="taking_time_meal_modal"
+                                            disabled
+                                        >
+                                            <option value="1">после</option>
+                                            <option value="2">до</option>
+                                        </select>
+
+                                        <span class="presc-regimen__text">еды</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xl-4 col-lg-5">
+                                <div class="presc-suggestions-panel" id="prescriptionSuggestionsCard">
+                                    <div class="presc-suggestions-panel__header">
+                                        <div>
+                                            <div class="presc-suggestions-panel__title">Что можно назначить по МНН</div>
+                                            <div class="presc-suggestions-panel__subtitle">
+                                                Подборка по диагнозу, возрасту, выбранному фильтру и ограничениям
+                                            </div>
+                                        </div>
+
+                                        <div class="presc-suggestions-panel__meta">
+                <span id="prescriptionSuggestionsFilterLabel" class="presc-filter-chip">
+                    Без фильтра
+                </span>
+                                            <span id="prescriptionSuggestionsCount" class="presc-count-chip">
+                    0
+                </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="presc-suggestions-panel__body">
+                                        <div id="prescriptionSuggestionsLoading" class="presc-suggestions-state d-none">
+                                            <div class="presc-loader"></div>
+                                            <div>Подбираем рекомендации…</div>
+                                        </div>
+
+                                        <div id="prescriptionSuggestionsEmpty" class="presc-suggestions-state">
+                                            Выберите режим показаний или диагноз, чтобы показать рекомендации по МНН.
+                                        </div>
+
+                                        <div id="prescriptionSuggestionsList" class="presc-suggestions-list d-none"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 pt-2">
+                        <button type="submit" class="btn btn-primary btn-sm px-3">
+                            <i class="bi bi-journal-check me-1"></i> Выписать рецепт
+                        </button>
+
+                        <button id="printRecipeButton_modal" type="button" class="btn btn-outline-success btn-sm px-3"
+                                disabled>
+                            <i class="bi bi-printer me-1"></i> Распечатать рецепт
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const patientInfoForm = document.querySelector('#pane-patient-info form.patient-info-form-card');
+            if (!patientInfoForm) {
+                return;
+            }
+
+            const medicalCardRoot = document.querySelector('#medicalCardRoot');
+            const addressSuggestUrl = patientInfoForm.dataset.addressSuggestUrl || medicalCardRoot?.dataset.addressSuggestUrl || '';
+            const insuranceSuggestUrl = patientInfoForm.dataset.insuranceSuggestUrl || medicalCardRoot?.dataset.insuranceSuggestUrl || '';
+            const registrationAddress = document.querySelector('#patientRegistrationAddress');
+            const actualAddress = document.querySelector('#patientActualAddress');
+            const registrationPostalCode = document.querySelector('#patientRegistrationPostalCode');
+            const actualPostalCode = document.querySelector('#patientActualPostalCode');
+            const legacyAddress = document.querySelector('#patientLegacyAddress');
+            const sameAsRegistration = document.querySelector('#sameAsRegistrationAddress');
+            const copyAddressButton = document.querySelector('#copyRegistrationAddressToActual');
+            const identityDocument = document.querySelector('#patientIdentityDocument');
+            const insuranceCompany = document.querySelector('#patientInsuranceCompany');
+            const insurancePolicyNumber = document.querySelector('#patientInsurancePolicyNumber');
+            const insurancePolicyLegacy = document.querySelector('#patientInsurancePolicy');
+
+            const localInsuranceOrganizations = [
+                { value: 'АО «МАКС-М»', search: 'макс м makc max max-m макс-м максм' },
+                { value: 'ООО «Капитал МС»', search: 'капитал мс капитал медицинское страхование' },
+                { value: 'АО «СОГАЗ-Мед»', search: 'согаз мед согаз-мед sogaz' },
+                { value: 'ООО «АльфаСтрахование-ОМС»', search: 'альфастрахование омс альфа страхование альфастрахование-омс' },
+                { value: 'ООО «СК «Ингосстрах-М»', search: 'ингосстрах м ингосстрах-м ingos' },
+                { value: 'ООО «РЕСО-Мед»', search: 'ресо мед ресо-мед reso' },
+                { value: 'АО «Страховая компания «СОГАЗ-Мед»', search: 'страховая компания согаз мед' },
+                { value: 'ООО «ВТБ Медицинское страхование»', search: 'втб медицинское страхование втб мс' },
+                { value: 'ООО «СМК РЕСО-Мед»', search: 'смк ресо мед' },
+                { value: 'ООО «МСК Медстрах»', search: 'мск медстрах медицинское страхование' }
+            ];
+
+            function onlyDigits(value, maxLength = null) {
+                let digits = String(value || '').replace(/\D/g, '');
+
+                if (maxLength) {
+                    digits = digits.slice(0, maxLength);
+                }
+
+                return digits;
+            }
+
+            function formatSnils(value) {
+                const digits = onlyDigits(value, 11);
+                const first = digits.slice(0, 3);
+                const second = digits.slice(3, 6);
+                const third = digits.slice(6, 9);
+                const control = digits.slice(9, 11);
+                let result = first;
+
+                if (second) {
+                    result += '-' + second;
+                }
+
+                if (third) {
+                    result += '-' + third;
+                }
+
+                if (control) {
+                    result += ' ' + control;
+                }
+
+                return result;
+            }
+
+            function formatDepartmentCode(value) {
+                const digits = onlyDigits(value, 6);
+
+                if (digits.length <= 3) {
+                    return digits;
+                }
+
+                return digits.slice(0, 3) + '-' + digits.slice(3, 6);
+            }
+
+            function normalizePhoneDigits(value) {
+                let digits = onlyDigits(value, 11);
+
+                if (digits.startsWith('8')) {
+                    digits = '7' + digits.slice(1);
+                } else if (digits.startsWith('9')) {
+                    digits = '7' + digits;
+                }
+
+                return digits.slice(0, 11);
+            }
+
+            function formatPhone(value) {
+                const digits = normalizePhoneDigits(value);
+
+                if (!digits) {
+                    return '';
+                }
+
+                const country = digits.slice(0, 1);
+                const code = digits.slice(1, 4);
+                const first = digits.slice(4, 7);
+                const second = digits.slice(7, 9);
+                const third = digits.slice(9, 11);
+                let result = '+' + country;
+
+                if (code) {
+                    result += ' (' + code;
+                    if (code.length === 3) {
+                        result += ')';
+                    }
+                }
+
+                if (first) {
+                    result += ' ' + first;
+                }
+
+                if (second) {
+                    result += '-' + second;
+                }
+
+                if (third) {
+                    result += '-' + third;
+                }
+
+                return result;
+            }
+
+            function normalizeEmail(value) {
+                return String(value || '').replace(/\s+/g, '').toLowerCase();
+            }
+
+            function normalizePolicy(value) {
+                return String(value || '')
+                    .replace(/\s+/g, ' ')
+                    .replace(/[^0-9a-zA-Zа-яА-ЯёЁ№/\- ]/g, '')
+                    .trim()
+                    .slice(0, 32);
+            }
+
+            function bindInputMask(selector, formatter, eventName = 'input') {
+                document.querySelectorAll(selector).forEach(function (field) {
+                    const apply = function () {
+                        const formatted = formatter(field.value, field);
+
+                        if (field.value !== formatted) {
+                            field.value = formatted;
+                        }
+                    };
+
+                    field.addEventListener(eventName, apply);
+                    field.addEventListener('change', apply);
+                    field.addEventListener('blur', apply);
+                    apply();
+                });
+            }
+
+            function bindFieldMasks() {
+                bindInputMask('.js-mask-snils', formatSnils);
+                bindInputMask('.js-mask-department-code', formatDepartmentCode);
+                bindInputMask('.js-mask-phone', formatPhone);
+                bindInputMask('.js-mask-email', normalizeEmail);
+                bindInputMask('.js-mask-policy', normalizePolicy);
+                bindInputMask('.js-mask-digits', function (value, field) {
+                    return onlyDigits(value, Number(field.dataset.maskMax || 0) || null);
+                });
+            }
+
+            function syncLegacyInsurancePolicy() {
+                if (!insurancePolicyLegacy) {
+                    return;
+                }
+
+                const company = insuranceCompany?.value.trim() || '';
+                const number = insurancePolicyNumber?.value.trim() || '';
+                insurancePolicyLegacy.value = [company, number].filter(Boolean).join(' — ');
+            }
+
+            function syncLegacyAddress() {
+                if (legacyAddress && registrationAddress) {
+                    legacyAddress.value = registrationAddress.value.trim();
+                }
+            }
+
+            function normalizePostalCode(postalCode) {
+                return String(postalCode || '').replace(/\D/g, '').slice(0, 6);
+            }
+
+            function mergeAddressWithPostalCode(address, postalCode) {
+                const cleanAddress = String(address || '').trim();
+                const cleanPostalCode = normalizePostalCode(postalCode);
+
+                if (!cleanPostalCode) {
+                    return cleanAddress;
+                }
+
+                if (cleanAddress.startsWith(cleanPostalCode)) {
+                    return cleanAddress;
+                }
+
+                return cleanPostalCode + ', ' + cleanAddress;
+            }
+
+            function setPostalCode(field, postalCode) {
+                const targetSelector = field?.dataset?.postalTarget || '';
+                const target = targetSelector ? document.querySelector(targetSelector) : null;
+
+                if (!target) {
+                    return;
+                }
+
+                target.value = normalizePostalCode(postalCode);
+                target.dispatchEvent(new Event('input', { bubbles: true }));
+                target.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            function copyRegistrationPostalToActual() {
+                if (!registrationPostalCode || !actualPostalCode) {
+                    return;
+                }
+
+                actualPostalCode.value = registrationPostalCode.value;
+                actualPostalCode.dispatchEvent(new Event('input', { bubbles: true }));
+                actualPostalCode.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            function copyRegistrationToActual() {
+                if (!registrationAddress || !actualAddress) {
+                    return;
+                }
+
+                actualAddress.value = registrationAddress.value;
+                copyRegistrationPostalToActual();
+                actualAddress.dispatchEvent(new Event('input', { bubbles: true }));
+                syncLegacyAddress();
+            }
+
+            function syncSameAddressState() {
+                if (!sameAsRegistration || !registrationAddress || !actualAddress) {
+                    return;
+                }
+
+                if (sameAsRegistration.checked) {
+                    copyRegistrationToActual();
+                    actualAddress.setAttribute('readonly', 'readonly');
+                    actualAddress.classList.add('bg-light');
+                    actualPostalCode?.setAttribute('readonly', 'readonly');
+                    actualPostalCode?.classList.add('bg-light');
+                } else {
+                    actualAddress.removeAttribute('readonly');
+                    actualAddress.classList.remove('bg-light');
+                    actualPostalCode?.removeAttribute('readonly');
+                    actualPostalCode?.classList.remove('bg-light');
+                }
+            }
+
+            function collectPassport() {
+                if (!identityDocument) {
+                    return;
+                }
+
+                const series = document.querySelector('#patientPassportSeries')?.value.trim() || '';
+                const number = document.querySelector('#patientPassportNumber')?.value.trim() || '';
+                const issuedAt = document.querySelector('#patientPassportIssuedAt')?.value.trim() || '';
+                const departmentCode = document.querySelector('#patientPassportDepartmentCode')?.value.trim() || '';
+                const issuedBy = document.querySelector('#patientPassportIssuedBy')?.value.trim() || '';
+
+                const parts = [];
+                if (series || number) {
+                    parts.push(['Паспорт', series, number].filter(Boolean).join(' '));
+                } else {
+                    parts.push('Паспорт');
+                }
+
+                if (issuedAt) {
+                    parts.push('выдан ' + issuedAt);
+                }
+
+                if (issuedBy) {
+                    parts.push(issuedBy);
+                }
+
+                if (departmentCode) {
+                    parts.push('код подразделения ' + departmentCode);
+                }
+
+                identityDocument.value = parts.filter(Boolean).join(', ');
+            }
+
+            function escapeHtml(value) {
+                return String(value || '')
+                    .replace(/[&<>"]/g, function (char) {
+                        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char];
+                    })
+                    .replace(/'/g, '&#039;');
+            }
+
+            function normalizeSuggestions(payload) {
+                let rawItems = [];
+
+                if (Array.isArray(payload)) {
+                    rawItems = payload;
+                } else if (payload && Array.isArray(payload.suggestions)) {
+                    rawItems = payload.suggestions;
+                } else if (payload && Array.isArray(payload.data)) {
+                    rawItems = payload.data;
+                } else if (payload && Array.isArray(payload.items)) {
+                    rawItems = payload.items;
+                }
+
+                return rawItems.map(function (item) {
+                    if (typeof item === 'string') {
+                        return {
+                            value: item,
+                            unrestricted_value: item,
+                            postal_code: '',
+                            fias_id: ''
+                        };
+                    }
+
+                    const data = item.data || {};
+                    const value = item.value || item.unrestricted_value || item.address || item.name || data.result || '';
+
+                    return {
+                        value: value,
+                        unrestricted_value: item.unrestricted_value || value,
+                        postal_code: item.postal_code || data.postal_code || '',
+                        fias_id: item.fias_id || data.fias_id || data.fias_code || '',
+                        region: item.region || data.region_with_type || '',
+                        city: item.city || data.city_with_type || data.settlement_with_type || '',
+                        street: item.street || data.street_with_type || '',
+                        house: item.house || data.house || '',
+                        flat: item.flat || data.flat || ''
+                    };
+                }).filter(function (item) {
+                    return item.value;
+                });
+            }
+
+            function hideSuggestBox(box) {
+                if (!box) {
+                    return;
+                }
+
+                box.classList.remove('is-visible');
+                box.innerHTML = '';
+            }
+
+            function renderSuggestions(field, box, suggestions) {
+                if (!box || !suggestions.length) {
+                    hideSuggestBox(box);
+                    return;
+                }
+
+                box.innerHTML = suggestions.slice(0, 8).map(function (item, index) {
+                    const meta = [item.postal_code, item.city, item.street].filter(Boolean).join(' · ');
+
+                    return '<button type="button" class="patient-info-address-suggest__item" data-index="' + index + '">' +
+                        '<span class="d-block fw-semibold">' + escapeHtml(item.value) + '</span>' +
+                        (meta ? '<span class="d-block small text-muted mt-1">' + escapeHtml(meta) + '</span>' : '') +
+                        '</button>';
+                }).join('');
+
+                box.classList.add('is-visible');
+
+                box.querySelectorAll('.patient-info-address-suggest__item').forEach(function (button) {
+                    button.addEventListener('mousedown', function (event) {
+                        event.preventDefault();
+                    });
+
+                    button.addEventListener('click', function () {
+                        const item = suggestions[Number(button.dataset.index)] || null;
+
+                        if (!item) {
+                            return;
+                        }
+
+                        const addressValue = item.value || item.unrestricted_value || '';
+                        const postalCode = item.postal_code || '';
+
+                        field.value = mergeAddressWithPostalCode(addressValue, postalCode);
+                        field.dataset.unrestrictedValue = item.unrestricted_value || addressValue;
+                        field.dataset.postalCode = postalCode;
+                        field.dataset.fiasId = item.fias_id || '';
+                        setPostalCode(field, postalCode);
+
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                        field.dispatchEvent(new Event('change', { bubbles: true }));
+
+                        hideSuggestBox(box);
+                        field.focus();
+                    });
+                });
+            }
+
+            function buildAddressSuggestUrl(baseUrl, query) {
+                const separator = baseUrl.includes('?') ? '&' : '?';
+
+                // q — для твоего текущего роута, query — для совместимости с контроллером DaData из примера.
+                return baseUrl + separator + 'q=' + encodeURIComponent(query) + '&query=' + encodeURIComponent(query);
+            }
+
+            function normalizeInsuranceSearch(value) {
+                return String(value || '')
+                    .toLowerCase()
+                    .replace(/ё/g, 'е')
+                    .replace(/[«»"'`().,]/g, ' ')
+                    .replace(/[–—_]/g, '-')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function findLocalInsuranceSuggestions(query) {
+                const normalizedQuery = normalizeInsuranceSearch(query);
+                const compactQuery = normalizedQuery.replace(/[\s-]+/g, '');
+
+                if (normalizedQuery.length < 2) {
+                    return [];
+                }
+
+                return localInsuranceOrganizations.filter(function (item) {
+                    const haystack = normalizeInsuranceSearch(item.value + ' ' + (item.search || ''));
+                    const compactHaystack = haystack.replace(/[\s-]+/g, '');
+
+                    return haystack.includes(normalizedQuery) || compactHaystack.includes(compactQuery);
+                }).map(function (item) {
+                    return {
+                        value: item.value,
+                        unrestricted_value: item.value,
+                        inn: item.inn || '',
+                        kpp: item.kpp || '',
+                        ogrn: item.ogrn || '',
+                        status: item.status || ''
+                    };
+                });
+            }
+
+            function mapLocalInsuranceSuggestion(item) {
+                return {
+                    value: item.value,
+                    unrestricted_value: item.value,
+                    inn: item.inn || '',
+                    kpp: item.kpp || '',
+                    ogrn: item.ogrn || '',
+                    status: item.status || ''
+                };
+            }
+
+            function getDefaultInsuranceSuggestions() {
+                return localInsuranceOrganizations.slice(0, 8).map(mapLocalInsuranceSuggestion);
+            }
+
+            function normalizeInsuranceSuggestions(payload) {
+                const rawItems = Array.isArray(payload)
+                    ? payload
+                    : (payload.suggestions || payload.items || payload.data || payload.results || []);
+
+                return rawItems.map(function (item) {
+                    if (typeof item === 'string') {
+                        return {
+                            value: item,
+                            unrestricted_value: item,
+                            inn: '',
+                            kpp: '',
+                            ogrn: ''
+                        };
+                    }
+
+                    const data = item.data || {};
+                    const name = data.name || {};
+                    const value = item.value
+                        || item.unrestricted_value
+                        || item.name
+                        || name.short_with_opf
+                        || name.full_with_opf
+                        || name.short
+                        || name.full
+                        || '';
+
+                    return {
+                        value: value,
+                        unrestricted_value: item.unrestricted_value || name.full_with_opf || value,
+                        inn: item.inn || data.inn || '',
+                        kpp: item.kpp || data.kpp || '',
+                        ogrn: item.ogrn || data.ogrn || '',
+                        address: item.address || data.address?.value || data.address?.unrestricted_value || '',
+                        status: data.state?.status || item.status || ''
+                    };
+                }).filter(function (item) {
+                    return item.value;
+                });
+            }
+
+            function renderInsuranceSuggestions(field, box, suggestions) {
+                if (!box || !suggestions.length) {
+                    hideSuggestBox(box);
+                    return;
+                }
+
+                box.innerHTML = suggestions.slice(0, 8).map(function (item, index) {
+                    const meta = [item.inn ? 'ИНН ' + item.inn : '', item.kpp ? 'КПП ' + item.kpp : '', item.status].filter(Boolean).join(' · ');
+
+                    return '<button type="button" class="patient-info-address-suggest__item" data-index="' + index + '">' +
+                        '<span class="d-block fw-semibold">' + escapeHtml(item.value) + '</span>' +
+                        (meta ? '<span class="d-block small text-muted mt-1">' + escapeHtml(meta) + '</span>' : '') +
+                        '</button>';
+                }).join('');
+
+                box.classList.add('is-visible');
+
+                box.querySelectorAll('.patient-info-address-suggest__item').forEach(function (button) {
+                    button.addEventListener('mousedown', function (event) {
+                        event.preventDefault();
+                    });
+
+                    button.addEventListener('click', function () {
+                        const item = suggestions[Number(button.dataset.index)] || null;
+
+                        if (!item) {
+                            return;
+                        }
+
+                        field.value = item.value || item.unrestricted_value || '';
+                        field.dataset.unrestrictedValue = item.unrestricted_value || field.value;
+                        field.dataset.inn = item.inn || '';
+                        field.dataset.kpp = item.kpp || '';
+                        field.dataset.ogrn = item.ogrn || '';
+
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                        field.dispatchEvent(new Event('change', { bubbles: true }));
+
+                        hideSuggestBox(box);
+                        field.focus();
+                    });
+                });
+            }
+
+            function buildInsuranceSuggestUrl(baseUrl, query) {
+                const separator = baseUrl.includes('?') ? '&' : '?';
+
+                return baseUrl + separator + 'q=' + encodeURIComponent(query) + '&query=' + encodeURIComponent(query);
+            }
+
+            function bindInsuranceAutocomplete(field) {
+                const box = document.querySelector(field.dataset.suggestBox || '');
+                let timer = null;
+                let controller = null;
+
+                field.addEventListener('input', function () {
+                    syncLegacyInsurancePolicy();
+
+                    if (!box || field.hasAttribute('readonly')) {
+                        return;
+                    }
+
+                    const query = field.value.trim();
+                    clearTimeout(timer);
+
+                    if (query.length < 2) {
+                        hideSuggestBox(box);
+                        return;
+                    }
+
+                    const localSuggestions = findLocalInsuranceSuggestions(query);
+
+                    if (!insuranceSuggestUrl) {
+                        renderInsuranceSuggestions(field, box, localSuggestions);
+                        return;
+                    }
+
+                    timer = setTimeout(function () {
+                        if (controller) {
+                            controller.abort();
+                        }
+
+                        controller = new AbortController();
+
+                        fetch(buildInsuranceSuggestUrl(insuranceSuggestUrl, query), {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            signal: controller.signal
+                        })
+                            .then(function (response) {
+                                if (!response.ok) {
+                                    throw new Error('Insurance suggest request failed');
+                                }
+                                return response.json();
+                            })
+                            .then(function (payload) {
+                                const remoteSuggestions = normalizeInsuranceSuggestions(payload);
+                                renderInsuranceSuggestions(field, box, remoteSuggestions.length ? remoteSuggestions : localSuggestions);
+                            })
+                            .catch(function (error) {
+                                if (error.name !== 'AbortError') {
+                                    renderInsuranceSuggestions(field, box, localSuggestions);
+                                }
+                            });
+                    }, 300);
+                });
+
+                field.addEventListener('focus', function () {
+                    if (field.value.trim().length >= 2) {
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
+
+                field.addEventListener('dblclick', function () {
+                    if (!box || field.hasAttribute('readonly')) {
+                        return;
+                    }
+
+                    clearTimeout(timer);
+                    renderInsuranceSuggestions(field, box, getDefaultInsuranceSuggestions());
+                });
+
+                field.addEventListener('blur', function () {
+                    setTimeout(function () {
+                        hideSuggestBox(box);
+                    }, 180);
+                });
+            }
+
+            function bindAddressAutocomplete(field) {
+                const box = document.querySelector(field.dataset.suggestBox || '');
+                let timer = null;
+                let controller = null;
+
+                field.addEventListener('input', function () {
+                    syncLegacyAddress();
+
+                    if (sameAsRegistration?.checked && field === registrationAddress) {
+                        copyRegistrationToActual();
+                    }
+
+                    if (!addressSuggestUrl || !box || field.hasAttribute('readonly')) {
+                        return;
+                    }
+
+                    const query = field.value.trim();
+                    clearTimeout(timer);
+
+                    if (query.length < 3) {
+                        hideSuggestBox(box);
+                        return;
+                    }
+
+                    timer = setTimeout(function () {
+                        if (controller) {
+                            controller.abort();
+                        }
+
+                        controller = new AbortController();
+
+                        fetch(buildAddressSuggestUrl(addressSuggestUrl, query), {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            signal: controller.signal
+                        })
+                            .then(function (response) {
+                                if (!response.ok) {
+                                    throw new Error('Address suggest request failed');
+                                }
+                                return response.json();
+                            })
+                            .then(function (payload) {
+                                renderSuggestions(field, box, normalizeSuggestions(payload));
+                            })
+                            .catch(function (error) {
+                                if (error.name !== 'AbortError') {
+                                    hideSuggestBox(box);
+                                }
+                            });
+                    }, 300);
+                });
+
+                field.addEventListener('focus', function () {
+                    if (field.value.trim().length >= 3) {
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
+
+                field.addEventListener('blur', function () {
+                    setTimeout(function () {
+                        hideSuggestBox(box);
+                    }, 180);
+                });
+            }
+
+            bindFieldMasks();
+
+            document.querySelectorAll('.js-address-autocomplete').forEach(bindAddressAutocomplete);
+            document.querySelectorAll('.js-insurance-autocomplete').forEach(bindInsuranceAutocomplete);
+            document.querySelectorAll('.js-insurance-part').forEach(function (field) {
+                field.addEventListener('input', syncLegacyInsurancePolicy);
+                field.addEventListener('change', syncLegacyInsurancePolicy);
+            });
+            document.querySelectorAll('.js-passport-part').forEach(function (field) {
+                field.addEventListener('input', collectPassport);
+                field.addEventListener('change', collectPassport);
+            });
+
+            sameAsRegistration?.addEventListener('change', syncSameAddressState);
+            copyAddressButton?.addEventListener('click', function () {
+                copyRegistrationToActual();
+                if (sameAsRegistration) {
+                    sameAsRegistration.checked = true;
+                }
+                syncSameAddressState();
+            });
+
+            registrationAddress?.addEventListener('input', syncLegacyAddress);
+            registrationPostalCode?.addEventListener('input', function () {
+                registrationPostalCode.value = registrationPostalCode.value.replace(/\D/g, '').slice(0, 6);
+
+                if (sameAsRegistration?.checked) {
+                    copyRegistrationPostalToActual();
+                }
+            });
+            actualPostalCode?.addEventListener('input', function () {
+                actualPostalCode.value = actualPostalCode.value.replace(/\D/g, '').slice(0, 6);
+            });
+            patientInfoForm.addEventListener('submit', function () {
+                syncSameAddressState();
+                syncLegacyAddress();
+                syncLegacyInsurancePolicy();
+                collectPassport();
+            });
+
+            syncSameAddressState();
+            syncLegacyAddress();
+            syncLegacyInsurancePolicy();
+            collectPassport();
+        });
+    </script>
+
+@endsection

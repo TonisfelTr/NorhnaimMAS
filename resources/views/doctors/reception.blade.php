@@ -7,8 +7,8 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link @if(is_route('doctors.reception.index')) active @endif" href="{{ route('doctors.reception.index') }}">Текущая регистратура</a></li>
                     <li class="nav-item"><a class="nav-link @if(is_route('doctors.reception.create')) active @endif" href="{{ route('doctors.reception.create') }}">Создать запись</a></li>
-                    <li class="nav-item"><a class="nav-link @if(is_route('doctors.reception')) active @endif" href="{{ route('doctors.reception') }}">Текущая регистратура</a></li>
                     <li class="nav-item"><a class="nav-link @if(is_route('doctors.reception.archives')) active @endif" href="{{ route('doctors.reception.archives') }}">Архивы</a></li>
                 </ul>
             </div>

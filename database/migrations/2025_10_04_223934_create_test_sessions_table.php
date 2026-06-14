@@ -11,9 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('test_sessions', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('test_sessions', function (Blueprint $t) {
+            $t->id();
+            $t->foreignId('test_id')->constrained('tests')->cascadeOnDelete();
+            $t->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $t->foreignId('clinician_id')->nullable()->constrained('users')->nullOnDelete();
+
+            $t->string('status')->default('in_progress');
+            $t->jsonb('context')->nullable();
+            $t->timestamps();
+
+            $t->index(['test_id', 'user_id', 'status']);
         });
     }
 

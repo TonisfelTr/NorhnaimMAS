@@ -24,15 +24,18 @@ class Patient extends Model
     ];
     protected $with = ['doctor'];
 
-    public function getBirthAtAttribute(string $value) {
-        return Carbon::parse($value)->format('d.m.Y');
-    }
-
-    public function getCreatedAtAttribute(string $value) {
+    public function getCreatedAtAttribute(string $value)
+    {
         return Carbon::parse($value)->format('d.m.Y H:i');
     }
 
-    public function diagnose(): BelongsTo {
+    public function getBirthAtAttribute(string $value)
+    {
+        return Carbon::parse($value)->format('d.m.Y');
+    }
+
+    public function diagnose(): BelongsTo
+    {
         return $this->belongsTo(Diagnose::class);
     }
 
@@ -60,9 +63,9 @@ class Patient extends Model
     {
         return $this->belongsToMany(
             Symptom::class,
-            'patient_symptoms',   // pivot-таблица
-            'patient_id',         // FK на пациента в pivot
-            'symptom_id'          // FK на симптом в pivot
+            'patient_symptoms',
+            'patient_id',
+            'symptom_id'
         )->withPivot(['anamnesis_id', 'epicrisis_id', 'created_at', 'updated_at'])
             ->withTimestamps();
     }
@@ -70,7 +73,7 @@ class Patient extends Model
     public function symptomsLinks(): HasMany
     {
         return $this->hasMany(PatientSymptom::class, 'patient_id', 'id')
-            ->with(['symptom', 'anamnesis', 'epicrisis']); // Eager load для удобства
+            ->with(['symptom', 'anamnesis', 'epicrisis']);
     }
 
     public function doctor(): BelongsTo
@@ -81,5 +84,30 @@ class Patient extends Model
     public function labResearches(): HasMany
     {
         return $this->hasMany(LabResearch::class, 'patient_id', 'id');
+    }
+
+    public function testSessions(): HasMany
+    {
+        return $this->hasMany(TestSession::class);
+    }
+
+    public function conditions(): HasMany
+    {
+        return $this->hasMany(PatientCondition::class);
+    }
+
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(MedicalPrescription::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(MedicineDocument::class);
     }
 }

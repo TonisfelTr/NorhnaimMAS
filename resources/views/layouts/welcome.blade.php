@@ -5,6 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta name="twitter:url" content="{{ url()->current() }}">
+        @if(request('api_token'))
+            <meta name="x-test-api-token" content="{{ request('api_token') }}">
+            <script>
+                window.TEST_API = { token: document.querySelector('meta[name="x-test-api-token"]').content };
+            </script>
+        @endif
         <title>@yield('title') - СМА Норхнейм</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">

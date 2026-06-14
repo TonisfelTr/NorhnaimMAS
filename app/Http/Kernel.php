@@ -2,6 +2,8 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\DoctorHardLockMiddleware;
+use App\Http\Middleware\EnsureTestSession;
 use App\Http\Middleware\SecureCookies;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -22,7 +24,9 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \Illuminate\Http\Middleware\HandleCors::class,
-        SecureCookies::class
+        SecureCookies::class,
+        EnsureTestSession::class,
+        DoctorHardLockMiddleware::class
     ];
 
     /**
@@ -68,5 +72,10 @@ class Kernel extends HttpKernel
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        'doctor.lock' => \App\Http\Middleware\DoctorHardLockMiddleware::class,
+    ];
+
+    protected $routeMiddleware = [
+        'doctor.lock' => \App\Http\Middleware\DoctorHardLockMiddleware::class,
     ];
 }

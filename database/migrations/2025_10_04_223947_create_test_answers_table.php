@@ -11,9 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('test_answers', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('test_answers', function (Blueprint $t) {
+            $t->id();
+            $t->foreignId('session_id')->constrained('test_sessions')->cascadeOnDelete();
+            $t->foreignId('item_id')->constrained('test_items')->cascadeOnDelete();
+            $t->foreignId('option_id')->nullable()->constrained('test_item_options')->nullOnDelete();
+
+            $t->integer('value')->nullable();
+            $t->json('raw')->nullable();
+            $t->timestamps();
+
+            $t->unique(['session_id', 'item_id']);
+            $t->index(['session_id', 'item_id']);
         });
     }
 

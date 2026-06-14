@@ -59,3 +59,23 @@ function role(): \Spatie\Permission\Models\Role|false {
 
     return Auth::user()->role();
 }
+
+function ageWord(int $age): string
+{
+    $age = abs($age) % 100;
+    $lastDigit = $age % 10;
+
+    if ($age >= 11 && $age <= 19) {
+        return 'лет';
+    }
+
+    if ($lastDigit === 1) {
+        return 'год';
+    }
+
+    if ($lastDigit >= 2 && $lastDigit <= 4) {
+        return 'года';
+    }
+
+    return 'лет';
+}

@@ -1,0 +1,2129 @@
+:root
+    --mc-surface: #fff
+    --mc-border: #e9eef3
+    --mc-muted: #6b7280
+    --mc-radius: 12px
+    --mc-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 16px rgba(15, 23, 42, .03)
+
+
+.mc-wrap
+    max-width: 1490px
+    margin: 0 auto
+
+
+.mc-card
+    background: var(--mc-surface)
+    border: 1px solid var(--mc-border)
+    border-radius: var(--mc-radius)
+    box-shadow: var(--mc-shadow)
+
+
+.mc-card .card-body
+    padding: 1rem 1.25rem
+
+
+.mc-avatar
+    width: 56px
+    height: 56px
+    border-radius: 9999px
+    background: #f3f4f6
+    display: flex
+    align-items: center
+    justify-content: center
+
+
+.mc-tabs
+    background: #f9fafb
+    border-top: 1px solid var(--mc-border)
+    border-bottom-left-radius: var(--mc-radius)
+    border-bottom-right-radius: var(--mc-radius)
+    padding: .5rem 1rem 0
+
+
+.mc-tabs .nav
+    gap: .25rem
+
+
+.mc-tabs .nav-link
+    color: var(--mc-muted)
+    border: 0
+    border-radius: 9999px
+    padding: .35rem .75rem
+    font-weight: 500
+
+
+.mc-tabs .nav-link:hover
+    background: #eef2f7
+    color: #111827
+
+
+.mc-tabs .nav-link.active
+    background: rgba(13, 110, 253, .10)
+    color: #0d6efd
+
+
+.mc-pane
+    padding: 1rem 0
+
+
+.placeholder
+    opacity: .55
+
+
+.nav-link.active[data-bs-toggle="tab"]
+    background: transparent
+    border-bottom: 3px solid #0a58ca
+    border-radius: 0
+
+
+#suneditor_anamnesisEditor
+    font-family: "Trebuchet MS"
+
+
+.label-required::after
+    content: " *"
+    color: #dc3545
+    font-weight: 700
+    margin-left: 2px
+
+
+.tooltip
+    text-align: left !important
+
+
+#modalAddAnamnesis .modal-dialog
+    max-width: 90%
+
+
+#aiPanel
+    position: relative
+
+
+.ai-loading
+    position: absolute
+    inset: 0
+    background: rgba(255, 255, 255, .7)
+    display: flex
+    align-items: center
+    justify-content: center
+    z-index: 5
+
+
+#aiSymptoms .form-check.text-muted
+    opacity: .7
+
+
+#pane-manual .form-label
+    margin-bottom: .125rem
+
+
+#pane-manual .input-group
+    margin-top: .25rem
+
+
+#aiTabs
+    --bs-nav-tabs-border-color: white
+
+
+.select2-results__options
+    max-height: 200px !important
+    overflow-y: auto !important
+
+
+.select2-container--bootstrap-5 .select2-dropdown
+    z-index: 1061
+
+
+.ts-wrapper,
+.ts-wrapper.form-select
+    border: 0 !important
+    padding: 0 !important
+    background: transparent !important
+    box-shadow: none !important
+
+
+.ts-wrapper .ts-control
+    display: flex
+    align-items: center
+    flex-wrap: wrap
+    min-height: calc(2.25rem + 2px)
+    padding: .375rem .75rem
+    border: 1px solid var(--bs-border-color, #ced4da)
+    border-radius: .375rem
+    background: var(--bs-body-bg, #fff)
+    line-height: 1.5
+
+
+.ts-wrapper.focus .ts-control
+    border-color: var(--bs-primary, #0d6efd)
+    box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25)
+
+
+.ts-dropdown
+    margin-top: .25rem
+    border: 1px solid var(--bs-border-color, #ced4da)
+    border-radius: .5rem
+    overflow: hidden
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1)
+
+
+.ts-dropdown .dropdown-input
+    display: none !important
+
+
+.prescription-modal-compact
+    width: min(1220px, calc(100vw - 16px))
+    max-width: 1220px
+    margin: 8px auto
+
+
+.prescription-modal-ui .modal-dialog
+    width: min(1220px, calc(100vw - 16px))
+    max-width: 1220px
+    height: calc(100dvh - 16px)
+    max-height: calc(100dvh - 16px)
+    margin: 8px auto
+
+
+.prescription-modal-ui .modal-content
+    height: 100%
+    max-height: 100%
+    border: 0
+    border-radius: 18px
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .12)
+    overflow: hidden
+    background: #fff
+
+
+.prescription-modal-ui .modal-content > form
+    height: 100%
+    min-height: 0
+    display: flex
+    flex-direction: column
+
+
+.prescription-modal-ui .modal-header,
+.prescription-modal-ui .modal-footer
+    flex: 0 0 auto
+    background: #fff
+    z-index: 2
+
+
+.prescription-modal-ui .modal-header
+    padding: 16px 18px 10px
+    border-bottom: 1px solid #eef1f4
+
+
+.prescription-modal-ui .modal-body
+    flex: 1 1 auto
+    min-height: 0
+    overflow-y: auto
+    overflow-x: hidden
+    padding: 12px 18px 20px
+    scrollbar-width: auto
+    scrollbar-color: #9fc4ff #eef4fb
+
+
+.prescription-modal-ui .modal-footer
+    padding: 12px 18px 16px
+    border-top: 1px solid #eef1f4
+    box-shadow: 0 -8px 20px rgba(15, 23, 42, .04)
+
+
+.prescription-modal-ui .modal-body::-webkit-scrollbar
+    width: 12px
+
+
+.prescription-modal-ui .modal-body::-webkit-scrollbar-track
+    background: #eef4fb
+    border-radius: 999px
+
+
+.prescription-modal-ui .modal-body::-webkit-scrollbar-thumb
+    background: linear-gradient(180deg, #cfe3ff 0%, #9fc4ff 100%)
+    border-radius: 999px
+    border: 2px solid #eef4fb
+
+
+.prescription-modal-ui .modal-body::-webkit-scrollbar-thumb:hover
+    background: linear-gradient(180deg, #bdd8ff 0%, #84b5ff 100%)
+
+
+.prescription-modal-ui .form-label
+    font-size: 13px
+    font-weight: 600
+    margin-bottom: 6px
+    color: #344054
+    line-height: 1.25
+
+
+.prescription-modal-ui .form-text
+    font-size: 12px
+    color: #667085
+    line-height: 1.35
+
+
+.prescription-modal-ui .form-control,
+.prescription-modal-ui .form-select
+    min-height: 38px
+    border-radius: 12px
+
+
+.prescription-modal-ui .presc-readonly
+    background: #f3f6f8
+    border-color: #e5e7eb
+
+
+.prescription-modal-ui .presc-section
+    background: #fff
+    border: 1px solid #eef1f4
+    border-radius: 16px
+    padding: 14px 16px
+    margin-bottom: 14px
+
+
+.prescription-modal-ui .presc-section:last-child
+    margin-bottom: 0
+
+
+.prescription-modal-ui .presc-section-title
+    font-size: 14px
+    font-weight: 700
+    color: #1f2937
+    margin-bottom: 12px
+    line-height: 1.25
+
+
+.prescription-modal-ui .presc-section-head
+    display: flex
+    flex-direction: column
+    gap: 2px
+    margin-bottom: 12px
+
+
+.prescription-modal-ui .presc-section-hint
+    font-size: 12px
+    color: #667085
+    line-height: 1.35
+
+
+.prescription-modal-ui .presc-drug-picker .select2-container,
+.prescription-modal-ui .presc-drug-picker .select2-selection
+    width: 100% !important
+
+
+.prescription-modal-ui .presc-indication-switch
+    display: grid
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: 0
+    border: 1px solid #dbe3ea
+    border-radius: 14px
+    overflow: hidden
+    background: #fff
+
+
+.prescription-modal-ui .presc-radio-card
+    display: block
+    margin: 0
+    cursor: pointer
+
+
+.prescription-modal-ui .presc-radio-card:not(:last-child)
+    border-right: 1px solid #e5ebf2
+
+
+.prescription-modal-ui .presc-radio-card input
+    display: none
+
+
+.prescription-modal-ui .presc-radio-card__body
+    display: flex
+    flex-direction: column
+    justify-content: center
+    min-height: 78px
+    border: 0
+    border-radius: 0
+    padding: 12px 16px
+    background: #fff
+    transition: .18s ease
+
+
+.prescription-modal-ui .presc-radio-card__title
+    display: block
+    font-size: 14px
+    font-weight: 700
+    color: #111827
+    margin-bottom: 4px
+    line-height: 1.25
+
+
+.prescription-modal-ui .presc-radio-card__text
+    display: block
+    font-size: 12px
+    line-height: 1.35
+    color: #6b7280
+
+
+.prescription-modal-ui .presc-radio-card:hover .presc-radio-card__body
+    background: #f8fbff
+
+
+.prescription-modal-ui .presc-radio-card input:checked + .presc-radio-card__body
+    border: 0
+    background: #eff6ff
+    box-shadow: inset 0 0 0 2px #6ea2ff
+
+
+.prescription-modal-ui .presc-top-row .form-label
+    min-height: 2.4rem
+    display: flex
+    align-items: flex-end
+    line-height: 1.2
+
+
+.prescription-modal-ui .presc-regimen
+    display: flex
+    align-items: center
+    flex-wrap: wrap
+    gap: 8px 10px
+    background: #f8fafc
+    border: 1px dashed #dbe3ea
+    border-radius: 14px
+    padding: 12px
+
+
+.prescription-modal-ui .presc-regimen__label,
+.prescription-modal-ui .presc-regimen__text
+    font-size: 14px
+    color: #334155
+    line-height: 1.3
+
+
+.prescription-modal-ui .presc-regimen__input
+    width: 82px
+
+
+.prescription-modal-ui .presc-regimen__select
+    width: 96px
+    min-width: 96px
+
+
+.prescription-modal-ui .presc-regimen__badge
+    min-width: 42px
+    text-align: center
+    display: inline-block
+    padding: 6px 10px
+    border-radius: 999px
+    background: #e8f0fe
+    color: #1d4ed8
+    font-weight: 700
+    font-size: 13px
+    line-height: 1.2
+
+
+.presc-suggestion-item
+    border: 1px solid #edf1f5
+    border-radius: 12px
+    padding: 10px 12px
+    background: #fff
+    transition: border-color .15s ease, background-color .15s ease
+    box-shadow: none
+
+
+.presc-suggestion-item__top
+    display: flex
+    justify-content: space-between
+    gap: 10px
+    align-items: start
+    margin-bottom: 6px
+
+
+.presc-suggestion-item__title
+    font-weight: 700
+    font-size: 1.02rem
+    line-height: 1.25
+    color: #1f2a37
+
+
+.presc-suggestion-item__subtitle
+    font-size: 0.9rem
+    color: #6b7b91
+    margin-top: 3px
+
+
+.presc-suggestion-item__badges
+    display: flex
+    flex-wrap: wrap
+    gap: 6px
+    margin-top: 10px
+
+
+.presc-suggestion-item__reason
+    font-size: 0.87rem
+    color: #66758c
+    margin-top: 10px
+    line-height: 1.45
+    background: #f7f9fc
+    border-radius: 12px
+    padding: 10px 12px
+
+
+.presc-suggestion-item__action
+    margin-top: 12px
+    display: flex
+    justify-content: flex-end
+
+
+.contacts-dashboard
+    display: grid
+    grid-template-columns: 1.35fr .65fr
+    gap: 14px
+    margin-bottom: 16px
+
+
+.contacts-hero,
+.contacts-stat-card,
+.contacts-form-card,
+.contacts-list-card,
+.contacts-empty-state
+    background: #fff
+    border: 1px solid #e8eef6
+    border-radius: 18px
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04)
+
+
+.contacts-hero
+    position: relative
+    overflow: hidden
+    padding: 18px 20px
+    background: radial-gradient(circle at top right, rgba(13, 110, 253, .16), transparent 34%), linear-gradient(135deg, #ffffff 0%, #f7fbff 100%)
+
+
+.contacts-hero::after
+    content: ""
+    position: absolute
+    right: -46px
+    bottom: -62px
+    width: 190px
+    height: 190px
+    border-radius: 999px
+    background: rgba(13, 110, 253, .07)
+
+
+.contacts-hero__content
+    position: relative
+    z-index: 1
+
+
+.contacts-hero__eyebrow
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 5px 10px
+    border-radius: 999px
+    background: #eef6ff
+    color: #0b5ed7
+    font-size: 12px
+    font-weight: 700
+    margin-bottom: 10px
+
+
+.contacts-hero__title
+    margin: 0
+    color: #172033
+    font-size: 22px
+    font-weight: 800
+    line-height: 1.2
+
+
+.contacts-hero__subtitle
+    max-width: 640px
+    margin-top: 7px
+    color: #667085
+    font-size: 13px
+    line-height: 1.45
+
+
+.contacts-stat-card
+    padding: 16px
+    display: flex
+    align-items: center
+    gap: 12px
+
+
+.contacts-stat-card__icon
+    width: 44px
+    height: 44px
+    flex: 0 0 44px
+    border-radius: 15px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    background: #ecfdf3
+    color: #15803d
+    font-size: 20px
+
+
+.contacts-stat-card__label
+    color: #667085
+    font-size: 12px
+    line-height: 1.25
+    margin-bottom: 3px
+
+
+.contacts-stat-card__value
+    color: #172033
+    font-size: 22px
+    font-weight: 900
+    line-height: 1.1
+
+
+.contacts-form-card
+    padding: 16px
+    margin-bottom: 16px
+
+
+.contacts-form-card__head
+    display: flex
+    justify-content: space-between
+    gap: 12px
+    align-items: flex-start
+    margin-bottom: 14px
+
+
+.contacts-form-card__title
+    font-size: 15px
+    font-weight: 800
+    color: #1f2937
+
+
+.contacts-form-card__hint
+    margin-top: 3px
+    font-size: 12px
+    color: #667085
+    line-height: 1.35
+
+
+.contacts-form-card .form-label,
+.contacts-edit-form .form-label
+    font-size: 13px
+    font-weight: 700
+    color: #344054
+    margin-bottom: 6px
+
+
+.contacts-form-card .form-control,
+.contacts-edit-form .form-control
+    min-height: 40px
+    border-radius: 12px
+
+
+.contacts-form-card .btn
+    min-height: 40px
+    border-radius: 12px
+    font-weight: 700
+
+
+.contacts-list-card
+    overflow: hidden
+
+
+.contacts-list-head
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+    padding: 14px 18px
+    border-bottom: 1px solid #eef2f7
+    background: #fbfdff
+
+
+.contacts-list-title
+    font-size: 15px
+    font-weight: 800
+    color: #1f2937
+
+
+.contacts-count-pill
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 5px 10px
+    border-radius: 999px
+    background: #f3f6fb
+    border: 1px solid #e5ebf3
+    color: #667085
+    font-size: 12px
+    font-weight: 700
+
+
+.contacts-grid
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 12px
+    padding: 16px
+
+
+.contact-card
+    border: 1px solid #edf1f7
+    border-radius: 16px
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%)
+    padding: 14px
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease
+
+
+.contact-card:hover
+    border-color: #cfe0ff
+    box-shadow: 0 10px 24px rgba(57, 96, 179, .08)
+    transform: translateY(-1px)
+
+
+.contact-card__top
+    display: flex
+    justify-content: space-between
+    align-items: flex-start
+    gap: 12px
+
+
+.contact-card__main
+    display: flex
+    align-items: flex-start
+    gap: 12px
+    min-width: 0
+
+
+.contact-card__avatar
+    width: 44px
+    height: 44px
+    flex: 0 0 44px
+    border-radius: 15px
+    background: #eef6ff
+    color: #0d6efd
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    font-size: 20px
+
+
+.contact-card__name
+    color: #111827
+    font-size: 15px
+    font-weight: 800
+    line-height: 1.25
+    word-break: break-word
+
+
+.contact-card__phone
+    margin-top: 5px
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    color: #475467
+    font-size: 13px
+    line-height: 1.35
+    text-decoration: none
+    word-break: break-word
+
+
+.contact-card__phone:hover
+    color: #0d6efd
+    text-decoration: underline
+
+
+.contact-card__actions
+    display: flex
+    align-items: center
+    gap: 6px
+    flex: 0 0 auto
+
+
+.contact-card__actions .btn
+    border-radius: 11px
+
+
+.contacts-edit-box
+    margin-top: 12px
+    padding: 12px
+    border: 1px solid #e7edf5
+    border-radius: 14px
+    background: #f8fafc
+
+
+.contacts-edit-box[open]
+    background: #f7fbff
+    border-color: #d7e7ff
+
+
+.contacts-edit-box summary
+    list-style: none
+    cursor: pointer
+
+
+.contacts-edit-box summary::-webkit-details-marker
+    display: none
+
+
+.contacts-edit-summary
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    color: #0d6efd
+    font-size: 13px
+    font-weight: 700
+
+
+.contacts-edit-form
+    margin-top: 12px
+
+
+.contacts-edit-form__actions
+    display: flex
+    justify-content: flex-end
+    gap: 8px
+    margin-top: 12px
+
+
+.contacts-empty-state
+    padding: 34px 22px
+    text-align: center
+
+
+.contacts-empty-state__icon
+    width: 72px
+    height: 72px
+    margin: 0 auto 14px
+    border-radius: 24px
+    display: flex
+    align-items: center
+    justify-content: center
+    background: #eef6ff
+    color: #0d6efd
+    font-size: 32px
+
+
+.contacts-empty-state__title
+    font-size: 17px
+    font-weight: 800
+    color: #172033
+    margin-bottom: 6px
+
+
+.contacts-empty-state__text
+    max-width: 520px
+    margin: 0 auto
+    color: #667085
+    font-size: 13px
+    line-height: 1.45
+
+
+@media (max-width: 991px)
+.contacts-dashboard
+    grid-template-columns: 1fr
+
+
+.contacts-grid
+    grid-template-columns: 1fr
+
+
+.epicrisis-modal-ui .modal-dialog
+    width: calc(100vw - 12px)
+    max-width: none
+    margin: 6px auto
+
+
+.epicrisis-side-card,
+.epicrisis-editor-card
+    height: auto
+
+
+.patient-info-dashboard
+    grid-template-columns: 1fr
+
+
+
+@media (max-width: 575px)
+.contacts-hero,
+.contacts-form-card
+    padding: 14px
+
+
+.contacts-hero__title
+    font-size: 19px
+
+
+.contacts-list-head,
+.contacts-grid
+    padding: 12px
+
+
+.contact-card__top
+    flex-direction: column
+
+
+.contact-card__actions
+    width: 100%
+    justify-content: flex-end
+
+
+.patient-info-hero,
+.patient-info-form-card,
+.patient-info-side-card
+    padding: 14px
+
+
+.patient-info-hero__title
+    font-size: 19px
+
+
+.patient-info-form-actions .btn
+    width: 100%
+
+
+
+@media (max-width: 1199px)
+.prescription-modal-compact,
+.prescription-modal-ui .modal-dialog
+    width: calc(100vw - 16px)
+    max-width: 1060px
+
+
+.epicrisis-dashboard
+    grid-template-columns: 1fr 1fr
+
+
+.epicrisis-hero
+    grid-column: 1 / -1
+
+
+
+@media (max-width: 991px), (max-height: 900px)
+.prescription-modal-ui .modal-dialog
+    width: calc(100vw - 12px)
+    max-width: none
+    height: calc(100dvh - 12px)
+    max-height: calc(100dvh - 12px)
+    margin: 6px auto
+
+
+.prescription-modal-compact
+    width: calc(100vw - 12px)
+    max-width: none
+    margin: 6px auto
+
+
+.prescription-modal-ui .modal-content
+    border-radius: 14px
+
+
+.prescription-modal-ui .modal-body
+    padding: 10px 12px 16px
+
+
+.prescription-modal-ui .modal-footer
+    padding: 10px 12px 12px
+
+
+.prescription-modal-ui .presc-indication-switch
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+
+
+
+@media (max-width: 767px)
+.prescription-modal-ui .modal-header
+    padding: 12px 14px 8px
+
+
+.prescription-modal-ui .modal-footer
+    display: grid
+    grid-template-columns: 1fr
+    gap: 8px
+
+
+.prescription-modal-ui .modal-footer .btn
+    width: 100%
+
+
+.prescription-modal-ui .presc-section
+    padding: 12px
+    border-radius: 14px
+
+
+.prescription-modal-ui .presc-top-row .form-label
+    min-height: auto
+
+
+.prescription-modal-ui .presc-regimen
+    align-items: flex-start
+    gap: 8px
+
+
+.prescription-modal-ui .presc-regimen__input,
+.prescription-modal-ui .presc-regimen__select
+    width: 100%
+    min-width: 0
+
+
+.epicrisis-dashboard
+    grid-template-columns: 1fr
+
+
+.epicrisis-hero__content
+    flex-direction: column
+
+
+.epicrisis-hero__action
+    width: 100%
+
+
+.epicrisis-item
+    grid-template-columns: 52px minmax(0, 1fr)
+
+
+.epicrisis-date-badge
+    width: 48px
+    height: 54px
+    border-radius: 14px
+
+
+.epicrisis-date-badge__day
+    font-size: 17px
+
+
+.epicrisis-date-badge__month
+    font-size: 10px
+
+
+.epicrisis-item__actions
+    grid-column: 1 / -1
+    justify-content: stretch
+
+
+.epicrisis-open-btn
+    width: 100%
+
+
+.patient-info-address-card__head
+    flex-direction: column
+    align-items: stretch
+
+
+.patient-info-address-card__actions
+    justify-content: flex-start
+
+
+.patient-info-address-grid
+    grid-template-columns: 1fr
+
+
+.patient-info-check-grid
+    grid-template-columns: 1fr
+
+
+
+.prescription-modal-ui .presc-drug-picker
+    position: relative
+
+
+.prescription-modal-ui .presc-drug-picker .select2-container
+    width: 100% !important
+    display: block
+
+
+.prescription-modal-ui .presc-drug-picker .select2-container--bootstrap-5 .select2-selection,
+.prescription-modal-ui .presc-drug-picker .select2-container--default .select2-selection
+    min-height: 38px
+    height: auto
+    border: 1px solid var(--bs-border-color, #ced4da)
+    border-radius: 12px
+    padding: 4px 36px 4px 12px
+    display: flex
+    align-items: center
+    background: #fff
+
+
+.prescription-modal-ui .presc-drug-picker .select2-selection__rendered
+    line-height: 28px !important
+    padding-left: 0 !important
+    padding-right: 0 !important
+    color: #212529
+
+
+.prescription-modal-ui .presc-drug-picker .select2-selection__clear
+    position: absolute
+    right: 28px
+    top: 50%
+    transform: translateY(-50%)
+    margin: 0
+    font-size: 18px
+    line-height: 1
+
+
+.prescription-modal-ui .presc-drug-picker .select2-selection__arrow
+    height: 100% !important
+    right: 8px !important
+
+
+.prescription-modal-ui .select2-dropdown
+    z-index: 2000
+
+
+.presc-suggestions-panel
+    background: #fff
+    border: 1px solid #e9eef5
+    border-radius: 16px
+    padding: 14px
+    height: 100%
+    display: flex
+    flex-direction: column
+    box-shadow: none
+
+
+.presc-suggestions-panel__header
+    display: block
+    margin-bottom: 12px
+    padding-bottom: 10px
+    border-bottom: 1px solid #f0f2f5
+
+
+.presc-suggestions-panel__title
+    font-size: 15px
+    font-weight: 700
+    color: #1f2937
+    line-height: 1.2
+
+
+.presc-suggestions-panel__subtitle
+    margin-top: 3px
+    font-size: 12px
+    line-height: 1.35
+    color: #6b7280
+
+
+.presc-suggestions-panel__meta
+    display: flex
+    flex-direction: row
+    align-items: center
+    gap: 6px
+    white-space: nowrap
+    margin-top: 8px
+    justify-content: flex-start
+
+
+.presc-filter-chip,
+.presc-count-chip
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    min-height: 22px
+    padding: 3px 8px
+    border-radius: 999px
+    font-size: 11px
+    font-weight: 600
+
+
+.presc-filter-chip
+    background: #eef4ff
+    color: #2457d6
+    border: 1px solid #d9e6ff
+
+
+.presc-count-chip
+    background: #f5f7fb
+    color: #4a5872
+    border: 1px solid #e2e8f0
+    min-width: 36px
+
+
+.presc-suggestions-panel__body
+    min-height: 260px
+    flex: 1
+    display: flex
+    flex-direction: column
+
+
+.presc-suggestions-state
+    min-height: 140px
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    text-align: center
+    gap: 10px
+    color: #7b8797
+    background: #fafcff
+    border: 1px dashed #dbe4f0
+    border-radius: 12px
+    padding: 16px
+    font-size: 12px
+
+
+.presc-loader
+    width: 30px
+    height: 30px
+    border: 3px solid #d8e4ff
+    border-top-color: #4a7cff
+    border-radius: 50%
+    animation: prescSpin 0.9s linear infinite
+
+
+@keyframes prescSpin to transform: rotate(360deg)
+
+.presc-suggestions-list
+    display: flex
+    flex-direction: column
+    gap: 8px
+    max-height: 520px
+    overflow-y: auto
+    padding-right: 4px
+
+
+.presc-suggestion-item:hover
+    border-color: #cfe0ff
+    box-shadow: none
+    transform: none
+    background: #fbfdff
+
+
+.presc-suggestion-item.is-selected
+    border-color: #6ea2ff
+    background: #f3f7ff
+    box-shadow: none
+
+
+.presc-suggestion-badge
+    display: inline-flex
+    align-items: center
+    padding: 3px 7px
+    border-radius: 999px
+    font-size: 10px
+    font-weight: 700
+    line-height: 1
+
+
+.presc-suggestion-badge--rf
+    background: #eef6ff
+    color: #1e63d7
+    border: 1px solid #d6e7ff
+
+
+.presc-suggestion-badge--fda
+    background: #fff7ed
+    color: #b45309
+    border: 1px solid #fed7aa
+
+
+.presc-suggestion-item__action .btn
+    border-radius: 12px
+    min-width: 104px
+    font-weight: 600
+    padding: 8px 14px
+
+
+.presc-suggestion-main
+    min-width: 0
+
+
+.presc-suggestion-title
+    font-size: 14px
+    font-weight: 700
+    line-height: 1.25
+    color: #111827
+    word-break: break-word
+
+
+.presc-suggestion-latin
+    margin-top: 2px
+    font-size: 11px
+    line-height: 1.25
+    color: #6b7280
+    word-break: break-word
+
+
+.presc-suggestion-description
+    margin-top: 6px
+    font-size: 11px
+    line-height: 1.35
+    color: #7a8699
+
+
+.presc-suggestion-footer
+    display: flex
+    justify-content: space-between
+    align-items: center
+    gap: 8px
+    margin-top: 8px
+
+
+.presc-suggestion-badges
+    display: flex
+    gap: 5px
+    flex-wrap: wrap
+
+
+.presc-suggestion-pick
+    border-radius: 9px
+    padding: 4px 10px
+    font-size: 12px
+    font-weight: 600
+    white-space: nowrap
+
+
+.document-upload-dropzone
+    border: 2px dashed #cfe0ff
+    border-radius: 16px
+    background: #f8fbff
+    padding: 28px 18px
+    text-align: center
+    cursor: pointer
+    transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease
+
+
+.document-upload-dropzone:hover,
+.document-upload-dropzone.is-dragover
+    border-color: #0d6efd
+    background: #eef6ff
+    box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .08)
+
+
+.document-upload-dropzone__icon
+    width: 58px
+    height: 58px
+    border-radius: 999px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    background: #e8f1ff
+    color: #0d6efd
+    margin-bottom: 12px
+
+
+.document-upload-file
+    display: none
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+    margin-top: 12px
+    padding: 10px 12px
+    border: 1px solid #dbe7f6
+    border-radius: 12px
+    background: #fff
+
+
+.document-upload-file.is-visible
+    display: flex
+
+
+.document-upload-file__name
+    min-width: 0
+    font-weight: 600
+    word-break: break-word
+
+
+.document-upload-file__meta
+    font-size: 12px
+    color: #6b7280
+
+
+.epicrisis-modal-ui .modal-dialog
+    width: min(1180px, calc(100vw - 16px))
+    max-width: 1180px
+    margin: 8px auto
+
+
+.epicrisis-modal-ui .modal-content
+    border: 0
+    border-radius: 18px
+    box-shadow: 0 20px 60px rgba(15, 23, 42, .14)
+    overflow: hidden
+
+
+.epicrisis-modal-ui .modal-header,
+.epicrisis-modal-ui .modal-footer
+    background: #fff
+
+
+.epicrisis-modal-ui .modal-body
+    background: #f8fafc
+
+
+.epicrisis-side-card,
+.epicrisis-editor-card
+    height: 100%
+    background: #fff
+    border: 1px solid #e9eef5
+    border-radius: 16px
+    padding: 16px
+
+
+.epicrisis-section-title
+    font-size: 14px
+    font-weight: 700
+    color: #1f2937
+    margin-bottom: 12px
+
+
+.epicrisis-selected-diagnosis
+    border: 1px solid #dbeafe
+    background: #eff6ff
+    border-radius: 14px
+    padding: 12px
+    color: #1e3a8a
+
+
+.epicrisis-modal-ui .form-label
+    font-size: 13px
+    font-weight: 600
+    color: #344054
+    margin-bottom: 6px
+
+
+.epicrisis-modal-ui .form-control,
+.epicrisis-modal-ui .form-select
+    min-height: 38px
+    border-radius: 12px
+
+
+.epicrisis-modal-ui .select2-container
+    width: 100% !important
+
+
+.epicrisis-modal-ui .select2-container--bootstrap-5 .select2-selection,
+.epicrisis-modal-ui .select2-container--default .select2-selection
+    min-height: 38px
+    border-radius: 12px
+    border-color: var(--bs-border-color, #ced4da)
+    display: flex
+    align-items: center
+
+
+.epicrisis-modal-ui .select2-dropdown
+    z-index: 2100
+
+
+.epicrisis-dashboard
+    display: grid
+    grid-template-columns: 1.45fr repeat(3, minmax(170px, .55fr))
+    gap: 14px
+    margin-bottom: 16px
+
+
+.epicrisis-hero,
+.epicrisis-stat-card,
+.epicrisis-list-card,
+.epicrisis-empty-state
+    background: #fff
+    border: 1px solid #e8eef6
+    border-radius: 18px
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04)
+
+
+.epicrisis-hero
+    position: relative
+    overflow: hidden
+    padding: 18px 20px
+    background: radial-gradient(circle at top right, rgba(13, 110, 253, .16), transparent 34%), linear-gradient(135deg, #ffffff 0%, #f7fbff 100%)
+
+
+.epicrisis-hero::after
+    content: ""
+    position: absolute
+    right: -40px
+    bottom: -56px
+    width: 180px
+    height: 180px
+    border-radius: 999px
+    background: rgba(13, 110, 253, .07)
+
+
+.epicrisis-hero__content
+    position: relative
+    z-index: 1
+    display: flex
+    justify-content: space-between
+    align-items: flex-start
+    gap: 16px
+
+
+.epicrisis-hero__eyebrow
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 5px 10px
+    border-radius: 999px
+    background: #eef6ff
+    color: #0b5ed7
+    font-size: 12px
+    font-weight: 700
+    margin-bottom: 10px
+
+
+.epicrisis-hero__title
+    margin: 0
+    color: #172033
+    font-size: 22px
+    font-weight: 800
+    line-height: 1.2
+
+
+.epicrisis-hero__subtitle
+    max-width: 620px
+    margin-top: 7px
+    color: #667085
+    font-size: 13px
+    line-height: 1.45
+
+
+.epicrisis-hero__action
+    position: relative
+    z-index: 1
+    border-radius: 12px
+    white-space: nowrap
+    box-shadow: 0 8px 18px rgba(13, 110, 253, .18)
+
+
+.epicrisis-stat-card
+    padding: 16px
+    display: flex
+    align-items: center
+    gap: 12px
+
+
+.epicrisis-stat-card__icon
+    width: 42px
+    height: 42px
+    flex: 0 0 42px
+    border-radius: 14px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    font-size: 19px
+
+
+.epicrisis-stat-card__label
+    color: #667085
+    font-size: 12px
+    line-height: 1.25
+    margin-bottom: 3px
+
+
+.epicrisis-stat-card__value
+    color: #172033
+    font-size: 20px
+    font-weight: 800
+    line-height: 1.1
+
+
+.epicrisis-list-card
+    overflow: hidden
+
+
+.epicrisis-list-head
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+    padding: 14px 18px
+    border-bottom: 1px solid #eef2f7
+    background: #fbfdff
+
+
+.epicrisis-list-title
+    font-size: 15px
+    font-weight: 800
+    color: #1f2937
+
+
+.epicrisis-count-pill
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 5px 10px
+    border-radius: 999px
+    background: #f3f6fb
+    border: 1px solid #e5ebf3
+    color: #667085
+    font-size: 12px
+    font-weight: 700
+
+
+.epicrisis-timeline
+    position: relative
+    padding: 6px 18px 18px
+
+
+.epicrisis-item
+    position: relative
+    display: grid
+    grid-template-columns: 74px minmax(0, 1fr) auto
+    gap: 14px
+    padding: 16px 0
+    border-bottom: 1px solid #f0f3f7
+
+
+.epicrisis-item:last-child
+    border-bottom: 0
+    padding-bottom: 0
+
+
+.epicrisis-date-badge
+    width: 62px
+    height: 62px
+    border-radius: 18px
+    background: linear-gradient(180deg, #eff6ff 0%, #f8fbff 100%)
+    border: 1px solid #dceaff
+    color: #1d4ed8
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    line-height: 1
+
+
+.epicrisis-date-badge__day
+    font-size: 20px
+    font-weight: 900
+
+
+.epicrisis-date-badge__month
+    margin-top: 5px
+    font-size: 11px
+    font-weight: 800
+    text-transform: uppercase
+
+
+.epicrisis-item__main
+    min-width: 0
+
+
+.epicrisis-item__top
+    display: flex
+    align-items: center
+    flex-wrap: wrap
+    gap: 8px
+    margin-bottom: 7px
+
+
+.epicrisis-item__title
+    margin: 0
+    font-size: 16px
+    font-weight: 800
+    color: #111827
+    line-height: 1.25
+
+
+.epicrisis-meta
+    display: flex
+    flex-wrap: wrap
+    gap: 8px 14px
+    margin-bottom: 10px
+    color: #667085
+    font-size: 12px
+    line-height: 1.35
+
+
+.epicrisis-meta__item
+    display: inline-flex
+    align-items: center
+    gap: 5px
+
+
+.epicrisis-diagnosis-line
+    display: flex
+    align-items: flex-start
+    gap: 8px
+    flex-wrap: wrap
+    margin-bottom: 10px
+
+
+.epicrisis-mkb-badge
+    display: inline-flex
+    align-items: center
+    gap: 5px
+    padding: 5px 9px
+    border-radius: 999px
+    background: #ecfdf3
+    border: 1px solid #bbf7d0
+    color: #15803d
+    font-size: 12px
+    font-weight: 800
+    line-height: 1
+
+
+.epicrisis-diagnosis-title
+    color: #475467
+    font-size: 13px
+    line-height: 1.45
+
+
+.epicrisis-preview
+    color: #334155
+    font-size: 13px
+    line-height: 1.55
+    background: #f8fafc
+    border: 1px solid #eef2f7
+    border-radius: 14px
+    padding: 11px 13px
+    word-break: break-word
+
+
+.epicrisis-item__actions
+    display: flex
+    align-items: flex-start
+    gap: 8px
+
+
+.epicrisis-open-btn
+    border-radius: 12px
+    padding: 7px 12px
+    white-space: nowrap
+
+
+.epicrisis-empty-state
+    padding: 34px 22px
+    text-align: center
+
+
+.epicrisis-empty-state__icon
+    width: 72px
+    height: 72px
+    margin: 0 auto 14px
+    border-radius: 24px
+    display: flex
+    align-items: center
+    justify-content: center
+    background: #eef6ff
+    color: #0d6efd
+    font-size: 32px
+
+
+.epicrisis-empty-state__title
+    font-size: 17px
+    font-weight: 800
+    color: #172033
+    margin-bottom: 6px
+
+
+.epicrisis-empty-state__text
+    max-width: 520px
+    margin: 0 auto 16px
+    color: #667085
+    font-size: 13px
+    line-height: 1.45
+
+
+.patient-info-dashboard
+    display: grid
+    grid-template-columns: 1.15fr .85fr
+    gap: 16px
+    margin-bottom: 16px
+
+
+.patient-info-hero,
+.patient-info-form-card,
+.patient-info-side-card
+    background: #fff
+    border: 1px solid #e8eef6
+    border-radius: 18px
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .04)
+
+
+.patient-info-hero
+    position: relative
+    overflow: hidden
+    padding: 18px 20px
+    background: radial-gradient(circle at top right, rgba(13, 110, 253, .16), transparent 34%), linear-gradient(135deg, #ffffff 0%, #f7fbff 100%)
+
+
+.patient-info-hero::after
+    content: ""
+    position: absolute
+    right: -42px
+    bottom: -58px
+    width: 180px
+    height: 180px
+    border-radius: 999px
+    background: rgba(13, 110, 253, .07)
+
+
+.patient-info-hero__content
+    position: relative
+    z-index: 1
+
+
+.patient-info-hero__eyebrow
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 5px 10px
+    border-radius: 999px
+    background: #eef6ff
+    color: #0b5ed7
+    font-size: 12px
+    font-weight: 700
+    margin-bottom: 10px
+
+
+.patient-info-hero__title
+    margin: 0
+    color: #172033
+    font-size: 22px
+    font-weight: 800
+    line-height: 1.2
+
+
+.patient-info-hero__subtitle
+    max-width: 650px
+    margin-top: 7px
+    color: #667085
+    font-size: 13px
+    line-height: 1.45
+
+
+.patient-info-form-card
+    padding: 16px
+
+
+.patient-info-form-card__head
+    display: flex
+    justify-content: space-between
+    gap: 12px
+    align-items: flex-start
+    margin-bottom: 14px
+
+
+.patient-info-form-card__title
+    font-size: 15px
+    font-weight: 800
+    color: #1f2937
+
+
+.patient-info-form-card__hint
+    margin-top: 3px
+    font-size: 12px
+    color: #667085
+    line-height: 1.35
+
+
+.patient-info-form-card .form-label
+    font-size: 13px
+    font-weight: 700
+    color: #344054
+    margin-bottom: 6px
+
+
+.patient-info-form-card .form-control,
+.patient-info-form-card .form-select
+    min-height: 36px
+    border-radius: 12px
+    padding: 6px 10px
+    font-size: 13px
+    line-height: 1.25
+
+
+.patient-info-form-card textarea.form-control
+    min-height: 78px
+    font-size: 13px
+    line-height: 1.35
+
+
+.patient-info-form-actions
+    display: flex
+    justify-content: flex-end
+    flex-wrap: wrap
+    gap: 8px
+    padding-top: 12px
+    margin-top: 4px
+    border-top: 1px solid #eef2f7
+
+
+.patient-info-form-actions .btn
+    border-radius: 12px
+    font-weight: 700
+    min-height: 40px
+
+
+.patient-info-side-card
+    padding: 16px
+    height: 100%
+
+
+.patient-info-side-card__title
+    font-size: 15px
+    font-weight: 800
+    color: #1f2937
+    margin-bottom: 12px
+
+
+.patient-info-summary-list
+    display: flex
+    flex-direction: column
+    gap: 10px
+
+
+.patient-info-summary-item
+    display: flex
+    gap: 10px
+    align-items: flex-start
+    padding: 10px 12px
+    border: 1px solid #edf1f7
+    border-radius: 14px
+    background: #fbfcff
+
+
+.patient-info-summary-item__icon
+    width: 32px
+    height: 32px
+    flex: 0 0 32px
+    border-radius: 11px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    background: #eef6ff
+    color: #0d6efd
+
+
+.patient-info-summary-item__label
+    color: #667085
+    font-size: 12px
+    line-height: 1.25
+
+
+.patient-info-summary-item__value
+    margin-top: 2px
+    color: #172033
+    font-size: 13px
+    font-weight: 700
+    line-height: 1.35
+    word-break: break-word
+
+
+.patient-info-form-sections
+    display: flex
+    flex-direction: column
+    gap: 14px
+
+
+.patient-info-section
+    border: 1px solid #e5edf7
+    border-radius: 18px
+    background: #fbfdff
+    padding: 14px
+
+
+.patient-info-section--main
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)
+
+
+.patient-info-section--passport
+    background: linear-gradient(180deg, #ffffff 0%, #fffdf7 100%)
+    border-color: #f0e4c8
+
+
+.patient-info-section--addresses
+    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%)
+    border-color: #d9e9ff
+
+
+.patient-info-section--comment
+    background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%)
+
+
+.patient-info-section-title
+    display: flex
+    align-items: center
+    gap: 10px
+    margin: -2px 0 14px
+    padding: 0 0 11px
+    border-bottom: 1px solid #e7eef7
+    color: #1f2937
+    font-size: 15px
+    font-weight: 900
+
+
+.patient-info-section-title i
+    width: 34px
+    height: 34px
+    flex: 0 0 34px
+    border-radius: 12px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    background: #eef6ff
+    font-size: 17px
+
+
+.patient-info-section-title__text
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+
+.patient-info-section-title__hint
+    color: #667085
+    font-size: 12px
+    font-weight: 500
+    line-height: 1.35
+
+
+.patient-info-address-wrap
+    position: relative
+
+
+.patient-info-address-input
+    min-height: 36px !important
+    height: 36px
+    padding: 6px 10px
+    font-size: 13px
+    line-height: 1.25
+
+
+.patient-info-address-suggest
+    position: absolute
+    left: 0
+    right: 0
+    top: calc(100% + 6px)
+    z-index: 1080
+    display: none
+    overflow: hidden
+    border: 1px solid #dbe7f6
+    border-radius: 12px
+    background: #fff
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .10)
+    max-height: 240px
+    overflow-y: auto
+
+
+.patient-info-address-suggest.is-visible
+    display: block
+
+
+.patient-info-address-suggest__item
+    width: 100%
+    border: 0
+    background: #fff
+    text-align: left
+    padding: 8px 10px
+    color: #344054
+    font-size: 12px
+    line-height: 1.3
+    cursor: pointer
+
+
+.patient-info-address-suggest__item:hover,
+.patient-info-address-suggest__item:focus
+    background: #f2f7ff
+    color: #0b5ed7
+    outline: none
+
+
+.patient-info-address-suggest__item + .patient-info-address-suggest__item
+    border-top: 1px solid #eef2f7
+
+
+.patient-info-address-card
+    border: 1px solid #e5edf7
+    border-radius: 16px
+    background: rgba(255, 255, 255, .78)
+    padding: 14px
+
+
+.patient-info-address-card + .patient-info-address-card
+    margin-top: 12px
+
+
+.patient-info-address-card__head
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 12px
+    margin-bottom: 10px
+
+
+.patient-info-address-card__title
+    margin: 0
+    color: #344054
+    font-size: 13px
+    font-weight: 800
+    line-height: 1.25
+
+
+.patient-info-address-card__hint
+    margin-top: 3px
+    color: #667085
+    font-size: 11px
+    line-height: 1.35
+
+
+.patient-info-address-card__actions
+    display: flex
+    align-items: center
+    justify-content: flex-end
+    flex-wrap: wrap
+    gap: 8px
+    flex: 0 0 auto
+
+
+.patient-info-address-card__actions .btn
+    min-height: 34px
+    padding: 5px 11px
+    border-radius: 10px
+    font-size: 13px
+    font-weight: 700
+
+
+.patient-info-address-card__actions .form-check-label
+    color: #344054
+    font-size: 12px
+    font-weight: 600
+
+
+.patient-info-address-grid
+    display: grid
+    grid-template-columns: minmax(0, 1fr)
+    gap: 10px
+    align-items: end
+
+
+.patient-info-address-grid .form-label
+    margin-bottom: 5px
+    font-size: 12px
+
+
+.patient-info-address-grid__address
+    min-width: 0
+
+
+.patient-info-check-grid
+    display: grid
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: 10px
+
+
+.patient-info-check-card
+    min-height: 74px
+    padding: 12px 14px
+    border: 1px solid #e5edf7
+    border-radius: 14px
+    background: #fff
+    display: flex
+    align-items: flex-start
+    gap: 10px
+
+
+.patient-info-check-card .form-check-input
+    margin-top: 2px
+
+
+.patient-info-check-card__title
+    color: #1f2937
+    font-size: 13px
+    font-weight: 800
+    line-height: 1.25
+
+
+.patient-info-check-card__hint
+    margin-top: 3px
+    color: #667085
+    font-size: 11px
+    line-height: 1.35
+

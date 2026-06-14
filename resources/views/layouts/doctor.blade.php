@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if(request('api_token'))
+        <meta name="x-test-api-token" content="{{ request('api_token') }}">
+        <script>
+            window.TEST_API = { token: document.querySelector('meta[name="x-test-api-token"]').content };
+        </script>
+    @endif
     <title>@yield('title') - Панель врача СМА Норхнейм</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -23,10 +29,10 @@
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
             <li><a href="{{ route('doctors.main') }}" class="nav-link link-body-emphasis"><i class="bi bi-speedometer2"></i> Статистика</a></li>
-            <li><a href="{{ route('doctors.reception') }}" class="nav-link link-body-emphasis"><i class="bi bi-person-lines-fill"></i> Регистратура</a></li>
+            <li><a href="{{ route('doctors.reception.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-person-lines-fill"></i> Регистратура</a></li>
             <li><a href="#" class="nav-link link-body-emphasis"><i class="bi bi-ui-checks-grid"></i> Тесты</a></li>
             <li><a href="#" class="nav-link link-body-emphasis"><i class="bi bi-search-heart"></i> Анализы</a></li>
-            <li><a href="{{ route('doctors.prescriptions') }}" class="nav-link link-body-emphasis"><i class="bi bi-prescription"></i> Выписки</a></li>
+            <li><a href="{{ route('doctors.prescriptions.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-prescription"></i> Выписки</a></li>
             <li><a href="#" class="nav-link link-body-emphasis"><i class="bi bi-gear"></i> Настройки</a></li>
         </ul>
         <hr>

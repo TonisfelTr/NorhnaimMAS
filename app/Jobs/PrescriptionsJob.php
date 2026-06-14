@@ -19,10 +19,9 @@ class PrescriptionsJob implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        private array $data
+        private $data
     )
     {
-        //
     }
 
     /**

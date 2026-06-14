@@ -120,7 +120,7 @@
         <tr>
             <td style="width:60%">
                 <div><span class="label">Дата:</span> <span class="value">{{ Carbon\Carbon::now()->format('d.m.Y') }}</span></div>
-                <div style="margin-top:6px"><span class="label">Врач (Ф.И.О., должность):</span><span class="value">{{ optional($patient->doctor()->first())->full_name ?? '—' }}, {{ optional($patient->doctor()->first())->status ?? '' }}</span></div>
+                <div style="margin-top:6px"><span class="label">Врач (Ф.И.О., должность):</span><span class="value">{{ $patient->doctor->full_name ?? '—' }}, {{ optional($patient->doctor()->first())->status ?? '' }}</span></div>
                 <div style="margin-top:6px"><span class="label">Пациент:</span> <span class="value">{{ $patient->full_name }}</span></div>
                 <div style="margin-top:6px"><span class="label">Дата рождения:</span> <span class="value">{{ $patient->birth_at }}</span></div>
                 <div style="margin-top:6px"><span class="label">Адрес:</span> <span class="value">{{ $patient->address_registration }}</span></div>
@@ -133,7 +133,7 @@
 
     <div style="margin-bottom:6px"><strong>Код болезни по МКБ:</strong></div>
     <div class="icd-box">
-        <span class="code">{{ optional($patient->diagnose()->first())->code ?? '—' }} {{ optional($patient->diagnose()->first())->title ?? '' }}</span>
+        <span class="code">{{ $patient->diagnose->code ?? '—' }} {{ optional($patient->diagnose()->first())->title ?? '' }}</span>
         {{-- при желании: краткое описание/стадия и т.п. --}}
     </div>
 

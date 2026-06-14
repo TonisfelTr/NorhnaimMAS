@@ -1,21 +1,22 @@
 services:
     laravel.test:
         build:
-            context: ./vendor/laravel/sail/runtimes/8.3
+            context: ./vendor/laravel/sail/runtimes/8.5
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: sail-8.3/app
+        image: sail-8.5/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
             - '8080:80'
-            - '${VITE_PORT:-5175}:${VITE_PORT:-5173}'
+            - '${VITE_PORT:-5175}:${VITE_PORT:-5175}'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
-            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal client_port=9003 start_with_request=yes}'
+            PHP_IDE_CONFIG: '${PHP_IDE_CONFIG:-serverName=laravel.test}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
@@ -28,16 +29,19 @@ services:
 
     laravel.worker:
         build:
-            context: ./vendor/laravel/sail/runtimes/8.3
+            context: ./vendor/laravel/sail/runtimes/8.5
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: sail-8.3/worker
+        image: sail-8.5/worker
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal client_port=9003 start_with_request=yes}'
+            PHP_IDE_CONFIG: '${PHP_IDE_CONFIG:-serverName=laravel.test}'
         volumes:
             - '.:/var/www/html'
         networks:
@@ -123,17 +127,17 @@ services:
         container_name: ollama
         restart: unless-stopped
         ports:
-            - "11434:11434"           # REST API
+            - "11434:11434"
         volumes:
             - ollama-data:/root/.ollama
         networks:
             - sail
-        # Разблочить на проде. Понадобится GPU для того, чтобы это всё работало быстро, т.к. нагрузка может быть огромной.
-        # deploy:
-        #   resources:
-        #     reservations:
-        #       devices:
-        #         - capabilities: ["gpu"]
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        -   driver: nvidia
+                            capabilities: [ gpu ]
 
 networks:
     sail:

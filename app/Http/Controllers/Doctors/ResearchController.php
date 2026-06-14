@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Doctors;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DirectionPrintRequest;
+use App\Models\Clinic;
 use App\Models\LabResearch;
 use App\Models\LabResearchResult;
 use App\Models\Patient;
@@ -57,52 +58,68 @@ class ResearchController extends Controller
         return redirect()->back()->with('success', 'Исследование было изменено!');
     }
 
-    public function delete(Patient $patient, LabResearch $labResearch)
+    public function delete(Request $request, LabResearch $labResearch)
     {
-        if ($labResearch->status != 'ordered') {
-            return redirect()->back()->withErrors('Нельзя удалить запись анализа с этим статусом.');
+        DB::beginTransaction();
+
+        try {
+            LabResearchResult::where('lab_research_id', $labResearch->id)->delete();
+
+            $labResearch->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Анализ удалён',
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Не удалось удалить анализ: ' . $e->getMessage(),
+            ], 500);
         }
-
-        $labResearch->delete();
-
-        return redirect()->back();
     }
 
-    public function print(DirectionPrintRequest $request, Patient $patient, LabResearch $labResearch)
+    public function print(DirectionPrintRequest $request, LabResearch $labResearch, Patient $patient)
     {
         $doctor = $patient->doctor()->first();
-        $clinic = $doctor ? $doctor->clinic()->first() : null;
+
+        if (!$doctor && auth()->check()) {
+            $doctor = auth()->user()->doctor()->first();
+        }
+
+        $clinic = null;
+
+        if ($doctor) {
+            if (method_exists($doctor, 'clinic')) {
+                $clinic = $doctor->clinic()->first();
+            }
+
+            if (!$clinic && !empty($doctor->clinic_id)) {
+                $clinic = Clinic::find($doctor->clinic_id);
+            }
+        }
 
         $row = DB::select("
-        SELECT
-            jsonb_agg(
-                jsonb_build_object(
-                    'parameter_id', p.id,
-                    'parameter_name', p.name,
-                    'unit', p.unit,
-                    'data_type', p.data_type,
-                    'result_raw', r.value,
-                    'reference_ranges', COALESCE(rrs.ranges, '[]'::jsonb)
-                ) ORDER BY p.\"group\", p.name
-            ) AS parameters
-        FROM lab_research_results r
-            JOIN lab_parameters p ON r.lab_parameter_id = p.id
-            LEFT JOIN LATERAL (
-                SELECT jsonb_agg(
+            SELECT
+                jsonb_agg(
                     jsonb_build_object(
-                        'sex', rr.sex,
-                        'age_min_y', rr.age_min_y,
-                        'age_max_y', rr.age_max_y,
-                        'min', rr.min,
-                        'max', rr.max
-                    ) ORDER BY rr.age_min_y, rr.sex
-                ) AS ranges
-                FROM lab_reference_ranges rr
-                WHERE rr.parameter_id = p.id
-            ) rrs ON true
-        WHERE r.lab_research_id = ?
-        GROUP BY r.lab_research_id
-    ", [$labResearch->id]);
+                        'parameter_id', p.id,
+                        'parameter_name', p.name,
+                        'unit', p.unit,
+                        'data_type', p.data_type,
+                        'normal_values', COALESCE(p.normal_values, '[]'::jsonb),
+                    'result_raw', r.value
+                ) ORDER BY p.\"group\", p.name
+                ) AS parameters
+            FROM lab_research_results r
+                JOIN lab_parameters p ON r.lab_parameter_id = p.id
+            WHERE r.lab_research_id = ?
+            GROUP BY r.lab_research_id
+        ", [$labResearch->id]);
 
         $rawParameters = $row[0]->parameters ?? null;
 
@@ -142,6 +159,7 @@ class ResearchController extends Controller
                 $dataType = $p->data_type ?? '';
                 $resultRaw = $p->result_raw ?? null;
                 $referenceRanges = $p->reference_ranges ?? [];
+                $normalValues = $p->normal_values ?? [];
 
                 // приводим result к числу если numeric и валидно
                 $resultValue = $resultRaw;
@@ -262,6 +280,7 @@ class ResearchController extends Controller
                     'reference_text'   => $referenceTextOnlyRanges,
                     'reference_used'   => $referenceUsed,
                     'out_of_range'     => $outOfRange,
+                    'normal_values'    => $normalValues,
                 ];
             }
         }

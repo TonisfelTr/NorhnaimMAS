@@ -21,7 +21,7 @@
         {{-- Крошки --}}
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('doctors.reception') }}">Пациенты</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('doctors.reception.index') }}">Пациенты</a></li>
                 <li class="breadcrumb-item">
                     <a href="{{ route('doctors.patients.medical_card', $patient->id) }}">{{ $patient->fullName ?? $patient->fio ?? ('Пациент #'.$patient->id) }}</a>
                 </li>
