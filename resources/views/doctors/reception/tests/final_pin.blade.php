@@ -25,7 +25,11 @@
 
     <form method="POST" action="{{ route('doctors.tests.final_pin.verify', $session) }}">
         @csrf
-
+        <input
+            type="hidden"
+            name="mode"
+            value="{{ $mode ?? 'finish' }}"
+        >
         <input
             name="pin"
             inputmode="numeric"

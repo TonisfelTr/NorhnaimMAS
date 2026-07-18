@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace App\Enums\Tests;
 enum PatientTestSessionsStatusesEnum: string {
     case TS_ACTIVE = 'active';
     case TS_FINISHED = 'finished';

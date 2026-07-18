@@ -6,53 +6,119 @@
 @endsection
 @section('sub-main')
     <div id="medicalCardRoot"
-         class="p-4"
+         class="medical-card-page"
          data-active-tab="{{ session('active_tab') }}"
          data-address-suggest-url="{{ route('api-search-address') }}">
         <div class="mc-wrap">
 
-            <div class="mc-card mb-2">
-                <div class="card-body d-flex align-items-center gap-3 flex-wrap">
-                    <div class="mc-avatar">
-                        <i class="bi bi-person fs-4 text-secondary"></i>
+            <div class="mc-patient-shell">
+                <div class="mc-patient-head">
+                    <div class="mc-patient-avatar-modern">
+                        {{ mb_substr($patient->name, 0, 1) . mb_substr($patient->surname, 0, 1) }}
                     </div>
 
-                    <div class="me-auto">
-                        <div class="h5 mb-1">{{ $patient->surname }}
-                            , {{ $patient->name }} {{ $patient->patronym }}</div>
-                        <div class="text-muted small">Дата рождения: {{ $patient->birth_at }}</div>
-                        <div class="text-muted small">Пол:
-                            @if($patient->gender == 'M')
-                                мужской
-                            @elseif($patient->gender == 'F')
-                                женский
-                            @else
-                                не указано
-                            @endif
+                    <div class="mc-patient-main">
+                        <div class="mc-patient-eyebrow">
+                            <i class="bi bi-person-vcard"></i>
+                            Медицинская карта пациента
                         </div>
-                        <div class="text-muted small">Пациент с: {{ $patient->created_at }}</div>
-                        <div class="text-muted small">Лечащий врач: @if($patient->doctor)
-                                {{ $patient->doctor->full_name }}
-                            @else
-                                <span class="text-info">не указан</span>
-                            @endif</div>
-                        <div class="text-muted small">Диагноз: @if($patient->diagnose_id)
-                                {{ $patient->diagnose->code }}
-                            @else
-                                <span class="text-warning">не поставлен</span>
-                            @endif</div>
-                        @if(!$patient->user_id)
-                            <div class="text-warning small">
-                                <i class="bi bi-exclamation-triangle"></i> Не зарегистрирован в системе!
-                            </div>
-                        @else
-                            <span class="text-info">Зарегистрирован в системе!</span>
-                        @endif
+
+                        <h1 class="mc-patient-name">
+                            {{ $patient->full_name }}
+                        </h1>
+
+                        <div class="mc-patient-subline">
+                            <span class="mc-patient-chip">
+                                <i class="bi bi-calendar3"></i>
+                                Дата рождения: {{ $patient->birth_at }}
+                            </span>
+
+                            <span class="mc-patient-chip">
+                                <i class="bi bi-gender-ambiguous"></i>
+                                Пол: {{ $patient->gender }}
+                            </span>
+
+                            <span class="mc-patient-chip">
+                                <i class="bi bi-clock-history"></i>
+                                Пациент с: {{ $patient->created_at }}
+                            </span>
+                        </div>
                     </div>
 
+                    <div class="mc-patient-side">
+                        @if(!$patient->user_id)
+                            <span class="mc-status-chip warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Не зарегистрирован в системе
+                            </span>
+                        @else
+                            <span class="mc-status-chip success">
+                                <i class="bi bi-check2-circle"></i>
+                                Зарегистрирован в системе
+                            </span>
+                        @endif
+
+                        <div class="mc-patient-id">
+                            ID пациента: {{ $patient->id ?? '—' }}
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mc-tabs">
+                <div class="mc-patient-meta-grid">
+                    <div class="mc-patient-meta-card">
+                        <div class="mc-patient-meta-icon">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+
+                        <div>
+                            <div class="mc-patient-meta-label">Лечащий врач</div>
+                            <div class="mc-patient-meta-value">
+                                {{ $patient->doctor->fullname }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mc-patient-meta-card">
+                        <div class="mc-patient-meta-icon">
+                            <i class="bi bi-activity"></i>
+                        </div>
+
+                        <div>
+                            <div class="mc-patient-meta-label">Диагноз</div>
+                            <div class="mc-patient-meta-value {{ $patient->diagnose->code ? '' : 'is-warning' }}">
+                                {{ $patient->diagnose->code }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mc-patient-meta-card">
+                        <div class="mc-patient-meta-icon">
+                            <i class="bi bi-hash"></i>
+                        </div>
+
+                        <div>
+                            <div class="mc-patient-meta-label">Номер медкарты</div>
+                            <div class="mc-patient-meta-value">
+                                {{ $patient->medcard_number }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mc-patient-meta-card">
+                        <div class="mc-patient-meta-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+
+                        <div>
+                            <div class="mc-patient-meta-label">Адрес прописки</div>
+                            <div class="mc-patient-meta-value">
+                                {{ $patient->address_registration }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mc-tabs mc-tabs-modern">
                     <ul class="nav" id="cardTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-patient-info" type="button">
@@ -75,8 +141,8 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-epicrisis"
-                                    type="button">Эпикриз
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-epicrisis" type="button">
+                                Эпикриз
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -125,7 +191,7 @@
                                     <div>
                                         <div class="patient-info-summary-item__label">Номер медкарты</div>
                                         <div class="patient-info-summary-item__value">
-                                            {{ $patient->medcard_number ?? '—' }}
+                                            {{ $patient->medcard_number }}
                                         </div>
                                     </div>
                                 </div>
@@ -134,7 +200,7 @@
                                     <div>
                                         <div class="patient-info-summary-item__label">Адрес прописки</div>
                                         <div class="patient-info-summary-item__value">
-                                            {{ $patient->address_registration ?? '—' }}
+                                            {{ $patient->address_registration }}
                                         </div>
                                     </div>
                                 </div>
@@ -152,7 +218,7 @@
                                     <div>
                                         <div class="patient-info-summary-item__label">Место работы</div>
                                         <div class="patient-info-summary-item__value">
-                                            {{ $patient->job_organization }}
+                                            {{ $patient->job_organization ?? '—' }}
                                         </div>
                                     </div>
                                 </div>
@@ -167,19 +233,6 @@
                         </div>
                     </div>
 
-                    @php
-                        $patientAddressSuggestUrl = \Illuminate\Support\Facades\Route::has('api-search-address')
-                            ? route('api-search-address')
-                            : (\Illuminate\Support\Facades\Route::has('api.addresses.suggest')
-                                ? route('api.addresses.suggest')
-                                : (\Illuminate\Support\Facades\Route::has('addresses.suggest') ? route('addresses.suggest') : ''));
-                        $patientInsuranceSuggestUrl = \Illuminate\Support\Facades\Route::has('api-search-organization')
-                            ? route('api-search-organization')
-                            : (\Illuminate\Support\Facades\Route::has('api.insurance-organizations.suggest')
-                                ? route('api.insurance-organizations.suggest')
-                                : (\Illuminate\Support\Facades\Route::has('insurance-organizations.suggest') ? route('insurance-organizations.suggest') : ''));
-                    @endphp
-
                     @if($errors->any())
                         <div class="alert alert-danger">
                             Возникли ошибки при сохранении карты пациента:
@@ -193,9 +246,9 @@
 
                     <form class="patient-info-form-card"
                           method="post"
-                          data-address-suggest-url="{{ $patientAddressSuggestUrl }}"
-                          data-insurance-suggest-url="{{ $patientInsuranceSuggestUrl }}"
-                          action="{{ \Illuminate\Support\Facades\Route::has('doctors.patients.update') ? route('doctors.patients.update', $patient->id) : url()->current() }}">
+                          data-address-suggest-url="{{ route('api-search-address') }}"
+                          data-insurance-suggest-url="{{ route('api-search-organizations') }}"
+                          action="{{ route('doctors.patients.medical_card.update', $patient->id) }}">
                         @csrf
 
                         <div class="patient-info-form-card__head">
@@ -253,7 +306,7 @@
                                                type="date"
                                                name="birth_at"
                                                class="form-control"
-                                               value="{{ old('birth_at', $patient->birth_at ? \Illuminate\Support\Carbon::parse($patient->birth_at)->format('Y-m-d') : '') }}">
+                                               value="{{ old('birth_at', $patient->birth_at) }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label" for="patientGender">Пол</label>
@@ -439,7 +492,7 @@
                                                autocomplete="off"
                                                data-mask-max="4"
                                                placeholder="0000"
-                                               value="{{ $patient->serial }}">
+                                               value="{{ old('passport_series', $patient->serial) }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label" for="patientPassportNumber">Номер</label>
@@ -452,7 +505,7 @@
                                                autocomplete="off"
                                                data-mask-max="6"
                                                placeholder="000000"
-                                               value="{{ $patient->number }}">
+                                               value="{{ old('passport_number', $patient->number) }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label" for="patientPassportIssuedAt">Дата выдачи</label>
@@ -460,7 +513,7 @@
                                                type="date"
                                                name="passport_issued_at"
                                                class="form-control js-passport-part"
-                                               value="{{ $patient->issued_at }}">
+                                               value="{{ old('passport_issued_at', $patient->issued_at) }}">
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label" for="patientPassportDepartmentCode">Код подразделения</label>
@@ -472,7 +525,7 @@
                                                inputmode="numeric"
                                                autocomplete="off"
                                                placeholder="000-000"
-                                               value="{{ $patient->department_code }}">
+                                               value="{{ old('passport_department_code', $patient->department_code) }}">
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label" for="patientPassportIssuedBy">Кем выдан</label>
@@ -481,7 +534,7 @@
                                                   class="form-control js-passport-part"
                                                   rows="2"
                                                   maxlength="500"
-                                                  placeholder="Наименование органа, выдавшего паспорт">{{ $patient->issued_by }}</textarea>
+                                                  placeholder="Наименование органа, выдавшего паспорт">{{ old('passport_issued_by', $patient->issued_by) }}</textarea>
                                     </div>
 
                                 </div>
@@ -574,7 +627,7 @@
                                     </div>
                                 </div>
 
-                                <input type="hidden" name="address" id="patientLegacyAddress" value="{{ old('address', $patient->address ?? $patient->address_registration) }}">
+                                <input type="hidden" name="address" id="patientLegacyAddress" value="{{ old('address', $patient->address_registration) }}">
                             </section>
 
                             <section class="patient-info-section patient-info-section--comment">
@@ -593,7 +646,7 @@
                                                   class="form-control"
                                                   rows="3"
                                                   maxlength="1000"
-                                                  placeholder="Важные регистрационные примечания">{{ old('comment', $patient->comment ?? $patient->note ?? '') }}</textarea>
+                                                  placeholder="Важные регистрационные примечания">{{ old('comment', $patient->comment ?? '') }}</textarea>
                                     </div>
                                 </div>
                             </section>
@@ -651,7 +704,7 @@
                                         </div>
                                         <div>
                                             <div class="small text-muted">Всего документов</div>
-                                            <div class="h5 mb-0">{{ isset($documents) ? $documents->count() : 0 }}</div>
+                                            <div class="h5 mb-0">{{ $patient->documents->count() }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -878,13 +931,9 @@
                                     </div>
                                     <div class="text-muted small mb-1">
                                         Автор:
-                                        @if(method_exists($a,'doctor') && $a->doctor)
-                                            {{ $a->doctor->full_name ?? '' }}
-                                        @else
-                                            —
-                                        @endif
+                                        {{ $a->doctor_name ?? '—' }}
                                     </div>
-                                    <div>{{ strip_tags(html_entity_decode(\Illuminate\Support\Str::limit($a->text, 260))) }}</div>
+                                    <div>{{ $a->preview ?? '—' }}</div>
                                 </div>
                                 <div class="d-flex align-items-start gap-2">
                                     <a href="{{ route('doctors.patients.anamneses.show', [$patient->id, $a->id]) }}"
@@ -923,7 +972,7 @@
                                         <tr class="placeholder-glow">
                                             <td><span class="col-7">{{ $research->laboratory }}</span></td>
                                             <td><span
-                                                    class="col-6">{{ \Carbon\Carbon::parse($research->updated_at)->format('d.m.Y H:i:s') }}</span>
+                                                    class="col-6">{{ $research->updated_at_display }}</span>
                                             </td>
                                             <td><span
                                                     class="col-8">{{ $research->priority == 'normal' ? 'Обычный' : 'Срочный' }}</span>
@@ -1028,7 +1077,7 @@
                          data-url-session-show="{{ route('doctors.patients.sessions.show', '__SID__') }}"
                          data-url-start="{{ route('doctors.patients.tests.start', '__AID__') }}"
                          data-tests-search="{{ route('doctors.patients.tests.list') }}"
-                         data-testing-base="{{ config('app.testing_base_url', url('/doctors/patients/testing')) }}"
+                         data-testing-base="{{ $patient->testing_base_url }}"
                     >
 
                         <div id="testsEmpty" class="text-muted small">
@@ -1319,7 +1368,7 @@
                             <div class="prescription-date-group">
                                 <div class="d-flex align-items-center gap-2 mb-3">
                                     <div class="fw-semibold fs-6">
-                                        {{ \Carbon\Carbon::parse($date)->locale('ru')->isoFormat('D MMMM YYYY [года]') }}
+                                        {{ $datePrescriptions->first()->date_label ?? $date }}
                                     </div>
 
                                     <div class="flex-grow-1 border-top"></div>
@@ -1360,7 +1409,7 @@
 
                                                         <div class="small text-muted">
                                                             Последняя выписка:
-                                                            {{ \Carbon\Carbon::parse($prescription->created_at)->format('d.m.Y H:i') }}
+                                                            {{ $prescription->created_at_display }}
                                                         </div>
                                                     </div>
 
@@ -1406,12 +1455,6 @@
                 </div>
 
                 <div class="tab-pane fade mc-pane" id="pane-epicrisis" role="tabpanel">
-                    @php
-                        $epicrises = method_exists($patient,'epicrises') ? $patient->epicrises()->latest()->get() : collect();
-                        $epicrisesCount = $epicrises->count();
-                        $lastEpicrisis = $epicrises->first();
-                        $epicrisesWithDiagnosesCount = $epicrises->filter(fn($item) => !empty($item->mkb10))->count();
-                    @endphp
 
                     <div class="epicrisis-dashboard">
                         <div class="epicrisis-hero">
@@ -1441,7 +1484,7 @@
                             </div>
                             <div>
                                 <div class="epicrisis-stat-card__label">Всего эпикризов</div>
-                                <div class="epicrisis-stat-card__value">{{ $epicrisesCount }}</div>
+                                <div class="epicrisis-stat-card__value">{{ $patient->epicrises->count() }}</div>
                             </div>
                         </div>
 
@@ -1451,7 +1494,7 @@
                             </div>
                             <div>
                                 <div class="epicrisis-stat-card__label">С диагнозом</div>
-                                <div class="epicrisis-stat-card__value">{{ $epicrisesWithDiagnosesCount }}</div>
+                                <div class="epicrisis-stat-card__value">{{ $patient->epicrises()->with('diagnose')->count() }}</div>
                             </div>
                         </div>
 
@@ -1462,13 +1505,13 @@
                             <div>
                                 <div class="epicrisis-stat-card__label">Последний эпикриз</div>
                                 <div class="epicrisis-stat-card__value fs-6">
-                                    {{ $lastEpicrisis?->created_at?->format('d.m.Y') ?? '—' }}
+                                    {{ $patient->epicrises->last()->created_at }}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    @if($epicrisesCount)
+                    @if($epicrisesCount = $patient->epicrises()->count())
                         <div class="epicrisis-list-card">
                             <div class="epicrisis-list-head">
                                 <div>
@@ -1482,60 +1525,55 @@
                             </div>
 
                             <div class="epicrisis-timeline">
-                                @foreach($epicrises as $e)
-                                    @php
-                                        $createdAt = $e->created_at;
-                                        $plainText = trim(strip_tags(html_entity_decode($e->text ?? '')));
-                                        $diagnosisTitle = trim($e->diagnosis_title ?? '');
-                                    @endphp
+                                @foreach($patient->epicrises as $epicrisis)
 
                                     <div class="epicrisis-item">
                                         <div class="epicrisis-date-badge">
-                                            <span class="epicrisis-date-badge__day">{{ $createdAt?->format('d') ?? '—' }}</span>
-                                            <span class="epicrisis-date-badge__month">{{ $createdAt?->locale('ru')->isoFormat('MMM') ?? '' }}</span>
+                                            <span class="epicrisis-date-badge__day">{{ $epicrisis->day }}</span>
+                                            <span class="epicrisis-date-badge__month">{{ $epicrisis->month }}</span>
                                         </div>
 
                                         <div class="epicrisis-item__main">
                                             <div class="epicrisis-item__top">
-                                                <h3 class="epicrisis-item__title">Эпикриз от {{ $createdAt?->format('d.m.Y') ?? 'без даты' }}</h3>
+                                                <h3 class="epicrisis-item__title">Эпикриз от {{ $epicrisis->date_title }}</h3>
                                                 <span class="badge text-bg-light border">
-                                                    {{ $createdAt?->format('H:i') ?? '—' }}
+                                                    {{ $epicrisis->time_display }}
                                                 </span>
                                             </div>
 
                                             <div class="epicrisis-meta">
                                                 <span class="epicrisis-meta__item">
                                                     <i class="bi bi-person-badge"></i>
-                                                    {{ $e->doctor?->full_name ?? 'Автор не указан' }}
+                                                    {{ $epicrisis->doctor_name_display }}
                                                 </span>
                                                 <span class="epicrisis-meta__item">
                                                     <i class="bi bi-calendar2-week"></i>
-                                                    {{ $createdAt?->locale('ru')->isoFormat('D MMMM YYYY [г.]') ?? 'Дата не указана' }}
+                                                    {{ $epicrisis->date_full }}
                                                 </span>
                                             </div>
 
-                                            @if(!empty($e->mkb10) || $diagnosisTitle !== '')
+                                            @if($epicrisis->mkb10 || $epicrisis->diagnosis_title_display)
                                                 <div class="epicrisis-diagnosis-line">
-                                                    @if(!empty($e->mkb10))
+                                                    @if($epicrisis->mkb10)
                                                         <span class="epicrisis-mkb-badge">
                                                             <i class="bi bi-activity"></i>
-                                                            {{ $e->mkb10 }}
+                                                            {{ $epicrisis->mkb10 }}
                                                         </span>
                                                     @endif
-                                                    @if($diagnosisTitle !== '')
-                                                        <span class="epicrisis-diagnosis-title">{{ $diagnosisTitle }}</span>
+                                                    @if($epicrisis->diagnosis_title_display)
+                                                        <span class="epicrisis-diagnosis-title">{{ $epicrisis->diagnosis_title_display }}</span>
                                                     @endif
                                                 </div>
                                             @endif
 
                                             <div class="epicrisis-preview">
-                                                {{ \Illuminate\Support\Str::limit(strip_tags(html_entity_decode($e->text)), 360) }}
+                                                {{ $epicrisis->preview }}
                                             </div>
                                         </div>
 
                                         <div class="epicrisis-item__actions">
                                             <a class="btn btn-outline-primary btn-sm epicrisis-open-btn"
-                                               href="{{ route('doctors.patients.epicrisis.show', [$patient->id, $e->id]) }}">
+                                               href="{{ $epicrisis->show_url }}">
                                                 Открыть <i class="bi bi-arrow-right-short"></i>
                                             </a>
                                         </div>
@@ -1567,9 +1605,9 @@
     <div class="modal fade" id="modalAddLab" tabindex="-1" aria-hidden="true"
          data-mode="result"
          data-api-params="{{ route('api.params.search') }}"
-         data-gender="{{ strtolower($patient->gender ?? '') }}"
-         data-sex="{{ strtolower($patient->sex ?? 'any') }}"
-         data-age="{{ $patient->birth_at ? \Carbon\Carbon::parse($patient->birth_at)->age : '' }}"
+         data-gender="{{ $patient->lab_gender }}"
+         data-sex="{{ $patient->lab_sex }}"
+         data-age="{{ $patient->age_for_labs }}"
          data-update-url="{{ route('doctors.patients.researches.update', ['patient' => $patient->id, 'labResearch' => '__ID__']) }}">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <form class="modal-content" method="post"
@@ -1591,7 +1629,7 @@
                                 <div class="mb-2">
                                     <label class="form-label">Дата/время забора</label>
                                     <input type="datetime-local" class="form-control" name="collected_at"
-                                           value="{{ now()->format('Y-m-d\TH:i') }}" required>
+                                           value="{{ $patient->default_datetime }}" required>
                                 </div>
 
                                 <div class="mb-2">
@@ -1664,9 +1702,9 @@
 
     <div class="modal fade" id="modalViewLab" tabindex="-1" aria-hidden="true"
          data-api-params="{{ route('api.params.search') }}"
-         data-gender="{{ strtolower($patient->gender ?? '') }}"
-         data-sex="{{ strtolower($patient->sex ?? 'any') }}"
-         data-age="{{ $patient->birth_at ? \Carbon\Carbon::parse($patient->birth_at)->age : '' }}">
+         data-gender="{{ $patient->lab_gender }}"
+         data-sex="{{ $patient->lab_sex }}"
+         data-age="{{ $patient->age_for_labs }}">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1958,9 +1996,9 @@
          aria-hidden="true"
          data-mode="order"
          data-api-params="{{ route('api.params.search') }}"
-         data-gender="{{ strtolower($patient->gender ?? '') }}"
-         data-sex="{{ strtolower($patient->sex ?? 'any') }}"
-         data-age="{{ $patient->birth_at ? \Carbon\Carbon::parse($patient->birth_at)->age : '' }}"
+         data-gender="{{ $patient->lab_gender }}"
+         data-sex="{{ $patient->lab_sex }}"
+         data-age="{{ $patient->age_for_labs }}"
          data-api-save-template="{{ route('api.store.labtemplate') }}"
          data-templates='@json($templatesMap)'>
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -1980,7 +2018,7 @@
                                 <div class="mb-2">
                                     <label class="form-label">Плановая дата/время забора</label>
                                     <input type="date" class="form-control" name="planned_at"
-                                           value="{{ now()->format('Y-m-d') }}">
+                                           value="{{ $patient->default_date }}">
                                 </div>
 
                                 <div class="row g-2">
@@ -2157,7 +2195,7 @@
                                     <input name="created_at"
                                            type="date"
                                            class="form-control"
-                                           value="{{ now()->format('Y-m-d') }}"
+                                           value="{{ $patient->default_date }}"
                                            required>
                                 </div>
 
@@ -2255,27 +2293,197 @@
         </div>
     </div>
 
-    <div class="modal fade" id="assignTestModal" tabindex="-1" aria-hidden="true" aria-labelledby="assignTestTitle">
-        <div class="modal-dialog modal-dialog-centered">
-            <form id="assignTestForm" class="modal-content"
-                  action="{{ route('doctors.patients.tests.assign', $patient->id) }}" method="post">
+    <div class="modal fade assign-test-modal-ui"
+         id="assignTestModal"
+         tabindex="-1"
+         aria-hidden="true"
+         aria-labelledby="assignTestTitle">
+
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <form id="assignTestForm"
+                  class="modal-content"
+                  action="{{ route('doctors.patients.tests.assign', $patient->id) }}"
+                  method="post">
                 @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title" id="assignTestTitle">Назначить тест</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+
+                <input type="hidden" name="access_source_type" id="assignTestAccessSourceType">
+                <input type="hidden" name="access_rule_id" id="assignTestAccessRuleId">
+                <input type="hidden" name="practice_context" id="assignTestPracticeContext">
+
+                <div class="modal-header assign-test-modal__header">
+                    <div>
+                        <div class="assign-test-modal__eyebrow">
+                            <i class="bi bi-clipboard2-pulse"></i>
+                            Тестирование пациента
+                        </div>
+
+                        <h5 class="modal-title assign-test-modal__title" id="assignTestTitle">
+                            Назначить тест
+                        </h5>
+
+                        <div class="assign-test-modal__subtitle">
+                            Выберите тест, который нужно назначить пациенту. В списке отображаются только доступные вам варианты.
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"></button>
                 </div>
-                <div class="modal-body">
-                    <label class="form-label">Выберите тест</label>
-                    <select id="assignTestSelect"
-                            name="test_id"
-                            class="form-select"
-                            placeholder="Начните вводить тест..."
-                            data-source="{{ route('api.search.tests') }}">
-                    </select>
+
+                <div class="modal-body assign-test-modal__body">
+                    <div class="assign-test-grid">
+                        <div class="assign-test-main-card">
+                            <div class="assign-test-section-title">
+                                <i class="bi bi-search"></i>
+                                Выбор теста
+                            </div>
+
+                            <label class="form-label" for="assignTestSelect">
+                                Тест для назначения
+                            </label>
+
+                            <select id="assignTestSelect"
+                                    name="test_id"
+                                    class="form-select"
+                                    placeholder="Начните вводить название теста..."
+                                    data-source="{{ route('api.search.tests') }}">
+                            </select>
+
+                            <div class="assign-test-help">
+                                <strong>Подсказка:</strong> после выбора теста справа появится краткая информация о нём и доступных действиях.
+                            </div>
+
+                            <div class="assign-test-source-list">
+                                <div class="assign-test-source-list__title">
+                                    Какие тесты могут быть доступны
+                                </div>
+
+                                <div class="assign-test-source-item">
+                                <span class="assign-test-source-item__icon system">
+                                    <i class="bi bi-box-seam"></i>
+                                </span>
+                                    <div>
+                                        <div class="assign-test-source-item__title">Общие тесты</div>
+                                        <div class="assign-test-source-item__text">
+                                            Стандартные тесты, доступные для назначения.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="assign-test-source-item">
+                                <span class="assign-test-source-item__icon owner">
+                                    <i class="bi bi-person-check"></i>
+                                </span>
+                                    <div>
+                                        <div class="assign-test-source-item__title">Мои тесты</div>
+                                        <div class="assign-test-source-item__text">
+                                            Тесты, которые были созданы вами.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="assign-test-source-item">
+                                <span class="assign-test-source-item__icon clinic">
+                                    <i class="bi bi-building-check"></i>
+                                </span>
+                                    <div>
+                                        <div class="assign-test-source-item__title">Тесты организации</div>
+                                        <div class="assign-test-source-item__text">
+                                            Тесты, доступные в рамках вашей клиники.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="assign-test-access-card">
+                            <div class="assign-test-access-empty" id="assignTestAccessEmpty">
+                                <div class="assign-test-access-empty__icon">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+
+                                <div class="assign-test-access-empty__title">
+                                    Тест не выбран
+                                </div>
+
+                                <div class="assign-test-access-empty__text">
+                                    Выберите тест слева. Здесь появится его описание, источник доступности и возможные действия.
+                                </div>
+                            </div>
+
+                            <div class="assign-test-access-details d-none" id="assignTestAccessDetails">
+                                <div class="assign-test-selected-head">
+                                    <div class="assign-test-type-icon" id="assignTestTypeIcon">
+                                        <i class="bi bi-ui-checks"></i>
+                                    </div>
+
+                                    <div class="min-w-0">
+                                        <div class="assign-test-selected-title" id="assignTestName">
+                                            —
+                                        </div>
+
+                                        <div class="assign-test-selected-meta" id="assignTestMeta">
+                                            —
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="assign-test-access-source">
+                                    <div class="assign-test-access-source__label">
+                                        Доступность теста
+                                    </div>
+
+                                    <div class="assign-test-access-source__value" id="assignTestAccessLabel">
+                                        —
+                                    </div>
+
+                                    <div class="assign-test-access-source__hint" id="assignTestAccessHint">
+                                        —
+                                    </div>
+                                </div>
+
+                                <div class="assign-test-permissions">
+                                    <div class="assign-test-permission" id="assignCanAssign">
+                                        <i class="bi bi-check2-circle"></i>
+                                        Можно назначить пациенту
+                                    </div>
+
+                                    <div class="assign-test-permission" id="assignCanConduct">
+                                        <i class="bi bi-play-circle"></i>
+                                        Можно провести тестирование
+                                    </div>
+
+                                    <div class="assign-test-permission" id="assignCanViewResults">
+                                        <i class="bi bi-eye"></i>
+                                        Результаты будут доступны врачу
+                                    </div>
+                                </div>
+
+                                <div class="assign-test-warning d-none" id="assignTestWarning">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Назначить</button>
+
+                <div class="modal-footer assign-test-modal__footer">
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="assignTestSubmitBtn"
+                            disabled>
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Назначить
+                    </button>
                 </div>
             </form>
         </div>
@@ -2291,7 +2499,7 @@
                     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
                     <input type="hidden" name="usage_instructions" id="usage_instructions__">
                     <input type="hidden" name="birth_at" id="birth_at__">
-                    <input type="hidden" name="diagnosis_code" id="diagnosis_code" value="{{ $patient->diagnose?->code }}">
+                    <input type="hidden" name="diagnosis_code" id="diagnosis_code" value="{{ $patient->prescription_diagnosis_code }}">
 
                     <input type="hidden" name="indicated_in_russia" id="indicated_in_russia_hidden" value="0">
                     <input type="hidden" name="indicated_by_fda" id="indicated_by_fda_hidden" value="0">
@@ -2355,7 +2563,7 @@
                                             <label class="form-label">Пациент</label>
                                             <input type="text"
                                                    class="form-control form-control-sm presc-readonly"
-                                                   value="{{ trim($patient->surname . ' ' . $patient->name . ' ' . $patient->patronym) }}"
+                                                   value="{{ $patient->prescription_full_name }}"
                                                    disabled>
                                         </div>
 
@@ -2543,741 +2751,5 @@
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const patientInfoForm = document.querySelector('#pane-patient-info form.patient-info-form-card');
-            if (!patientInfoForm) {
-                return;
-            }
-
-            const medicalCardRoot = document.querySelector('#medicalCardRoot');
-            const addressSuggestUrl = patientInfoForm.dataset.addressSuggestUrl || medicalCardRoot?.dataset.addressSuggestUrl || '';
-            const insuranceSuggestUrl = patientInfoForm.dataset.insuranceSuggestUrl || medicalCardRoot?.dataset.insuranceSuggestUrl || '';
-            const registrationAddress = document.querySelector('#patientRegistrationAddress');
-            const actualAddress = document.querySelector('#patientActualAddress');
-            const registrationPostalCode = document.querySelector('#patientRegistrationPostalCode');
-            const actualPostalCode = document.querySelector('#patientActualPostalCode');
-            const legacyAddress = document.querySelector('#patientLegacyAddress');
-            const sameAsRegistration = document.querySelector('#sameAsRegistrationAddress');
-            const copyAddressButton = document.querySelector('#copyRegistrationAddressToActual');
-            const identityDocument = document.querySelector('#patientIdentityDocument');
-            const insuranceCompany = document.querySelector('#patientInsuranceCompany');
-            const insurancePolicyNumber = document.querySelector('#patientInsurancePolicyNumber');
-            const insurancePolicyLegacy = document.querySelector('#patientInsurancePolicy');
-
-            const localInsuranceOrganizations = [
-                { value: 'АО «МАКС-М»', search: 'макс м makc max max-m макс-м максм' },
-                { value: 'ООО «Капитал МС»', search: 'капитал мс капитал медицинское страхование' },
-                { value: 'АО «СОГАЗ-Мед»', search: 'согаз мед согаз-мед sogaz' },
-                { value: 'ООО «АльфаСтрахование-ОМС»', search: 'альфастрахование омс альфа страхование альфастрахование-омс' },
-                { value: 'ООО «СК «Ингосстрах-М»', search: 'ингосстрах м ингосстрах-м ingos' },
-                { value: 'ООО «РЕСО-Мед»', search: 'ресо мед ресо-мед reso' },
-                { value: 'АО «Страховая компания «СОГАЗ-Мед»', search: 'страховая компания согаз мед' },
-                { value: 'ООО «ВТБ Медицинское страхование»', search: 'втб медицинское страхование втб мс' },
-                { value: 'ООО «СМК РЕСО-Мед»', search: 'смк ресо мед' },
-                { value: 'ООО «МСК Медстрах»', search: 'мск медстрах медицинское страхование' }
-            ];
-
-            function onlyDigits(value, maxLength = null) {
-                let digits = String(value || '').replace(/\D/g, '');
-
-                if (maxLength) {
-                    digits = digits.slice(0, maxLength);
-                }
-
-                return digits;
-            }
-
-            function formatSnils(value) {
-                const digits = onlyDigits(value, 11);
-                const first = digits.slice(0, 3);
-                const second = digits.slice(3, 6);
-                const third = digits.slice(6, 9);
-                const control = digits.slice(9, 11);
-                let result = first;
-
-                if (second) {
-                    result += '-' + second;
-                }
-
-                if (third) {
-                    result += '-' + third;
-                }
-
-                if (control) {
-                    result += ' ' + control;
-                }
-
-                return result;
-            }
-
-            function formatDepartmentCode(value) {
-                const digits = onlyDigits(value, 6);
-
-                if (digits.length <= 3) {
-                    return digits;
-                }
-
-                return digits.slice(0, 3) + '-' + digits.slice(3, 6);
-            }
-
-            function normalizePhoneDigits(value) {
-                let digits = onlyDigits(value, 11);
-
-                if (digits.startsWith('8')) {
-                    digits = '7' + digits.slice(1);
-                } else if (digits.startsWith('9')) {
-                    digits = '7' + digits;
-                }
-
-                return digits.slice(0, 11);
-            }
-
-            function formatPhone(value) {
-                const digits = normalizePhoneDigits(value);
-
-                if (!digits) {
-                    return '';
-                }
-
-                const country = digits.slice(0, 1);
-                const code = digits.slice(1, 4);
-                const first = digits.slice(4, 7);
-                const second = digits.slice(7, 9);
-                const third = digits.slice(9, 11);
-                let result = '+' + country;
-
-                if (code) {
-                    result += ' (' + code;
-                    if (code.length === 3) {
-                        result += ')';
-                    }
-                }
-
-                if (first) {
-                    result += ' ' + first;
-                }
-
-                if (second) {
-                    result += '-' + second;
-                }
-
-                if (third) {
-                    result += '-' + third;
-                }
-
-                return result;
-            }
-
-            function normalizeEmail(value) {
-                return String(value || '').replace(/\s+/g, '').toLowerCase();
-            }
-
-            function normalizePolicy(value) {
-                return String(value || '')
-                    .replace(/\s+/g, ' ')
-                    .replace(/[^0-9a-zA-Zа-яА-ЯёЁ№/\- ]/g, '')
-                    .trim()
-                    .slice(0, 32);
-            }
-
-            function bindInputMask(selector, formatter, eventName = 'input') {
-                document.querySelectorAll(selector).forEach(function (field) {
-                    const apply = function () {
-                        const formatted = formatter(field.value, field);
-
-                        if (field.value !== formatted) {
-                            field.value = formatted;
-                        }
-                    };
-
-                    field.addEventListener(eventName, apply);
-                    field.addEventListener('change', apply);
-                    field.addEventListener('blur', apply);
-                    apply();
-                });
-            }
-
-            function bindFieldMasks() {
-                bindInputMask('.js-mask-snils', formatSnils);
-                bindInputMask('.js-mask-department-code', formatDepartmentCode);
-                bindInputMask('.js-mask-phone', formatPhone);
-                bindInputMask('.js-mask-email', normalizeEmail);
-                bindInputMask('.js-mask-policy', normalizePolicy);
-                bindInputMask('.js-mask-digits', function (value, field) {
-                    return onlyDigits(value, Number(field.dataset.maskMax || 0) || null);
-                });
-            }
-
-            function syncLegacyInsurancePolicy() {
-                if (!insurancePolicyLegacy) {
-                    return;
-                }
-
-                const company = insuranceCompany?.value.trim() || '';
-                const number = insurancePolicyNumber?.value.trim() || '';
-                insurancePolicyLegacy.value = [company, number].filter(Boolean).join(' — ');
-            }
-
-            function syncLegacyAddress() {
-                if (legacyAddress && registrationAddress) {
-                    legacyAddress.value = registrationAddress.value.trim();
-                }
-            }
-
-            function normalizePostalCode(postalCode) {
-                return String(postalCode || '').replace(/\D/g, '').slice(0, 6);
-            }
-
-            function mergeAddressWithPostalCode(address, postalCode) {
-                const cleanAddress = String(address || '').trim();
-                const cleanPostalCode = normalizePostalCode(postalCode);
-
-                if (!cleanPostalCode) {
-                    return cleanAddress;
-                }
-
-                if (cleanAddress.startsWith(cleanPostalCode)) {
-                    return cleanAddress;
-                }
-
-                return cleanPostalCode + ', ' + cleanAddress;
-            }
-
-            function setPostalCode(field, postalCode) {
-                const targetSelector = field?.dataset?.postalTarget || '';
-                const target = targetSelector ? document.querySelector(targetSelector) : null;
-
-                if (!target) {
-                    return;
-                }
-
-                target.value = normalizePostalCode(postalCode);
-                target.dispatchEvent(new Event('input', { bubbles: true }));
-                target.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-
-            function copyRegistrationPostalToActual() {
-                if (!registrationPostalCode || !actualPostalCode) {
-                    return;
-                }
-
-                actualPostalCode.value = registrationPostalCode.value;
-                actualPostalCode.dispatchEvent(new Event('input', { bubbles: true }));
-                actualPostalCode.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-
-            function copyRegistrationToActual() {
-                if (!registrationAddress || !actualAddress) {
-                    return;
-                }
-
-                actualAddress.value = registrationAddress.value;
-                copyRegistrationPostalToActual();
-                actualAddress.dispatchEvent(new Event('input', { bubbles: true }));
-                syncLegacyAddress();
-            }
-
-            function syncSameAddressState() {
-                if (!sameAsRegistration || !registrationAddress || !actualAddress) {
-                    return;
-                }
-
-                if (sameAsRegistration.checked) {
-                    copyRegistrationToActual();
-                    actualAddress.setAttribute('readonly', 'readonly');
-                    actualAddress.classList.add('bg-light');
-                    actualPostalCode?.setAttribute('readonly', 'readonly');
-                    actualPostalCode?.classList.add('bg-light');
-                } else {
-                    actualAddress.removeAttribute('readonly');
-                    actualAddress.classList.remove('bg-light');
-                    actualPostalCode?.removeAttribute('readonly');
-                    actualPostalCode?.classList.remove('bg-light');
-                }
-            }
-
-            function collectPassport() {
-                if (!identityDocument) {
-                    return;
-                }
-
-                const series = document.querySelector('#patientPassportSeries')?.value.trim() || '';
-                const number = document.querySelector('#patientPassportNumber')?.value.trim() || '';
-                const issuedAt = document.querySelector('#patientPassportIssuedAt')?.value.trim() || '';
-                const departmentCode = document.querySelector('#patientPassportDepartmentCode')?.value.trim() || '';
-                const issuedBy = document.querySelector('#patientPassportIssuedBy')?.value.trim() || '';
-
-                const parts = [];
-                if (series || number) {
-                    parts.push(['Паспорт', series, number].filter(Boolean).join(' '));
-                } else {
-                    parts.push('Паспорт');
-                }
-
-                if (issuedAt) {
-                    parts.push('выдан ' + issuedAt);
-                }
-
-                if (issuedBy) {
-                    parts.push(issuedBy);
-                }
-
-                if (departmentCode) {
-                    parts.push('код подразделения ' + departmentCode);
-                }
-
-                identityDocument.value = parts.filter(Boolean).join(', ');
-            }
-
-            function escapeHtml(value) {
-                return String(value || '')
-                    .replace(/[&<>"]/g, function (char) {
-                        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char];
-                    })
-                    .replace(/'/g, '&#039;');
-            }
-
-            function normalizeSuggestions(payload) {
-                let rawItems = [];
-
-                if (Array.isArray(payload)) {
-                    rawItems = payload;
-                } else if (payload && Array.isArray(payload.suggestions)) {
-                    rawItems = payload.suggestions;
-                } else if (payload && Array.isArray(payload.data)) {
-                    rawItems = payload.data;
-                } else if (payload && Array.isArray(payload.items)) {
-                    rawItems = payload.items;
-                }
-
-                return rawItems.map(function (item) {
-                    if (typeof item === 'string') {
-                        return {
-                            value: item,
-                            unrestricted_value: item,
-                            postal_code: '',
-                            fias_id: ''
-                        };
-                    }
-
-                    const data = item.data || {};
-                    const value = item.value || item.unrestricted_value || item.address || item.name || data.result || '';
-
-                    return {
-                        value: value,
-                        unrestricted_value: item.unrestricted_value || value,
-                        postal_code: item.postal_code || data.postal_code || '',
-                        fias_id: item.fias_id || data.fias_id || data.fias_code || '',
-                        region: item.region || data.region_with_type || '',
-                        city: item.city || data.city_with_type || data.settlement_with_type || '',
-                        street: item.street || data.street_with_type || '',
-                        house: item.house || data.house || '',
-                        flat: item.flat || data.flat || ''
-                    };
-                }).filter(function (item) {
-                    return item.value;
-                });
-            }
-
-            function hideSuggestBox(box) {
-                if (!box) {
-                    return;
-                }
-
-                box.classList.remove('is-visible');
-                box.innerHTML = '';
-            }
-
-            function renderSuggestions(field, box, suggestions) {
-                if (!box || !suggestions.length) {
-                    hideSuggestBox(box);
-                    return;
-                }
-
-                box.innerHTML = suggestions.slice(0, 8).map(function (item, index) {
-                    const meta = [item.postal_code, item.city, item.street].filter(Boolean).join(' · ');
-
-                    return '<button type="button" class="patient-info-address-suggest__item" data-index="' + index + '">' +
-                        '<span class="d-block fw-semibold">' + escapeHtml(item.value) + '</span>' +
-                        (meta ? '<span class="d-block small text-muted mt-1">' + escapeHtml(meta) + '</span>' : '') +
-                        '</button>';
-                }).join('');
-
-                box.classList.add('is-visible');
-
-                box.querySelectorAll('.patient-info-address-suggest__item').forEach(function (button) {
-                    button.addEventListener('mousedown', function (event) {
-                        event.preventDefault();
-                    });
-
-                    button.addEventListener('click', function () {
-                        const item = suggestions[Number(button.dataset.index)] || null;
-
-                        if (!item) {
-                            return;
-                        }
-
-                        const addressValue = item.value || item.unrestricted_value || '';
-                        const postalCode = item.postal_code || '';
-
-                        field.value = mergeAddressWithPostalCode(addressValue, postalCode);
-                        field.dataset.unrestrictedValue = item.unrestricted_value || addressValue;
-                        field.dataset.postalCode = postalCode;
-                        field.dataset.fiasId = item.fias_id || '';
-                        setPostalCode(field, postalCode);
-
-                        field.dispatchEvent(new Event('input', { bubbles: true }));
-                        field.dispatchEvent(new Event('change', { bubbles: true }));
-
-                        hideSuggestBox(box);
-                        field.focus();
-                    });
-                });
-            }
-
-            function buildAddressSuggestUrl(baseUrl, query) {
-                const separator = baseUrl.includes('?') ? '&' : '?';
-
-                // q — для твоего текущего роута, query — для совместимости с контроллером DaData из примера.
-                return baseUrl + separator + 'q=' + encodeURIComponent(query) + '&query=' + encodeURIComponent(query);
-            }
-
-            function normalizeInsuranceSearch(value) {
-                return String(value || '')
-                    .toLowerCase()
-                    .replace(/ё/g, 'е')
-                    .replace(/[«»"'`().,]/g, ' ')
-                    .replace(/[–—_]/g, '-')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-            }
-
-            function findLocalInsuranceSuggestions(query) {
-                const normalizedQuery = normalizeInsuranceSearch(query);
-                const compactQuery = normalizedQuery.replace(/[\s-]+/g, '');
-
-                if (normalizedQuery.length < 2) {
-                    return [];
-                }
-
-                return localInsuranceOrganizations.filter(function (item) {
-                    const haystack = normalizeInsuranceSearch(item.value + ' ' + (item.search || ''));
-                    const compactHaystack = haystack.replace(/[\s-]+/g, '');
-
-                    return haystack.includes(normalizedQuery) || compactHaystack.includes(compactQuery);
-                }).map(function (item) {
-                    return {
-                        value: item.value,
-                        unrestricted_value: item.value,
-                        inn: item.inn || '',
-                        kpp: item.kpp || '',
-                        ogrn: item.ogrn || '',
-                        status: item.status || ''
-                    };
-                });
-            }
-
-            function mapLocalInsuranceSuggestion(item) {
-                return {
-                    value: item.value,
-                    unrestricted_value: item.value,
-                    inn: item.inn || '',
-                    kpp: item.kpp || '',
-                    ogrn: item.ogrn || '',
-                    status: item.status || ''
-                };
-            }
-
-            function getDefaultInsuranceSuggestions() {
-                return localInsuranceOrganizations.slice(0, 8).map(mapLocalInsuranceSuggestion);
-            }
-
-            function normalizeInsuranceSuggestions(payload) {
-                const rawItems = Array.isArray(payload)
-                    ? payload
-                    : (payload.suggestions || payload.items || payload.data || payload.results || []);
-
-                return rawItems.map(function (item) {
-                    if (typeof item === 'string') {
-                        return {
-                            value: item,
-                            unrestricted_value: item,
-                            inn: '',
-                            kpp: '',
-                            ogrn: ''
-                        };
-                    }
-
-                    const data = item.data || {};
-                    const name = data.name || {};
-                    const value = item.value
-                        || item.unrestricted_value
-                        || item.name
-                        || name.short_with_opf
-                        || name.full_with_opf
-                        || name.short
-                        || name.full
-                        || '';
-
-                    return {
-                        value: value,
-                        unrestricted_value: item.unrestricted_value || name.full_with_opf || value,
-                        inn: item.inn || data.inn || '',
-                        kpp: item.kpp || data.kpp || '',
-                        ogrn: item.ogrn || data.ogrn || '',
-                        address: item.address || data.address?.value || data.address?.unrestricted_value || '',
-                        status: data.state?.status || item.status || ''
-                    };
-                }).filter(function (item) {
-                    return item.value;
-                });
-            }
-
-            function renderInsuranceSuggestions(field, box, suggestions) {
-                if (!box || !suggestions.length) {
-                    hideSuggestBox(box);
-                    return;
-                }
-
-                box.innerHTML = suggestions.slice(0, 8).map(function (item, index) {
-                    const meta = [item.inn ? 'ИНН ' + item.inn : '', item.kpp ? 'КПП ' + item.kpp : '', item.status].filter(Boolean).join(' · ');
-
-                    return '<button type="button" class="patient-info-address-suggest__item" data-index="' + index + '">' +
-                        '<span class="d-block fw-semibold">' + escapeHtml(item.value) + '</span>' +
-                        (meta ? '<span class="d-block small text-muted mt-1">' + escapeHtml(meta) + '</span>' : '') +
-                        '</button>';
-                }).join('');
-
-                box.classList.add('is-visible');
-
-                box.querySelectorAll('.patient-info-address-suggest__item').forEach(function (button) {
-                    button.addEventListener('mousedown', function (event) {
-                        event.preventDefault();
-                    });
-
-                    button.addEventListener('click', function () {
-                        const item = suggestions[Number(button.dataset.index)] || null;
-
-                        if (!item) {
-                            return;
-                        }
-
-                        field.value = item.value || item.unrestricted_value || '';
-                        field.dataset.unrestrictedValue = item.unrestricted_value || field.value;
-                        field.dataset.inn = item.inn || '';
-                        field.dataset.kpp = item.kpp || '';
-                        field.dataset.ogrn = item.ogrn || '';
-
-                        field.dispatchEvent(new Event('input', { bubbles: true }));
-                        field.dispatchEvent(new Event('change', { bubbles: true }));
-
-                        hideSuggestBox(box);
-                        field.focus();
-                    });
-                });
-            }
-
-            function buildInsuranceSuggestUrl(baseUrl, query) {
-                const separator = baseUrl.includes('?') ? '&' : '?';
-
-                return baseUrl + separator + 'q=' + encodeURIComponent(query) + '&query=' + encodeURIComponent(query);
-            }
-
-            function bindInsuranceAutocomplete(field) {
-                const box = document.querySelector(field.dataset.suggestBox || '');
-                let timer = null;
-                let controller = null;
-
-                field.addEventListener('input', function () {
-                    syncLegacyInsurancePolicy();
-
-                    if (!box || field.hasAttribute('readonly')) {
-                        return;
-                    }
-
-                    const query = field.value.trim();
-                    clearTimeout(timer);
-
-                    if (query.length < 2) {
-                        hideSuggestBox(box);
-                        return;
-                    }
-
-                    const localSuggestions = findLocalInsuranceSuggestions(query);
-
-                    if (!insuranceSuggestUrl) {
-                        renderInsuranceSuggestions(field, box, localSuggestions);
-                        return;
-                    }
-
-                    timer = setTimeout(function () {
-                        if (controller) {
-                            controller.abort();
-                        }
-
-                        controller = new AbortController();
-
-                        fetch(buildInsuranceSuggestUrl(insuranceSuggestUrl, query), {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            signal: controller.signal
-                        })
-                            .then(function (response) {
-                                if (!response.ok) {
-                                    throw new Error('Insurance suggest request failed');
-                                }
-                                return response.json();
-                            })
-                            .then(function (payload) {
-                                const remoteSuggestions = normalizeInsuranceSuggestions(payload);
-                                renderInsuranceSuggestions(field, box, remoteSuggestions.length ? remoteSuggestions : localSuggestions);
-                            })
-                            .catch(function (error) {
-                                if (error.name !== 'AbortError') {
-                                    renderInsuranceSuggestions(field, box, localSuggestions);
-                                }
-                            });
-                    }, 300);
-                });
-
-                field.addEventListener('focus', function () {
-                    if (field.value.trim().length >= 2) {
-                        field.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                });
-
-                field.addEventListener('dblclick', function () {
-                    if (!box || field.hasAttribute('readonly')) {
-                        return;
-                    }
-
-                    clearTimeout(timer);
-                    renderInsuranceSuggestions(field, box, getDefaultInsuranceSuggestions());
-                });
-
-                field.addEventListener('blur', function () {
-                    setTimeout(function () {
-                        hideSuggestBox(box);
-                    }, 180);
-                });
-            }
-
-            function bindAddressAutocomplete(field) {
-                const box = document.querySelector(field.dataset.suggestBox || '');
-                let timer = null;
-                let controller = null;
-
-                field.addEventListener('input', function () {
-                    syncLegacyAddress();
-
-                    if (sameAsRegistration?.checked && field === registrationAddress) {
-                        copyRegistrationToActual();
-                    }
-
-                    if (!addressSuggestUrl || !box || field.hasAttribute('readonly')) {
-                        return;
-                    }
-
-                    const query = field.value.trim();
-                    clearTimeout(timer);
-
-                    if (query.length < 3) {
-                        hideSuggestBox(box);
-                        return;
-                    }
-
-                    timer = setTimeout(function () {
-                        if (controller) {
-                            controller.abort();
-                        }
-
-                        controller = new AbortController();
-
-                        fetch(buildAddressSuggestUrl(addressSuggestUrl, query), {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            signal: controller.signal
-                        })
-                            .then(function (response) {
-                                if (!response.ok) {
-                                    throw new Error('Address suggest request failed');
-                                }
-                                return response.json();
-                            })
-                            .then(function (payload) {
-                                renderSuggestions(field, box, normalizeSuggestions(payload));
-                            })
-                            .catch(function (error) {
-                                if (error.name !== 'AbortError') {
-                                    hideSuggestBox(box);
-                                }
-                            });
-                    }, 300);
-                });
-
-                field.addEventListener('focus', function () {
-                    if (field.value.trim().length >= 3) {
-                        field.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
-                });
-
-                field.addEventListener('blur', function () {
-                    setTimeout(function () {
-                        hideSuggestBox(box);
-                    }, 180);
-                });
-            }
-
-            bindFieldMasks();
-
-            document.querySelectorAll('.js-address-autocomplete').forEach(bindAddressAutocomplete);
-            document.querySelectorAll('.js-insurance-autocomplete').forEach(bindInsuranceAutocomplete);
-            document.querySelectorAll('.js-insurance-part').forEach(function (field) {
-                field.addEventListener('input', syncLegacyInsurancePolicy);
-                field.addEventListener('change', syncLegacyInsurancePolicy);
-            });
-            document.querySelectorAll('.js-passport-part').forEach(function (field) {
-                field.addEventListener('input', collectPassport);
-                field.addEventListener('change', collectPassport);
-            });
-
-            sameAsRegistration?.addEventListener('change', syncSameAddressState);
-            copyAddressButton?.addEventListener('click', function () {
-                copyRegistrationToActual();
-                if (sameAsRegistration) {
-                    sameAsRegistration.checked = true;
-                }
-                syncSameAddressState();
-            });
-
-            registrationAddress?.addEventListener('input', syncLegacyAddress);
-            registrationPostalCode?.addEventListener('input', function () {
-                registrationPostalCode.value = registrationPostalCode.value.replace(/\D/g, '').slice(0, 6);
-
-                if (sameAsRegistration?.checked) {
-                    copyRegistrationPostalToActual();
-                }
-            });
-            actualPostalCode?.addEventListener('input', function () {
-                actualPostalCode.value = actualPostalCode.value.replace(/\D/g, '').slice(0, 6);
-            });
-            patientInfoForm.addEventListener('submit', function () {
-                syncSameAddressState();
-                syncLegacyAddress();
-                syncLegacyInsurancePolicy();
-                collectPassport();
-            });
-
-            syncSameAddressState();
-            syncLegacyAddress();
-            syncLegacyInsurancePolicy();
-            collectPassport();
-        });
-    </script>
 
 @endsection

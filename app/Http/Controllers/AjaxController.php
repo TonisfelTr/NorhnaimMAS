@@ -325,21 +325,98 @@ class AjaxController extends Controller
 
     public function searchTestsForPatient(Request $request): JsonResponse
     {
-        $tests = Test::query();
+        $doctor = $request->user()->doctor;
 
-        if ($request->has('q')) {
-            $tests = $tests->where('name', 'ilike', '%' . $request->get('q') . '%');
-        }
+        $doctorId = $doctor->id;
+        $clinicId = $doctor->clinic_id;
 
-        $tests = $tests->get()->map(function ($element) {
-            return [
-                'id' => $element->id,
-                'text' => $element->name
-            ];
-        });
+        $search = trim((string) $request->get('q', ''));
+
+        $tests = Test::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where('name', 'ilike', '%' . $search . '%');
+            })
+
+            // Есть ли у теста вообще привязка к какой-либо клинике
+            ->withExists([
+                'clinics as has_any_clinic',
+            ])
+
+            // Привязан ли тест именно к клинике текущего врача
+            ->when(!is_null($clinicId), function ($query) use ($clinicId) {
+                $query->withExists([
+                    'clinics as is_current_clinic_test' => function ($query) use ($clinicId) {
+                        $query->where('clinics.id', $clinicId);
+                    },
+                ]);
+            })
+
+            ->where(function ($query) use ($doctorId, $clinicId) {
+                // 1. Тесты, созданные самим врачом
+                $query->where('owner_doctor_id', $doctorId)
+
+                    // 2. Общие тесты:
+                    // нет владельца-врача и нет привязки к клинике
+                    ->orWhere(function ($query) {
+                        $query->whereNull('owner_doctor_id')
+                            ->whereDoesntHave('clinics');
+                    });
+
+                // 3. Тесты клиники текущего врача
+                if (!is_null($clinicId)) {
+                    $query->orWhereHas('clinics', function ($query) use ($clinicId) {
+                        $query->where('clinics.id', $clinicId);
+                    });
+                }
+            })
+
+            ->orderBy('name')
+            ->limit(30)
+            ->get()
+            ->map(function ($element) use ($doctorId) {
+                $isMyTest = (int) $element->owner_doctor_id === (int) $doctorId;
+                $hasAnyClinic = (bool) ($element->has_any_clinic ?? false);
+                $isCurrentClinicTest = (bool) ($element->is_current_clinic_test ?? false);
+
+                $isCommonTest = is_null($element->owner_doctor_id) && !$hasAnyClinic;
+
+                if ($isCommonTest) {
+                    $accessSourceType = 'system';
+                    $accessLabel = 'Общий тест';
+                    $accessHint = 'Общий тест, доступный всем врачам.';
+                } elseif ($isMyTest && $isCurrentClinicTest) {
+                    $accessSourceType = 'doctor_clinic';
+                    $accessLabel = 'Мой тест клиники';
+                    $accessHint = 'Тест создан вами и доступен врачам вашей клиники.';
+                } elseif ($isMyTest) {
+                    $accessSourceType = 'doctor';
+                    $accessLabel = 'Мой тест';
+                    $accessHint = 'Тест создан вами и доступен только вам.';
+                } else {
+                    $accessSourceType = 'clinic';
+                    $accessLabel = 'Тест клиники';
+                    $accessHint = 'Тест доступен врачам вашей клиники.';
+                }
+
+                return [
+                    'id' => $element->id,
+                    'text' => $element->name,
+                    'description' => $element->description,
+                    'code' => $element->code,
+                    'type_label' => $element->type,
+
+                    'access_source_type' => $accessSourceType,
+                    'access_label' => $accessLabel,
+                    'access_hint' => $accessHint,
+
+                    'can_assign' => true,
+                    'can_conduct' => true,
+                    'can_view_results' => true,
+                ];
+            });
 
         return response()->json([
-            'data' => $tests->toArray()
+            'data' => $tests->toArray(),
         ]);
     }
 

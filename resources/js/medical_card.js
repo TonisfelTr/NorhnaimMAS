@@ -3796,6 +3796,189 @@ function initTestAssignments() {
     const assignForm = qs('#assignTestForm');
     const assignSelect = qs('#assignTestSelect');
 
+    const assignAccessEmpty = qs('#assignTestAccessEmpty', assignModal);
+    const assignAccessDetails = qs('#assignTestAccessDetails', assignModal);
+    const assignTypeIcon = qs('#assignTestTypeIcon', assignModal);
+    const assignTestName = qs('#assignTestName', assignModal);
+    const assignTestMeta = qs('#assignTestMeta', assignModal);
+    const assignAccessLabel = qs('#assignTestAccessLabel', assignModal);
+    const assignAccessHint = qs('#assignTestAccessHint', assignModal);
+    const assignCanAssign = qs('#assignCanAssign', assignModal);
+    const assignCanConduct = qs('#assignCanConduct', assignModal);
+    const assignCanViewResults = qs('#assignCanViewResults', assignModal);
+    const assignWarning = qs('#assignTestWarning', assignModal);
+    const assignSubmitButton = qs('#assignTestSubmitBtn', assignForm);
+
+    const assignAccessSourceType = qs('#assignTestAccessSourceType', assignForm);
+    const assignAccessRuleId = qs('#assignTestAccessRuleId', assignForm);
+    const assignPracticeContext = qs('#assignTestPracticeContext', assignForm);
+
+    function setAssignText(element, value) {
+        if (element) {
+            element.textContent = value || '—';
+        }
+    }
+
+    function setAssignValue(element, value) {
+        if (element) {
+            element.value = value || '';
+        }
+    }
+
+    function setAssignPermission(element, enabled) {
+        element?.classList.toggle('is-active', Boolean(enabled));
+    }
+
+    function updateAssignSubmitState() {
+        const item = window.__selectedAssignTestData
+            ? normalizeTestItem(window.__selectedAssignTestData)
+            : null;
+
+        if (assignSubmitButton) {
+            assignSubmitButton.disabled = !item || item.can_assign === false;
+        }
+    }
+
+    function getAssignAccessDefaults(item) {
+        const sourceType = String(item.access_source_type || '').toLowerCase();
+
+        switch (sourceType) {
+            case 'builtin':
+            case 'system':
+                return {
+                    label: 'Системный тест',
+                    hint: 'Общий тест «из коробки», доступен всем врачам.'
+                };
+
+            case 'owner':
+            case 'doctor':
+                return {
+                    label: 'Личный тест врача',
+                    hint: 'Тест создан текущим врачом.'
+                };
+
+            case 'clinic':
+                return {
+                    label: 'Тест клиники',
+                    hint: 'Тест доступен через клинику, к которой привязан врач.'
+                };
+
+            case 'global':
+            case 'granted':
+            case 'doctor_access':
+                return {
+                    label: 'Доступ выдан врачу',
+                    hint: 'Врачу отдельно выдан доступ к этому тесту.'
+                };
+
+            default:
+                return {
+                    label: 'Доступный тест',
+                    hint: 'Тест разрешён для назначения текущим врачом.'
+                };
+        }
+    }
+
+    function setAssignTypeIcon(type) {
+        if (!assignTypeIcon) {
+            return;
+        }
+
+        const typeName = String(type || '').toLowerCase();
+
+        const iconClass = {
+            questionnaire: 'bi-ui-checks',
+            image: 'bi-images',
+            card_sort: 'bi-grid-3x3-gap'
+        }[typeName] || 'bi-ui-checks';
+
+        assignTypeIcon.innerHTML = `<i class="bi ${iconClass}"></i>`;
+    }
+
+    function resetAssignAccessPanel() {
+        window.__selectedAssignTestData = null;
+
+        assignAccessEmpty?.classList.remove('d-none');
+        assignAccessDetails?.classList.add('d-none');
+
+        setAssignText(assignTestName, '—');
+        setAssignText(assignTestMeta, '—');
+        setAssignText(assignAccessLabel, '—');
+        setAssignText(assignAccessHint, '—');
+
+        setAssignValue(assignAccessSourceType, '');
+        setAssignValue(assignAccessRuleId, '');
+        setAssignValue(assignPracticeContext, '');
+
+        setAssignPermission(assignCanAssign, false);
+        setAssignPermission(assignCanConduct, false);
+        setAssignPermission(assignCanViewResults, false);
+
+        assignWarning?.classList.add('d-none');
+        qs('span', assignWarning)?.replaceChildren();
+
+        updateAssignSubmitState();
+    }
+
+    function renderAssignAccessPanel(rawItem) {
+        const item = normalizeTestItem(rawItem);
+
+        if (!item) {
+            resetAssignAccessPanel();
+            return;
+        }
+
+        window.__selectedAssignTestData = item;
+
+        assignAccessEmpty?.classList.add('d-none');
+        assignAccessDetails?.classList.remove('d-none');
+
+        setAssignTypeIcon(item.type);
+
+        const meta = [
+            item.code ? `Код: ${item.code}` : '',
+            item.type_label || getAssignTestTypeLabel(item.type),
+            item.duration ? `${item.duration} мин.` : ''
+        ].filter(Boolean).join(' · ');
+
+        const accessDefaults = getAssignAccessDefaults(item);
+
+        setAssignText(assignTestName, item.name || item.text);
+        setAssignText(assignTestMeta, meta || '—');
+        setAssignText(assignAccessLabel, item.access_label || accessDefaults.label);
+        setAssignText(assignAccessHint, item.access_hint || accessDefaults.hint);
+
+        setAssignValue(assignAccessSourceType, item.access_source_type);
+        setAssignValue(assignAccessRuleId, item.access_rule_id);
+        setAssignValue(assignPracticeContext, item.practice_context);
+
+        setAssignPermission(assignCanAssign, item.can_assign);
+        setAssignPermission(assignCanConduct, item.can_conduct);
+        setAssignPermission(assignCanViewResults, item.can_view_results);
+
+        const warningText = item.warning || '';
+
+        if (assignWarning) {
+            const warningSpan = qs('span', assignWarning);
+
+            if (warningText) {
+                if (warningSpan) {
+                    warningSpan.textContent = warningText;
+                }
+
+                assignWarning.classList.remove('d-none');
+            } else {
+                assignWarning.classList.add('d-none');
+
+                if (warningSpan) {
+                    warningSpan.textContent = '';
+                }
+            }
+        }
+
+        updateAssignSubmitState();
+    }
+
     const startModal = qs('#testStartModal');
     const pinValue = qs('#test-pin', startModal);
     const pinTimer = qs('#pin-timer', startModal);
@@ -3977,14 +4160,147 @@ function initTestAssignments() {
         const name = item.name || item.title || item.text || item.test_name || '';
         const text = code && name ? `${code} — ${name}` : (name || code || id);
 
-        return id
-            ? {
-                id: String(id),
-                text: String(text),
-                code,
-                name
-            }
-            : null;
+        if (!id) {
+            return null;
+        }
+
+        return {
+            id: String(id),
+            text: String(text),
+
+            name: String(name || text),
+            code: String(code || ''),
+            type: item.type || item.test_type || '',
+            type_label: item.type_label || item.typeLabel || '',
+            duration: item.duration || item.estimated_minutes || item.estimatedMinutes || '',
+            description: item.description || item.about || item.short_description || '',
+
+            access_source_type: item.access_source_type || item.accessSourceType || '',
+            access_label: item.access_label || item.accessLabel || '',
+            access_hint: item.access_hint || item.accessHint || '',
+            access_rule_id: item.access_rule_id || item.accessRuleId || '',
+            practice_context: item.practice_context || item.practiceContext || '',
+
+            can_assign: item.can_assign ?? item.canAssign ?? true,
+            can_conduct: item.can_conduct ?? item.canConduct ?? false,
+            can_view_results: item.can_view_results ?? item.canViewResults ?? false,
+
+            warning: item.warning || ''
+        };
+    }
+
+    function getAssignTestTypeLabel(type) {
+        switch (String(type || '').toLowerCase()) {
+            case 'questionnaire':
+                return 'Опросник';
+
+            case 'image':
+                return 'Тест с изображениями';
+
+            case 'card_sort':
+                return 'Сортировка карточек';
+
+            default:
+                return 'Тест';
+        }
+    }
+
+    function getAssignAccessClass(type) {
+        switch (String(type || '').toLowerCase()) {
+            case 'builtin':
+            case 'system':
+                return 'is-system';
+
+            case 'owner':
+            case 'doctor':
+                return 'is-doctor';
+
+            case 'clinic':
+                return 'is-clinic';
+
+            case 'global':
+                return 'is-global';
+
+            default:
+                return 'is-default';
+        }
+    }
+
+    function formatAssignTestOption(item) {
+        if (item.loading) {
+            return item.text;
+        }
+
+        const name = escapeHtml(item.name || item.text || 'Без названия');
+        const code = item.code ? escapeHtml(item.code) : '';
+        const typeLabel = escapeHtml(item.type_label || getAssignTestTypeLabel(item.type));
+        const duration = item.duration || '';
+        const description = item.description
+            ? escapeHtml(item.description)
+            : 'Описание теста не заполнено.';
+
+        const accessLabel = escapeHtml(item.access_label || 'Доступ разрешён');
+        const accessClass = getAssignAccessClass(item.access_source_type);
+
+        const meta = [
+            code ? 'Код: ' + code : '',
+            typeLabel,
+            duration ? duration + ' мин.' : ''
+        ].filter(Boolean).join(' · ');
+
+        return window.jQuery(`
+        <div class="assign-test-option">
+            <div class="assign-test-option__top">
+                <div class="assign-test-option__title">
+                    ${name}
+                </div>
+
+                <span class="assign-test-option__access ${accessClass}">
+                    ${accessLabel}
+                </span>
+            </div>
+
+            ${meta ? `
+                <div class="assign-test-option__meta">
+                    ${escapeHtml(meta)}
+                </div>
+            ` : ''}
+
+            <div class="assign-test-option__description">
+                ${description}
+            </div>
+        </div>
+    `);
+    }
+
+    function formatAssignTestSelection(item) {
+        if (!item.id) {
+            return item.text || 'Начните вводить название теста...';
+        }
+
+        const name = escapeHtml(item.name || item.text || 'Без названия');
+        const code = item.code ? escapeHtml(item.code) : '';
+        const accessLabel = item.access_label ? escapeHtml(item.access_label) : '';
+
+        return window.jQuery(`
+        <div class="assign-test-selected-item">
+            <span class="assign-test-selected-item__name">
+                ${name}
+            </span>
+
+            ${code ? `
+                <span class="assign-test-selected-item__code">
+                    ${code}
+                </span>
+            ` : ''}
+
+            ${accessLabel ? `
+                <span class="assign-test-selected-item__access">
+                    ${accessLabel}
+                </span>
+            ` : ''}
+        </div>
+    `);
     }
 
     function responseToSelect2(data) {
@@ -4043,39 +4359,92 @@ function initTestAssignments() {
                 theme: 'bootstrap-5',
                 width: '100%',
                 dropdownParent: assignModal ? $(assignModal) : $(document.body),
-                placeholder: assignSelect.getAttribute('placeholder') || 'Начните вводить тест',
+                dropdownCssClass: 'assign-test-select-dropdown',
+                placeholder: assignSelect.dataset.placeholder || assignSelect.getAttribute('placeholder') || 'Начните вводить название теста...',
                 allowClear: true,
                 minimumInputLength: 0,
+
                 ajax: {
                     url: source,
                     dataType: 'json',
                     delay: 250,
                     cache: false,
+
                     data(params) {
                         return {
                             q: params.term || '',
                             page: params.page || 1
                         };
                     },
+
                     processResults(data) {
                         return {
-                            results: responseToSelect2(data).map(item => ({
-                                id: item.id,
-                                text: item.text
-                            })),
+                            results: responseToSelect2(data),
                             pagination: {
                                 more: Boolean(data?.pagination?.more || data?.more)
                             }
                         };
                     }
+                },
+
+                templateResult: formatAssignTestOption,
+                templateSelection: formatAssignTestSelection,
+
+                escapeMarkup(markup) {
+                    return markup;
+                },
+
+                language: {
+                    searching() {
+                        return 'Ищем доступные тесты...';
+                    },
+
+                    noResults() {
+                        return 'Доступные тесты не найдены';
+                    },
+
+                    loadingMore() {
+                        return 'Загружаем ещё...';
+                    }
                 }
             });
+
+            $select
+                .off('select2:select.assignTest')
+                .on('select2:select.assignTest', function (event) {
+                    renderAssignAccessPanel(event.params.data || null);
+
+                    assignSelect.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+                });
+
+            $select
+                .off('select2:clear.assignTest')
+                .on('select2:clear.assignTest', function () {
+                    resetAssignAccessPanel();
+
+                    assignSelect.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+                });
 
             return;
         }
 
         preloadNativeSelect();
     }
+
+    assignSelect?.addEventListener('change', () => {
+        if (!assignSelect.value) {
+            resetAssignAccessPanel();
+            return;
+        }
+
+        if (window.__selectedAssignTestData) {
+            renderAssignAccessPanel(window.__selectedAssignTestData);
+        }
+    });
 
     function cleanupModalBackdrops() {
         setTimeout(() => {
@@ -4125,13 +4494,15 @@ function initTestAssignments() {
                 window.jQuery(assignSelect).val(null).trigger('change');
             }
 
+            resetAssignAccessPanel();
+
             await loadAssignments();
             showToast('Тест назначен');
         } catch (error) {
             console.error('[tests] Не удалось назначить тест:', error);
             alert(`Не удалось назначить тест: ${error.message}`);
         } finally {
-            submitButton?.removeAttribute('disabled');
+            updateAssignSubmitState();
         }
     });
 
@@ -4355,8 +4726,737 @@ function initTestAssignments() {
     loadAssignments();
 }
 
+
+function initPatientInfoForm() {
+    const patientInfoForm = document.querySelector('#pane-patient-info form.patient-info-form-card');
+    if (!patientInfoForm) {
+        return;
+    }
+
+    const medicalCardRoot = document.querySelector('#medicalCardRoot');
+    const addressSuggestUrl = patientInfoForm.dataset.addressSuggestUrl || medicalCardRoot?.dataset.addressSuggestUrl || '';
+    const insuranceSuggestUrl = patientInfoForm.dataset.insuranceSuggestUrl || medicalCardRoot?.dataset.insuranceSuggestUrl || '';
+    const registrationAddress = document.querySelector('#patientRegistrationAddress');
+    const actualAddress = document.querySelector('#patientActualAddress');
+    const registrationPostalCode = document.querySelector('#patientRegistrationPostalCode');
+    const actualPostalCode = document.querySelector('#patientActualPostalCode');
+    const legacyAddress = document.querySelector('#patientLegacyAddress');
+    const sameAsRegistration = document.querySelector('#sameAsRegistrationAddress');
+    const copyAddressButton = document.querySelector('#copyRegistrationAddressToActual');
+    const identityDocument = document.querySelector('#patientIdentityDocument');
+    const insuranceCompany = document.querySelector('#patientInsuranceCompany');
+    const insurancePolicyNumber = document.querySelector('#patientInsurancePolicyNumber');
+    const insurancePolicyLegacy = document.querySelector('#patientInsurancePolicy');
+
+    const localInsuranceOrganizations = [
+        { value: 'АО «МАКС-М»', search: 'макс м makc max max-m макс-м максм' },
+        { value: 'ООО «Капитал МС»', search: 'капитал мс капитал медицинское страхование' },
+        { value: 'АО «СОГАЗ-Мед»', search: 'согаз мед согаз-мед sogaz' },
+        { value: 'ООО «АльфаСтрахование-ОМС»', search: 'альфастрахование омс альфа страхование альфастрахование-омс' },
+        { value: 'ООО «СК «Ингосстрах-М»', search: 'ингосстрах м ингосстрах-м ingos' },
+        { value: 'ООО «РЕСО-Мед»', search: 'ресо мед ресо-мед reso' },
+        { value: 'АО «Страховая компания «СОГАЗ-Мед»', search: 'страховая компания согаз мед' },
+        { value: 'ООО «ВТБ Медицинское страхование»', search: 'втб медицинское страхование втб мс' },
+        { value: 'ООО «СМК РЕСО-Мед»', search: 'смк ресо мед' },
+        { value: 'ООО «МСК Медстрах»', search: 'мск медстрах медицинское страхование' }
+    ];
+
+    function onlyDigits(value, maxLength = null) {
+        let digits = String(value || '').replace(/\D/g, '');
+
+        if (maxLength) {
+            digits = digits.slice(0, maxLength);
+        }
+
+        return digits;
+    }
+
+    function formatSnils(value) {
+        const digits = onlyDigits(value, 11);
+        const first = digits.slice(0, 3);
+        const second = digits.slice(3, 6);
+        const third = digits.slice(6, 9);
+        const control = digits.slice(9, 11);
+        let result = first;
+
+        if (second) {
+            result += '-' + second;
+        }
+
+        if (third) {
+            result += '-' + third;
+        }
+
+        if (control) {
+            result += ' ' + control;
+        }
+
+        return result;
+    }
+
+    function formatDepartmentCode(value) {
+        const digits = onlyDigits(value, 6);
+
+        if (digits.length <= 3) {
+            return digits;
+        }
+
+        return digits.slice(0, 3) + '-' + digits.slice(3, 6);
+    }
+
+    function normalizePhoneDigits(value) {
+        let digits = onlyDigits(value, 11);
+
+        if (digits.startsWith('8')) {
+            digits = '7' + digits.slice(1);
+        } else if (digits.startsWith('9')) {
+            digits = '7' + digits;
+        }
+
+        return digits.slice(0, 11);
+    }
+
+    function formatPhone(value) {
+        const digits = normalizePhoneDigits(value);
+
+        if (!digits) {
+            return '';
+        }
+
+        const country = digits.slice(0, 1);
+        const code = digits.slice(1, 4);
+        const first = digits.slice(4, 7);
+        const second = digits.slice(7, 9);
+        const third = digits.slice(9, 11);
+        let result = '+' + country;
+
+        if (code) {
+            result += ' (' + code;
+            if (code.length === 3) {
+                result += ')';
+            }
+        }
+
+        if (first) {
+            result += ' ' + first;
+        }
+
+        if (second) {
+            result += '-' + second;
+        }
+
+        if (third) {
+            result += '-' + third;
+        }
+
+        return result;
+    }
+
+    function normalizeEmail(value) {
+        return String(value || '').replace(/\s+/g, '').toLowerCase();
+    }
+
+    function normalizePolicy(value) {
+        return String(value || '')
+            .replace(/\s+/g, ' ')
+            .replace(/[^0-9a-zA-Zа-яА-ЯёЁ№/\- ]/g, '')
+            .trim()
+            .slice(0, 32);
+    }
+
+    function bindInputMask(selector, formatter, eventName = 'input') {
+        document.querySelectorAll(selector).forEach(function (field) {
+            const apply = function () {
+                const formatted = formatter(field.value, field);
+
+                if (field.value !== formatted) {
+                    field.value = formatted;
+                }
+            };
+
+            field.addEventListener(eventName, apply);
+            field.addEventListener('change', apply);
+            field.addEventListener('blur', apply);
+            apply();
+        });
+    }
+
+    function bindFieldMasks() {
+        bindInputMask('.js-mask-snils', formatSnils);
+        bindInputMask('.js-mask-department-code', formatDepartmentCode);
+        bindInputMask('.js-mask-phone', formatPhone);
+        bindInputMask('.js-mask-email', normalizeEmail);
+        bindInputMask('.js-mask-policy', normalizePolicy);
+        bindInputMask('.js-mask-digits', function (value, field) {
+            return onlyDigits(value, Number(field.dataset.maskMax || 0) || null);
+        });
+    }
+
+    function syncLegacyInsurancePolicy() {
+        if (!insurancePolicyLegacy) {
+            return;
+        }
+
+        const company = insuranceCompany?.value.trim() || '';
+        const number = insurancePolicyNumber?.value.trim() || '';
+        insurancePolicyLegacy.value = [company, number].filter(Boolean).join(' — ');
+    }
+
+    function syncLegacyAddress() {
+        if (legacyAddress && registrationAddress) {
+            legacyAddress.value = registrationAddress.value.trim();
+        }
+    }
+
+    function normalizePostalCode(postalCode) {
+        return String(postalCode || '').replace(/\D/g, '').slice(0, 6);
+    }
+
+    function mergeAddressWithPostalCode(address, postalCode) {
+        const cleanAddress = String(address || '').trim();
+        const cleanPostalCode = normalizePostalCode(postalCode);
+
+        if (!cleanPostalCode) {
+            return cleanAddress;
+        }
+
+        if (cleanAddress.startsWith(cleanPostalCode)) {
+            return cleanAddress;
+        }
+
+        return cleanPostalCode + ', ' + cleanAddress;
+    }
+
+    function setPostalCode(field, postalCode) {
+        const targetSelector = field?.dataset?.postalTarget || '';
+        const target = targetSelector ? document.querySelector(targetSelector) : null;
+
+        if (!target) {
+            return;
+        }
+
+        target.value = normalizePostalCode(postalCode);
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+        target.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function copyRegistrationPostalToActual() {
+        if (!registrationPostalCode || !actualPostalCode) {
+            return;
+        }
+
+        actualPostalCode.value = registrationPostalCode.value;
+        actualPostalCode.dispatchEvent(new Event('input', { bubbles: true }));
+        actualPostalCode.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function copyRegistrationToActual() {
+        if (!registrationAddress || !actualAddress) {
+            return;
+        }
+
+        actualAddress.value = registrationAddress.value;
+        copyRegistrationPostalToActual();
+        actualAddress.dispatchEvent(new Event('input', { bubbles: true }));
+        syncLegacyAddress();
+    }
+
+    function syncSameAddressState() {
+        if (!sameAsRegistration || !registrationAddress || !actualAddress) {
+            return;
+        }
+
+        if (sameAsRegistration.checked) {
+            copyRegistrationToActual();
+            actualAddress.setAttribute('readonly', 'readonly');
+            actualAddress.classList.add('bg-light');
+            actualPostalCode?.setAttribute('readonly', 'readonly');
+            actualPostalCode?.classList.add('bg-light');
+        } else {
+            actualAddress.removeAttribute('readonly');
+            actualAddress.classList.remove('bg-light');
+            actualPostalCode?.removeAttribute('readonly');
+            actualPostalCode?.classList.remove('bg-light');
+        }
+    }
+
+    function collectPassport() {
+        if (!identityDocument) {
+            return;
+        }
+
+        const series = document.querySelector('#patientPassportSeries')?.value.trim() || '';
+        const number = document.querySelector('#patientPassportNumber')?.value.trim() || '';
+        const issuedAt = document.querySelector('#patientPassportIssuedAt')?.value.trim() || '';
+        const departmentCode = document.querySelector('#patientPassportDepartmentCode')?.value.trim() || '';
+        const issuedBy = document.querySelector('#patientPassportIssuedBy')?.value.trim() || '';
+
+        const parts = [];
+        if (series || number) {
+            parts.push(['Паспорт', series, number].filter(Boolean).join(' '));
+        } else {
+            parts.push('Паспорт');
+        }
+
+        if (issuedAt) {
+            parts.push('выдан ' + issuedAt);
+        }
+
+        if (issuedBy) {
+            parts.push(issuedBy);
+        }
+
+        if (departmentCode) {
+            parts.push('код подразделения ' + departmentCode);
+        }
+
+        identityDocument.value = parts.filter(Boolean).join(', ');
+    }
+
+    function normalizeSuggestions(payload) {
+        let rawItems = [];
+
+        if (Array.isArray(payload)) {
+            rawItems = payload;
+        } else if (payload && Array.isArray(payload.suggestions)) {
+            rawItems = payload.suggestions;
+        } else if (payload && Array.isArray(payload.data)) {
+            rawItems = payload.data;
+        } else if (payload && Array.isArray(payload.items)) {
+            rawItems = payload.items;
+        }
+
+        return rawItems.map(function (item) {
+            if (typeof item === 'string') {
+                return {
+                    value: item,
+                    unrestricted_value: item,
+                    postal_code: '',
+                    fias_id: ''
+                };
+            }
+
+            const data = item.data || {};
+            const value = item.value || item.unrestricted_value || item.address || item.name || data.result || '';
+
+            return {
+                value: value,
+                unrestricted_value: item.unrestricted_value || value,
+                postal_code: item.postal_code || data.postal_code || '',
+                fias_id: item.fias_id || data.fias_id || data.fias_code || '',
+                region: item.region || data.region_with_type || '',
+                city: item.city || data.city_with_type || data.settlement_with_type || '',
+                street: item.street || data.street_with_type || '',
+                house: item.house || data.house || '',
+                flat: item.flat || data.flat || ''
+            };
+        }).filter(function (item) {
+            return item.value;
+        });
+    }
+
+    function hideSuggestBox(box) {
+        if (!box) {
+            return;
+        }
+
+        box.classList.remove('is-visible');
+        box.innerHTML = '';
+    }
+
+    function renderSuggestions(field, box, suggestions) {
+        if (!box || !suggestions.length) {
+            hideSuggestBox(box);
+            return;
+        }
+
+        box.innerHTML = suggestions.slice(0, 8).map(function (item, index) {
+            const meta = [item.postal_code, item.city, item.street].filter(Boolean).join(' · ');
+
+            return '<button type="button" class="patient-info-address-suggest__item" data-index="' + index + '">' +
+                '<span class="d-block fw-semibold">' + escapeHtml(item.value) + '</span>' +
+                (meta ? '<span class="d-block small text-muted mt-1">' + escapeHtml(meta) + '</span>' : '') +
+                '</button>';
+        }).join('');
+
+        box.classList.add('is-visible');
+
+        box.querySelectorAll('.patient-info-address-suggest__item').forEach(function (button) {
+            button.addEventListener('mousedown', function (event) {
+                event.preventDefault();
+            });
+
+            button.addEventListener('click', function () {
+                const item = suggestions[Number(button.dataset.index)] || null;
+
+                if (!item) {
+                    return;
+                }
+
+                const addressValue = item.value || item.unrestricted_value || '';
+                const postalCode = item.postal_code || '';
+
+                field.value = mergeAddressWithPostalCode(addressValue, postalCode);
+                field.dataset.unrestrictedValue = item.unrestricted_value || addressValue;
+                field.dataset.postalCode = postalCode;
+                field.dataset.fiasId = item.fias_id || '';
+                setPostalCode(field, postalCode);
+
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+
+                hideSuggestBox(box);
+                field.focus();
+            });
+        });
+    }
+
+    function buildAddressSuggestUrl(baseUrl, query) {
+        const separator = baseUrl.includes('?') ? '&' : '?';
+
+        // q — для твоего текущего роута, query — для совместимости с контроллером DaData из примера.
+        return baseUrl + separator + 'q=' + encodeURIComponent(query) + '&query=' + encodeURIComponent(query);
+    }
+
+    function normalizeInsuranceSearch(value) {
+        return String(value || '')
+            .toLowerCase()
+            .replace(/ё/g, 'е')
+            .replace(/[«»"'`().,]/g, ' ')
+            .replace(/[–—_]/g, '-')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function findLocalInsuranceSuggestions(query) {
+        const normalizedQuery = normalizeInsuranceSearch(query);
+        const compactQuery = normalizedQuery.replace(/[\s-]+/g, '');
+
+        if (normalizedQuery.length < 2) {
+            return [];
+        }
+
+        return localInsuranceOrganizations.filter(function (item) {
+            const haystack = normalizeInsuranceSearch(item.value + ' ' + (item.search || ''));
+            const compactHaystack = haystack.replace(/[\s-]+/g, '');
+
+            return haystack.includes(normalizedQuery) || compactHaystack.includes(compactQuery);
+        }).map(function (item) {
+            return {
+                value: item.value,
+                unrestricted_value: item.value,
+                inn: item.inn || '',
+                kpp: item.kpp || '',
+                ogrn: item.ogrn || '',
+                status: item.status || ''
+            };
+        });
+    }
+
+    function mapLocalInsuranceSuggestion(item) {
+        return {
+            value: item.value,
+            unrestricted_value: item.value,
+            inn: item.inn || '',
+            kpp: item.kpp || '',
+            ogrn: item.ogrn || '',
+            status: item.status || ''
+        };
+    }
+
+    function getDefaultInsuranceSuggestions() {
+        return localInsuranceOrganizations.slice(0, 8).map(mapLocalInsuranceSuggestion);
+    }
+
+    function normalizeInsuranceSuggestions(payload) {
+        const rawItems = Array.isArray(payload)
+            ? payload
+            : (payload.suggestions || payload.items || payload.data || payload.results || []);
+
+        return rawItems.map(function (item) {
+            if (typeof item === 'string') {
+                return {
+                    value: item,
+                    unrestricted_value: item,
+                    inn: '',
+                    kpp: '',
+                    ogrn: ''
+                };
+            }
+
+            const data = item.data || {};
+            const name = data.name || {};
+            const value = item.value
+                || item.unrestricted_value
+                || item.name
+                || name.short_with_opf
+                || name.full_with_opf
+                || name.short
+                || name.full
+                || '';
+
+            return {
+                value: value,
+                unrestricted_value: item.unrestricted_value || name.full_with_opf || value,
+                inn: item.inn || data.inn || '',
+                kpp: item.kpp || data.kpp || '',
+                ogrn: item.ogrn || data.ogrn || '',
+                address: item.address || data.address?.value || data.address?.unrestricted_value || '',
+                status: data.state?.status || item.status || ''
+            };
+        }).filter(function (item) {
+            return item.value;
+        });
+    }
+
+    function renderInsuranceSuggestions(field, box, suggestions) {
+        if (!box || !suggestions.length) {
+            hideSuggestBox(box);
+            return;
+        }
+
+        box.innerHTML = suggestions.slice(0, 8).map(function (item, index) {
+            const meta = [item.inn ? 'ИНН ' + item.inn : '', item.kpp ? 'КПП ' + item.kpp : '', item.status].filter(Boolean).join(' · ');
+
+            return '<button type="button" class="patient-info-address-suggest__item" data-index="' + index + '">' +
+                '<span class="d-block fw-semibold">' + escapeHtml(item.value) + '</span>' +
+                (meta ? '<span class="d-block small text-muted mt-1">' + escapeHtml(meta) + '</span>' : '') +
+                '</button>';
+        }).join('');
+
+        box.classList.add('is-visible');
+
+        box.querySelectorAll('.patient-info-address-suggest__item').forEach(function (button) {
+            button.addEventListener('mousedown', function (event) {
+                event.preventDefault();
+            });
+
+            button.addEventListener('click', function () {
+                const item = suggestions[Number(button.dataset.index)] || null;
+
+                if (!item) {
+                    return;
+                }
+
+                field.value = item.value || item.unrestricted_value || '';
+                field.dataset.unrestrictedValue = item.unrestricted_value || field.value;
+                field.dataset.inn = item.inn || '';
+                field.dataset.kpp = item.kpp || '';
+                field.dataset.ogrn = item.ogrn || '';
+
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+
+                hideSuggestBox(box);
+                field.focus();
+            });
+        });
+    }
+
+    function buildInsuranceSuggestUrl(baseUrl, query) {
+        const separator = baseUrl.includes('?') ? '&' : '?';
+
+        return baseUrl + separator + 'q=' + encodeURIComponent(query) + '&query=' + encodeURIComponent(query);
+    }
+
+    function bindInsuranceAutocomplete(field) {
+        const box = document.querySelector(field.dataset.suggestBox || '');
+        let timer = null;
+        let controller = null;
+
+        field.addEventListener('input', function () {
+            syncLegacyInsurancePolicy();
+
+            if (!box || field.hasAttribute('readonly')) {
+                return;
+            }
+
+            const query = field.value.trim();
+            clearTimeout(timer);
+
+            if (query.length < 2) {
+                hideSuggestBox(box);
+                return;
+            }
+
+            const localSuggestions = findLocalInsuranceSuggestions(query);
+
+            if (!insuranceSuggestUrl) {
+                renderInsuranceSuggestions(field, box, localSuggestions);
+                return;
+            }
+
+            timer = setTimeout(function () {
+                if (controller) {
+                    controller.abort();
+                }
+
+                controller = new AbortController();
+
+                fetch(buildInsuranceSuggestUrl(insuranceSuggestUrl, query), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    signal: controller.signal
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Insurance suggest request failed');
+                        }
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        const remoteSuggestions = normalizeInsuranceSuggestions(payload);
+                        renderInsuranceSuggestions(field, box, remoteSuggestions.length ? remoteSuggestions : localSuggestions);
+                    })
+                    .catch(function (error) {
+                        if (error.name !== 'AbortError') {
+                            renderInsuranceSuggestions(field, box, localSuggestions);
+                        }
+                    });
+            }, 300);
+        });
+
+        field.addEventListener('focus', function () {
+            if (field.value.trim().length >= 2) {
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+
+        field.addEventListener('dblclick', function () {
+            if (!box || field.hasAttribute('readonly')) {
+                return;
+            }
+
+            clearTimeout(timer);
+            renderInsuranceSuggestions(field, box, getDefaultInsuranceSuggestions());
+        });
+
+        field.addEventListener('blur', function () {
+            setTimeout(function () {
+                hideSuggestBox(box);
+            }, 180);
+        });
+    }
+
+    function bindAddressAutocomplete(field) {
+        const box = document.querySelector(field.dataset.suggestBox || '');
+        let timer = null;
+        let controller = null;
+
+        field.addEventListener('input', function () {
+            syncLegacyAddress();
+
+            if (sameAsRegistration?.checked && field === registrationAddress) {
+                copyRegistrationToActual();
+            }
+
+            if (!addressSuggestUrl || !box || field.hasAttribute('readonly')) {
+                return;
+            }
+
+            const query = field.value.trim();
+            clearTimeout(timer);
+
+            if (query.length < 3) {
+                hideSuggestBox(box);
+                return;
+            }
+
+            timer = setTimeout(function () {
+                if (controller) {
+                    controller.abort();
+                }
+
+                controller = new AbortController();
+
+                fetch(buildAddressSuggestUrl(addressSuggestUrl, query), {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    signal: controller.signal
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Address suggest request failed');
+                        }
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        renderSuggestions(field, box, normalizeSuggestions(payload));
+                    })
+                    .catch(function (error) {
+                        if (error.name !== 'AbortError') {
+                            hideSuggestBox(box);
+                        }
+                    });
+            }, 300);
+        });
+
+        field.addEventListener('focus', function () {
+            if (field.value.trim().length >= 3) {
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+
+        field.addEventListener('blur', function () {
+            setTimeout(function () {
+                hideSuggestBox(box);
+            }, 180);
+        });
+    }
+
+    bindFieldMasks();
+
+    document.querySelectorAll('.js-address-autocomplete').forEach(bindAddressAutocomplete);
+    document.querySelectorAll('.js-insurance-autocomplete').forEach(bindInsuranceAutocomplete);
+    document.querySelectorAll('.js-insurance-part').forEach(function (field) {
+        field.addEventListener('input', syncLegacyInsurancePolicy);
+        field.addEventListener('change', syncLegacyInsurancePolicy);
+    });
+    document.querySelectorAll('.js-passport-part').forEach(function (field) {
+        field.addEventListener('input', collectPassport);
+        field.addEventListener('change', collectPassport);
+    });
+
+    sameAsRegistration?.addEventListener('change', syncSameAddressState);
+    copyAddressButton?.addEventListener('click', function () {
+        copyRegistrationToActual();
+        if (sameAsRegistration) {
+            sameAsRegistration.checked = true;
+        }
+        syncSameAddressState();
+    });
+
+    registrationAddress?.addEventListener('input', syncLegacyAddress);
+    registrationPostalCode?.addEventListener('input', function () {
+        registrationPostalCode.value = registrationPostalCode.value.replace(/\D/g, '').slice(0, 6);
+
+        if (sameAsRegistration?.checked) {
+            copyRegistrationPostalToActual();
+        }
+    });
+    actualPostalCode?.addEventListener('input', function () {
+        actualPostalCode.value = actualPostalCode.value.replace(/\D/g, '').slice(0, 6);
+    });
+    patientInfoForm.addEventListener('submit', function () {
+        syncSameAddressState();
+        syncLegacyAddress();
+        syncLegacyInsurancePolicy();
+        collectPassport();
+    });
+
+    syncSameAddressState();
+    syncLegacyAddress();
+    syncLegacyInsurancePolicy();
+    collectPassport();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initTooltips();
+    initPatientInfoForm();
     initConfirmForms();
     initDefaultTab();
     initContactsTabState();

@@ -92,7 +92,8 @@ class InstallCommand extends Command
             'RolePermissionSeeder'       => 'Роли и права',
             'AdminUserSeeder'            => 'Администратор',
             'SettingsItemsSeeder'        => 'Настройки',
-            'LabsSeeder'                 => 'Исследования'
+            'LabsSeeder'                 => 'Исследования',
+            'TestFullSeeder'             => 'Тесты'
         ];
     }
 

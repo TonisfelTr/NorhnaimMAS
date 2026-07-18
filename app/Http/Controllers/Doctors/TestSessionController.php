@@ -12,17 +12,50 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Illuminate\Validation\ValidationException;
 
 class TestSessionController extends Controller
 {
-    private const MAX_SESSION_MINUTES = 60;
+    private const DEFAULT_SESSION_MINUTES = 60;
 
     /**
-     * Если сессия длится слишком долго — считаем её истёкшей, завершаем и снимаем блокировку панели врача.
-     * Возвращает true если сессия была завершена по таймауту (или уже неактивна).
+     * Возвращает продолжительность и время окончания сессии.
+     *
+     * Если estimated_minutes не заполнено или равно 0,
+     * используется значение по умолчанию.
+     */
+    private function resolveSessionTimeout(TestSession $session): array
+    {
+        $estimatedMinutes = (int) $session
+            ->test()
+            ->value('estimated_minutes');
+
+        $minutes = $estimatedMinutes > 0
+            ? $estimatedMinutes
+            : self::DEFAULT_SESSION_MINUTES;
+
+        $startedRaw = $session->locked_at
+            ?? $session->created_at;
+
+        $startedAt = $startedRaw
+            ? Carbon::parse($startedRaw)
+            : null;
+
+        return [
+            'minutes' => $minutes,
+            'started_at' => $startedAt,
+            'expires_at' => $startedAt
+                ? $startedAt->copy()->addMinutes($minutes)
+                : null,
+        ];
+    }
+
+    /**
+     * Завершает активную сессию, если истекло время,
+     * заданное в tests.estimated_minutes.
      */
     private function enforceTimeout(TestSession $session): bool
     {
@@ -30,35 +63,52 @@ class TestSessionController extends Controller
             return false;
         }
 
-        $started = $session->locked_at ?? $session->created_at ?? null;
-        if (!$started) {
+        $timeout = $this->resolveSessionTimeout($session);
+        $expiresAt = $timeout['expires_at'];
+
+        if (!$expiresAt) {
             return false;
         }
 
-        if (now()->diffInMinutes($started) < self::MAX_SESSION_MINUTES) {
+        if (now()->lt($expiresAt)) {
             return false;
         }
 
-        $session->update([
-            'in_progress'  => false,
-            'status'       => 'timeout',
-            'completed_at' => now(),
-            'locked_at'    => null,
-            'locked_by'    => null,
-        ]);
+        DB::transaction(function () use ($session, $timeout): void {
+            $context = (array) ($session->context ?? []);
 
-        if ($session->relationLoaded('assignment')) {
-            $assignment = $session->assignment;
-        } else {
-            $assignment = $session->assignment()->first();
-        }
+            /*
+             * Уже введённые ответы и sort_order сохраняются.
+             */
+            $context['timed_out'] = true;
+            $context['timeout_minutes'] = $timeout['minutes'];
+            $context['timed_out_at'] = now()->toIso8601String();
 
-        if ($assignment) {
-            $assignment->update([
-                'status'      => 'timeout',
-                'finished_at' => now(),
+            $session->update([
+                'in_progress' => false,
+                'status' => 'timeout',
+                'completed_at' => now(),
+
+                /*
+                 * Разблокируем панель врача.
+                 */
+                'locked_at' => null,
+                'locked_by' => null,
+
+                'context' => $context,
             ]);
-        }
+
+            $assignment = $session->relationLoaded('assignment')
+                ? $session->assignment
+                : $session->assignment()->first();
+
+            if ($assignment) {
+                $assignment->update([
+                    'status' => 'timeout',
+                    'finished_at' => now(),
+                ]);
+            }
+        });
 
         return true;
     }
@@ -150,15 +200,19 @@ class TestSessionController extends Controller
 
         if (!$assignment->session_id) {
             $session = TestSession::create([
-                'test_id'      => $assignment->test_id,
+                'test_id'      => $testId,
                 'clinician_id' => $assignment->clinician_id,
                 'patient_id'   => data_get($assignment->context, 'patient_id'),
-                'context'      => array_merge((array)($assignment->context ?? []), [
-                    'assignment_id' => $assignment->id,
-                    'answers' => [],
-                    'current_index' => 0,
-                    'final_pin_ok' => false
-                ]),
+                'context' => array_merge(
+                    (array) ($assignment->context ?? []),
+                    [
+                        'assignment_id' => $assignment->id,
+                        'answers' => [],
+                        'sort_order' => [],
+                        'current_index' => 0,
+                        'final_pin_ok' => false,
+                    ]
+                ),
                 'in_progress'  => true,
                 'locked_by'    => auth()->user()->doctor->id,
                 'locked_at' => now(),
@@ -184,7 +238,18 @@ class TestSessionController extends Controller
                 // если сессия была завершена/разлочена/неактивна — начинаем заново
                 if (!$session->in_progress || is_null($session->locked_at) || $session->status !== 'in_progress') {
                     $ctx['answers'] = [];
+                    $ctx['sort_order'] = [];
                     $ctx['current_index'] = 0;
+
+                    unset(
+                        $ctx['timed_out'],
+                        $ctx['timed_out_at'],
+                        $ctx['timeout_minutes'],
+                        $ctx['interrupted'],
+                        $ctx['interrupted_at'],
+                        $ctx['interrupted_by'],
+                        $ctx['interrupted_with_pin']
+                    );
 
                     // стартовый PIN НЕ должен означать финальный PIN
                     $ctx['start_pin_ok'] = true;
@@ -220,7 +285,10 @@ class TestSessionController extends Controller
     {
         if ($this->enforceTimeout($session)) {
             return view('doctors.reception.tests.run', compact('session'))
-                ->with('warning', 'Прохождение теста было завершено автоматически (превышен лимит 60 минут).');
+                ->with(
+                    'warning',
+                    'Прохождение теста было завершено автоматически: истекло установленное время.'
+                );
         }
 
         if ($session->in_progress) {
@@ -252,181 +320,893 @@ class TestSessionController extends Controller
             return response()->json([
                 'ok' => false,
                 'timed_out' => true,
-                'message' => 'Сессия истекла (превышен лимит 60 минут).',
+                'message' => 'Сессия истекла: превышено время прохождения теста.',
             ], 409);
         }
 
-        $session->load(['test:id,code,name,description', 'test.sections.items.options', 'responses', 'openResponses']);
+        $session->load([
+            'test:id,code,name,type,description,instructions',
 
+            /*
+             * Обычный опросник.
+             */
+            'test.sections.items.options',
+
+            /*
+             * Карточки с изображением и текстовым ответом:
+             * Роршах и аналогичные тесты.
+             */
+            'test.testCards.media',
+
+            /*
+             * Сортируемые карточки:
+             * Люшер и другие тесты типа sort.
+             */
+            'test.sortCards.media',
+
+            'responses',
+            'openResponses',
+        ]);
+
+        $test = $session->test;
+        $timeout = $this->resolveSessionTimeout($session);
+
+        $expiresAt = $timeout['expires_at'];
+
+        $remainingSeconds = $expiresAt
+            ? max(0, now()->diffInSeconds($expiresAt, false))
+            : null;
+
+        if (!$test) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Тест для данной сессии не найден.',
+            ], 404);
+        }
+
+        /*
+         * =========================================================
+         * КАРТОЧКИ С ОТВЕТОМ — test_cards
+         * Используются только для type = image.
+         * =========================================================
+         */
+        $cards = [];
+
+        if ($test->type === 'image') {
+            $cards = $test->testCards
+                ->sortBy(static fn ($card) => (int) $card->sort)
+                ->values()
+                ->map(static function ($card): array {
+                    $imageUrl = $card->getFirstMediaUrl(
+                        'test_card_image',
+                        'front'
+                    );
+
+                    /*
+                     * Если конверсия front ещё не создана,
+                     * возвращаем оригинальное изображение.
+                     */
+                    if ($imageUrl === '') {
+                        $imageUrl = $card->getFirstMediaUrl(
+                            'test_card_image'
+                        );
+                    }
+
+                    return [
+                        'id' => (int) $card->id,
+                        'title' => (string) $card->title,
+                        'question' => (string) $card->question,
+                        'sort' => (int) $card->sort,
+                        'image_url' => $imageUrl,
+                        'required' => true,
+                    ];
+                })
+                ->all();
+        }
+
+        /*
+         * =========================================================
+         * СОРТИРУЕМЫЕ КАРТОЧКИ — test_sort_cards
+         * Используются только для type = sort.
+         *
+         * Возможные типы:
+         * - color
+         * - text
+         * - image
+         * =========================================================
+         */
+        $sortCards = [];
+
+        if ($test->type === 'sort') {
+            $sortCards = $test->sortCards
+                ->sortBy(static fn ($card) => (int) $card->sort)
+                ->values()
+                ->map(static function ($card): array {
+                    $supportedTypes = [
+                        'color',
+                        'text',
+                        'image',
+                    ];
+
+                    $cardType = in_array(
+                        (string) $card->type,
+                        $supportedTypes,
+                        true
+                    )
+                        ? (string) $card->type
+                        : 'text';
+
+                    $imageUrl = '';
+
+                    if ($cardType === 'image') {
+                        $imageUrl = $card->getFirstMediaUrl(
+                            'test_sort_card_image',
+                            'front'
+                        );
+
+                        if ($imageUrl === '') {
+                            $imageUrl = $card->getFirstMediaUrl(
+                                'test_sort_card_image'
+                            );
+                        }
+                    }
+
+                    return [
+                        'id' => (int) $card->id,
+                        'type' => $cardType,
+                        'title' => (string) $card->title,
+                        'text' => (string) ($card->text ?? ''),
+                        'color' => (string) ($card->color ?? ''),
+                        'image_url' => $imageUrl,
+                        'sort' => (int) $card->sort,
+                    ];
+                })
+                ->all();
+        }
+
+        /*
+         * =========================================================
+         * ВОПРОСЫ ОБЫЧНОГО ОПРОСНИКА
+         * =========================================================
+         */
         $items = [];
-        foreach ($session->test->sections as $section) {
-            foreach ($section->items as $item) {
-                $hasOptions = $item->options && $item->options->count() > 0;
 
-                $items[] = [
-                    'id'       => $item->id,
-                    'type'     => $hasOptions ? 'radio' : 'text',
-                    'title'    => (string)($item->text ?? ''),
-                    'required' => true, // если у тебя есть поле required — замени
-                    'help'     => null,
-                    'options'  => $hasOptions
-                        ? $item->options->map(fn($o) => [
-                            'value' => $o->id,
-                            'label' => (string)($o->label ?? ''),
-                        ])->values()
-                        : [],
-                ];
+        if ($test->type === 'questionnaire') {
+            foreach ($test->sections as $section) {
+                foreach ($section->items as $item) {
+                    $hasOptions = $item->options
+                        && $item->options->isNotEmpty();
+
+                    $items[] = [
+                        'id' => (int) $item->id,
+                        'type' => $hasOptions
+                            ? 'radio'
+                            : 'text',
+
+                        'title' => (string) ($item->text ?? ''),
+                        'required' => true,
+                        'help' => null,
+
+                        'options' => $hasOptions
+                            ? $item->options
+                                ->map(static fn ($option): array => [
+                                    'value' => (int) $option->id,
+                                    'label' => (string) (
+                                        $option->label ?? ''
+                                    ),
+                                ])
+                                ->values()
+                                ->all()
+                            : [],
+                    ];
+                }
             }
         }
 
-        $answers = [];
+        /*
+         * =========================================================
+         * СОСТОЯНИЕ СЕССИИ
+         * =========================================================
+         */
+        $ctx = (array) ($session->context ?? []);
 
-        foreach ($session->responses as $resp) {
-            if ($resp->item_id) {
-                $answers[(string)$resp->item_id] = $resp->test_item_option_id;
+        /*
+         * answers:
+         * - questionnaire — ответы на вопросы;
+         * - image — ответы под карточками;
+         * - sort — здесь не используется.
+         */
+        $answers = (array) ($ctx['answers'] ?? []);
+
+        /*
+         * Для обычного опросника восстанавливаем ответы
+         * из связанных таблиц.
+         */
+        if ($test->type === 'questionnaire') {
+            foreach ($session->responses as $response) {
+                if (!$response->item_id) {
+                    continue;
+                }
+
+                $answerValue =
+                    $response->option_id
+                    ?? $response->test_item_option_id
+                    ?? null;
+
+                $answers[(string) $response->item_id] =
+                    $answerValue;
+            }
+
+            foreach ($session->openResponses as $openResponse) {
+                $itemId = $openResponse->item_id ?? null;
+
+                if (!$itemId) {
+                    continue;
+                }
+
+                $answerValue =
+                    $openResponse->response_text
+                    ?? $openResponse->text
+                    ?? null;
+
+                $answers[(string) $itemId] =
+                    $answerValue;
             }
         }
-        foreach ($session->openResponses as $open) {
-            if ($open->item_id) {
-                $answers[(string)$open->item_id] = $open->text;
-            }
-        }
 
-        $ctx = (array)($session->context ?? []);
-        $ctx['answers'] = $ctx['answers'] ?? [];
+        /*
+         * Восстанавливаем порядок сортировки.
+         */
+        $sortOrder = collect($ctx['sort_order'] ?? [])
+            ->map(static fn ($id) => (int) $id)
+            ->filter(static fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
 
-        $total = count($items);
+        /*
+         * Удаляем из sort_order идентификаторы карточек,
+         * которых больше нет в данном тесте.
+         */
+        if ($test->type === 'sort') {
+            $allowedSortCardIds = collect($sortCards)
+                ->pluck('id')
+                ->map(static fn ($id) => (int) $id)
+                ->values();
 
-        $ci = (int)($ctx['current_index'] ?? 0);
-
-        if ($total <= 0) {
-            $ci = 0;
+            $sortOrder = collect($sortOrder)
+                ->filter(
+                    static fn (int $id) =>
+                    $allowedSortCardIds->contains($id)
+                )
+                ->values()
+                ->all();
         } else {
-            if ($ci < 0) $ci = 0;
-            if ($ci >= $total) $ci = $total - 1;
+            $sortOrder = [];
         }
 
-        $ctx['current_index'] = $ci;
+        /*
+         * =========================================================
+         * КОЛИЧЕСТВО ШАГОВ И ТЕКУЩИЙ ИНДЕКС
+         * =========================================================
+         */
+        $total = match ($test->type) {
+            'image' => count($cards),
+            'sort' => count($sortCards),
+            default => count($items),
+        };
+
+        if ($test->type === 'sort') {
+            /*
+             * В сортировке прогресс определяется количеством
+             * уже выбранных карточек.
+             *
+             * Здесь допустимо current_index === total:
+             * это означает, что все карточки расположены.
+             */
+            $currentIndex = min(
+                count($sortOrder),
+                $total
+            );
+        } else {
+            $currentIndex = (int) (
+                $ctx['current_index'] ?? 0
+            );
+
+            if ($total === 0) {
+                $currentIndex = 0;
+            } else {
+                $currentIndex = max(
+                    0,
+                    min($currentIndex, $total - 1)
+                );
+            }
+        }
+
+        /*
+         * Обновляем очищенное состояние сессии.
+         */
+        $ctx['answers'] = $answers;
+        $ctx['sort_order'] = $sortOrder;
+        $ctx['current_index'] = $currentIndex;
+
         $session->context = $ctx;
         $session->save();
 
         return response()->json([
             'ok' => true,
+
             'test' => [
-                'id'          => $session->test->id,
-                'code'        => $session->test->code,
-                'title'       => $session->test->name,
-                'description' => $session->test->description,
-                'instructions' => $session->test()->first()->instructions,
+                'id' => (int) $test->id,
+                'code' => (string) $test->code,
+                'title' => (string) $test->name,
+                'type' => (string) $test->type,
+                'description' => (string) (
+                    $test->description ?? ''
+                ),
+                'instructions' => (string) (
+                    $test->instructions ?? ''
+                ),
+                'estimated_minutes' => $timeout['minutes'],
             ],
+
+            /*
+             * Обычные вопросы.
+             */
             'items' => $items,
+
+            /*
+             * Карточки с открытым ответом.
+             */
+            'cards' => $cards,
+
+            /*
+             * Карточки, которые пациент должен расположить.
+             */
+            'sort' => $sortCards,
+
             'state' => [
-                'answers'       => $answers,
-                'current_index' => $ci,
+                /*
+                 * Принудительно возвращаем JSON-объект {},
+                 * а не пустой массив [].
+                 */
+                'answers' => (object) $answers,
+
+                /*
+                 * Порядок сортируемых карточек.
+                 */
+                'sort_order' => $sortOrder,
+
+                'current_index' => $currentIndex,
             ],
+
             'session' => [
-                'id'          => $session->id,
-                'status'      => $session->status,
-                'in_progress' => (bool)$session->in_progress,
-                'locked_at'   => $session->locked_at ? $session->locked_at->toIso8601String() : null,
+                'id' => (int) $session->id,
+                'status' => (string) $session->status,
+                'in_progress' => (bool) $session->in_progress,
+
+                'locked_at' => $session->locked_at
+                    ? $session->locked_at->toIso8601String()
+                    : null,
+
+                'expires_at' => $expiresAt
+                    ? $expiresAt->toIso8601String()
+                    : null,
+
+                'remaining_seconds' => $remainingSeconds,
             ],
         ]);
     }
 
     /**
-     * SUBMIT = отправка ответа на текущий вопрос.
-     * Вызывается при "Следующий вопрос" и на автосохранении.
+     * SUBMIT:
      *
-     * Ожидает:
-     * - item_id: ID вопроса (test_items.id)
-     * - answer: для radio -> ID option (test_item_options.id), для text -> строка
-     * - current_index: индекс вопроса на фронте (для восстановления прогресса)
+     * questionnaire:
+     * - item_id
+     * - answer
+     * - current_index
+     *
+     * image:
+     * - card_id
+     * - answer
+     * - current_index
+     *
+     * sort:
+     * - sort_order
+     * - current_index
      */
-    public function submit(TestSession $session, Request $request): JsonResponse
-    {
+    public function submit(
+        TestSession $session,
+        Request $request
+    ): JsonResponse {
         if ($this->enforceTimeout($session)) {
             return response()->json([
                 'ok' => false,
                 'timed_out' => true,
-                'message' => 'Сессия истекла (превышен лимит 60 минут).',
+                'message' => 'Сессия истекла: превышено время прохождения теста.',
             ], 409);
         }
 
-        abort_unless($session->in_progress == true, 403);
-        abort_if($session->status === 'submitted', 409, 'Тест уже завершён');
+        abort_unless($session->in_progress === true, 403);
 
-        $data = $request->validate([
-            'item_id'       => 'required|integer',
-            'answer'        => 'nullable',
-            'current_index' => 'required|integer|min:0',
+        abort_if(
+            $session->status === 'submitted',
+            409,
+            'Тест уже завершён'
+        );
+
+        $session->loadMissing([
+            'test:id,type',
+            'test.testCards:id,test_id',
+            'test.sortCards:id,test_id',
         ]);
 
-        $session->load(['test.sections.items.options']);
+        $test = $session->test;
 
-        $item = $session->test->sections
-            ->flatMap(fn($s) => $s->items)
-            ->firstWhere('id', (int)$data['item_id']);
+        if (!$test) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Тест для данной сессии не найден.',
+            ], 404);
+        }
 
-        abort_unless($item, 422);
+        /*
+         * =========================================================
+         * СОРТИРОВКА КАРТОЧЕК
+         * =========================================================
+         */
+        if ($test->type === 'sort') {
+            $data = $request->validate([
+                /*
+                 * present позволяет отправить пустой массив при сбросе.
+                 */
+                'sort_order' => [
+                    'present',
+                    'array',
+                ],
 
-        $hasOptions = $item->options && $item->options->count() > 0;
+                'sort_order.*' => [
+                    'integer',
+                    'distinct',
+                ],
 
-        if ($hasOptions) {
-            TestAnswer::updateOrCreate(
-                ['session_id' => $session->id, 'item_id' => $item->id],
-                ['option_id' => $data['answer']]
-            );
-        } else {
-            $stimulusId = (int)($data['stimulus_id'] ?? 0);
-            if ($stimulusId <= 0) {
-                throw ValidationException::withMessages(['stimulus_id' => 'Не передан stimulus_id для открытого ответа.']);
+                'current_index' => [
+                    'nullable',
+                    'integer',
+                    'min:0',
+                ],
+            ], [
+                'sort_order.present' =>
+                    'Не передан порядок карточек.',
+
+                'sort_order.array' =>
+                    'Порядок карточек имеет неверный формат.',
+
+                'sort_order.*.integer' =>
+                    'Передан некорректный идентификатор карточки.',
+
+                'sort_order.*.distinct' =>
+                    'Одна карточка указана в порядке несколько раз.',
+            ]);
+
+            $allowedCardIds = $test->sortCards
+                ->pluck('id')
+                ->map(static fn ($id): int => (int) $id)
+                ->values();
+
+            if ($allowedCardIds->isEmpty()) {
+                throw ValidationException::withMessages([
+                    'sort_order' =>
+                        'В тесте отсутствуют карточки для сортировки.',
+                ]);
             }
 
-            $text = is_null($data['answer']) ? null : (string)$data['answer'];
+            $sortOrder = collect($data['sort_order'])
+                ->map(static fn ($id): int => (int) $id)
+                ->values();
 
-            TestOpenResponse::updateOrCreate(
-                ['session_id' => $session->id, 'stimulus_id' => $stimulusId, 'sequence_no' => 1],
-                ['response_text' => $text]
+            /*
+             * Проверяем, что все переданные ID относятся
+             * именно к текущему тесту.
+             */
+            if ($sortOrder->diff($allowedCardIds)->isNotEmpty()) {
+                throw ValidationException::withMessages([
+                    'sort_order' =>
+                        'Передана карточка, которая не относится к данному тесту.',
+                ]);
+            }
+
+            if ($sortOrder->count() > $allowedCardIds->count()) {
+                throw ValidationException::withMessages([
+                    'sort_order' =>
+                        'Передано больше карточек, чем существует в тесте.',
+                ]);
+            }
+
+            $context = (array) ($session->context ?? []);
+
+            $context['sort_order'] = $sortOrder->all();
+
+            /*
+             * Индекс определяем на сервере, чтобы клиент
+             * не мог передать некорректное значение.
+             */
+            $context['current_index'] = $sortOrder->count();
+
+            $session->context = $context;
+            $session->save();
+
+            return response()->json([
+                'ok' => true,
+                'saved' => true,
+                'type' => 'sort',
+                'sort_order' => $sortOrder->all(),
+                'current_index' => $sortOrder->count(),
+            ]);
+        }
+
+        /*
+         * =========================================================
+         * ТЕСТ С ИЗОБРАЖЕНИЯМИ И ОТКРЫТЫМ ОТВЕТОМ
+         * =========================================================
+         */
+        if ($test->type === 'image') {
+            $data = $request->validate([
+                'card_id' => [
+                    'required',
+                    'integer',
+                ],
+
+                'answer' => [
+                    'required',
+                    'string',
+                    'max:20000',
+                ],
+
+                'current_index' => [
+                    'required',
+                    'integer',
+                    'min:0',
+                ],
+            ], [
+                'card_id.required' =>
+                    'Не передан идентификатор карточки.',
+
+                'answer.required' =>
+                    'Введите ответ по карточке.',
+
+                'current_index.required' =>
+                    'Не передан номер текущей карточки.',
+            ]);
+
+            $card = $test->testCards
+                ->firstWhere('id', (int) $data['card_id']);
+
+            if (!$card) {
+                throw ValidationException::withMessages([
+                    'card_id' =>
+                        'Карточка не найдена в данном тесте.',
+                ]);
+            }
+
+            $context = (array) ($session->context ?? []);
+            $answers = (array) ($context['answers'] ?? []);
+
+            $answers[(string) $card->id] =
+                trim((string) $data['answer']);
+
+            $context['answers'] = $answers;
+            $context['current_index'] =
+                (int) $data['current_index'];
+
+            $session->context = $context;
+            $session->save();
+
+            return response()->json([
+                'ok' => true,
+                'saved' => true,
+                'type' => 'image',
+                'card_id' => $card->id,
+                'current_index' =>
+                    (int) $data['current_index'],
+            ]);
+        }
+
+        /*
+         * =========================================================
+         * ОБЫЧНЫЙ ОПРОСНИК
+         * =========================================================
+         */
+        if ($test->type !== 'questionnaire') {
+            return response()->json([
+                'ok' => false,
+                'message' =>
+                    'Неподдерживаемый тип теста: ' . $test->type,
+            ], 422);
+        }
+
+        $data = $request->validate([
+            'item_id' => [
+                'required',
+                'integer',
+            ],
+
+            'answer' => [
+                'nullable',
+            ],
+
+            'current_index' => [
+                'required',
+                'integer',
+                'min:0',
+            ],
+
+            'stimulus_id' => [
+                'nullable',
+                'integer',
+            ],
+        ]);
+
+        $session->loadMissing([
+            'test.sections.items.options',
+        ]);
+
+        $test = $session->test;
+
+        $item = $test->sections
+            ->flatMap(
+                static fn ($section) => $section->items
+            )
+            ->firstWhere('id', (int) $data['item_id']);
+
+        if (!$item) {
+            throw ValidationException::withMessages([
+                'item_id' =>
+                    'Вопрос не найден в данном тесте.',
+            ]);
+        }
+
+        $hasOptions = $item->options
+            && $item->options->isNotEmpty();
+
+        if ($hasOptions) {
+            $option = $item->options
+                ->firstWhere('id', (int) $data['answer']);
+
+            if (!$option) {
+                throw ValidationException::withMessages([
+                    'answer' =>
+                        'Выбранный вариант не относится к вопросу.',
+                ]);
+            }
+
+            TestAnswer::updateOrCreate(
+                [
+                    'session_id' => $session->id,
+                    'item_id' => $item->id,
+                ],
+                [
+                    'option_id' => $option->id,
+                ]
+            );
+        } else {
+            $stimulusId = (int) (
+                $data['stimulus_id'] ?? 0
             );
 
-            TestAnswer::where('session_id', $session->id)
+            if ($stimulusId > 0) {
+                TestOpenResponse::updateOrCreate(
+                    [
+                        'session_id' => $session->id,
+                        'stimulus_id' => $stimulusId,
+                        'sequence_no' => 1,
+                    ],
+                    [
+                        'response_text' =>
+                            is_null($data['answer'])
+                                ? null
+                                : (string) $data['answer'],
+                    ]
+                );
+            }
+
+            TestAnswer::query()
+                ->where('session_id', $session->id)
                 ->where('item_id', $item->id)
                 ->delete();
         }
 
-        $ctx = (array)($session->context ?? []);
-        $ctx['answers'] = $ctx['answers'] ?? [];
-        $ctx['answers'][(string)$item->id] = $data['answer'];
-        $ctx['current_index'] = $data['current_index'];
+        $context = (array) ($session->context ?? []);
+        $answers = (array) ($context['answers'] ?? []);
 
-        $session->update(['context' => $ctx]);
+        $answers[(string) $item->id] =
+            $data['answer'] ?? null;
 
-        return response()->json(['ok' => true]);
+        $context['answers'] = $answers;
+        $context['current_index'] =
+            (int) $data['current_index'];
+
+        $session->context = $context;
+        $session->save();
+
+        return response()->json([
+            'ok' => true,
+            'saved' => true,
+            'type' => 'questionnaire',
+            'item_id' => $item->id,
+            'current_index' =>
+                (int) $data['current_index'],
+        ]);
     }
 
     /**
-     * FINISH = пациент завершил тест целиком.
-     * Меняем статус на submitted, чтобы врач мог финализировать в TestsController@finish.
+     * FINISH = пациент завершил тест.
      */
     public function finish(TestSession $session): JsonResponse
     {
         if ($this->enforceTimeout($session)) {
-            return response()->json(['ok' => true, 'timed_out' => true]);
+            return response()->json([
+                'ok' => true,
+                'timed_out' => true,
+            ]);
         }
 
-        abort_unless($session->in_progress, 403);
+        abort_unless($session->in_progress === true, 403);
+
+        $session->loadMissing([
+            'test:id,type',
+            'test.testCards:id,test_id',
+            'test.sortCards:id,test_id',
+            'assignment',
+        ]);
+
+        $test = $session->test;
+
+        if (!$test) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Тест для данной сессии не найден.',
+            ], 404);
+        }
+
+        /*
+         * =========================================================
+         * ПРОВЕРКА СОРТИРОВКИ
+         * =========================================================
+         */
+        if ($test->type === 'sort') {
+            $expectedIds = $test->sortCards
+                ->pluck('id')
+                ->map(static fn ($id): int => (int) $id)
+                ->sort()
+                ->values();
+
+            if ($expectedIds->isEmpty()) {
+                return response()->json([
+                    'ok' => false,
+                    'message' =>
+                        'В тесте отсутствуют карточки для сортировки.',
+                ], 422);
+            }
+
+            $rawSortOrder = data_get(
+                $session->context,
+                'sort_order',
+                []
+            );
+
+            if (!is_array($rawSortOrder)) {
+                return response()->json([
+                    'ok' => false,
+                    'message' =>
+                        'Сохранённый порядок карточек повреждён.',
+                ], 422);
+            }
+
+            $sortOrder = collect($rawSortOrder)
+                ->map(static fn ($id): int => (int) $id)
+                ->filter(static fn (int $id): bool => $id > 0)
+                ->values();
+
+            /*
+             * Отдельно проверяем дубли.
+             */
+            if ($sortOrder->unique()->count() !== $sortOrder->count()) {
+                return response()->json([
+                    'ok' => false,
+                    'message' =>
+                        'Одна карточка расположена несколько раз.',
+                ], 422);
+            }
+
+            $actualIds = $sortOrder
+                ->sort()
+                ->values();
+
+            if (
+                $actualIds->count() !== $expectedIds->count()
+                || $actualIds->all() !== $expectedIds->all()
+            ) {
+                return response()->json([
+                    'ok' => false,
+                    'message' =>
+                        'Перед завершением расположите все карточки.',
+                ], 422);
+            }
+        }
+
+        /*
+         * =========================================================
+         * ПРОВЕРКА ОТВЕТОВ ТЕСТА С ИЗОБРАЖЕНИЯМИ
+         * =========================================================
+         */
+        if ($test->type === 'image') {
+            $answers = (array) data_get(
+                $session->context,
+                'answers',
+                []
+            );
+
+            $missingCardIds = $test->testCards
+                ->pluck('id')
+                ->filter(static function ($cardId) use ($answers): bool {
+                    $key = (string) $cardId;
+
+                    if (!array_key_exists($key, $answers)) {
+                        return true;
+                    }
+
+                    $answer = $answers[$key];
+
+                    return !is_string($answer)
+                        || trim($answer) === '';
+                })
+                ->values();
+
+            if ($missingCardIds->isNotEmpty()) {
+                return response()->json([
+                    'ok' => false,
+                    'message' =>
+                        'Перед завершением ответьте на все карточки.',
+                ], 422);
+            }
+        }
 
         $session->update([
-            'in_progress'  => false,
-            'status'       => 'submitted',
+            'in_progress' => false,
+            'status' => 'submitted',
             'completed_at' => now(),
-            'locked_at'    => now(),
+
+            /*
+             * Блокировку пока сохраняем — она будет снята
+             * после финального PIN врача.
+             */
+            'locked_at' => now(),
         ]);
-        $session->assignment->finished_at = now();
 
-        app(TestScoringService::class)->scoreAndPersist($session->fresh());
+        /*
+         * В старом варианте значение присваивалось,
+         * но не сохранялось в БД.
+         */
+        if ($session->assignment) {
+            $session->assignment->update([
+                'finished_at' => now(),
+            ]);
+        }
 
-        return response()->json(['ok' => true]);
+        /*
+         * Текущий TestScoringService рассчитан на вопросы
+         * и варианты ответов. Для image и sort
+         * автоматический подсчёт пока не запускаем.
+         */
+        if ($test->type === 'questionnaire') {
+            app(TestScoringService::class)
+                ->scoreAndPersist($session->fresh());
+        }
+
+        return response()->json([
+            'ok' => true,
+        ]);
     }
 
     /**
@@ -542,64 +1322,262 @@ class TestSessionController extends Controller
         ]);
     }
 
-    public function finalPinForm(TestSession $session)
-    {
-        abort_unless($session->locked_by === auth()->user()->doctor->id, 403);
-
+    public function finalPinForm(
+        Request $request,
+        TestSession $session
+    ): View|RedirectResponse {
+        /*
+         * Сначала обрабатываем таймаут.
+         */
         if ($this->enforceTimeout($session)) {
-            return redirect()->route('doctors.patients.medical_card', $session->patient_id);
+            $patientId = $session->patient_id
+                ?? data_get($session->context, 'patient_id');
+
+            return $patientId
+                ? redirect()->route(
+                    'doctors.patients.medical_card',
+                    ['patient' => $patientId]
+                )
+                : redirect()->route('doctors.main');
         }
 
-        $finalOk = (bool) data_get($session->context, 'final_pin_ok', false);
+        $doctorId = (int) optional(
+            $request->user()?->doctor
+        )->id;
+
+        /*
+         * Важно: оба идентификатора приводим к int.
+         */
+        abort_unless(
+            $doctorId > 0
+            && (int) $session->locked_by === $doctorId,
+            403,
+            'Эта тестовая сессия заблокирована другим врачом.'
+        );
+
+        $mode = $request->query('mode') === 'interrupt'
+            ? 'interrupt'
+            : 'finish';
+
+        /*
+         * Досрочное прерывание активной сессии.
+         */
+        if ($mode === 'interrupt') {
+            abort_unless(
+                (bool) $session->in_progress,
+                409,
+                'Тест уже не находится в процессе прохождения.'
+            );
+
+            return view(
+                'doctors.reception.tests.final_pin',
+                [
+                    'session' => $session,
+                    'mode' => 'interrupt',
+                ]
+            );
+        }
+
+        /*
+         * Обычная финализация завершённого пациентом теста.
+         */
+        $finalOk = (bool) data_get(
+            $session->context,
+            'final_pin_ok',
+            false
+        );
 
         if ($finalOk) {
-            return redirect()->route('doctors.patients.sessions.show', $session->id)->with([
-                'session' => $session,
-            ]);
+            return redirect()->route(
+                'doctors.patients.sessions.show',
+                $session->id
+            );
         }
 
         if ($session->status !== 'submitted') {
-            return redirect()->route('doctors.reception.tests.run', $session->id);
+            return redirect()->route(
+                'doctors.reception.tests.run',
+                $session->id
+            );
         }
 
-        return view('doctors.reception.tests.final_pin', compact('session'));
+        return view(
+            'doctors.reception.tests.final_pin',
+            [
+                'session' => $session,
+                'mode' => 'finish',
+            ]
+        );
     }
 
-    public function finalPinVerify(Request $request, TestSession $session)
-    {
-        abort_unless($session->locked_by === auth()->user()->doctor->id, 403);
+    public function finalPinVerify(
+        Request $request,
+        TestSession $session
+    ): RedirectResponse {
+        $doctorId = (int) optional(
+            $request->user()?->doctor
+        )->id;
 
-        if (!$request->filled('pin')) {
-            return redirect()->route('doctors.tests.final_pin.form', $session->id);
-        }
+        abort_unless(
+            $doctorId > 0
+            && (int) $session->locked_by === $doctorId,
+            403,
+            'Эта тестовая сессия заблокирована другим врачом.'
+        );
 
-        $request->validate(['pin' => 'required|string|min:4|max:6']);
+        $data = $request->validate([
+            'pin' => [
+                'required',
+                'string',
+                'min:4',
+                'max:6',
+            ],
+
+            'mode' => [
+                'required',
+                'string',
+                'in:finish,interrupt',
+            ],
+        ]);
+
+        $mode = $data['mode'];
 
         $assignment = TestAssignment::query()
             ->where('session_id', $session->id)
             ->first();
 
         if (!$assignment) {
-            $assignmentId = data_get($session->context, 'assignment_id');
-            $assignment = $assignmentId ? TestAssignment::find($assignmentId) : null;
+            $assignmentId = data_get(
+                $session->context,
+                'assignment_id'
+            );
+
+            $assignment = $assignmentId
+                ? TestAssignment::find($assignmentId)
+                : null;
         }
 
-        if (!$assignment || empty($assignment->pin_hash) || empty($assignment->pin_expires_at)) {
-            return back()->withErrors(['pin' => 'Не найден PIN для проверки. Начните тест заново.']);
+        if (
+            !$assignment
+            || empty($assignment->pin_hash)
+        ) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'pin' => 'Не найден PIN для данной сессии.',
+                ]);
         }
 
-        if (now()->greaterThan($assignment->pin_expires_at) || !password_verify($request->pin, $assignment->pin_hash)) {
-            return back()->withErrors(['pin' => 'Неверный или истёкший PIN.']);
+        if (!password_verify($data['pin'], $assignment->pin_hash)) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'pin' => 'Неверный PIN.',
+                ]);
         }
 
-        $ctx = (array) ($session->context ?? []);
-        $ctx['final_pin_ok'] = true;
-        $session->context = $ctx;
+        /*
+         * =========================================================
+         * ДОСРОЧНОЕ ПРЕРЫВАНИЕ
+         * =========================================================
+         */
+        if ($mode === 'interrupt') {
+            if (!$session->in_progress) {
+                return back()->withErrors([
+                    'pin' => 'Тест уже не находится в процессе прохождения.',
+                ]);
+            }
 
-        $session->locked_by = auth()->user()->doctor->id;
+            DB::transaction(function () use (
+                $session,
+                $assignment,
+                $doctorId
+            ): void {
+                $context = (array) ($session->context ?? []);
+
+                /*
+                 * answers и sort_order остаются в context.
+                 * Частично введённые результаты не удаляются.
+                 */
+                $context['interrupted'] = true;
+                $context['interrupted_at'] =
+                    now()->toIso8601String();
+                $context['interrupted_by'] = $doctorId;
+                $context['interrupted_with_pin'] = true;
+
+                unset(
+                    $context['final_pin_ok'],
+                    $context['final_pin_ok_at']
+                );
+
+                $session->update([
+                    'status' => 'cancelled',
+                    'in_progress' => false,
+                    'completed_at' => now(),
+
+                    /*
+                     * Разблокируем докторскую панель.
+                     */
+                    'locked_at' => null,
+                    'locked_by' => null,
+
+                    'context' => $context,
+                ]);
+
+                $assignment->update([
+                    'status' => 'cancelled',
+                    'finished_at' => now(),
+                ]);
+            });
+
+            $patientId = $session->patient_id
+                ?? data_get($session->context, 'patient_id');
+
+            if ($patientId) {
+                return redirect()
+                    ->route(
+                        'doctors.patients.medical_card',
+                        ['patient' => $patientId]
+                    )
+                    ->with(
+                        'success',
+                        'Тест прерван. Частичные ответы сохранены, панель разблокирована.'
+                    );
+            }
+
+            return redirect()
+                ->route('doctors.main')
+                ->with(
+                    'success',
+                    'Тест прерван, панель разблокирована.'
+                );
+        }
+
+        /*
+         * =========================================================
+         * ОБЫЧНОЕ ЗАВЕРШЕНИЕ
+         * =========================================================
+         */
+        if ($session->status !== 'submitted') {
+            return back()->withErrors([
+                'pin' => 'Пациент ещё не завершил тест.',
+            ]);
+        }
+
+        $context = (array) ($session->context ?? []);
+
+        $context['final_pin_ok'] = true;
+        $context['final_pin_ok_at'] =
+            now()->toIso8601String();
+
+        $session->context = $context;
+        $session->locked_by = $doctorId;
         $session->locked_at = now();
         $session->save();
 
-        return redirect()->route('doctors.patients.sessions.show', $session->id);
+        return redirect()->route(
+            'doctors.patients.sessions.show',
+            $session->id
+        );
     }
 }

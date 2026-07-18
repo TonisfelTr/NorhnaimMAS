@@ -9,6 +9,7 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\TestAssignment;
 use App\Services\TestInterpretationService;
+use App\Services\Tests\TestResultViewDataService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -466,7 +467,17 @@ class TestsController extends Controller
                 ->value('kiosk_token');
         }
 
-        return view('doctors.reception.tests.session_show', [
+        $resultView = app(TestResultViewDataService::class)->make(
+            session: $session,
+            sections: $sections,
+            stats: [
+                'total' => $total ?? null,
+                'answered' => $answered ?? null,
+                'missed' => $missed ?? null,
+            ],
+        );
+
+        return view('doctors.reception.tests.session_show', array_merge([
             'session'  => $session,
             'test'     => $session->test,
             'sections' => $sections,
@@ -474,8 +485,7 @@ class TestsController extends Controller
             'answered' => $answered,
             'missed'   => $missed,
             'unlockToken' => $unlockToken,
-            'canRestart' => in_array($session->status, ['submitted','in_progress'], true),
-        ]);
+            'canRestart' => in_array($session->status, ['submitted','in_progress'], true)], $resultView));
     }
 
     /** Кодирование ответа (врач) */
@@ -605,48 +615,100 @@ class TestsController extends Controller
     public function resultsPage(TestSession $session)
     {
         $session->load([
-            'test:id,code,name,description',
+            'test',
             'test.sections.items.options',
+            'test.testCards.media',
             'responses.option:id,label,value',
             'results.key:id,title',
         ]);
 
-        if ($session->results->isEmpty() || request()->boolean('recalc')) {
-            $session->results()->delete();
-            app(TestScoringService::class)->scoreAndPersist($session);
-            $session->load(['results.key:id,title']);
+        abort_if(!$session->test, 404, 'Тест не найден.');
+
+        $testType = mb_strtolower(trim((string) ($session->test->type ?? 'questionnaire')));
+        $isQuestionnaire = $testType === 'questionnaire';
+
+        $sections = [];
+        $total = 0;
+        $answered = 0;
+
+        $interpretation = [
+            'title' => 'Интерпретация',
+            'badge' => null,
+            'text' => '',
+            'items' => [],
+            'meta' => [],
+        ];
+
+        $chart = [];
+        $showChart = false;
+
+        $overview = [
+            'score' => 0,
+            'max' => null,
+            'percent' => null,
+        ];
+
+        $resultCards = [];
+
+        if ($isQuestionnaire) {
+            if ($session->results->isEmpty() || request()->boolean('recalc')) {
+                $session->results()->delete();
+                app(TestScoringService::class)->scoreAndPersist($session);
+                $session->load(['results.key:id,title']);
+            }
+
+            $sections = $this->buildSectionsViewData($session);
+            [$total, $answered] = $this->calculateProgress($sections);
+
+            $rawInterpretation = app(TestInterpretationService::class)->build($session);
+            $interpretation = $this->normalizeInterpretationForView(
+                $rawInterpretation,
+                (string) ($session->test->code ?? '')
+            );
+
+            $chart = $this->buildChartViewData($session);
+            $showChart = count($chart) > 1;
+
+            $overview = $this->buildOverviewViewData(
+                $session,
+                $interpretation
+            );
+
+            $resultCards = $this->buildResultCardsViewData(
+                $session,
+                $interpretation
+            );
         }
 
-        $sections = $this->buildSectionsViewData($session);
-        [$total, $answered] = $this->calculateProgress($sections);
+        $missed = max(0, $total - $answered);
 
-        $rawInterpretation = app(TestInterpretationService::class)->build($session);
-        $interpretation = $this->normalizeInterpretationForView(
-            $rawInterpretation,
-            (string)($session->test->code ?? '')
+        $resultView = app(TestResultViewDataService::class)->make(
+            session: $session,
+            sections: $sections,
+            stats: [
+                'total' => $total,
+                'answered' => $answered,
+                'missed' => $missed,
+            ],
+            resultData: [
+                'interpretation' => $interpretation,
+                'chart' => $chart,
+                'showChart' => $showChart,
+                'overview' => $overview,
+                'resultCards' => $resultCards,
+            ],
         );
 
-        $chart = $this->buildChartViewData($session);
-        $showChart = count($chart) > 1;
-
-        $overview = $this->buildOverviewViewData($session, $interpretation);
-        $resultCards = $this->buildResultCardsViewData($session, $interpretation);
-
-        return view('doctors.reception.tests.results', [
-            'session' => $session,
-            'test' => $session->test,
-            'sections' => $sections,
-            'total' => $total,
-            'answered' => $answered,
-            'missed' => $total - $answered,
-
-            'interpretation' => $interpretation,
-
-            'chart' => $chart,
-            'showChart' => $showChart,
-
-            'overview' => $overview,
-            'resultCards' => $resultCards,
-        ]);
+        return view(
+            'doctors.reception.tests.results',
+            array_merge([
+                'session' => $session,
+                'test' => $session->test,
+                'sections' => $sections,
+                'total' => $total,
+                'answered' => $answered,
+                'missed' => $missed,
+            ], $resultView)
+        );
     }
 }

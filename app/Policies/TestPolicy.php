@@ -16,10 +16,6 @@ final class TestPolicy
 
     public function view(User $user, Test $test): bool
     {
-        if ($test->is_public) {
-            return $user->hasAnyRole(['doctor', 'admins']);
-        }
-
         return $user->hasRole('doctor')
             && $user->doctor
             && (int) $test->owner_doctor_id === (int) $user->doctor->id;
@@ -29,10 +25,6 @@ final class TestPolicy
     {
         if (! $user->can('tests.assign')) {
             return false;
-        }
-
-        if ($test->is_public) {
-            return $user->hasRole('doctor');
         }
 
         return $user->hasRole('doctor')

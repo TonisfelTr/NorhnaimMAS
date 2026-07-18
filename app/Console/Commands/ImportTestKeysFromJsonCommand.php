@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Test;
-use App\Models\TestInterpretation;
+use App\Models\TestCardInterpretation;
 use App\Models\TestKey;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -92,7 +92,7 @@ final class ImportTestKeysFromJsonCommand extends Command
                         }
                         [$min, $max, $text] = $range;
 
-                        TestInterpretation::create([
+                        TestCardInterpretation::create([
                             'test_id'   => $test->id,
                             'key_id'    => $key->id,
                             'min_score' => (int) $min,

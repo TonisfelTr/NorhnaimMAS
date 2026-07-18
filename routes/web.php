@@ -3,6 +3,7 @@
 use App\Http\Controllers\Doctors\ContactController;
 use App\Http\Controllers\Doctors\DocumentController;
 use App\Http\Controllers\Doctors\EpicrisisController;
+use App\Http\Controllers\Doctors\TestPanelController;
 use App\Http\Middleware\DoctorHardLockMiddleware;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\RoleMiddleware;
@@ -120,6 +121,7 @@ Route::middleware([
             Route::get('/{session}/payload', [TestSessionController::class, 'payload'])->name('payload');
             Route::post('/{session}/submit', [TestSessionController::class, 'submit'])->name('submit');
             Route::post('/{session}/finish', [TestSessionController::class, 'finish'])->name('finish');
+            Route::post('{session}/force-finish', [TestSessionController::class, 'forceFinish'])->name('force-finish');
         });
     });
     // -------------------- Patients --------------------
@@ -189,6 +191,15 @@ Route::middleware([
             Route::put('/{contact}', [ContactController::class, 'update'])->name('contacts.update');
             Route::delete('/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');
         });
+    });
+    // -------------------- Tests -----------------------
+    Route::prefix('tests/')->as('tests.')->group(function () {
+        Route::get('/', [TestPanelController::class, 'index'])->name('index');
+        Route::get('/mine', [TestPanelController::class, 'mine'])->name('mine');
+        Route::post('/store/images', [TestPanelController::class, 'storeImageTest'])->name('store-image-test');
+        Route::post('/store/questionnaire', [TestPanelController::class, 'storeQuestionnaireTest'])->name('store-questionnaire-test');
+        Route::post('/store/cardsort', [TestPanelController::class, 'storeSortTest'])->name('store-card-sort-test');
+        Route::post('/delete/{test}', [TestPanelController::class, 'destroy'])->name('destroy');
     });
 
     Route::get('/tests/{assignment}/pin', [TestSessionController::class, 'form'])->name('tests.pin.form');

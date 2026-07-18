@@ -40,7 +40,6 @@ final class TestsImportController extends Controller
             'code'             => $data['code'],
             'name'             => $data['name'],
             'description'      => $data['description'] ?? null,
-            'is_public'        => false,
             'owner_doctor_id'  => $doctor->id,
         ]);
 
