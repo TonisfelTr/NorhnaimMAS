@@ -32,6 +32,7 @@ export default defineConfig({
                 'resources/sass/components.sass',
                 'resources/sass/doctors.sass',
                 'resources/sass/medical_card.sass',
+                'resource/sass/analyses.cass',
                 'resources/js/app.js',
                 'resources/js/admin_app.js',
                 'resources/js/selectize.js',

@@ -10,6 +10,7 @@ use App\Models\LabResearchTemplate;
 use App\Models\Patient;
 use App\Models\PatientCondition;
 use App\Models\Test;
+use Filament\Forms\Components\Builder;
 use \Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -116,52 +117,177 @@ class AjaxController extends Controller
         return response()->json(['results' => $patients]);
     }
 
-    public function searchDrugs(Request $request)
+    public function searchDrugs(Request $request): JsonResponse
     {
-        $search = trim((string) $request->query('q', ''));
-        $patientId = $request->query('patient_id');
-        $indicationSource = $request->query('indication_source');
+        /*
+         * Select2 передаёт поисковую строку в параметрах q и term.
+         */
+        $search = trim((string) (
+        $request->query('q')
+            ?: $request->query('term', '')
+        ));
 
-        $drugs = Drug::query()
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'ilike', "%{$search}%")
-                        ->orWhere('latin_name', 'ilike', "%{$search}%");
-                });
-            });
+        $patientId = $request->integer('patient_id') ?: null;
 
-        if ($patientId) {
-            $patient = Patient::find($patientId);
+        $indicationSource = mb_strtolower(
+            trim((string) $request->query('indication_source', ''))
+        );
+
+        $page = max(1, $request->integer('page', 1));
+        $perPage = 20;
+
+        /*
+         * Разрешённые режимы:
+         *
+         * пустое значение — показывать все доступные препараты;
+         * russia — фильтровать по показаниям РФ;
+         * fda — фильтровать по показаниям FDA.
+         */
+        if (!in_array($indicationSource, ['russia', 'fda'], true)) {
+            $indicationSource = '';
+        }
+
+        $drugsQuery = Drug::query()
+            ->select([
+                'id',
+                'name',
+                'latin_name',
+                'strict',
+            ]);
+
+        /*
+         * Поиск одновременно по русскому названию и МНН.
+         */
+        if ($search !== '') {
+            $searchValue = '%' . $search . '%';
+
+            $drugsQuery->where(
+                function ( $query) use ($searchValue): void {
+                    $query
+                        ->where('name', 'ilike', $searchValue)
+                        ->orWhere('latin_name', 'ilike', $searchValue);
+                }
+            );
+
+            /*
+             * Сначала выводим:
+             *
+             * 1. точное совпадение русского названия;
+             * 2. точное совпадение МНН;
+             * 3. название, начинающееся с введённого текста;
+             * 4. МНН, начинающееся с введённого текста;
+             * 5. остальные частичные совпадения.
+             */
+            $drugsQuery->orderByRaw(
+                '
+                CASE
+                    WHEN name ILIKE ? THEN 0
+                    WHEN latin_name ILIKE ? THEN 1
+                    WHEN name ILIKE ? THEN 2
+                    WHEN latin_name ILIKE ? THEN 3
+                    ELSE 4
+                END
+            ',
+                [
+                    $search,
+                    $search,
+                    $search . '%',
+                    $search . '%',
+                ]
+            );
+        }
+
+        /*
+         * Фильтры, зависящие от пациента.
+         */
+        if ($patientId !== null) {
+            $patient = Patient::query()
+                ->select([
+                    'id',
+                    'diagnose_id',
+                    'birth_at',
+                ])
+                ->find($patientId);
 
             if (!$patient) {
-                return response()->json(['results' => []]);
+                return response()->json([
+                    'results' => [],
+                    'pagination' => [
+                        'more' => false,
+                    ],
+                    'message' => 'Пациент не найден.',
+                ]);
             }
 
-            $diagnosisIds = [];
+            /*
+             * Фильтрация по диагнозу включается только при выборе
+             * «Показан в РФ» или «Показан FDA».
+             *
+             * В режиме «Не указывать» диагноз не ограничивает поиск.
+             */
+            if ($indicationSource !== '') {
+                $diagnosisIds = collect([
+                    $patient->diagnose_id,
+                ]);
 
-            if (!empty($patient->diagnose_id)) {
-                $diagnosisIds[] = $patient->diagnose_id;
-            }
-
-            if (method_exists($patient, 'diagnoses')) {
-                $relationIds = $patient->diagnoses()->pluck('diagnoses.id')->all();
-                $diagnosisIds = array_values(array_unique(array_merge($diagnosisIds, $relationIds)));
-            }
-
-            if (empty($diagnosisIds)) {
-                return response()->json(['results' => []]);
-            }
-
-            $drugs->whereHas('indications', function ($query) use ($diagnosisIds, $indicationSource) {
-                $query->whereIn('diagnose_id', $diagnosisIds);
-
-                if ($indicationSource === 'fda') {
-                    $query->where('indicated_by_fda', true);
-                } elseif ($indicationSource === 'russia') {
-                    $query->where('indicated_in_russia', true);
+                if (method_exists($patient, 'diagnoses')) {
+                    $diagnosisIds = $diagnosisIds->merge(
+                        $patient->diagnoses()
+                            ->pluck('diagnoses.id')
+                    );
                 }
-            });
 
+                $diagnosisIds = $diagnosisIds
+                    ->filter()
+                    ->map(
+                        static fn ($diagnosisId): int =>
+                        (int) $diagnosisId
+                    )
+                    ->unique()
+                    ->values();
+
+                if ($diagnosisIds->isEmpty()) {
+                    return response()->json([
+                        'results' => [],
+                        'pagination' => [
+                            'more' => false,
+                        ],
+                        'message' => 'У пациента не указан диагноз.',
+                    ]);
+                }
+
+                $drugsQuery->whereHas(
+                    'indications',
+                    function ( $query) use (
+                        $diagnosisIds,
+                        $indicationSource
+                    ): void {
+                        $query->whereIn(
+                            'diagnose_id',
+                            $diagnosisIds->all()
+                        );
+
+                        if ($indicationSource === 'russia') {
+                            $query->where(
+                                'indicated_in_russia',
+                                true
+                            );
+                        }
+
+                        if ($indicationSource === 'fda') {
+                            $query->where(
+                                'indicated_by_fda',
+                                true
+                            );
+                        }
+                    }
+                );
+            }
+
+            /*
+             * Получаем активные состояния пациента, которые могут
+             * являться противопоказаниями для препаратов.
+             */
             $patientConditionNames = PatientCondition::query()
                 ->where('patient_id', $patientId)
                 ->where('status', 'active')
@@ -169,58 +295,151 @@ class AjaxController extends Controller
                 ->get()
                 ->pluck('condition.name')
                 ->filter()
+                ->map(
+                    static fn ($name): string =>
+                    trim((string) $name)
+                )
+                ->filter(
+                    static fn (string $name): bool =>
+                        $name !== ''
+                )
                 ->unique()
-                ->values()
-                ->all();
+                ->values();
 
-            if (!empty($patientConditionNames)) {
-                $contraindicationIds = ContraindicationsType::query()
-                    ->whereIn('name', $patientConditionNames)
-                    ->pluck('id')
-                    ->all();
+            $contraindicationIds = collect();
 
-                if (!empty($contraindicationIds)) {
-                    $drugs->whereDoesntHave('contraindications', function ($query) use ($contraindicationIds) {
-                        $query->whereIn('contraindications_types.id', $contraindicationIds);
-                    });
-                }
+            /*
+             * Противопоказания по заболеваниям и состояниям пациента.
+             */
+            if ($patientConditionNames->isNotEmpty()) {
+                $conditionContraindicationIds =
+                    ContraindicationsType::query()
+                        ->whereIn(
+                            'name',
+                            $patientConditionNames->all()
+                        )
+                        ->pluck('id');
+
+                $contraindicationIds = $contraindicationIds
+                    ->merge($conditionContraindicationIds);
             }
 
-            $patientAge = Carbon::parse($patient->birth_at)->age;
-            $drugs->whereDoesntHave('contraindications', function ($query) use ($patientAge) {
-                $ageContraindications = false;
-                ContraindicationsType::where('name', 'ILIKE', "возраст до %{$patientAge}%")
-                    ->pluck('name', 'id')
-                    ->filter(function ($record) use ($patientAge, &$ageContraindications) {
-                        preg_match_all('/до\s(\d{1,2})/', $record['name'], $matches);
-                        $lowAgeLimit = intval($matches[1][0]);
+            /*
+             * Возрастные противопоказания.
+             *
+             * Например, запись «Возраст до 18» применяется,
+             * если пациенту меньше 18 лет.
+             */
+            if ($patient->birth_at) {
+                $patientAge = Carbon::parse(
+                    $patient->birth_at
+                )->age;
 
-                        if ($lowAgeLimit < $patientAge && !$ageContraindications) {
-                            $ageContraindications = $record['id'];
+                $ageContraindicationIds =
+                    ContraindicationsType::query()
+                        ->where(
+                            'name',
+                            'ilike',
+                            '%возраст%до%'
+                        )
+                        ->get([
+                            'id',
+                            'name',
+                        ])
+                        ->filter(
+                            static function (
+                                ContraindicationsType $contraindication
+                            ) use ($patientAge): bool {
+                                $name = trim(
+                                    (string) $contraindication->name
+                                );
 
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    });
+                                $matched = preg_match(
+                                    '/возраст\s+до\s+(\d{1,3})/ui',
+                                    $name,
+                                    $matches
+                                );
 
-                $query->where('contraindications_types.id', $ageContraindications);
-            });
+                                if ($matched !== 1) {
+                                    return false;
+                                }
+
+                                $minimumAge = (int) $matches[1];
+
+                                return $patientAge < $minimumAge;
+                            }
+                        )
+                        ->pluck('id');
+
+                $contraindicationIds = $contraindicationIds
+                    ->merge($ageContraindicationIds);
+            }
+
+            $contraindicationIds = $contraindicationIds
+                ->filter()
+                ->map(
+                    static fn ($contraindicationId): int =>
+                    (int) $contraindicationId
+                )
+                ->unique()
+                ->values();
+
+            /*
+             * Исключаем препараты, противопоказанные пациенту.
+             */
+            if ($contraindicationIds->isNotEmpty()) {
+                $drugsQuery->whereDoesntHave(
+                    'contraindications',
+                    function ( $query) use (
+                        $contraindicationIds
+                    ): void {
+                        $query->whereIn(
+                            'contraindications_types.id',
+                            $contraindicationIds->all()
+                        );
+                    }
+                );
+            }
         }
 
-        $drugs = $drugs->orderBy('name')
-            ->limit(10)
-            ->get()
-            ->map(function ($drug) {
-                return [
-                    'id' => $drug->id,
-                    'text' => $drug->name,
-                    'latin_name' => $drug->latin_name,
-                ];
-            });
+        /*
+         * Запрашиваем на одну запись больше, чтобы определить,
+         * существует ли следующая страница Select2.
+         */
+        $drugs = $drugsQuery
+            ->orderBy('name')
+            ->forPage($page, $perPage + 1)
+            ->get();
+
+        $hasMore = $drugs->count() > $perPage;
+
+        $results = $drugs
+            ->take($perPage)
+            ->map(
+                static function (Drug $drug): array {
+                    return [
+                        'id' => (int) $drug->id,
+
+                        /*
+                         * Поле text обязательно для Select2.
+                         */
+                        'text' => (string) $drug->name,
+
+                        'name' => (string) $drug->name,
+                        'latin_name' =>
+                            (string) ($drug->latin_name ?? ''),
+
+                        'strict' => (bool) $drug->strict,
+                    ];
+                }
+            )
+            ->values();
 
         return response()->json([
-            'results' => $drugs,
+            'results' => $results,
+            'pagination' => [
+                'more' => $hasMore,
+            ],
         ]);
     }
 

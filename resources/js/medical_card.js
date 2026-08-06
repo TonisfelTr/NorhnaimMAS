@@ -67,6 +67,57 @@ function getBootstrapModal(element) {
     return bootstrap.Modal.getOrCreateInstance(element);
 }
 
+function openResearchModal(trigger, modalSelector) {
+    if (!trigger) {
+        return;
+    }
+
+    const modal = qs(modalSelector);
+
+    if (!modal) {
+        console.warn(
+            `Модальное окно ${modalSelector} не найдено`
+        );
+
+        return;
+    }
+
+    const labsTabButton = qs(
+        '[data-bs-toggle="tab"][data-bs-target="#pane-labs"]'
+    );
+
+    const labsPane = qs('#pane-labs');
+
+    const showModal = () => {
+        getBootstrapModal(modal)?.show(trigger);
+    };
+
+    if (
+        labsPane?.classList.contains('active')
+        && labsPane?.classList.contains('show')
+    ) {
+        setTimeout(showModal, 0);
+
+        return;
+    }
+
+    if (!labsTabButton) {
+        setTimeout(showModal, 0);
+
+        return;
+    }
+
+    labsTabButton.addEventListener(
+        'shown.bs.tab',
+        showModal,
+        { once: true }
+    );
+
+    bootstrap.Tab.getOrCreateInstance(
+        labsTabButton
+    ).show();
+}
+
 async function fetchJson(url, options = {}) {
     const response = await fetch(url, {
         credentials: 'same-origin',
@@ -249,6 +300,9 @@ function normalizeParam(item) {
             min: null,
             max: null,
             ref: '',
+            criticalLow: null,
+            criticalHigh: null,
+            criticalRef: '',
             value: ''
         };
     }
@@ -369,6 +423,37 @@ function normalizeParam(item) {
         nested?.reference_range ??
         '';
 
+    const criticalLow =
+        item.critical_low ??
+        item.criticalLow ??
+        item.critical_min ??
+        item.criticalMin ??
+        nested?.critical_low ??
+        nested?.criticalLow ??
+        nested?.critical_min ??
+        nested?.criticalMin ??
+        null;
+
+    const criticalHigh =
+        item.critical_high ??
+        item.criticalHigh ??
+        item.critical_max ??
+        item.criticalMax ??
+        nested?.critical_high ??
+        nested?.criticalHigh ??
+        nested?.critical_max ??
+        nested?.criticalMax ??
+        null;
+
+    const criticalRef =
+        item.critical_ref ??
+        item.criticalRef ??
+        item.critical_reference ??
+        nested?.critical_ref ??
+        nested?.criticalRef ??
+        nested?.critical_reference ??
+        '';
+
     return {
         id,
         name: name || (id ? `Параметр #${id}` : ''),
@@ -383,6 +468,9 @@ function normalizeParam(item) {
         min,
         max,
         ref,
+        criticalLow,
+        criticalHigh,
+        criticalRef,
         value:
             item.result_value ??
             item.value ??
@@ -431,6 +519,9 @@ function mergeParamWithResult(rawParam, values) {
             min: param.min ?? resultParam.min,
             max: param.max ?? resultParam.max,
             ref: param.ref || resultParam.ref,
+            criticalLow: param.criticalLow ?? resultParam.criticalLow ?? null,
+            criticalHigh: param.criticalHigh ?? resultParam.criticalHigh ?? null,
+            criticalRef: param.criticalRef || resultParam.criticalRef || '',
             value: getResultValue(resultPayload)
         };
     }
@@ -461,31 +552,137 @@ function getRefText(param) {
     return '—';
 }
 
+function getCriticalRefText(param) {
+    if (param.criticalRef) {
+        return param.criticalRef;
+    }
+
+    const parts = [];
+
+    if (param.criticalLow != null) {
+        parts.push(`≤ ${param.criticalLow}`);
+    }
+
+    if (param.criticalHigh != null) {
+        parts.push(`≥ ${param.criticalHigh}`);
+    }
+
+    return parts.join(' или ');
+}
+
+
 function evaluateParamFlag(value, param) {
-    const normalized = String(value ?? '').replace(',', '.').trim();
+    const normalized = String(value ?? '')
+        .replace(/\s+/g, '')
+        .replace(',', '.')
+        .trim();
 
     if (!normalized) {
-        return { text: '—', className: 'bg-light text-dark' };
+        return {
+            kind: 'empty',
+            text: '—',
+            className: 'lab-param-flag lab-param-flag--empty bg-light text-dark',
+            title: ''
+        };
     }
 
-    const number = parseFloat(normalized);
+    const number = Number(normalized);
 
     if (!Number.isFinite(number)) {
-        return { text: '—', className: 'bg-light text-dark' };
+        return {
+            kind: 'text',
+            text: 'текст',
+            className: 'lab-param-flag lab-param-flag--text bg-light text-dark',
+            title: ''
+        };
     }
 
-    const min = param.min != null ? parseFloat(String(param.min).replace(',', '.')) : null;
-    const max = param.max != null ? parseFloat(String(param.max).replace(',', '.')) : null;
+    const criticalLow = param.criticalLow != null
+        ? Number(String(param.criticalLow).replace(',', '.'))
+        : null;
 
-    if (Number.isFinite(min) && number < min) {
-        return { text: 'низкий', className: 'bg-warning text-dark' };
+    const criticalHigh = param.criticalHigh != null
+        ? Number(String(param.criticalHigh).replace(',', '.'))
+        : null;
+
+    if (
+        Number.isFinite(criticalLow)
+        && number <= criticalLow
+    ) {
+        return {
+            kind: 'critical',
+            text: 'критично низкий',
+            className: 'lab-param-flag lab-param-flag--critical bg-danger',
+            title: param.criticalRef
+                ? `Критический порог: ${param.criticalRef}`
+                : ''
+        };
     }
 
-    if (Number.isFinite(max) && number > max) {
-        return { text: 'высокий', className: 'bg-danger' };
+    if (
+        Number.isFinite(criticalHigh)
+        && number >= criticalHigh
+    ) {
+        return {
+            kind: 'critical',
+            text: 'критично высокий',
+            className: 'lab-param-flag lab-param-flag--critical bg-danger',
+            title: param.criticalRef
+                ? `Критический порог: ${param.criticalRef}`
+                : ''
+        };
     }
 
-    return { text: 'норма', className: 'bg-success' };
+    const min = param.min != null
+        ? Number(String(param.min).replace(',', '.'))
+        : null;
+
+    const max = param.max != null
+        ? Number(String(param.max).replace(',', '.'))
+        : null;
+
+    if (
+        Number.isFinite(min)
+        && number < min
+    ) {
+        return {
+            kind: 'deviation',
+            text: 'ниже нормы',
+            className: 'lab-param-flag lab-param-flag--deviation bg-warning text-dark',
+            title: ''
+        };
+    }
+
+    if (
+        Number.isFinite(max)
+        && number > max
+    ) {
+        return {
+            kind: 'deviation',
+            text: 'выше нормы',
+            className: 'lab-param-flag lab-param-flag--deviation bg-warning text-dark',
+            title: ''
+        };
+    }
+
+    if (
+        !Number.isFinite(min)
+        && !Number.isFinite(max)
+    ) {
+        return {
+            kind: 'unknown',
+            text: 'нет референса',
+            className: 'lab-param-flag lab-param-flag--unknown bg-secondary',
+            title: ''
+        };
+    }
+
+    return {
+        kind: 'normal',
+        text: 'норма',
+        className: 'lab-param-flag lab-param-flag--normal bg-success',
+        title: ''
+    };
 }
 
 const paramDetailsCache = new Map();
@@ -619,7 +816,22 @@ async function hydrateParams(params, apiUrl, modal = null) {
             min: param.min ?? resolved.min ?? null,
             max: param.max ?? resolved.max ?? null,
 
-            ref: param.ref || resolved.ref || ''
+            ref: param.ref || resolved.ref || '',
+
+            criticalLow:
+                param.criticalLow
+                ?? resolved.criticalLow
+                ?? null,
+
+            criticalHigh:
+                param.criticalHigh
+                ?? resolved.criticalHigh
+                ?? null,
+
+            criticalRef:
+                param.criticalRef
+                || resolved.criticalRef
+                || ''
         };
     });
 }
@@ -843,17 +1055,28 @@ function initLabResultModal() {
             const flag = evaluateParamFlag(param.value, param);
 
             return `
-                <tr data-param-id="${escapeHtml(param.id)}" class="${hideNormal?.checked && flag.text === 'норма' ? 'd-none' : ''}">
+                <tr data-param-id="${escapeHtml(param.id)}"
+                    class="lab-result-row lab-result-row--${escapeHtml(flag.kind)} ${hideNormal?.checked && flag.kind === 'normal' ? 'd-none' : ''}">
                     <td>
                         <input type="hidden" name="param_ids[]" value="${escapeHtml(param.id)}">
                         <div class="fw-semibold">${escapeHtml(param.name)}</div>
                     </td>
-                    <td>${escapeHtml(getRefText(param))}</td>
+                    <td>
+                        <div>${escapeHtml(getRefText(param))}</div>
+                        ${getCriticalRefText(param)
+                ? `<div class="lab-critical-reference">Крит.: ${escapeHtml(getCriticalRefText(param))}</div>`
+                : ''}
+                    </td>
                     <td>${escapeHtml(param.unit || '—')}</td>
                     <td>
                         <input class="form-control form-control-sm" name="values[${escapeHtml(param.id)}]" value="${escapeHtml(param.value || '')}" data-result-value="${escapeHtml(param.id)}">
                     </td>
-                    <td class="text-center"><span class="badge ${flag.className}">${escapeHtml(flag.text)}</span></td>
+                    <td class="text-center">
+                        <span class="badge ${flag.className}"
+                              title="${escapeHtml(flag.title || '')}">
+                            ${escapeHtml(flag.text)}
+                        </span>
+                    </td>
                     <td class="text-end">
                         <button type="button" class="btn btn-link p-1 text-danger" data-remove-result-param="${escapeHtml(param.id)}">
                             <i class="bi bi-trash3"></i>
@@ -965,12 +1188,22 @@ function initLabViewModal() {
             const flag = evaluateParamFlag(param.value, param);
 
             return `
-                <tr class="${hideNormal?.checked && flag.text === 'норма' ? 'd-none' : ''}">
+                <tr class="lab-result-row lab-result-row--${escapeHtml(flag.kind)} ${hideNormal?.checked && flag.kind === 'normal' ? 'd-none' : ''}">
                     <td><div class="fw-semibold">${escapeHtml(param.name)}</div></td>
-                    <td>${escapeHtml(getRefText(param))}</td>
+                    <td>
+                        <div>${escapeHtml(getRefText(param))}</div>
+                        ${getCriticalRefText(param)
+                ? `<div class="lab-critical-reference">Крит.: ${escapeHtml(getCriticalRefText(param))}</div>`
+                : ''}
+                    </td>
                     <td>${escapeHtml(param.unit || '—')}</td>
                     <td>${escapeHtml(param.value || '—')}</td>
-                    <td class="text-center"><span class="badge ${flag.className}">${escapeHtml(flag.text)}</span></td>
+                    <td class="text-center">
+                        <span class="badge ${flag.className}"
+                              title="${escapeHtml(flag.title || '')}">
+                            ${escapeHtml(flag.text)}
+                        </span>
+                    </td>
                 </tr>
             `;
         }).join('');
@@ -987,18 +1220,82 @@ function initLabViewModal() {
             return;
         }
 
-        const values = safeJsonParse(button.dataset.values, {}) || {};
-        params = toArray(getDatasetParams(button)).map(item => mergeParamWithResult(item, values));
-        render();
+        const values =
+            safeJsonParse(button.dataset.values, {}) || {};
 
-        params = await hydrateParams(params, modal.dataset.apiParams, modal);
-
-        qs('#v_collected_at', modal).textContent = button.dataset.collectedAt || '—';
-        qs('#v_status', modal).textContent = 'Готово';
-        qs('#v_lab_name', modal).textContent = button.dataset.laboratory || '—';
-        qs('#v_comment', modal).textContent = button.dataset.comment || '—';
+        params = toArray(
+            getDatasetParams(button)
+        ).map(item => {
+            return mergeParamWithResult(item, values);
+        });
 
         render();
+
+        params = await hydrateParams(
+            params,
+            modal.dataset.apiParams,
+            modal
+        );
+
+        qs('#v_collected_at', modal).textContent =
+            button.dataset.collectedAt || '—';
+
+        qs('#v_status', modal).textContent =
+            'Готово';
+
+        qs('#v_lab_name', modal).textContent =
+            button.dataset.laboratory || '—';
+
+        qs('#v_comment', modal).textContent =
+            button.dataset.comment || '—';
+
+        render();
+
+        /*
+         * Фиксируем просмотр результата в БД.
+         */
+        const viewUrl = button.dataset.viewUrl;
+
+        if (!viewUrl) {
+            return;
+        }
+
+        try {
+            const response = await fetch(viewUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrf(),
+                },
+            });
+
+            const result = await response.json()
+                .catch(() => ({}));
+
+            if (!response.ok || result.success !== true) {
+                throw new Error(
+                    result.message
+                    || `HTTP ${response.status}`
+                );
+            }
+
+            /*
+             * Чтобы повторное открытие этой же строки
+             * не отправляло запрос снова.
+             */
+            button.dataset.viewed = '1';
+        } catch (error) {
+            console.error(
+                'Не удалось зафиксировать просмотр анализа:',
+                error
+            );
+
+            showToast?.(
+                'Результат открыт, но просмотр не был зафиксирован'
+            );
+        }
     });
 
     hideNormal?.addEventListener('change', render);
@@ -1279,42 +1576,52 @@ function initPrescriptionDrugSelect2() {
     const takingDrug = qs('#taking_drug_modal', modal);
     const takingCount = qs('#taking_count_modal', modal);
     const takingMeal = qs('#taking_time_meal_modal', modal);
+    const validity = qs('#validity_period_modal', modal);
     const printButton = qs('#printRecipeButton_modal', modal);
+    const formAlert = qs('#prescription_form_alert', modal);
 
     const suggestionsEmpty = qs('#prescriptionSuggestionsEmpty', modal);
     const suggestionsLoading = qs('#prescriptionSuggestionsLoading', modal);
     const suggestionsList = qs('#prescriptionSuggestionsList', modal);
+    const suggestionsCount = qs('#prescriptionSuggestionsCount', modal);
 
     if (!modal || !form || !select) {
         return;
     }
 
-    if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.select2) {
-        console.warn('Select2 не подключён: #drug_id_modal не будет работать как AJAX-поиск.');
+    if (!window.jQuery || !window.jQuery.fn?.select2) {
+        console.warn('Select2 не подключён: поиск препаратов недоступен.');
         return;
     }
 
     const $ = window.jQuery;
     const $select = $(select);
 
-    const sourceUrl = select.dataset.source;
-    const suggestionsUrl = form.dataset.suggestionsUrl || sourceUrl;
+    const sourceUrl = String(select.dataset.source || '').trim();
+    const suggestionsUrl = String(form.dataset.suggestionsUrl || '').trim();
 
     if (!sourceUrl) {
         console.warn('Для #drug_id_modal не указан data-source.');
         return;
     }
 
+    let currentSuggestions = [];
+    let selectedDrugRequestToken = 0;
+
     function indicationSource() {
         return $('input[name="indication_source"]:checked', modal).val() || '';
     }
 
     function diagnosisCode() {
-        return $('#diagnosis_code', modal).val() || '';
+        return String($('#diagnosis_code', modal).val() || '').trim();
     }
 
     function patientId() {
-        return $('#patientPrescriptionForm input[name="patient_id"]').val() || '';
+        return String($('#patientPrescriptionForm input[name="patient_id"]').val() || '').trim();
+    }
+
+    function birthAt() {
+        return String($('#birth_at__', modal).val() || '').trim();
     }
 
     function requestParams(term = '') {
@@ -1325,18 +1632,84 @@ function initPrescriptionDrugSelect2() {
             term: term || '',
             patient_id: patientId(),
             diagnosis_code: diagnosisCode(),
+            birth_at: birthAt(),
             indication_source: source,
             indicated_in_russia: source === 'russia' ? 1 : 0,
             indicated_by_fda: source === 'fda' ? 1 : 0
         };
     }
 
-    function normalizeItems(data) {
-        if (Array.isArray(data)) {
-            return data;
+    function showFormError(message = '') {
+        if (!formAlert) {
+            if (message) console.error(message);
+            return;
         }
 
-        return data?.results || data?.items || data?.data || [];
+        formAlert.textContent = message;
+        formAlert.classList.toggle('d-none', !message);
+    }
+
+    function normalizeItems(payload) {
+        if (Array.isArray(payload)) {
+            return payload;
+        }
+
+        const candidates = [
+            payload?.items,
+            payload?.results,
+            payload?.recommendations,
+            payload?.drugs,
+            payload?.data?.items,
+            payload?.data?.results,
+            payload?.data?.recommendations,
+            payload?.data?.drugs,
+            payload?.data
+        ];
+
+        return candidates.find(Array.isArray) || [];
+    }
+
+    function normalizeObject(payload) {
+        if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+            return null;
+        }
+
+        const candidates = [
+            payload.preset,
+            payload.item,
+            payload.result,
+            payload.data?.preset,
+            payload.data?.item,
+            payload.data?.result,
+            payload.data
+        ];
+
+        return candidates.find(value => value && typeof value === 'object' && !Array.isArray(value)) || null;
+    }
+
+    async function fetchJson(url) {
+        const response = await fetch(url, {
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+        const payload = contentType.includes('application/json')
+            ? await response.json()
+            : null;
+
+        if (!response.ok) {
+            throw new Error(
+                payload?.message
+                || payload?.error
+                || `Ошибка HTTP ${response.status}`
+            );
+        }
+
+        return payload;
     }
 
     function hasCyrillic(value) {
@@ -1347,477 +1720,371 @@ function initPrescriptionDrugSelect2() {
         return values.find(value => String(value || '').trim() !== '') || '';
     }
 
-    function russianDrugName(item) {
-        const candidates = [
-            item.name_ru,
-            item.russian_name,
-            item.name_rus,
-            item.ru_name,
-            item.title_ru,
-            item.drug_name_ru,
-            item.trade_name_ru,
-            item.name,
-            item.title,
-            item.text,
-            item.generic_name
-        ];
-
-        const cyrillic = candidates.find(hasCyrillic);
-
-        if (cyrillic) {
-            return cyrillic;
-        }
-
-        return firstFilled(
-            item.name,
-            item.title,
-            item.text,
-            item.generic_name,
-            item.latin_name,
-            item.mnn,
-            item.inn,
-            `Препарат #${item.id}`
-        );
-    }
-
-    function latinDrugName(item) {
-        const candidates = [
-            item.latin_name,
-            item.latin,
-            item.name_latin,
-            item.inn_latin,
-            item.mnn_latin,
-            item.generic_latin,
-            item.generic_name,
-            item.mnn,
-            item.inn,
-            item.text,
-            item.title,
-            item.name
-        ];
-
-        const latin = candidates.find(value => {
-            const text = String(value || '').trim();
-            return text && !hasCyrillic(text);
-        });
-
-        return latin || '';
-    }
-
-    function drugDescription(item) {
-        return firstFilled(
-            item.description,
-            item.short_description,
-            item.annotation,
-            item.reason,
-            item.indication_reason,
-            item.indication_text,
-            item.comment,
-            item.note
-        );
-    }
-
-    function itemTitle(item) {
-        return itemRussianName(item);
-    }
-
-    function itemSubtitle(item) {
-        return itemLatinName(item);
-    }
-
-    function toSelect2Items(data) {
-        return normalizeItems(data).map(item => ({
-            id: item.id,
-            text: itemTitle(item),
-            name: item.name || '',
-            latin_name: item.latin_name || '',
-            generic_name: item.generic_name || '',
-            raw: item
-        }));
-    }
-
-    function showSuggestionsMessage(message) {
-        if (suggestionsLoading) {
-            suggestionsLoading.classList.add('d-none');
-        }
-
-        if (suggestionsList) {
-            suggestionsList.innerHTML = '';
-            suggestionsList.classList.add('d-none');
-        }
-
-        if (suggestionsEmpty) {
-            suggestionsEmpty.textContent = message;
-            suggestionsEmpty.classList.remove('d-none');
-        }
-    }
-
-    function renderSuggestions(items) {
-        const countNode = qs('#prescriptionSuggestionsCount');
-
-        if (!suggestionsEmpty || !suggestionsList || !suggestionsLoading) {
-            return;
-        }
-
-        suggestionsLoading.classList.add('d-none');
-
-        if (countNode) {
-            countNode.textContent = String(items.length || 0);
-        }
-
-        if (!items.length) {
-            showSuggestionsMessage('По выбранному фильтру препараты не найдены.');
-            return;
-        }
-
-        suggestionsEmpty.classList.add('d-none');
-
-        suggestionsList.innerHTML = items.map(item => {
-            const id = itemId(item);
-
-            const title = escapeHtml(itemTitle(item));
-            const latin = escapeHtml(itemSubtitle(item));
-            const description = escapeHtml(drugDescription(item));
-
-            const rawTitle = itemTitle(item);
-            const rf = item.indicated_in_russia || item.indicated_in_russia === 1 || item.indicated_in_russia === '1';
-            const fda = item.indicated_by_fda || item.indicated_by_fda === 1 || item.indicated_by_fda === '1';
-
-            return `
-            <div class="presc-suggestion-item" data-suggestion-id="${escapeHtml(id)}">
-                <div class="presc-suggestion-main">
-                    <div class="presc-suggestion-title">${title}</div>
-
-                    ${latin ? `
-                        <div class="presc-suggestion-latin">${latin}</div>
-                    ` : ''}
-
-                    ${description ? `
-                        <div class="presc-suggestion-description">${description}</div>
-                    ` : ''}
-                </div>
-
-                <div class="presc-suggestion-footer">
-                    <div class="presc-suggestion-badges">
-                        ${rf ? `<span class="presc-suggestion-badge presc-suggestion-badge--rf">РФ</span>` : ''}
-                        ${fda ? `<span class="presc-suggestion-badge presc-suggestion-badge--fda">FDA</span>` : ''}
-                    </div>
-
-                    <button type="button"
-                            class="btn btn-sm btn-outline-primary presc-suggestion-pick"
-                            data-pick-suggested-drug
-                            data-drug-id="${escapeHtml(itemId(item))}"
-                            data-drug-text="${escapeHtml(itemTitle(item))}"
-                            data-drug-latin="${escapeHtml(itemLatinName(item))}"
-                            data-drug-payload="${encodeURIComponent(JSON.stringify(item))}">
-                        Выбрать
-                    </button>
-                </div>
-            </div>
-        `;
-        }).join('');
-
-        suggestionsList.classList.remove('d-none');
-
-        bindSuggestedDrugButtons();
-    }
-
-    function bindSuggestedDrugButtons() {
-        if (!suggestionsList) {
-            return;
-        }
-
-        qsa('[data-pick-suggested-drug]', suggestionsList).forEach(button => {
-            button.removeEventListener('click', handleSuggestedDrugPick);
-            button.addEventListener('click', handleSuggestedDrugPick);
-        });
-    }
-
-    async function handleSuggestedDrugPick(event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const button = event.currentTarget;
-
-        console.log('[Prescription] click suggested drug', button.dataset);
-
-        let raw = {};
-
-        try {
-            raw = JSON.parse(decodeURIComponent(button.dataset.drugPayload || '{}'));
-        } catch (error) {
-            console.warn('[Prescription] cannot parse drug payload', error);
-            raw = {};
-        }
-
-        const drugId = String(
-            button.dataset.drugId
-            || itemId(raw)
-            || ''
-        ).trim();
-
-        const drugText = String(
-            button.dataset.drugText
-            || itemTitle(raw)
-            || ''
-        ).trim();
-
-        const drugLatin = String(
-            button.dataset.drugLatin
-            || itemLatinName(raw)
-            || drugText
-        ).trim();
-
-        if (!drugId || !drugText) {
-            console.warn('[Prescription] empty suggested drug data', {
-                drugId,
-                drugText,
-                drugLatin,
-                raw,
-            });
-
-            return;
-        }
-
-        qsa('.presc-suggestion-item', suggestionsList).forEach(card => {
-            card.classList.remove('is-selected');
-        });
-
-        button.closest('.presc-suggestion-item')?.classList.add('is-selected');
-
-        const select2Data = {
-            id: drugId,
-            text: drugText,
-            name: raw.name || raw.drug_name || drugText,
-            latin_name: drugLatin,
-            generic_name: raw.generic_name || raw.inn || '',
-            raw: {
-                ...raw,
-                id: drugId,
-                drug_id: raw.drug_id || drugId,
-                text: drugText,
-                name: raw.name || raw.drug_name || drugText,
-                drug_name: raw.drug_name || drugText,
-                latin_name: drugLatin,
-            },
-        };
-
-        $select.find('option').filter(function () {
-            return String(this.value) === String(drugId);
-        }).remove();
-
-        const option = new Option(drugText, drugId, true, true);
-
-        $select.append(option);
-        $select.val(drugId).trigger('change.select2');
-
-        /*
-         * Принудительно обновляем Select2. Событие select2:select здесь не вызываем,
-         * чтобы не запускать общий обработчик выбора и не сбрасывать поля второй раз.
-         */
-        if ($select.data('select2')) {
-            $select
-                .next('.select2-container')
-                .find('.select2-selection__rendered')
-                .text(drugText)
-                .attr('title', drugText);
-        }
-
-        resetSelect(drugForm, 'Выберите форму', true);
-        resetSelect(dosage, 'Выберите дозировку', true);
-        resetSelect(quantity, 'Выберите количество', true);
-
-        try {
-            await loadDrugForms(select2Data);
-
-            applySuggestedPrescriptionDefaults(raw);
-        } catch (error) {
-            console.error('[Prescription] load drug forms failed', error);
-            applySuggestedPrescriptionDefaults(raw);
-        }
-    }
-
     function itemId(item) {
-        return item.id
-            || item.drug_id
-            || item.drugId
-            || item.medicine_id
-            || item.preparation_id
+        const raw = item?.raw || item || {};
+
+        return raw.id
+            || raw.drug_id
+            || raw.drugId
+            || raw.medicine_id
+            || raw.preparation_id
+            || item?.id
             || '';
     }
 
     function itemRussianName(item) {
-        return item.drug_name
-            || item.name_ru
-            || item.russian_name
-            || item.name_rus
-            || item.ru_name
-            || item.inn
-            || item.name
-            || item.title
-            || item.text
-            || item.generic_name
-            || item.latin_name
+        const raw = item?.raw || item || {};
+        const candidates = [
+            raw.drug_name,
+            raw.name_ru,
+            raw.russian_name,
+            raw.name_rus,
+            raw.ru_name,
+            raw.inn,
+            raw.name,
+            raw.title,
+            raw.text,
+            raw.generic_name,
+            raw.latin_name
+        ];
+
+        return candidates.find(hasCyrillic)
+            || firstFilled(...candidates)
             || `Препарат #${itemId(item)}`;
     }
 
     function itemLatinName(item) {
-        return item.latin_name
-            || item.latin
-            || item.name_latin
-            || item.inn_latin
-            || item.mnn_latin
-            || item.trade_names
-            || item.generic_name
-            || item.mnn
-            || '';
+        const raw = item?.raw || item || {};
+        const candidates = [
+            raw.latin_name,
+            raw.latin,
+            raw.name_latin,
+            raw.inn_latin,
+            raw.mnn_latin,
+            raw.generic_latin,
+            raw.generic_name,
+            raw.mnn,
+            raw.inn
+        ];
+
+        return candidates.find(value => {
+            const text = String(value || '').trim();
+            return text !== '' && !hasCyrillic(text);
+        }) || '';
+    }
+
+    function itemDescription(item) {
+        const raw = item?.raw || item || {};
+
+        return firstFilled(
+            raw.description,
+            raw.short_description,
+            raw.annotation,
+            raw.reason,
+            raw.indication_reason,
+            raw.indication_text,
+            raw.comment,
+            raw.note
+        );
+    }
+
+    function toSelect2Item(item) {
+        const raw = item?.raw || item || {};
+
+        return {
+            id: String(itemId(raw)),
+            text: itemRussianName(raw),
+            name: raw.name || raw.drug_name || itemRussianName(raw),
+            latin_name: itemLatinName(raw),
+            generic_name: raw.generic_name || raw.inn || '',
+            strict: Boolean(raw.strict),
+            raw
+        };
+    }
+
+    function toSelect2Items(payload) {
+        return normalizeItems(payload)
+            .map(toSelect2Item)
+            .filter(item => item.id !== '');
+    }
+
+    function setSuggestionsState(state, message = '') {
+        suggestionsLoading?.classList.toggle('d-none', state !== 'loading');
+        suggestionsEmpty?.classList.toggle('d-none', state !== 'empty');
+        suggestionsList?.classList.toggle('d-none', state !== 'list');
+
+        if (state === 'empty' && suggestionsEmpty) {
+            suggestionsEmpty.innerHTML = `
+                <i class="bi bi-capsule"></i>
+                <span>${escapeHtml(message || 'Подходящие препараты не найдены.')}</span>
+            `;
+        }
+    }
+
+    function renderSuggestions(items) {
+        currentSuggestions = Array.isArray(items) ? items : [];
+
+        if (suggestionsCount) {
+            suggestionsCount.textContent = String(currentSuggestions.length);
+        }
+
+        if (!currentSuggestions.length) {
+            if (suggestionsList) suggestionsList.innerHTML = '';
+            setSuggestionsState('empty', 'По выбранному фильтру препараты не найдены.');
+            return;
+        }
+
+        suggestionsList.innerHTML = currentSuggestions.map(item => {
+            const raw = item?.raw || item || {};
+            const id = itemId(raw);
+            const title = escapeHtml(itemRussianName(raw));
+            const latin = escapeHtml(itemLatinName(raw));
+            const description = escapeHtml(itemDescription(raw));
+            const rf = raw.indicated_in_russia === true || raw.indicated_in_russia === 1 || raw.indicated_in_russia === '1';
+            const fda = raw.indicated_by_fda === true || raw.indicated_by_fda === 1 || raw.indicated_by_fda === '1';
+            const strict = raw.strict === true || raw.strict === 1 || raw.strict === '1';
+
+            return `
+                <div class="presc-suggestion-item" data-suggestion-id="${escapeHtml(id)}">
+                    <div class="presc-suggestion-main">
+                        <div class="presc-suggestion-title">${title}</div>
+                        ${latin ? `<div class="presc-suggestion-latin">${latin}</div>` : ''}
+                        ${description ? `<div class="presc-suggestion-description">${description}</div>` : ''}
+                    </div>
+
+                    <div class="presc-suggestion-footer">
+                        <div class="presc-suggestion-badges">
+                            ${rf ? '<span class="presc-suggestion-badge presc-suggestion-badge--rf">РФ</span>' : ''}
+                            ${fda ? '<span class="presc-suggestion-badge presc-suggestion-badge--fda">FDA</span>' : ''}
+                            ${strict ? '<span class="presc-suggestion-badge">148-1/у-88</span>' : ''}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary presc-suggestion-pick"
+                            data-pick-suggested-drug
+                            data-drug-payload="${encodeURIComponent(JSON.stringify(raw))}"
+                        >
+                            Выбрать
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        setSuggestionsState('list');
     }
 
     async function loadSuggestions() {
-        if (!suggestionsUrl) {
-            return;
-        }
+        setSuggestionsState('loading');
 
-        if (suggestionsLoading) {
-            suggestionsLoading.classList.remove('d-none');
-        }
-
-        if (suggestionsEmpty) {
-            suggestionsEmpty.classList.add('d-none');
-        }
-
-        if (suggestionsList) {
-            suggestionsList.classList.add('d-none');
-        }
-
-        const url = new URL(suggestionsUrl, window.location.origin);
         const params = requestParams('');
+        let items = [];
+        let aiError = null;
 
-        Object.entries(params).forEach(([key, value]) => {
-            url.searchParams.set(key, value);
-        });
+        if (suggestionsUrl) {
+            try {
+                const url = new URL(suggestionsUrl, window.location.origin);
 
-        const response = await fetch(url.toString(), {
-            credentials: 'same-origin',
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                Object.entries(params).forEach(([key, value]) => {
+                    if (value !== '' && value !== null && value !== undefined) {
+                        url.searchParams.set(key, value);
+                    }
+                });
+
+                const payload = await fetchJson(url.toString());
+                items = normalizeItems(payload);
+            } catch (error) {
+                aiError = error;
+                console.warn('[Prescription] AI recommendations unavailable, fallback to drug search', error);
             }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка загрузки подборки препаратов: HTTP ${response.status}`);
         }
 
-        const data = await response.json();
+        /*
+         * Если ИИ-сервис недоступен или вернул пустой ответ, показываем
+         * безопасный резервный список из обычного поиска лекарств.
+         */
+        if (!items.length) {
+            try {
+                const fallbackUrl = new URL(sourceUrl, window.location.origin);
 
-        renderSuggestions(normalizeItems(data));
+                Object.entries({ ...params, page: 1 }).forEach(([key, value]) => {
+                    if (value !== null && value !== undefined) {
+                        fallbackUrl.searchParams.set(key, value);
+                    }
+                });
+
+                const payload = await fetchJson(fallbackUrl.toString());
+                items = normalizeItems(payload);
+            } catch (fallbackError) {
+                console.error('[Prescription] fallback recommendations failed', fallbackError);
+
+                renderSuggestions([]);
+                setSuggestionsState(
+                    'empty',
+                    aiError?.message || fallbackError.message || 'Не удалось загрузить подбор препаратов.'
+                );
+                return;
+            }
+        }
+
+        renderSuggestions(items);
     }
 
     function resetSelect(selectEl, placeholder, disabled = true) {
-        if (!selectEl) {
-            return;
-        }
+        if (!selectEl) return;
 
         selectEl.innerHTML = '';
-
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = placeholder;
-
-        selectEl.appendChild(option);
+        selectEl.appendChild(new Option(placeholder, ''));
         selectEl.value = '';
         selectEl.disabled = disabled;
     }
 
-    function enableRegimenFields() {
+    function resetPrescriptionFields() {
+        resetSelect(drugForm, 'Выберите форму', true);
+        resetSelect(dosage, 'Выберите дозировку', true);
+        resetSelect(quantity, 'Выберите количество', true);
+
         if (standard) {
-            standard.disabled = false;
+            standard.value = 1;
+            standard.disabled = true;
+            standard.min = 1;
+            standard.removeAttribute('max');
         }
 
         if (takingDrug) {
-            takingDrug.disabled = false;
+            takingDrug.value = 1;
+            takingDrug.disabled = true;
         }
 
         if (takingCount) {
-            takingCount.disabled = false;
+            takingCount.value = 1;
+            takingCount.disabled = true;
         }
 
         if (takingMeal) {
-            takingMeal.disabled = false;
+            takingMeal.value = 1;
+            takingMeal.disabled = true;
         }
 
-        if (printButton) {
-            printButton.disabled = false;
-        }
+        const drugType = qs('#drug_type_modal', modal);
+        const takingTime = qs('#taking_time_modal', modal);
+        const daysCount = qs('#days_count_modal', modal);
+        const daysLabel = qs('#days_label_modal', modal);
+        const usage = qs('#usage_instructions__', modal);
+        const strictMessage = qs('#strict_message_modal', modal);
+        const validityBlock = qs('#validity_block_modal', modal);
+
+        if (drugType) drugType.textContent = 'единице препарата';
+        if (takingTime) takingTime.textContent = 'раз';
+        if (daysCount) daysCount.textContent = '—';
+        if (daysLabel) daysLabel.textContent = 'дней';
+        if (usage) usage.value = '';
+
+        strictMessage?.classList.add('d-none');
+        validityBlock?.classList.remove('d-none');
+
+        if (printButton) printButton.disabled = true;
+    }
+
+    function enableRegimenFields() {
+        if (standard) standard.disabled = false;
+        if (takingDrug) takingDrug.disabled = false;
+        if (takingCount) takingCount.disabled = false;
+        if (takingMeal) takingMeal.disabled = false;
+        if (printButton) printButton.disabled = false;
+    }
+
+    function firstNonEmptyOption(selectEl) {
+        if (!selectEl) return null;
+        return Array.from(selectEl.options).find(option => String(option.value).trim() !== '') || null;
+    }
+
+    function selectFirstOption(selectEl) {
+        const option = firstNonEmptyOption(selectEl);
+        if (!option) return false;
+
+        selectEl.value = option.value;
+        selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
     }
 
     function ensureOptionAndSelect(selectEl, value, label = null) {
         if (!selectEl || value === undefined || value === null || String(value).trim() === '') {
-            return;
+            return false;
         }
 
         const stringValue = String(value).trim();
         const stringLabel = String(label ?? value).trim();
 
-        const exists = Array.from(selectEl.options).some(option => String(option.value) === stringValue);
-
-        if (!exists) {
+        if (!Array.from(selectEl.options).some(option => String(option.value) === stringValue)) {
             selectEl.appendChild(new Option(stringLabel, stringValue));
         }
 
         selectEl.disabled = false;
         selectEl.value = stringValue;
         selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
     }
 
     function dayWord(number) {
         const n = Math.abs(Number(number)) % 100;
         const n1 = n % 10;
 
-        if (n > 10 && n < 20) {
-            return 'дней';
-        }
-
-        if (n1 > 1 && n1 < 5) {
-            return 'дня';
-        }
-
-        if (n1 === 1) {
-            return 'день';
-        }
-
+        if (n > 10 && n < 20) return 'дней';
+        if (n1 > 1 && n1 < 5) return 'дня';
+        if (n1 === 1) return 'день';
         return 'дней';
     }
 
     function drugFormLabel(value) {
         const text = String(value || '').toLowerCase();
 
-        if (text.includes('capsule') || text.includes('капсул')) {
-            return 'капсуле';
-        }
+        if (text.includes('capsule') || text.includes('капсул')) return 'капсуле';
+        if (text.includes('tablet') || text.includes('таб')) return 'таблетке';
+        if (text.includes('drop') || text.includes('капл')) return 'капле';
+        if (text.includes('solution') || text.includes('раствор')) return 'мл';
+        if (text.includes('ampoule') || text.includes('ампул')) return 'ампуле';
+        if (text.includes('syrup') || text.includes('сироп')) return 'мл';
+        if (text.includes('dragee') || text.includes('драже')) return 'драже';
 
-        if (text.includes('tablet') || text.includes('таб')) {
-            return 'таблетке';
-        }
+        return 'единице препарата';
+    }
 
-        if (text.includes('drop') || text.includes('капл')) {
-            return 'капле';
-        }
+    function drugFormTitle(value) {
+        const original = String(value || '').trim();
+        const text = original.toLowerCase();
 
-        if (text.includes('solution') || text.includes('раствор')) {
-            return 'мл';
-        }
+        const map = {
+            capsules: 'Капсулы',
+            capsule: 'Капсулы',
+            tablets: 'Таблетки',
+            tablet: 'Таблетки',
+            pills: 'Таблетки',
+            pill: 'Таблетки',
+            dragees: 'Драже',
+            dragee: 'Драже',
+            drops: 'Капли',
+            drop: 'Капли',
+            solution: 'Раствор',
+            syrup: 'Сироп',
+            ampules: 'Ампулы',
+            ampoules: 'Ампулы',
+            ampoule: 'Ампулы',
+            injection: 'Инъекции',
+            injections: 'Инъекции',
+            powder: 'Порошок',
+            suspension: 'Суспензия',
+            spray: 'Спрей',
+            ointment: 'Мазь',
+            cream: 'Крем',
+            gel: 'Гель',
+            patch: 'Пластырь',
+            suppositories: 'Суппозитории',
+            suppository: 'Суппозитории'
+        };
 
-        if (text.includes('ampoule') || text.includes('ампул')) {
-            return 'ампуле';
-        }
-
-        if (text.includes('syrup') || text.includes('сироп')) {
-            return 'мл';
-        }
-
-        return 'единице';
+        return map[text] || original;
     }
 
     function updatePrescriptionDaysAndText(raw = {}) {
@@ -1832,55 +2099,134 @@ function initPrescriptionDrugSelect2() {
         const takingTimeNode = qs('#taking_time_modal', modal);
         const usageInput = qs('#usage_instructions__', modal);
 
-        const totalUnits = raw.total_units
-            ? Number(raw.total_units)
-            : quantityValue * standardValue;
+        const totalUnits = Number(raw.total_units || (quantityValue * standardValue));
+        const perDay = takingDrugValue * takingCountValue;
+        const days = totalUnits > 0 && perDay > 0 ? Math.floor(totalUnits / perDay) : 0;
 
-        const days = takingDrugValue && takingCountValue
-            ? Math.floor(totalUnits / (takingDrugValue * takingCountValue))
-            : 0;
-
-        if (daysNode) {
-            daysNode.textContent = days ? String(days) : '—';
-        }
-
-        if (daysLabelNode) {
-            daysLabelNode.textContent = dayWord(days);
-        }
-
-        if (drugTypeNode) {
-            drugTypeNode.textContent = drugFormLabel(drugForm?.value || raw.drug_form);
-        }
-
-        if (takingTimeNode) {
-            takingTimeNode.textContent = takingCountValue === 1 ? 'раз' : 'раза';
-        }
+        if (daysNode) daysNode.textContent = days > 0 ? String(days) : '—';
+        if (daysLabelNode) daysLabelNode.textContent = dayWord(days);
+        if (drugTypeNode) drugTypeNode.textContent = drugFormLabel(drugForm?.value || raw.drug_form);
+        if (takingTimeNode) takingTimeNode.textContent = takingCountValue === 1 ? 'раз' : 'раза';
 
         if (usageInput) {
-            const meal = String(takingMeal?.value || raw.taking_time_meal || '1') === '2' ? 'до еды' : 'после еды';
+            if (raw.usage_instructions) {
+                usageInput.value = String(raw.usage_instructions);
+            } else {
+                const meal = String(takingMeal?.value || raw.taking_time_meal || '1') === '2'
+                    ? 'до еды'
+                    : 'после еды';
 
-            usageInput.value = `По ${takingDrugValue} ${drugFormLabel(drugForm?.value || raw.drug_form)} ${takingCountValue} ${takingCountValue === 1 ? 'раз' : 'раза'} в день ${meal}`;
+                usageInput.value = `По ${takingDrugValue} ${drugFormLabel(drugForm?.value || raw.drug_form)} ${takingCountValue} ${takingCountValue === 1 ? 'раз' : 'раза'} в день ${meal}`;
+            }
         }
     }
 
-    function applySuggestedPrescriptionDefaults(raw = {}) {
-        if (!raw || typeof raw !== 'object') {
-            return;
+    function toggleStrict(raw = {}) {
+        const strict = raw.strict === true || raw.strict === 1 || raw.strict === '1';
+        const strictMessage = qs('#strict_message_modal', modal);
+        const validityBlock = qs('#validity_block_modal', modal);
+
+        strictMessage?.classList.toggle('d-none', !strict);
+        validityBlock?.classList.toggle('d-none', strict);
+
+        if (standard) {
+            standard.min = 1;
+
+            if (strict) standard.max = 3;
+            else standard.removeAttribute('max');
+        }
+    }
+
+    function fillDosageAndQuantity() {
+        const rows = safeJsonParse(drugForm?.dataset.rows, []) || [];
+        const selectedForm = String(drugForm?.value || '');
+
+        const filtered = rows.filter(row => String(row.form || row.drug_form || '') === selectedForm);
+
+        resetSelect(dosage, 'Выберите дозировку', false);
+        resetSelect(quantity, 'Выберите количество', false);
+
+        const dosages = [...new Set(
+            filtered
+                .map(row => row.dosage ?? row.dose)
+                .filter(value => value !== null && value !== undefined && String(value).trim() !== '')
+        )];
+
+        const quantities = [...new Set(
+            filtered
+                .map(row => row.quantity ?? row.count ?? row.volume)
+                .filter(value => value !== null && value !== undefined && String(value).trim() !== '')
+        )];
+
+        dosages.forEach(value => dosage.appendChild(new Option(String(value), String(value))));
+        quantities.forEach(value => quantity.appendChild(new Option(String(value), String(value))));
+
+        dosage.disabled = dosages.length === 0;
+        quantity.disabled = quantities.length === 0;
+    }
+
+    async function loadDrugForms(item) {
+        const raw = item?.raw || item || {};
+        const latinName = itemLatinName(raw)
+            || raw.latin_name
+            || item?.latin_name
+            || raw.text
+            || item?.text;
+
+        if (!latinName) {
+            throw new Error('У препарата не указано МНН для загрузки форм.');
         }
 
-        /*
-         * 1. Форма / дозировка / количество.
-         * Если endpoint forms не вернул такие option — добавляем их вручную из автоподбора.
-         */
-        ensureOptionAndSelect(drugForm, raw.drug_form, drugFormTitle(raw.drug_form));
-        fillDosageAndQuantity();
+        const formsUrl = `/api/doctors/search-drugs/${encodeURIComponent(latinName)}/forms`;
+        const payload = await fetchJson(formsUrl);
+        const rows = normalizeItems(payload);
 
-        ensureOptionAndSelect(dosage, raw.dosage, raw.dosage);
-        ensureOptionAndSelect(quantity, raw.quantity, raw.quantity);
+        resetSelect(drugForm, 'Выберите форму', false);
+        resetSelect(dosage, 'Выберите дозировку', true);
+        resetSelect(quantity, 'Выберите количество', true);
 
-        /*
-         * 2. Количество стандартов и схема приёма.
-         */
+        drugForm.dataset.rows = JSON.stringify(rows);
+
+        const forms = [...new Set(
+            rows
+                .map(row => row.form || row.drug_form)
+                .filter(value => value !== null && value !== undefined && String(value).trim() !== '')
+        )];
+
+        forms.forEach(value => {
+            drugForm.appendChild(new Option(drugFormTitle(value), String(value)));
+        });
+
+        drugForm.disabled = forms.length === 0;
+        enableRegimenFields();
+
+        if (forms.length) {
+            drugForm.value = String(forms[0]);
+            fillDosageAndQuantity();
+            selectFirstOption(dosage);
+            selectFirstOption(quantity);
+        }
+
+        updatePrescriptionDaysAndText(raw);
+        return rows;
+    }
+
+    function applySuggestedPrescriptionDefaults(raw = {}) {
+        if (!raw || typeof raw !== 'object') return;
+
+        if (raw.drug_form) {
+            ensureOptionAndSelect(drugForm, raw.drug_form, drugFormTitle(raw.drug_form));
+            fillDosageAndQuantity();
+        }
+
+        if (raw.dosage !== undefined && raw.dosage !== null) {
+            ensureOptionAndSelect(dosage, raw.dosage, raw.dosage);
+        }
+
+        if (raw.quantity !== undefined && raw.quantity !== null) {
+            ensureOptionAndSelect(quantity, raw.quantity, raw.quantity);
+        }
+
         if (standard) {
             standard.disabled = false;
             standard.value = raw.standard ?? 1;
@@ -1893,166 +2239,122 @@ function initPrescriptionDrugSelect2() {
 
         if (takingCount) {
             takingCount.disabled = false;
-            takingCount.value = raw.taking_count ?? 1;
+            takingCount.value = String(raw.taking_count ?? 1);
         }
 
         if (takingMeal) {
             takingMeal.disabled = false;
-            takingMeal.value = raw.taking_time_meal ?? 1;
+            takingMeal.value = String(raw.taking_time_meal ?? 1);
         }
-
-        const validity = qs('#validity_period_modal', modal);
 
         if (validity && raw.validity_period) {
-            validity.value = String(raw.validity_period);
+            ensureOptionAndSelect(validity, raw.validity_period, String(raw.validity_period) === '365' ? '1 год' : `${raw.validity_period} дней`);
         }
 
-        /*
-         * 3. Строгий рецепт / предупреждение.
-         */
-        const strictMessage = qs('#strict_message_modal', modal);
-        const validityBlock = qs('#validity_block_modal', modal);
-
-        if (raw.strict) {
-            strictMessage?.classList.remove('d-none');
-            validityBlock?.classList.add('d-none');
-
-            if (standard) {
-                standard.min = 1;
-                standard.max = 3;
-            }
-        } else {
-            strictMessage?.classList.add('d-none');
-            validityBlock?.classList.remove('d-none');
-
-            if (standard) {
-                standard.min = 1;
-                standard.removeAttribute('max');
-            }
-        }
-
-        /*
-         * 4. Дни курса и скрытая инструкция.
-         */
+        toggleStrict(raw);
         updatePrescriptionDaysAndText(raw);
 
-        if (printButton) {
-            printButton.disabled = false;
-        }
-
-        console.log('[Prescription] suggested defaults applied', raw);
+        if (printButton) printButton.disabled = false;
     }
 
-    function drugFormTitle(value) {
-        const text = String(value || '').toLowerCase();
+    function sameDrug(left, right) {
+        const leftId = String(itemId(left));
+        const rightId = String(itemId(right));
 
-        const map = {
-            capsules: 'капсулы',
-            capsule: 'капсулы',
-            tablets: 'таблетки',
-            tablet: 'таблетки',
-            pills: 'таблетки',
-            pill: 'таблетки',
-            drops: 'капли',
-            drop: 'капли',
-            solution: 'раствор',
-            syrup: 'сироп',
-            ampoules: 'ампулы',
-            ampoule: 'ампулы',
-            injection: 'инъекции',
-            injections: 'инъекции',
-            powder: 'порошок',
-            suspension: 'суспензия',
-            spray: 'спрей',
-            ointment: 'мазь',
-            cream: 'крем',
-            gel: 'гель',
-            patch: 'пластырь',
-            suppositories: 'суппозитории',
-            suppository: 'суппозитории'
-        };
+        if (leftId && rightId && leftId === rightId) return true;
 
-        if (map[text]) {
-            return map[text];
-        }
+        const leftLatin = itemLatinName(left).toLowerCase();
+        const rightLatin = itemLatinName(right).toLowerCase();
 
-        if (text.includes('capsule')) return 'капсулы';
-        if (text.includes('tablet')) return 'таблетки';
-        if (text.includes('drop')) return 'капли';
-        if (text.includes('solution')) return 'раствор';
-        if (text.includes('syrup')) return 'сироп';
-        if (text.includes('ampoule')) return 'ампулы';
-        if (text.includes('injection')) return 'инъекции';
-
-        return value || '';
+        return leftLatin !== '' && rightLatin !== '' && leftLatin === rightLatin;
     }
 
-    async function loadDrugForms(item) {
+    async function loadPresetForDrug(item) {
+        const raw = item?.raw || item || {};
 
-        const raw = item.raw || item;
+        const localPreset = currentSuggestions.find(candidate => sameDrug(candidate, raw));
+        if (localPreset) return localPreset?.raw || localPreset;
 
-        const latinName = raw.latin_name || item.latin_name || itemLatinName(raw) || raw.text || item.text;
+        if (!suggestionsUrl) return null;
 
-        if (!latinName) {
-            return;
-        }
+        try {
+            const url = new URL(suggestionsUrl, window.location.origin);
+            const params = {
+                ...requestParams(''),
+                drug_id: itemId(raw),
+                latin_name: itemLatinName(raw)
+            };
 
-        const formsUrl = `/api/doctors/search-drugs/${encodeURIComponent(latinName)}/forms`;
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== '' && value !== null && value !== undefined) {
+                    url.searchParams.set(key, value);
+                }
+            });
 
-        const response = await fetch(formsUrl, {
-            credentials: 'same-origin',
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+            const payload = await fetchJson(url.toString());
+            const objectPreset = normalizeObject(payload);
+
+            if (objectPreset && (
+                objectPreset.drug_form
+                || objectPreset.dosage
+                || objectPreset.quantity
+                || objectPreset.usage_instructions
+            )) {
+                return objectPreset;
             }
-        });
 
-        if (!response.ok) {
-            throw new Error(`Ошибка загрузки форм препарата: HTTP ${response.status}`);
+            return normalizeItems(payload).find(candidate => sameDrug(candidate, raw)) || null;
+        } catch (error) {
+            console.warn('[Prescription] preset unavailable, using forms defaults', error);
+            return null;
         }
-
-        const data = await response.json();
-        const rows = normalizeItems(data);
-
-        resetSelect(drugForm, 'Выберите форму', false);
-        resetSelect(dosage, 'Выберите дозировку', true);
-        resetSelect(quantity, 'Выберите количество', true);
-
-        drugForm.dataset.rows = JSON.stringify(rows);
-
-        const forms = [...new Set(rows.map(row => row.form || row.drug_form).filter(Boolean))];
-
-        forms.forEach(value => {
-            drugForm.appendChild(new Option(drugFormTitle(value), value));
-        });
-
-        drugForm.disabled = !forms.length;
-
-        enableRegimenFields();
     }
 
-    function fillDosageAndQuantity() {
-        const rows = safeJsonParse(drugForm?.dataset.rows, []) || [];
-        const selectedForm = drugForm?.value || '';
+    async function processSelectedDrug(item) {
+        const token = ++selectedDrugRequestToken;
+        const normalized = toSelect2Item(item);
 
-        const filtered = rows.filter(row => String(row.form || row.drug_form) === String(selectedForm));
+        showFormError('');
+        resetPrescriptionFields();
 
-        resetSelect(dosage, 'Выберите дозировку', false);
-        resetSelect(quantity, 'Выберите количество', false);
+        try {
+            await loadDrugForms(normalized);
 
-        const dosages = [...new Set(filtered.map(row => row.dosage || row.dose).filter(Boolean))];
-        const quantities = [...new Set(filtered.map(row => row.quantity || row.count).filter(Boolean))];
+            if (token !== selectedDrugRequestToken) return;
 
-        dosages.forEach(value => {
-            dosage.appendChild(new Option(value, value));
-        });
+            const preset = await loadPresetForDrug(normalized);
 
-        quantities.forEach(value => {
-            quantity.appendChild(new Option(value, value));
-        });
+            if (token !== selectedDrugRequestToken) return;
 
-        dosage.disabled = !dosages.length;
-        quantity.disabled = !quantities.length;
+            applySuggestedPrescriptionDefaults({
+                ...(normalized.raw || {}),
+                ...(preset?.raw || preset || {})
+            });
+        } catch (error) {
+            console.error('[Prescription] cannot prepare selected drug', error);
+            showFormError(error.message || 'Не удалось загрузить параметры выбранного препарата.');
+        }
+    }
+
+    async function selectSuggestedDrug(raw) {
+        const item = toSelect2Item(raw);
+
+        $select.find('option').filter(function () {
+            return String(this.value) === String(item.id);
+        }).remove();
+
+        $select.append(new Option(item.text, item.id, true, true));
+        $select.val(item.id).trigger('change.select2');
+
+        if ($select.data('select2')) {
+            $select
+                .next('.select2-container')
+                .find('.select2-selection__rendered')
+                .text(item.text)
+                .attr('title', item.text);
+        }
+
+        await processSelectedDrug(item);
     }
 
     if ($select.hasClass('select2-hidden-accessible')) {
@@ -2062,7 +2364,7 @@ function initPrescriptionDrugSelect2() {
     $select.select2({
         theme: 'bootstrap-5',
         width: '100%',
-        dropdownParent: $('#prescriptionModal'),
+        dropdownParent: $(modal),
         placeholder: select.dataset.placeholder || 'Начните вводить препарат',
         allowClear: true,
         minimumInputLength: 0,
@@ -2091,61 +2393,81 @@ function initPrescriptionDrugSelect2() {
         }
     });
 
-    $select.off('select2:select.prescriptionDrug').on('select2:select.prescriptionDrug', async function (event) {
-        const item = event.params.data || {};
+    $select
+        .off('select2:select.prescriptionDrug')
+        .on('select2:select.prescriptionDrug', async function (event) {
+            await processSelectedDrug(event.params.data || {});
+        });
 
-        resetSelect(drugForm, 'Выберите форму', true);
-        resetSelect(dosage, 'Выберите дозировку', true);
-        resetSelect(quantity, 'Выберите количество', true);
+    $select
+        .off('select2:clear.prescriptionDrug')
+        .on('select2:clear.prescriptionDrug', function () {
+            ++selectedDrugRequestToken;
+            resetPrescriptionFields();
+            showFormError('');
+        });
+
+    drugForm?.addEventListener('change', function () {
+        fillDosageAndQuantity();
+        selectFirstOption(dosage);
+        selectFirstOption(quantity);
+        updatePrescriptionDaysAndText();
+    });
+
+    [dosage, quantity, standard, takingDrug, takingCount, takingMeal].forEach(element => {
+        element?.addEventListener('change', () => updatePrescriptionDaysAndText());
+        element?.addEventListener('input', () => updatePrescriptionDaysAndText());
+    });
+
+    suggestionsList?.addEventListener('click', async function (event) {
+        const button = event.target.closest('[data-pick-suggested-drug]');
+        if (!button) return;
+
+        event.preventDefault();
+
+        let raw = {};
 
         try {
-            await loadDrugForms(item);
+            raw = JSON.parse(decodeURIComponent(button.dataset.drugPayload || '{}'));
         } catch (error) {
-            console.error(error);
-            showSuggestionsMessage(error.message);
+            console.error('[Prescription] invalid suggestion payload', error);
+            return;
         }
 
-        select.dispatchEvent(new CustomEvent('prescription:drug-selected', {
-            bubbles: true,
-            detail: item
-        }));
+        button.disabled = true;
+
+        try {
+            await selectSuggestedDrug(raw);
+        } finally {
+            button.disabled = false;
+        }
     });
-
-    $select.off('select2:clear.prescriptionDrug').on('select2:clear.prescriptionDrug', function () {
-        resetSelect(drugForm, 'Выберите форму', true);
-        resetSelect(dosage, 'Выберите дозировку', true);
-        resetSelect(quantity, 'Выберите количество', true);
-
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-
-    drugForm?.addEventListener('change', fillDosageAndQuantity);
 
     $('input[name="indication_source"]', modal)
         .off('change.prescriptionSelect2')
         .on('change.prescriptionSelect2', async function () {
+            ++selectedDrugRequestToken;
             $select.val(null).trigger('change');
-
-            if ($select.data('select2')) {
-                $select.select2('close');
-            }
+            resetPrescriptionFields();
 
             try {
                 await loadSuggestions();
             } catch (error) {
                 console.error(error);
-                showSuggestionsMessage(error.message);
+                setSuggestionsState('empty', error.message);
             }
         });
 
-    modal.addEventListener('shown.bs.modal', async () => {
-        try {
-            await loadSuggestions();
-        } catch (error) {
-            console.error(error);
-            showSuggestionsMessage(error.message);
-        }
-    });
+    $(modal)
+        .off('shown.bs.modal.prescriptionDrug')
+        .on('shown.bs.modal.prescriptionDrug', async function () {
+            try {
+                await loadSuggestions();
+            } catch (error) {
+                console.error(error);
+                setSuggestionsState('empty', error.message);
+            }
+        });
 
     const docsForm = document.getElementById('pane-docs');
     const fileInput = document.getElementById('document-upload__upload');
@@ -4588,7 +4910,7 @@ function initTestAssignments() {
             if (ctx) {
                 ctx.font = '13px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('QR-библиотека не подключена', pinQrCanvas.width / 2, 104);
+                ctx.fillText('QR-библиотека2 не подключена', pinQrCanvas.width / 2, 104);
                 ctx.fillText('Используйте ссылку выше', pinQrCanvas.width / 2, 124);
             }
         } catch (error) {
@@ -5454,6 +5776,617 @@ function initPatientInfoForm() {
     collectPassport();
 }
 
+function initLabResultDeepLink() {
+    const query = new URLSearchParams(window.location.search);
+    const researchId = query.get('research');
+
+    if (!researchId || !/^\d+$/.test(researchId)) {
+        return;
+    }
+
+    const button = qs(
+        `[data-lab-view][data-id="${researchId}"]`
+    );
+
+    if (!button) {
+        console.warn(
+            `Исследование #${researchId} не найдено на странице`
+        );
+
+        return;
+    }
+
+    openResearchModal(
+        button,
+        '#modalViewLab'
+    );
+}
+
+function initInstrumentalResearchModals() {
+    const editModal = qs('#modalEditInstrumentalResearch');
+    const editForm = qs('#editInstrumentalResearchForm');
+
+    editModal?.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+
+        if (!button?.matches('[data-instrumental-edit]')) {
+            return;
+        }
+
+        const payload = safeJsonParse(
+            button.dataset.payload,
+            {}
+        ) || {};
+
+        if (!editForm) {
+            return;
+        }
+
+        editForm.action = button.dataset.updateUrl || '';
+
+        editForm.elements.namedItem('study_type').value =
+            payload.study_type || '';
+
+        editForm.elements.namedItem('name').value =
+            payload.name || '';
+
+        editForm.elements.namedItem('body_area').value =
+            payload.body_area || '';
+
+        editForm.elements.namedItem('priority').value =
+            payload.priority || 'normal';
+
+        editForm.elements.namedItem('status').value =
+            payload.status || 'ordered';
+
+        editForm.elements.namedItem('planned_at').value =
+            payload.planned_at || '';
+
+        editForm.elements.namedItem('organization').value =
+            payload.organization || '';
+
+        editForm.elements.namedItem('indication').value =
+            payload.indication || '';
+
+        editForm.elements.namedItem('with_contrast').checked =
+            Boolean(payload.with_contrast);
+    });
+
+    const resultModal = qs('#modalInstrumentalResult');
+    const resultForm = qs('#instrumentalResultForm');
+
+    resultModal?.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+
+        if (!button?.matches('[data-instrumental-result]')) {
+            return;
+        }
+
+        const payload = safeJsonParse(
+            button.dataset.payload,
+            {}
+        ) || {};
+
+        if (!resultForm) {
+            return;
+        }
+
+        resultForm.action = button.dataset.resultUrl || '';
+
+        const resultName = qs('#instrumentalResultName');
+
+        if (resultName) {
+            resultName.textContent =
+                payload.name || 'Исследование';
+        }
+
+        resultForm.elements.namedItem('performed_at').value =
+            payload.performed_at || '';
+
+        resultForm.elements.namedItem('result_at').value =
+            payload.result_at || '';
+
+        resultForm.elements.namedItem('organization').value =
+            payload.organization || '';
+
+        resultForm.elements.namedItem('specialist_name').value =
+            payload.specialist_name || '';
+
+        resultForm.elements.namedItem('description').value =
+            payload.description || '';
+
+        resultForm.elements.namedItem('conclusion').value =
+            payload.conclusion || '';
+
+        resultForm.elements.namedItem('recommendations').value =
+            payload.recommendations || '';
+
+        renderInstrumentalMediaList(
+            qs('#instrumentalResultExistingFiles'),
+            payload.files,
+            false
+        );
+    });
+
+    const viewModal = qs('#modalViewInstrumentalResearch');
+
+    viewModal?.addEventListener('show.bs.modal', async event => {
+        const button = event.relatedTarget;
+
+        if (!button?.matches('[data-instrumental-view]')) {
+            return;
+        }
+
+        const payload = safeJsonParse(
+            button.dataset.payload,
+            {}
+        ) || {};
+
+        const viewName = qs('#viewInstrumentalName');
+        const viewType = qs('#viewInstrumentalType');
+        const viewPerformedAt = qs('#viewInstrumentalPerformedAt');
+        const viewResultAt = qs('#viewInstrumentalResultAt');
+        const viewOrganization = qs('#viewInstrumentalOrganization');
+        const viewSpecialist = qs('#viewInstrumentalSpecialist');
+        const viewBodyArea = qs('#viewInstrumentalBodyArea');
+        const viewContrast = qs('#viewInstrumentalContrast');
+        const viewDescription = qs('#viewInstrumentalDescription');
+        const viewConclusion = qs('#viewInstrumentalConclusion');
+        const viewRecommendations = qs('#viewInstrumentalRecommendations');
+
+        if (viewName) {
+            viewName.textContent =
+                payload.name || 'Результат исследования';
+        }
+
+        if (viewType) {
+            viewType.textContent =
+                payload.type_label
+                || payload.study_type?.toUpperCase()
+                || 'Исследование';
+        }
+
+        if (viewPerformedAt) {
+            viewPerformedAt.textContent =
+                formatInstrumentalDate(payload.performed_at);
+        }
+
+        if (viewResultAt) {
+            viewResultAt.textContent =
+                formatInstrumentalDate(payload.result_at);
+        }
+
+        if (viewOrganization) {
+            viewOrganization.textContent =
+                payload.organization || 'Не указана';
+        }
+
+        if (viewSpecialist) {
+            viewSpecialist.textContent =
+                payload.specialist_name || 'Не указан';
+        }
+
+        if (viewBodyArea) {
+            viewBodyArea.textContent =
+                payload.body_area || 'Не указана';
+        }
+
+        if (viewContrast) {
+            viewContrast.textContent =
+                payload.with_contrast
+                    ? 'С контрастом'
+                    : 'Без контраста';
+
+            viewContrast.classList.toggle(
+                'is-active',
+                Boolean(payload.with_contrast)
+            );
+        }
+
+        if (viewDescription) {
+            viewDescription.textContent =
+                payload.description || 'Описание не заполнено';
+        }
+
+        if (viewConclusion) {
+            viewConclusion.textContent =
+                payload.conclusion || 'Заключение не заполнено';
+        }
+
+        if (viewRecommendations) {
+            viewRecommendations.textContent =
+                payload.recommendations || 'Рекомендации отсутствуют';
+        }
+
+        renderInstrumentalMediaList(
+            qs('#viewInstrumentalFiles'),
+            payload.files,
+            true
+        );
+
+        const viewedUrl = button.dataset.viewedUrl;
+
+        if (!viewedUrl || button.dataset.viewed === '1') {
+            return;
+        }
+
+        try {
+            const response = await fetch(viewedUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrf(),
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            button.dataset.viewed = '1';
+        } catch (error) {
+            console.error(
+                'Не удалось зафиксировать просмотр исследования:',
+                error
+            );
+        }
+    });
+
+    const deleteModal =
+        qs('#modalDeleteInstrumentalResearch');
+
+    const deleteForm =
+        qs('#deleteInstrumentalResearchForm');
+
+    deleteModal?.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+
+        if (!button?.matches('[data-instrumental-delete]')) {
+            return;
+        }
+
+        if (deleteForm) {
+            deleteForm.action =
+                button.dataset.deleteUrl || '';
+        }
+
+        const deleteName =
+            qs('#deleteInstrumentalResearchName');
+
+        if (deleteName) {
+            deleteName.textContent =
+                `«${button.dataset.name || 'Исследование'}»`;
+        }
+    });
+
+    const query =
+        new URLSearchParams(window.location.search);
+
+    if (query.get('section') === 'instrumental') {
+        setTimeout(() => {
+            qs('#instrumentalResearchesPanel')
+                ?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                });
+        }, 150);
+    }
+
+    const instrumentalResearchId =
+        query.get('instrumental_research');
+
+    if (
+        instrumentalResearchId
+        && /^\d+$/.test(instrumentalResearchId)
+    ) {
+        const viewButton = qs(
+            `[data-instrumental-view][data-id="${instrumentalResearchId}"]`
+        );
+
+        if (viewButton) {
+            openResearchModal(
+                viewButton,
+                '#modalViewInstrumentalResearch'
+            );
+        }
+    }
+}
+
+function formatInstrumentalFileSize(size) {
+    const bytes = Number(size || 0);
+
+    if (bytes < 1024) {
+        return `${bytes} Б`;
+    }
+
+    if (bytes < 1024 * 1024) {
+        return `${Math.round(bytes / 1024)} КБ`;
+    }
+
+    return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
+}
+
+function formatInstrumentalDate(value) {
+    if (!value) {
+        return '—';
+    }
+
+    const dateTimeMatch = String(value).match(
+        /^(\d{4})-(\d{2})-(\d{2})(?:T|\s)(\d{2}):(\d{2})/
+    );
+
+    if (dateTimeMatch) {
+        return `${dateTimeMatch[3]}.${dateTimeMatch[2]}.${dateTimeMatch[1]} `
+            + `${dateTimeMatch[4]}:${dateTimeMatch[5]}`;
+    }
+
+    const dateMatch = String(value).match(
+        /^(\d{4})-(\d{2})-(\d{2})/
+    );
+
+    if (dateMatch) {
+        return `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`;
+    }
+
+    return String(value);
+}
+
+function getInstrumentalMediaIcon(mimeType) {
+    const mime = String(mimeType || '').toLowerCase();
+
+    if (mime === 'application/pdf') {
+        return 'bi-file-earmark-pdf';
+    }
+
+    if (mime.startsWith('image/')) {
+        return 'bi-file-earmark-image';
+    }
+
+    if (mime.includes('zip')) {
+        return 'bi-file-earmark-zip';
+    }
+
+    return 'bi-file-earmark-medical';
+}
+
+function renderInstrumentalMediaList(
+    container,
+    files,
+    showEmptyState = true
+) {
+    if (!container) {
+        return;
+    }
+
+    files = Array.isArray(files)
+        ? files
+        : [];
+
+    if (!files.length) {
+        container.innerHTML = showEmptyState
+            ? `
+                <div class="instrumental-view-files-empty">
+                    <div class="instrumental-view-files-empty__icon">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+
+                    <div>
+                        <div class="instrumental-view-files-empty__title">
+                            Файлы не прикреплены
+                        </div>
+
+                        <div class="instrumental-view-files-empty__text">
+                            У исследования отсутствуют цифровые материалы
+                        </div>
+                    </div>
+                </div>
+            `
+            : '';
+
+        return;
+    }
+
+    container.innerHTML = files.map(function (file) {
+        const fileName = file.name
+            || file.file_name
+            || 'Файл исследования';
+
+        const fileSize = formatInstrumentalFileSize(
+            file.size
+        );
+
+        const icon = getInstrumentalMediaIcon(
+            file.mime_type
+        );
+
+        return `
+            <a class="instrumental-view-file"
+               href="${escapeHtml(file.view_url || '#')}"
+               target="_blank"
+               rel="noopener">
+
+                <span class="instrumental-view-file__icon">
+                    <i class="bi ${icon}"></i>
+                </span>
+
+                <span class="instrumental-view-file__main">
+                    <span class="instrumental-view-file__name">
+                        ${escapeHtml(fileName)}
+                    </span>
+
+                    <span class="instrumental-view-file__meta">
+                        ${escapeHtml(file.mime_type || 'Файл')}
+                        ${fileSize ? ` · ${escapeHtml(fileSize)}` : ''}
+                    </span>
+                </span>
+
+                <span class="instrumental-view-file__action">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    Открыть
+                </span>
+            </a>
+        `;
+    }).join('');
+}
+
+function getInstrumentalFilesWord(count) {
+    const lastTwoDigits = count % 100;
+    const lastDigit = count % 10;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+        return 'файлов';
+    }
+
+    if (lastDigit === 1) {
+        return 'файл';
+    }
+
+    if (lastDigit >= 2 && lastDigit <= 4) {
+        return 'файла';
+    }
+
+    return 'файлов';
+}
+
+function initInstrumentalResultFiles() {
+    const modal = qs('#modalInstrumentalResult');
+    const input = qs('#instrumentalResultFiles');
+    const summary = qs('#instrumentalResultFilesSummary');
+
+    if (!input || !summary) {
+        return;
+    }
+
+    function renderSelectedFiles() {
+        const files = Array.from(input.files || []);
+
+        if (!files.length) {
+            summary.innerHTML = `
+                <div class="text-muted">
+                    Файлы не выбраны
+                </div>
+            `;
+
+            return;
+        }
+
+        const totalSize = files.reduce(function (sum, file) {
+            return sum + Number(file.size || 0);
+        }, 0);
+
+        const filesList = files.map(function (file) {
+            return `
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <i class="bi bi-file-earmark-check text-success"></i>
+
+                    <span class="text-truncate">
+                        ${escapeHtml(file.name)}
+                    </span>
+
+                    <span class="text-muted text-nowrap">
+                        ${formatInstrumentalFileSize(file.size)}
+                    </span>
+                </div>
+            `;
+        }).join('');
+
+        summary.innerHTML = `
+            <div class="d-flex align-items-center gap-2 text-success">
+                <i class="bi bi-check-circle-fill"></i>
+
+                <strong>
+                    Выбрано:
+                    ${files.length}
+                    ${getInstrumentalFilesWord(files.length)}
+                </strong>
+
+                <span class="text-muted">
+                    · ${formatInstrumentalFileSize(totalSize)}
+                </span>
+            </div>
+
+            <div class="instrumental-result-selected-files">
+                ${filesList}
+            </div>
+        `;
+    }
+
+    input.addEventListener('change', renderSelectedFiles);
+
+    modal?.addEventListener('show.bs.modal', function () {
+        input.value = '';
+        renderSelectedFiles();
+    });
+}
+
+
+$('.js-patient-select').select2({
+
+    placeholder:
+        'Введите ФИО пациента',
+    allowClear: true,
+    width: '100%',
+    minimumInputLength: 2,
+    ajax: {
+        url:'{{ route("api.doctors.analyses.patients-search") }}',
+        dataType: 'json',
+        delay: 300,
+        data: function(params) {
+            return {
+                q: params.term
+            };
+        },
+        processResults: function(data) {
+            return {
+                results: data
+            };
+        }
+    }
+});
+
+$('.js-patient-select').select2({
+    placeholder: 'Введите ФИО пациента',
+    allowClear: true,
+    width: '100%',
+    minimumInputLength: 2,
+    ajax: {
+
+        url: 'api/doctors/search-patients',
+
+        dataType: 'json',
+
+        delay: 300,
+
+        data: function(params) {
+            return {
+                q: params.term
+            };
+        },
+        processResults: function(data) {
+            return {
+                results: data
+            };
+        }
+    },
+
+    templateResult: function(patient) {
+        if (!patient.id) {
+            return patient.text;
+        }
+        return $(
+            '<div class="patient-option">' +
+            '<strong>' + patient.text + '</strong>' +
+            '</div>'
+        );
+    },
+
+    templateSelection: function(patient) {
+        return patient.text || patient.placeholder;
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     initTooltips();
     initPatientInfoForm();
@@ -5465,6 +6398,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initLabResultModal();
     initLabViewModal();
     initLabActions();
+    initLabResultDeepLink();
+    initInstrumentalResearchModals();
+    initInstrumentalResultFiles();
     initPrescriptionIndicationSwitch();
     initPrescriptionDrugSelect2();
     initTestAssignments();

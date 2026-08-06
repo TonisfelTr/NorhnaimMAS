@@ -1,0 +1,14 @@
+В routes/web.php должен быть импорт:
+
+use App\Http\Controllers\Doctors\PrescriptionsController;
+
+Удалите неправильный импорт, если он есть:
+
+use App\Http\Controllers\PrescriptionsController;
+
+Маршрут должен вызывать:
+
+Route::get(
+    '/',
+    [PrescriptionsController::class, 'index']
+)->name('index');

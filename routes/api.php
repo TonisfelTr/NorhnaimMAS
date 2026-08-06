@@ -22,6 +22,7 @@ Route::prefix('/doctors')->group(function () {
     Route::get('/search-drugs/{latin_name}/forms', [AjaxController::class, 'getDrugForms'])->name('api.drugs.search.forms');
     Route::get('/search-params', [AjaxController::class, 'searchLabParameter'])->name('api.params.search');
     Route::get('/search-params/groups', [AjaxController::class, 'searchLabParameterGroup'])->name('api.params.search.groups');
+    Route::get('/sarch-patients', [AjaxController::class, 'searchCandlePatient'])->name('api.patients.cardssearch');
     Route::post('/labtemplates/store', [APIController::class, 'storeLabTemplate'])->name('api.store.labtemplate');
     Route::get('/search-tests', [AjaxController::class, 'searchTestsForPatient'])->name('api.search.tests');
     Route::match(['get', 'post'], '/prescription-autofill', [APIController::class, 'prescriptionAutofill'])->name('api.autofill.prescription');

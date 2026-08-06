@@ -36,6 +36,7 @@
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <span class="badge bg-primary text-bg-primary">{{ $anamnesis->diagnose->code ?? 'Диагноз не поставлен' }}</span>
 
+
                     @if($anamnesis->is_current)
                         <span class="badge bg-success text-bg-success">Текущий</span>
                     @endif
@@ -113,7 +114,6 @@
                                 @endif
                             </div>
                         </div>
-{{--                        @dd($symptoms)--}}
                         <div class="mb-3">
                             <div class="text-muted small mb-1">Симптомы</div>
                             @if(count($symptoms))

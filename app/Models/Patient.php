@@ -39,9 +39,10 @@ class Patient extends Model
         return $this->belongsTo(Diagnose::class);
     }
 
+
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function anamneses(): HasMany
@@ -84,6 +85,13 @@ class Patient extends Model
     public function labResearches(): HasMany
     {
         return $this->hasMany(LabResearch::class, 'patient_id', 'id');
+    }
+
+    public function instrumentalResearches(): HasMany
+    {
+        return $this->hasMany(
+            InstrumentalResearch::class
+        );
     }
 
     public function testSessions(): HasMany

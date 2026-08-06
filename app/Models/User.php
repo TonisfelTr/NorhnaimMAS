@@ -88,7 +88,6 @@ class User extends Authenticatable implements HasMedia, FilamentUser, HasAvatar
     {
         return $this->hasOne(Nurse::class);
     }
-
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->avatar

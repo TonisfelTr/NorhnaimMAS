@@ -12,7 +12,34 @@ class MedicalPrescription extends Model
 {
     use SoftDeletes;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'doctor_id',
+        'doctor_name',
+        'patient_id',
+        'patient_name',
+        'generic_name',
+        'drug_form',
+        'dosage',
+        'quantity',
+        'standards',
+        'usage_instructions',
+        'prescription_form',
+        'issued_at',
+        'validity_period',
+        'series',
+        'number',
+        'birth_at',
+        'is_strict',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'issued_at' => 'date',
+            'birth_at' => 'date',
+            'is_strict' => 'boolean',
+        ];
+    }
 
     protected function getUpdatedAtAttribute($value): string
     {
@@ -38,5 +65,10 @@ class MedicalPrescription extends Model
     public function drug(): BelongsTo
     {
         return $this->belongsTo(Drug::class, 'generic_name', 'latin_name');
+    }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class, 'patient_id', 'id');
     }
 }

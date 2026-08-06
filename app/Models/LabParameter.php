@@ -16,4 +16,9 @@ class LabParameter extends Model
     {
         return $this->hasMany(LabReferenceRange::class, 'parameter_id');
     }
+
+    public function criticalRanges(): HasMany
+    {
+        return $this->hasMany(LabParametersCriticalRange::class, 'parameter_id');
+    }
 }

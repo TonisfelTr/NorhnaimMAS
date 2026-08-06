@@ -3,6 +3,539 @@
 @section('assets')
     @vite('resources/sass/medical_card.sass')
     @vite('resources/js/medical_card.js')
+
+    <!-- PRESCRIPTION_MODAL_FIXED_STYLES_START -->
+    <style>
+        .prescription-modal-ui {
+            --pm-primary: #2563eb;
+            --pm-primary-dark: #1d4ed8;
+            --pm-text: #172033;
+            --pm-muted: #667085;
+            --pm-border: #e4e9f0;
+            --pm-bg: #f5f7fb;
+        }
+
+        .prescription-modal-ui .modal-dialog {
+            width: min(1320px, calc(100vw - 32px)) !important;
+            max-width: 1320px !important;
+            height: auto !important;
+            max-height: calc(100dvh - 32px) !important;
+            margin: 16px auto !important;
+        }
+
+        .prescription-modal-ui .modal-content {
+            width: 100% !important;
+            height: auto !important;
+            max-height: calc(100dvh - 32px) !important;
+            overflow: hidden !important;
+            border: 1px solid rgba(148, 163, 184, .28) !important;
+            border-radius: 22px !important;
+            background: #fff !important;
+            box-shadow: 0 28px 80px rgba(15, 23, 42, .22) !important;
+        }
+
+        .prescription-modal-ui .modal-content > form {
+            display: flex !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: calc(100dvh - 32px) !important;
+            flex-direction: column !important;
+        }
+
+        .prescription-modal-ui .modal-header {
+            display: flex !important;
+            flex: 0 0 auto !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 18px 22px !important;
+            border-bottom: 1px solid var(--pm-border) !important;
+            background:
+                radial-gradient(circle at 0 0, rgba(37, 99, 235, .09), transparent 34%),
+                #fff !important;
+        }
+
+        .presc-modal-heading {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-width: 0;
+        }
+
+        .presc-modal-heading__icon {
+            display: grid;
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            place-items: center;
+            border-radius: 14px;
+            background: #e9f1ff;
+            color: var(--pm-primary);
+            font-size: 20px;
+        }
+
+        .prescription-modal-ui .modal-title {
+            margin: 0 !important;
+            color: var(--pm-text) !important;
+            font-size: 20px !important;
+            font-weight: 800 !important;
+            line-height: 1.2 !important;
+        }
+
+        .presc-modal-subtitle {
+            margin-top: 3px;
+            color: var(--pm-muted);
+            font-size: 12px;
+        }
+
+        .prescription-modal-ui .modal-body {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            overflow: auto !important;
+            padding: 18px 22px 22px !important;
+            background: var(--pm-bg) !important;
+        }
+
+        .presc-layout {
+            display: grid !important;
+            grid-template-columns: minmax(0, 2fr) minmax(310px, .9fr) !important;
+            gap: 18px !important;
+            align-items: start !important;
+        }
+
+        .presc-main {
+            display: grid;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .prescription-modal-ui .presc-section {
+            margin: 0 !important;
+            padding: 17px !important;
+            border: 1px solid var(--pm-border) !important;
+            border-radius: 17px !important;
+            background: #fff !important;
+            box-shadow: 0 5px 18px rgba(15, 23, 42, .035) !important;
+        }
+
+        .prescription-modal-ui .presc-section-head {
+            margin-bottom: 13px !important;
+        }
+
+        .prescription-modal-ui .presc-section-title {
+            margin: 0 0 13px !important;
+            color: var(--pm-text) !important;
+            font-size: 14px !important;
+            font-weight: 800 !important;
+        }
+
+        .prescription-modal-ui .presc-section-head .presc-section-title {
+            margin-bottom: 2px !important;
+        }
+
+        .prescription-modal-ui .presc-section-hint,
+        .prescription-modal-ui .form-text {
+            color: var(--pm-muted) !important;
+            font-size: 11px !important;
+            line-height: 1.45 !important;
+        }
+
+        .prescription-modal-ui .presc-indication-switch {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+        }
+
+        .prescription-modal-ui .presc-radio-card {
+            display: block !important;
+            margin: 0 !important;
+            cursor: pointer;
+        }
+
+        .prescription-modal-ui .presc-radio-card input {
+            position: absolute !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .prescription-modal-ui .presc-radio-card__body {
+            display: flex !important;
+            min-height: 72px !important;
+            align-items: center !important;
+            gap: 11px !important;
+            padding: 11px 12px !important;
+            border: 1px solid #dbe2eb !important;
+            border-radius: 14px !important;
+            background: #fff !important;
+            transition: .16s ease !important;
+        }
+
+        .prescription-modal-ui .presc-radio-card:hover .presc-radio-card__body {
+            border-color: #b8cae8 !important;
+            transform: translateY(-1px);
+        }
+
+        .prescription-modal-ui .presc-radio-card__icon {
+            display: grid !important;
+            width: 34px !important;
+            height: 34px !important;
+            flex: 0 0 34px !important;
+            place-items: center !important;
+            border-radius: 10px !important;
+            background: #f1f5f9 !important;
+            color: #64748b !important;
+            font-size: 15px !important;
+        }
+
+        .prescription-modal-ui .presc-radio-card__title {
+            display: block !important;
+            margin: 0 0 2px !important;
+            color: var(--pm-text) !important;
+            font-size: 13px !important;
+            font-weight: 800 !important;
+        }
+
+        .prescription-modal-ui .presc-radio-card__text {
+            display: block !important;
+            color: var(--pm-muted) !important;
+            font-size: 11px !important;
+        }
+
+        .prescription-modal-ui .presc-radio-card input:checked + .presc-radio-card__body {
+            border-color: #6ea0ff !important;
+            background: #eef4ff !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .09) !important;
+        }
+
+        .prescription-modal-ui .presc-radio-card input:checked + .presc-radio-card__body .presc-radio-card__icon {
+            background: var(--pm-primary) !important;
+            color: #fff !important;
+        }
+
+        .presc-patient-card {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding: 12px 13px !important;
+            border: 1px solid #e3eaf3 !important;
+            border-radius: 14px !important;
+            background: linear-gradient(135deg, #f8fbff, #f3f7fc) !important;
+        }
+
+        .presc-patient-card__avatar {
+            display: grid !important;
+            width: 42px !important;
+            height: 42px !important;
+            flex: 0 0 42px !important;
+            place-items: center !important;
+            border-radius: 13px !important;
+            background: #dfeaff !important;
+            color: var(--pm-primary-dark) !important;
+            font-size: 13px !important;
+            font-weight: 900 !important;
+        }
+
+        .presc-patient-card__content {
+            min-width: 0;
+        }
+
+        .presc-patient-card__name {
+            overflow: hidden;
+            color: var(--pm-text);
+            font-size: 14px;
+            font-weight: 800;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .presc-patient-card__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px 14px;
+            margin-top: 4px;
+            color: var(--pm-muted);
+            font-size: 11px;
+        }
+
+        .prescription-modal-ui .form-label {
+            display: block !important;
+            margin-bottom: 6px !important;
+            color: #344054 !important;
+            font-size: 12px !important;
+            font-weight: 750 !important;
+        }
+
+        .prescription-modal-ui .form-control,
+        .prescription-modal-ui .form-select,
+        .prescription-modal-ui .select2-container--bootstrap-5 .select2-selection {
+            min-height: 42px !important;
+            border-color: #d9e1eb !important;
+            border-radius: 12px !important;
+            background-color: #fff !important;
+            font-size: 13px !important;
+        }
+
+        .prescription-modal-ui .presc-drug-picker .select2-container {
+            width: 100% !important;
+        }
+
+        .prescription-modal-ui .select2-container--bootstrap-5 .select2-dropdown {
+            overflow: hidden !important;
+            border-color: #cfd9e7 !important;
+            border-radius: 13px !important;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, .16) !important;
+        }
+
+        .presc-fields-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            gap: 12px !important;
+        }
+
+        .presc-field {
+            min-width: 0;
+        }
+
+        .presc-field--validity {
+            grid-column: span 2;
+        }
+
+        .presc-strict-warning {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border: 1px solid #f5d58d;
+            border-radius: 12px;
+            background: #fff8e6;
+            color: #8a5a00;
+            font-size: 12px;
+        }
+
+        .prescription-modal-ui .presc-regimen {
+            display: flex !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+            padding: 12px 13px !important;
+            border: 1px dashed #cfd9e7 !important;
+            border-radius: 14px !important;
+            background: #f8fafc !important;
+        }
+
+        .prescription-modal-ui .presc-regimen__input {
+            width: 74px !important;
+            min-width: 74px !important;
+        }
+
+        .prescription-modal-ui .presc-regimen__select {
+            width: 82px !important;
+            min-width: 82px !important;
+        }
+
+        .prescription-modal-ui .presc-regimen__select--meal {
+            width: 96px !important;
+            min-width: 96px !important;
+        }
+
+        .prescription-modal-ui .presc-regimen__badge {
+            display: inline-flex !important;
+            min-width: 42px !important;
+            min-height: 32px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 4px 9px !important;
+            border-radius: 999px !important;
+            background: #e6efff !important;
+            color: var(--pm-primary-dark) !important;
+            font-size: 12px !important;
+            font-weight: 850 !important;
+        }
+
+        .prescription-modal-ui .presc-side-card {
+            position: sticky !important;
+            top: 0 !important;
+            max-height: calc(100dvh - 190px) !important;
+            overflow: auto !important;
+            padding: 17px !important;
+            border: 1px solid var(--pm-border) !important;
+            border-radius: 18px !important;
+            background: #fff !important;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, .05) !important;
+        }
+
+        .presc-side-card__head {
+            display: flex !important;
+            align-items: flex-start !important;
+            gap: 11px !important;
+            margin-bottom: 13px !important;
+        }
+
+        .presc-side-card__icon {
+            display: grid !important;
+            width: 38px !important;
+            height: 38px !important;
+            flex: 0 0 38px !important;
+            place-items: center !important;
+            border-radius: 12px !important;
+            background: #eeeaff !important;
+            color: #6d4aff !important;
+            font-size: 17px !important;
+        }
+
+        .presc-side-card__title {
+            color: var(--pm-text) !important;
+            font-size: 14px !important;
+            font-weight: 850 !important;
+        }
+
+        .presc-side-card__hint {
+            margin-top: 3px !important;
+            color: var(--pm-muted) !important;
+            font-size: 11px !important;
+        }
+
+        .presc-side-card__toolbar {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+            margin-bottom: 12px !important;
+        }
+
+        .presc-filter-badge,
+        .presc-count-badge {
+            display: inline-flex !important;
+            min-height: 27px !important;
+            align-items: center !important;
+            padding: 4px 9px !important;
+            border-radius: 999px !important;
+            font-size: 10px !important;
+            font-weight: 750 !important;
+        }
+
+        .presc-filter-badge {
+            background: #edf4ff !important;
+            color: #2658a6 !important;
+        }
+
+        .presc-count-badge {
+            background: #f2f4f7 !important;
+            color: #667085 !important;
+        }
+
+        .presc-suggestions-state {
+            display: flex !important;
+            min-height: 155px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-direction: column !important;
+            gap: 9px !important;
+            padding: 18px !important;
+            border: 1px dashed #d7e0ec !important;
+            border-radius: 14px !important;
+            background: #fafcff !important;
+            color: #8a96a8 !important;
+            font-size: 12px !important;
+            text-align: center !important;
+        }
+
+        .prescription-modal-ui .modal-footer {
+            display: flex !important;
+            flex: 0 0 auto !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 9px !important;
+            padding: 13px 22px !important;
+            border-top: 1px solid var(--pm-border) !important;
+            background: #fff !important;
+            box-shadow: 0 -10px 25px rgba(15, 23, 42, .035) !important;
+        }
+
+        .presc-footer-note {
+            display: flex !important;
+            align-items: center !important;
+            gap: 7px !important;
+            margin-right: auto !important;
+            color: var(--pm-muted) !important;
+            font-size: 11px !important;
+        }
+
+        .presc-btn {
+            display: inline-flex !important;
+            width: auto !important;
+            min-height: 42px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 7px !important;
+            padding: 9px 16px !important;
+            border-radius: 12px !important;
+            font-size: 12px !important;
+            font-weight: 750 !important;
+        }
+
+        .presc-btn--primary {
+            min-width: 165px !important;
+        }
+
+        @media (max-width: 1100px) {
+            .presc-layout {
+                grid-template-columns: 1fr !important;
+            }
+
+            .prescription-modal-ui .presc-side-card {
+                position: static !important;
+                max-height: none !important;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .prescription-modal-ui .modal-dialog {
+                width: calc(100vw - 12px) !important;
+                margin: 6px auto !important;
+            }
+
+            .prescription-modal-ui .presc-indication-switch {
+                grid-template-columns: 1fr !important;
+            }
+
+            .presc-fields-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+
+            .presc-field--validity {
+                grid-column: span 1;
+            }
+
+            .presc-footer-note {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .presc-fields-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .prescription-modal-ui .modal-footer {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+            }
+
+            .prescription-modal-ui .modal-footer .btn {
+                width: 100% !important;
+            }
+        }
+
+        /* d-none должен перекрывать display:flex у состояний боковой панели. */
+        .prescription-modal-ui .d-none {
+            display: none !important;
+        }
+    </style>
+    <!-- PRESCRIPTION_MODAL_FIXED_STYLES_END -->
 @endsection
 @section('sub-main')
     <div id="medicalCardRoot"
@@ -73,7 +606,7 @@
                         <div>
                             <div class="mc-patient-meta-label">Лечащий врач</div>
                             <div class="mc-patient-meta-value">
-                                {{ $patient->doctor->fullname }}
+                                {{ $patient->with('doctor')->first()->surname . ' ' . $patient->with('doctor')->first()->name . ' ' . $patient->with('doctor')->first()->patronym }}
                             </div>
                         </div>
                     </div>
@@ -121,7 +654,8 @@
                 <div class="mc-tabs mc-tabs-modern">
                     <ul class="nav" id="cardTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-patient-info" type="button">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pane-patient-info"
+                                    type="button">
                                 Общая информация
                             </button>
                         </li>
@@ -131,7 +665,8 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-anamnesis" type="button">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-anamnesis"
+                                    type="button">
                                 Анамнез
                             </button>
                         </li>
@@ -141,7 +676,8 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-epicrisis" type="button">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-epicrisis"
+                                    type="button">
                                 Эпикриз
                             </button>
                         </li>
@@ -178,7 +714,8 @@
                                 <h2 class="patient-info-hero__title">Общая информация</h2>
                                 <div class="patient-info-hero__subtitle">
                                     Редактирование основных регистрационных данных: ФИО, дата рождения, пол,
-                                    паспорт, адрес прописки, адрес фактического проживания, контакты и номер медицинской карты.
+                                    паспорт, адрес прописки, адрес фактического проживания, контакты и номер медицинской
+                                    карты.
                                 </div>
                             </div>
                         </div>
@@ -255,7 +792,8 @@
                             <div>
                                 <div class="patient-info-form-card__title">Данные пациента</div>
                                 <div class="patient-info-form-card__hint">
-                                    После сохранения данные обновятся в шапке медицинской карты и в регистрационных сведениях пациента.
+                                    После сохранения данные обновятся в шапке медицинской карты и в регистрационных
+                                    сведениях пациента.
                                 </div>
                             </div>
                         </div>
@@ -311,9 +849,16 @@
                                     <div class="col-md-3">
                                         <label class="form-label" for="patientGender">Пол</label>
                                         <select id="patientGender" name="gender" class="form-select">
-                                            <option value="" @selected(old('gender', $patient->gender) === null || old('gender', $patient->gender) === '')>Не указан</option>
-                                            <option value="M" @selected(old('gender', $patient->gender) === 'M')>Мужской</option>
-                                            <option value="F" @selected(old('gender', $patient->gender) === 'F')>Женский</option>
+                                            <option
+                                                value="" @selected(old('gender', $patient->gender) === null || old('gender', $patient->gender) === '')>
+                                                Не указан
+                                            </option>
+                                            <option value="M" @selected(old('gender', $patient->gender) === 'M')>
+                                                Мужской
+                                            </option>
+                                            <option value="F" @selected(old('gender', $patient->gender) === 'F')>
+                                                Женский
+                                            </option>
                                         </select>
                                     </div>
                                     <div class="col-md-3">
@@ -362,7 +907,8 @@
                                                value="{{ old('email', $patient->email ?? '') }}">
                                     </div>
                                     <div class="col-md-5">
-                                        <label class="form-label" for="patientInsuranceCompany">Страховая организация</label>
+                                        <label class="form-label" for="patientInsuranceCompany">Страховая
+                                            организация</label>
                                         <div class="patient-info-address-wrap">
                                             <input id="patientInsuranceCompany"
                                                    type="text"
@@ -374,11 +920,13 @@
                                                    placeholder="Начните вводить название страховой"
                                                    title="Введите название или дважды кликните, чтобы открыть список популярных страховых"
                                                    value="{{ old('insurance_company', $patient->insurance_company) }}">
-                                            <div id="patientInsuranceCompanySuggest" class="patient-info-address-suggest"></div>
+                                            <div id="patientInsuranceCompanySuggest"
+                                                 class="patient-info-address-suggest"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label" for="patientInsurancePolicyNumber">Номер полиса</label>
+                                        <label class="form-label" for="patientInsurancePolicyNumber">Номер
+                                            полиса</label>
                                         <input id="patientInsurancePolicyNumber"
                                                type="text"
                                                name="oms"
@@ -414,7 +962,8 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label" for="patientAddressJob">Место работы / организация</label>
+                                        <label class="form-label" for="patientAddressJob">Место работы /
+                                            организация</label>
                                         <input id="patientAddressJob"
                                                type="text"
                                                name="job_organization"
@@ -435,7 +984,8 @@
                                                        value="1"
                                                     @checked((bool)$patient->socially_dangerous)>
                                                 <span>
-                                                    <span class="patient-info-check-card__title">Социально опасный</span>
+                                                    <span
+                                                        class="patient-info-check-card__title">Социально опасный</span>
                                                     <span class="patient-info-check-card__hint d-block">Отметка для регистрационных и медицинских предупреждений.</span>
                                                 </span>
                                             </label>
@@ -516,7 +1066,8 @@
                                                value="{{ old('passport_issued_at', $patient->issued_at) }}">
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label" for="patientPassportDepartmentCode">Код подразделения</label>
+                                        <label class="form-label" for="patientPassportDepartmentCode">Код
+                                            подразделения</label>
                                         <input id="patientPassportDepartmentCode"
                                                type="text"
                                                name="passport_department_code"
@@ -553,14 +1104,17 @@
                                     <div class="patient-info-address-card__head">
                                         <div>
                                             <div class="patient-info-address-card__title">Адрес прописки</div>
-                                            <div class="patient-info-address-card__hint">Начните вводить город, улицу, дом или квартиру — адрес можно выбрать из подсказки.</div>
+                                            <div class="patient-info-address-card__hint">Начните вводить город, улицу,
+                                                дом или квартиру — адрес можно выбрать из подсказки.
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div class="patient-info-address-grid">
                                         <div class="patient-info-address-grid__address">
                                             <div class="patient-info-address-wrap">
-                                                <label class="form-label" for="patientRegistrationAddress">Адрес с индексом</label>
+                                                <label class="form-label" for="patientRegistrationAddress">Адрес с
+                                                    индексом</label>
                                                 <input id="patientRegistrationAddress"
                                                        type="text"
                                                        name="address_registration"
@@ -572,7 +1126,8 @@
                                                        data-suggest-box="#patientRegistrationAddressSuggest"
                                                        placeholder="Например: 634000, г Томск, ул Ижевская, д 10, кв 21"
                                                        value="{{ old('address_registration', $patient->address_registration) }}">
-                                                <div id="patientRegistrationAddressSuggest" class="patient-info-address-suggest"></div>
+                                                <div id="patientRegistrationAddressSuggest"
+                                                     class="patient-info-address-suggest"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -581,8 +1136,12 @@
                                 <div class="patient-info-address-card">
                                     <div class="patient-info-address-card__head">
                                         <div>
-                                            <div class="patient-info-address-card__title">Адрес фактического проживания</div>
-                                            <div class="patient-info-address-card__hint">Заполните только если отличается от адреса прописки.</div>
+                                            <div class="patient-info-address-card__title">Адрес фактического
+                                                проживания
+                                            </div>
+                                            <div class="patient-info-address-card__hint">Заполните только если
+                                                отличается от адреса прописки.
+                                            </div>
                                         </div>
 
                                         <div class="patient-info-address-card__actions">
@@ -610,7 +1169,8 @@
                                     <div class="patient-info-address-grid">
                                         <div class="patient-info-address-grid__address">
                                             <div class="patient-info-address-wrap">
-                                                <label class="form-label" for="patientActualAddress">Адрес с индексом</label>
+                                                <label class="form-label" for="patientActualAddress">Адрес с
+                                                    индексом</label>
                                                 <input id="patientActualAddress"
                                                        type="text"
                                                        name="address_residence"
@@ -621,13 +1181,15 @@
                                                        data-suggest-box="#patientActualAddressSuggest"
                                                        placeholder="Например: 634000, г Томск, ул Ижевская, д 10, кв 21"
                                                        value="{{ old('address_residence', $patient->address_residence) }}">
-                                                <div id="patientActualAddressSuggest" class="patient-info-address-suggest"></div>
+                                                <div id="patientActualAddressSuggest"
+                                                     class="patient-info-address-suggest"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <input type="hidden" name="address" id="patientLegacyAddress" value="{{ old('address', $patient->address_registration) }}">
+                                <input type="hidden" name="address" id="patientLegacyAddress"
+                                       value="{{ old('address', $patient->address_registration) }}">
                             </section>
 
                             <section class="patient-info-section patient-info-section--comment">
@@ -698,8 +1260,9 @@
                             <div class="mc-card h-100">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-                                             style="width: 44px; height: 44px;">
+                                        <div
+                                            class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                                            style="width: 44px; height: 44px;">
                                             <i class="bi bi-folder2-open fs-5"></i>
                                         </div>
                                         <div>
@@ -715,8 +1278,9 @@
                             <div class="mc-card h-100">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center"
-                                             style="width: 44px; height: 44px;">
+                                        <div
+                                            class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center"
+                                            style="width: 44px; height: 44px;">
                                             <i class="bi bi-file-earmark-medical fs-5"></i>
                                         </div>
                                         <div>
@@ -732,8 +1296,9 @@
                             <div class="mc-card h-100">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
-                                             style="width: 44px; height: 44px;">
+                                        <div
+                                            class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
+                                            style="width: 44px; height: 44px;">
                                             <i class="bi bi-clock-history fs-5"></i>
                                         </div>
                                         <div>
@@ -782,8 +1347,10 @@
                                                     @endswitch
                                                 </td>
                                                 <td>
-                                                    <div class="fw-semibold">{{ $document->name ?? $document->title ?? 'Документ' }}</div>
-                                                    <div class="small" style="color: green;">{{ $document->medical_file ? 'Медицинский документ' : '' }}</div>
+                                                    <div
+                                                        class="fw-semibold">{{ $document->name ?? $document->title ?? 'Документ' }}</div>
+                                                    <div class="small"
+                                                         style="color: green;">{{ $document->medical_file ? 'Медицинский документ' : '' }}</div>
                                                 </td>
                                                 <td>{{ $document->description ?? '—' }}</td>
                                                 <td class="text-nowrap">{{ $document->created_at?->format('d.m.Y H:i') }}</td>
@@ -810,13 +1377,15 @@
                                 </div>
                             @else
                                 <div class="text-center py-5">
-                                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
-                                         style="width: 72px; height: 72px;">
+                                    <div
+                                        class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
+                                        style="width: 72px; height: 72px;">
                                         <i class="bi bi-folder2-open fs-2 text-muted"></i>
                                     </div>
                                     <div class="h6 mb-1">Документов пока нет</div>
                                     <div class="text-muted small mb-3">
-                                        Здесь будут отображаться выписки, заключения, изображения и другие файлы пациента.
+                                        Здесь будут отображаться выписки, заключения, изображения и другие файлы
+                                        пациента.
                                     </div>
                                     <button type="button"
                                             class="btn btn-outline-primary btn-sm"
@@ -839,12 +1408,14 @@
                                     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
                                     <input type="hidden" name="doctor_id" value="{{ auth()->user()->doctor->id }}">
                                     <h5 class="modal-title">Загрузка документа</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Закрыть"></button>
                                 </div>
 
                                 <div class="modal-body">
                                     <div class="mb-3">
-                                        <label class="form-label label-required" for="documentUploadName">Название документа</label>
+                                        <label class="form-label label-required" for="documentUploadName">Название
+                                            документа</label>
                                         <input id="documentUploadName"
                                                type="text"
                                                name="name"
@@ -868,13 +1439,17 @@
                                         <input type="checkbox" name="medical_file" id="medical_file">
                                         <label for="medical_file"> Медицинский документ</label>
                                     </div>
-                                    <div id="documentUploadDropzone" class="document-upload-dropzone" role="button" tabindex="0">
+                                    <div id="documentUploadDropzone" class="document-upload-dropzone" role="button"
+                                         tabindex="0">
                                         <div class="document-upload-dropzone__icon">
                                             <i class="bi bi-cloud-arrow-up fs-3"></i>
                                         </div>
                                         <div class="fw-semibold">Перетащите файл сюда</div>
-                                        <div class="small text-muted mt-1">или выберите его вручную. За один раз можно загрузить только один файл.</div>
-                                        <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="documentUploadSelectFile">
+                                        <div class="small text-muted mt-1">или выберите его вручную. За один раз можно
+                                            загрузить только один файл.
+                                        </div>
+                                        <button type="button" class="btn btn-outline-primary btn-sm mt-3"
+                                                id="documentUploadSelectFile">
                                             <i class="bi bi-paperclip me-1"></i> Выбрать файл
                                         </button>
                                     </div>
@@ -883,11 +1458,14 @@
                                         <div class="d-flex align-items-center gap-2 min-w-0">
                                             <i class="bi bi-file-earmark-medical text-primary fs-5"></i>
                                             <div class="min-w-0">
-                                                <div id="documentUploadFileName" class="document-upload-file__name">—</div>
-                                                <div id="documentUploadFileMeta" class="document-upload-file__meta">—</div>
+                                                <div id="documentUploadFileName" class="document-upload-file__name">—
+                                                </div>
+                                                <div id="documentUploadFileMeta" class="document-upload-file__meta">—
+                                                </div>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-link text-danger p-0" id="documentUploadClearFile" title="Убрать файл">
+                                        <button type="button" class="btn btn-link text-danger p-0"
+                                                id="documentUploadClearFile" title="Убрать файл">
                                             <i class="bi bi-x-lg"></i>
                                         </button>
                                     </div>
@@ -946,110 +1524,430 @@
                     @endforelse
                 </div>
 
-                <div class="tab-pane fade mc-pane" id="pane-labs" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <a href="#" class="btn btn-primary btn-sm"
-                           data-bs-toggle="modal" data-bs-target="#modalAddLabOrder">
-                            <i class="bi bi-plus-lg me-1"></i> Добавить
-                        </a>
-                    </div>
+                <div class="tab-pane fade mc-pane"
+                     id="pane-labs"
+                     role="tabpanel">
 
-                    <div class="mc-card">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table align-middle mb-0">
-                                    <thead class="table-light">
-                                    <tr>
-                                        <th>Лабораторное название</th>
-                                        <th>Дата</th>
-                                        <th>Приоритет</th>
-                                        <th>Статус</th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    @foreach($researches as $research)
-                                        <tr class="placeholder-glow">
-                                            <td><span class="col-7">{{ $research->laboratory }}</span></td>
-                                            <td><span
-                                                    class="col-6">{{ $research->updated_at_display }}</span>
-                                            </td>
-                                            <td><span
-                                                    class="col-8">{{ $research->priority == 'normal' ? 'Обычный' : 'Срочный' }}</span>
-                                            </td>
-                                            <td class="text-nowrap" style="min-width: 130px;">
-                                                @switch($research->status)
-                                                    @case('ordered')
-                                                        <span class="badge text-bg-primary">Назначено</span>
-                                                        @break
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
 
-                                                    @case('processing')
-                                                        <span class="badge text-bg-warning">В работе</span>
-                                                        @break
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            <strong>Не удалось сохранить данные.</strong>
 
-                                                    @case('ready')
-                                                        <span class="badge text-bg-success">Выполнен</span>
-                                                        @break
+                            <ul class="mb-0 mt-2">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
-                                                    @default
-                                                        <span class="badge text-bg-light border text-muted">{{ $research->status }}</span>
-                                                @endswitch
-                                            </td>
-                                            <td class="text-end text-nowrap" style="width: 140px;">
-                                                @if($research->status === 'ready')
+                    <div class="row g-4 align-items-stretch">
 
-                                                    <button type="button"
-                                                            class="btn btn-link p-1"
-                                                            title="Печать результатов"
-                                                            data-research-print
-                                                            data-url="{{ route('doctors.patients.researches.print', ['patient' => $patient->id, 'labResearch' => $research->id]) }}"
-                                                            data-research-id="{{ $research->id }}"
-                                                            data-patient-id="{{ $patient->id }}">
-                                                        <i class="bi bi-printer"></i>
-                                                    </button>
-                                                    <button type="button"
-                                                            class="btn btn-link p-1"
-                                                            title="Просмотреть результаты"
-                                                            data-lab-view
-                                                            data-id="{{ $research->id }}"
-                                                            data-params='@json($research->params_payload ?? [])'
-                                                            data-values='@json($research->values_map ?? [])'
-                                                            data-collected-at="{{ optional($research->collected_at ?? $research->planned_at)->format('Y-m-d H:i') }}"
-                                                            data-laboratory="{{ $research->laboratory }}"
-                                                            data-comment="{{ $research->comment }}">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                @else
-                                                    <button type="button"
-                                                            class="btn btn-link p-1"
-                                                            title="Внести изменения"
-                                                            data-lab-edit
-                                                            data-id="{{ $research->id }}"
-                                                            data-params='@json($research->params_payload ?? [])'
-                                                            data-values='@json($research->values_map ?? [])'
-                                                            data-planned-at="{{ optional($research->planned_at)->format('Y-m-d\TH:i') }}"
-                                                            data-priority="{{ $research->priority }}"
-                                                            data-laboratory="{{ $research->laboratory }}"
-                                                            data-comment="{{ $research->comment }}"
-                                                            data-sample-type="{{ $research->sample_type }}">
-                                                        <i class="bi bi-pencil-square"></i>
-                                                    </button>
-                                                @endif
+                        {{-- Лабораторные анализы --}}
+                        <div class="col-xl-6">
+                            <section class="mc-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                        <div>
+                                            <div class="h5 mb-1">
+                                                <i class="bi bi-droplet-half text-primary me-1"></i>
+                                                Лабораторные анализы
+                                            </div>
 
-                                                <button type="button"
-                                                        class="btn btn-link p-1"
-                                                        title="Удалить"
-                                                        data-lab-delete
-                                                        data-id="{{ $research->id }}"
-                                                        data-delete-url="{{ route('doctors.patients.researches.delete', $research->id) }}">
-                                                    <i class="bi bi-trash3 text-danger"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                            <div class="small text-muted">
+                                                Показатели, значения и референсные интервалы
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge text-bg-light border">
+                                {{ $researches->count() }}
+                            </span>
+
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalAddLabOrder">
+                                                <i class="bi bi-plus-lg me-1"></i>
+                                                Добавить
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    @if($researches->isNotEmpty())
+                                        <div class="table-responsive">
+                                            <table class="table align-middle mb-0">
+                                                <thead class="table-light">
+                                                <tr>
+                                                    <th>Анализ</th>
+                                                    <th>Дата</th>
+                                                    <th>Статус</th>
+                                                    <th class="text-end"></th>
+                                                </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                @foreach($researches as $research)
+                                                    <tr>
+                                                        <td>
+                                                            <div class="fw-semibold">
+                                                                {{ $research->laboratory ?: 'Лабораторный анализ' }}
+                                                            </div>
+
+                                                            <div class="small text-muted">
+                                                                {{ $research->sample_type ?: 'Материал не указан' }}
+                                                            </div>
+                                                        </td>
+
+                                                        <td class="text-nowrap">
+                                                            {{ $research->planned_at?->format('d.m.Y') ?: '—' }}
+                                                        </td>
+
+                                                        <td>
+                                                            @switch($research->status)
+                                                                @case('ordered')
+                                                                    <span class="badge text-bg-primary">
+                                                        Назначено
+                                                    </span>
+                                                                    @break
+
+                                                                @case('processing')
+                                                                    <span class="badge text-bg-warning">
+                                                        В работе
+                                                    </span>
+                                                                    @break
+
+                                                                @case('ready')
+                                                                    <span class="badge text-bg-success">
+                                                        Выполнен
+                                                    </span>
+                                                                    @break
+
+                                                                @default
+                                                                    <span class="badge text-bg-light border text-muted">
+                                                        {{ $research->status }}
+                                                    </span>
+                                                            @endswitch
+                                                        </td>
+
+                                                        <td class="text-end text-nowrap">
+                                                            @if($research->status === 'ready')
+                                                                <button type="button"
+                                                                        class="btn btn-link p-1"
+                                                                        title="Печать результатов"
+                                                                        data-research-print
+                                                                        data-url="{{ route(
+                                                            'doctors.patients.researches.print',
+                                                            [
+                                                                'patient' => $patient->id,
+                                                                'labResearch' => $research->id,
+                                                            ]
+                                                        ) }}"
+                                                                        data-research-id="{{ $research->id }}"
+                                                                        data-patient-id="{{ $patient->id }}">
+                                                                    <i class="bi bi-printer"></i>
+                                                                </button>
+
+                                                                <button type="button"
+                                                                        class="btn btn-link p-1"
+                                                                        title="Просмотреть результаты"
+                                                                        data-lab-view
+                                                                        data-id="{{ $research->id }}"
+                                                                        data-view-url="{{ route(
+                                                            'doctors.patients.researches.show',
+                                                            [
+                                                                'labResearch' => $research->id,
+                                                            ]
+                                                        ) }}"
+                                                                        data-params='@json($research->params_payload ?? [])'
+                                                                        data-values='@json($research->values_map ?? [])'
+                                                                        data-collected-at="{{ optional(
+                                                            $research->collected_at
+                                                            ?? $research->planned_at
+                                                        )->format('Y-m-d H:i') }}"
+                                                                        data-laboratory="{{ $research->laboratory }}"
+                                                                        data-comment="{{ $research->comment }}">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </button>
+                                                            @else
+                                                                <button type="button"
+                                                                        class="btn btn-link p-1"
+                                                                        title="Редактировать анализ"
+                                                                        data-lab-edit
+                                                                        data-id="{{ $research->id }}"
+                                                                        data-params='@json($research->params_payload ?? [])'
+                                                                        data-values='@json($research->values_map ?? [])'
+                                                                        data-planned-at="{{ optional($research->planned_at)->format('Y-m-d\TH:i') }}"
+                                                                        data-priority="{{ $research->priority }}"
+                                                                        data-laboratory="{{ $research->laboratory }}"
+                                                                        data-comment="{{ $research->comment }}"
+                                                                        data-sample-type="{{ $research->sample_type }}">
+                                                                    <i class="bi bi-pencil-square"></i>
+                                                                </button>
+                                                            @endif
+
+                                                            <button type="button"
+                                                                    class="btn btn-link p-1"
+                                                                    title="Удалить"
+                                                                    data-lab-delete
+                                                                    data-id="{{ $research->id }}"
+                                                                    data-delete-url="{{ route(
+                                                        'doctors.patients.researches.delete',
+                                                        $research->id
+                                                    ) }}">
+                                                                <i class="bi bi-trash3 text-danger"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <div class="text-center py-5">
+                                            <div class="mb-3 text-muted">
+                                                <i class="bi bi-droplet fs-1"></i>
+                                            </div>
+
+                                            <div class="fw-semibold">
+                                                Лабораторных анализов пока нет
+                                            </div>
+
+                                            <div class="small text-muted mt-1">
+                                                Создайте направление на лабораторный анализ.
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </section>
+                        </div>
+
+                        {{-- Инструментальные исследования --}}
+                        <div class="col-xl-6"
+                             id="instrumentalResearchesPanel">
+
+                            <section class="mc-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                                        <div>
+                                            <div class="h5 mb-1">
+                                                <i class="bi bi-heart-pulse text-danger me-1"></i>
+                                                Инструментальные исследования
+                                            </div>
+
+                                            <div class="small text-muted">
+                                                МРТ, КТ, ЭЭГ, ЭКГ, УЗИ и другие исследования
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge text-bg-light border">
+                                {{ $instrumentalResearches->count() }}
+                            </span>
+
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalAddInstrumentalResearch">
+                                                <i class="bi bi-plus-lg me-1"></i>
+                                                Добавить
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    @if($instrumentalResearches->isNotEmpty())
+                                        <div class="table-responsive">
+                                            <table class="table align-middle mb-0">
+                                                <thead class="table-light">
+                                                <tr>
+                                                    <th>Исследование</th>
+                                                    <th>Дата</th>
+                                                    <th>Статус</th>
+                                                    <th class="text-end"></th>
+                                                </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                @foreach($instrumentalResearches as $instrumentalResearch)
+                                                    @php
+                                                        $instrumentalPayload = [
+                                                            'id' => $instrumentalResearch->id,
+                                                            'study_type' => $instrumentalResearch->study_type,
+                                                            'name' => $instrumentalResearch->name,
+                                                            'body_area' => $instrumentalResearch->body_area,
+                                                            'priority' => $instrumentalResearch->priority,
+                                                            'status' => $instrumentalResearch->status,
+                                                            'with_contrast' => $instrumentalResearch->with_contrast,
+                                                            'planned_at' => $instrumentalResearch->planned_at?->format('Y-m-d\TH:i'),
+                                                            'performed_at' => $instrumentalResearch->performed_at?->format('Y-m-d\TH:i'),
+                                                            'result_at' => $instrumentalResearch->result_at?->format('Y-m-d\TH:i'),
+                                                            'organization' => $instrumentalResearch->organization,
+                                                            'specialist_name' => $instrumentalResearch->specialist_name,
+                                                            'indication' => $instrumentalResearch->indication,
+                                                            'description' => $instrumentalResearch->description,
+                                                            'conclusion' => $instrumentalResearch->conclusion,
+                                                            'recommendations' => $instrumentalResearch->recommendations,
+                                                            'type_label' => $instrumentalResearch->type_label,
+                                                            'body_area' => $instrumentalResearch->body_area,
+                                                            'result_at' => $instrumentalResearch->result_at?->format('Y-m-d\TH:i'),
+                                                            'files' => $instrumentalResearch->getMedia(\App\Models\InstrumentalResearch::MEDIA_COLLECTION_RESULTS)
+                                                                ->map(function ($media) use ($patient, $instrumentalResearch) {
+                                                                    return [
+                                                                        'id' => $media->id,
+                                                                        'name' => $media->name,
+                                                                        'file_name' => $media->file_name,
+                                                                        'mime_type' => $media->mime_type,
+                                                                        'size' => $media->size,
+                                                                        'view_url' => route('doctors.patients.instrumentals.media.view',
+                                                                            [
+                                                                                'patient' => $patient->id,
+                                                                                'instrumentalResearch' => $instrumentalResearch->id,
+                                                                                'media' => $media->id,
+                                                                            ]
+                                                                        ),
+                                                                    ];
+                                                                })
+                                                                ->values(),
+                                                        ];
+                                                    @endphp
+
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-start gap-2">
+                                                <span class="badge text-bg-light border">
+                                                    {{ $instrumentalResearch->type_label }}
+                                                </span>
+
+                                                                <div>
+                                                                    <div class="fw-semibold">
+                                                                        {{ $instrumentalResearch->name }}
+                                                                    </div>
+
+                                                                    @if($instrumentalResearch->body_area)
+                                                                        <div class="small text-muted">
+                                                                            {{ $instrumentalResearch->body_area }}
+                                                                        </div>
+                                                                    @endif
+
+                                                                    @if($instrumentalResearch->with_contrast)
+                                                                        <div class="small text-primary">
+                                                                            С контрастированием
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </td>
+
+                                                        <td class="text-nowrap">
+                                                            {{ $instrumentalResearch->planned_at?->format('d.m.Y') ?: '—' }}
+                                                        </td>
+
+                                                        <td>
+                                            <span class="badge text-bg-{{ $instrumentalResearch->status_class }}">
+                                                {{ $instrumentalResearch->status_label }}
+                                            </span>
+                                                        </td>
+
+                                                        <td class="text-end text-nowrap">
+                                                            <button type="button"
+                                                                    class="btn btn-link p-1"
+                                                                    title="Редактировать назначение"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#modalEditInstrumentalResearch"
+                                                                    data-instrumental-edit
+                                                                    data-payload='@json($instrumentalPayload)'
+                                                                    data-update-url="{{ route('doctors.patients.instrumentals.update', [
+                                                            'patient' => $patient->id,
+                                                            'instrumentalResearch' => $instrumentalResearch->id,
+                                                        ]) }}">
+                                                                <i class="bi bi-pencil-square"></i>
+                                                            </button>
+
+                                                            @if($instrumentalResearch->status !== 'cancelled')
+                                                                <button type="button"
+                                                                        class="btn btn-link p-1"
+                                                                        title="{{ $instrumentalResearch->status === 'ready'
+                                                            ? 'Изменить заключение'
+                                                            : 'Внести результат' }}"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#modalInstrumentalResult"
+                                                                        data-instrumental-result
+                                                                        data-payload='@json($instrumentalPayload)'
+                                                                        data-result-url="{{ route(
+                                                            'doctors.patients.instrumentals.result',
+                                                            [
+                                                                'patient' => $patient->id,
+                                                                'instrumentalResearch' => $instrumentalResearch->id,
+                                                            ]
+                                                        ) }}">
+                                                                    <i class="bi bi-file-earmark-medical"></i>
+                                                                </button>
+                                                            @endif
+
+                                                            @if($instrumentalResearch->status === 'ready')
+                                                                <button type="button"
+                                                                        class="btn btn-link p-1"
+                                                                        title="Просмотреть заключение"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#modalViewInstrumentalResearch"
+                                                                        data-instrumental-view
+                                                                        data-id="{{ $instrumentalResearch->id }}"
+                                                                        data-payload='@json($instrumentalPayload)'
+                                                                        data-viewed-url="{{ route(
+                                                            'doctors.patients.instrumentals.view',
+                                                            [
+                                                                'patient' => $patient->id,
+                                                                'instrumentalResearch' => $instrumentalResearch->id,
+                                                            ]
+                                                        ) }}">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </button>
+                                                            @endif
+
+                                                            <button type="button"
+                                                                    class="btn btn-link p-1 text-danger"
+                                                                    title="Удалить исследование"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#modalDeleteInstrumentalResearch"
+                                                                    data-instrumental-delete
+                                                                    data-name="{{ $instrumentalResearch->name }}"
+                                                                    data-delete-url="{{ route(
+                                                        'doctors.patients.instrumentals.delete',
+                                                        [
+                                                            'patient' => $patient->id,
+                                                            'instrumentalResearch' => $instrumentalResearch->id,
+                                                        ]
+                                                    ) }}">
+                                                                <i class="bi bi-trash3"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <div class="text-center py-5">
+                                            <div class="mb-3 text-muted">
+                                                <i class="bi bi-activity fs-1"></i>
+                                            </div>
+
+                                            <div class="fw-semibold">
+                                                Инструментальных исследований пока нет
+                                            </div>
+
+                                            <div class="small text-muted mt-1">
+                                                Назначьте МРТ, КТ, ЭЭГ, ЭКГ, УЗИ или другое исследование.
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </section>
                         </div>
                     </div>
                 </div>
@@ -1156,7 +2054,8 @@
                                 <h2 class="contacts-hero__title">Контакты пациента</h2>
 
                                 <div class="contacts-hero__subtitle">
-                                    Здесь можно хранить телефоны родственников, сопровождающих лиц и других контактных лиц пациента.
+                                    Здесь можно хранить телефоны родственников, сопровождающих лиц и других контактных
+                                    лиц пациента.
                                     При необходимости данные можно быстро отредактировать или удалить.
                                 </div>
                             </div>
@@ -1387,13 +2286,15 @@
                                             @csrf
 
                                             <div class="card-body p-3">
-                                                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                                                     <div>
                                                         <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                                                     <span class="badge text-bg-light border">
                                                         {{ ucfirst($prescription->drug?->groupName() ?? 'Препарат') }}
                                                     </span>
-                                                            <span class="badge text-bg-success-subtle border text-success-emphasis">
+                                                            <span
+                                                                class="badge text-bg-success-subtle border text-success-emphasis">
                                                         {{ $prescription->prescription_form }}
                                                     </span>
                                                             @if($prescription->daily_generic_prescriptions_count > 1)
@@ -1466,7 +2367,8 @@
                                     </div>
                                     <h2 class="epicrisis-hero__title">Эпикризы пациента</h2>
                                     <div class="epicrisis-hero__subtitle">
-                                        Быстрый просмотр сохранённых эпикризов: дата создания, автор, диагноз по МКБ-10 и краткое содержание документа.
+                                        Быстрый просмотр сохранённых эпикризов: дата создания, автор, диагноз по МКБ-10
+                                        и краткое содержание документа.
                                     </div>
                                 </div>
 
@@ -1494,7 +2396,8 @@
                             </div>
                             <div>
                                 <div class="epicrisis-stat-card__label">С диагнозом</div>
-                                <div class="epicrisis-stat-card__value">{{ $patient->epicrises()->with('diagnose')->count() }}</div>
+                                <div
+                                    class="epicrisis-stat-card__value">{{ $patient->epicrises()->with('diagnose')->count() }}</div>
                             </div>
                         </div>
 
@@ -1505,7 +2408,7 @@
                             <div>
                                 <div class="epicrisis-stat-card__label">Последний эпикриз</div>
                                 <div class="epicrisis-stat-card__value fs-6">
-                                    {{ $patient->epicrises->last()->created_at }}
+                                    {{ $patient->epicrises()->latest('created_at')->first() }}
                                 </div>
                             </div>
                         </div>
@@ -1535,7 +2438,8 @@
 
                                         <div class="epicrisis-item__main">
                                             <div class="epicrisis-item__top">
-                                                <h3 class="epicrisis-item__title">Эпикриз от {{ $epicrisis->date_title }}</h3>
+                                                <h3 class="epicrisis-item__title">Эпикриз
+                                                    от {{ $epicrisis->date_title }}</h3>
                                                 <span class="badge text-bg-light border">
                                                     {{ $epicrisis->time_display }}
                                                 </span>
@@ -1561,7 +2465,8 @@
                                                         </span>
                                                     @endif
                                                     @if($epicrisis->diagnosis_title_display)
-                                                        <span class="epicrisis-diagnosis-title">{{ $epicrisis->diagnosis_title_display }}</span>
+                                                        <span
+                                                            class="epicrisis-diagnosis-title">{{ $epicrisis->diagnosis_title_display }}</span>
                                                     @endif
                                                 </div>
                                             @endif
@@ -1588,7 +2493,8 @@
                             </div>
                             <div class="epicrisis-empty-state__title">Эпикризов пока нет</div>
                             <div class="epicrisis-empty-state__text">
-                                После добавления эпикриза здесь появится аккуратная история документов с диагнозами, авторами и быстрым переходом к просмотру.
+                                После добавления эпикриза здесь появится аккуратная история документов с диагнозами,
+                                авторами и быстрым переходом к просмотру.
                             </div>
                             <button class="btn btn-primary btn-sm"
                                     data-bs-toggle="modal"
@@ -1657,7 +2563,8 @@
                         <div class="col-xl-8 col-lg-7">
                             <div class="border rounded p-3">
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <div class="fw-semibold">Параметры направления <span id="resultSelCount">(0)</span></div>
+                                    <div class="fw-semibold">Параметры направления <span id="resultSelCount">(0)</span>
+                                    </div>
                                     <div class="form-check small">
                                         <input class="form-check-input" type="checkbox" id="toggleHideNormal">
                                         <label class="form-check-label" for="toggleHideNormal">Скрывать
@@ -2131,7 +3038,8 @@
                                 <hr>
 
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <div class="fw-semibold">Выбранные параметры <span id="orderSelCount">(0)</span></div>
+                                    <div class="fw-semibold">Выбранные параметры <span id="orderSelCount">(0)</span>
+                                    </div>
                                 </div>
 
                                 <div class="table-responsive">
@@ -2264,7 +3172,984 @@
             </form>
         </div>
     </div>
+    <div class="modal fade"
+         id="modalAddInstrumentalResearch"
+         tabindex="-1"
+         aria-hidden="true">
 
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <form class="modal-content"
+                  method="post"
+                  action="{{ route('doctors.patients.instrumentals.store', ['patient' => $patient->id]) }}">
+                @csrf
+
+                <input type="hidden"
+                       name="_instrumental_form"
+                       value="create">
+
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title mb-1">
+                            Назначить исследование
+                        </h5>
+
+                        <div class="small text-muted">
+                            МРТ, КТ, ЭЭГ, ЭКГ, УЗИ или другое исследование
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Вид исследования
+                            </label>
+
+                            <select class="form-select"
+                                    name="study_type"
+                                    required>
+                                @foreach($instrumentalResearchTypes as $value => $label)
+                                    <option value="{{ $value }}">
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label">
+                                Название
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   name="name"
+                                   required
+                                   maxlength="255"
+                                   placeholder="Например: МРТ головного мозга">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Область исследования
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   name="body_area"
+                                   maxlength="255"
+                                   placeholder="Например: головной мозг">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Планируемая дата
+                            </label>
+
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   name="planned_at">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Приоритет
+                            </label>
+
+                            <select class="form-select"
+                                    name="priority"
+                                    required>
+                                @foreach($instrumentalResearchPriorities as $value => $label)
+                                    <option value="{{ $value }}">
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check mb-2">
+                                <input type="hidden"
+                                       name="with_contrast"
+                                       value="0">
+
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="with_contrast"
+                                       value="1"
+                                       id="createInstrumentalWithContrast">
+
+                                <label class="form-check-label"
+                                       for="createInstrumentalWithContrast">
+                                    С контрастированием
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Организация
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   name="organization"
+                                   maxlength="255"
+                                   placeholder="Где планируется выполнить исследование">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Показания и клинический вопрос
+                            </label>
+
+                            <textarea class="form-control"
+                                      name="indication"
+                                      rows="4"
+                                      maxlength="5000"
+                                      placeholder="Причина назначения и вопрос специалисту"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Назначить исследование
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade"
+         id="modalEditInstrumentalResearch"
+         tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <form class="modal-content"
+                  id="editInstrumentalResearchForm"
+                  method="post">
+                @csrf
+                @method('PUT')
+
+                <input type="hidden"
+                       name="_instrumental_form"
+                       value="edit">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Редактировать исследование
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Вид исследования
+                            </label>
+
+                            <select class="form-select"
+                                    name="study_type"
+                                    required>
+                                @foreach($instrumentalResearchTypes as $value => $label)
+                                    <option value="{{ $value }}">
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label">
+                                Название
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   name="name"
+                                   required
+                                   maxlength="255">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Область исследования
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   name="body_area"
+                                   maxlength="255">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Планируемая дата
+                            </label>
+
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   name="planned_at">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Приоритет
+                            </label>
+
+                            <select class="form-select"
+                                    name="priority"
+                                    required>
+                                @foreach($instrumentalResearchPriorities as $value => $label)
+                                    <option value="{{ $value }}">
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Статус
+                            </label>
+
+                            <select class="form-select"
+                                    name="status"
+                                    required>
+                                @foreach($instrumentalResearchStatuses as $value => $label)
+                                    <option value="{{ $value }}">
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check mb-2">
+                                <input type="hidden"
+                                       name="with_contrast"
+                                       value="0">
+
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="with_contrast"
+                                       value="1"
+                                       id="editInstrumentalWithContrast">
+
+                                <label class="form-check-label"
+                                       for="editInstrumentalWithContrast">
+                                    С контрастированием
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Организация
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   name="organization"
+                                   maxlength="255">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Показания
+                            </label>
+
+                            <textarea class="form-control"
+                                      name="indication"
+                                      rows="4"
+                                      maxlength="5000"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade instrumental-result-modal"
+         id="modalInstrumentalResult"
+         tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <form class="modal-content"
+                  id="instrumentalResultForm"
+                  method="post"
+                  enctype="multipart/form-data">
+                @csrf
+
+                <input type="hidden"
+                       name="_instrumental_form"
+                       value="result">
+
+                <div class="modal-header instrumental-result-modal__header">
+                    <div class="instrumental-result-modal__heading">
+                        <div class="instrumental-result-modal__icon">
+                            <i class="bi bi-clipboard2-pulse"></i>
+                        </div>
+
+                        <div class="min-w-0">
+                            <div class="instrumental-result-modal__eyebrow">
+                                Инструментальное исследование
+                            </div>
+
+                            <h5 class="modal-title instrumental-result-modal__title">
+                                Результат исследования
+                            </h5>
+
+                            <div class="instrumental-result-modal__subtitle"
+                                 id="instrumentalResultName">
+                                —
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть">
+                    </button>
+                </div>
+
+                <div class="modal-body instrumental-result-modal__body">
+                    <div class="row g-4">
+
+                        {{-- Основные сведения --}}
+                        <div class="col-lg-4">
+                            <div class="instrumental-result-sidebar">
+                                <div class="instrumental-result-sidebar__title">
+                                    <i class="bi bi-info-circle"></i>
+                                    Основные сведения
+                                </div>
+
+                                <div class="instrumental-result-control">
+                                    <label class="form-label">
+                                        Дата выполнения
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input type="datetime-local"
+                                           class="form-control"
+                                           name="performed_at"
+                                           required>
+                                </div>
+
+                                <div class="instrumental-result-control">
+                                    <label class="form-label">
+                                        Дата заключения
+                                    </label>
+
+                                    <input type="datetime-local"
+                                           class="form-control"
+                                           name="result_at">
+                                </div>
+
+                                <div class="instrumental-result-control">
+                                    <label class="form-label">
+                                        Организация
+                                    </label>
+
+                                    <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-building"></i>
+                                    </span>
+
+                                        <input type="text"
+                                               class="form-control"
+                                               name="organization"
+                                               maxlength="255"
+                                               placeholder="Где выполнено исследование">
+                                    </div>
+                                </div>
+
+                                <div class="instrumental-result-control">
+                                    <label class="form-label">
+                                        Специалист
+                                    </label>
+
+                                    <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person-badge"></i>
+                                    </span>
+
+                                        <input type="text"
+                                               class="form-control"
+                                               name="specialist_name"
+                                               maxlength="255"
+                                               placeholder="ФИО специалиста">
+                                    </div>
+                                </div>
+
+                                <div class="instrumental-critical-box"
+                                     id="instrumentalCriticalBox">
+
+                                    <div class="form-check">
+                                        <input type="hidden"
+                                               name="is_critical"
+                                               value="0">
+
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="is_critical"
+                                               value="1"
+                                               id="instrumentalResultIsCritical">
+
+                                        <label class="form-check-label"
+                                               for="instrumentalResultIsCritical">
+                                            Критический результат
+                                        </label>
+                                    </div>
+
+                                    <div class="instrumental-critical-box__hint">
+                                        Отметьте, если результат требует срочного внимания врача.
+                                    </div>
+
+                                    <div class="instrumental-critical-box__reason"
+                                         id="instrumentalCriticalReasonBox">
+
+                                        <label class="form-label">
+                                            Причина критичности
+                                        </label>
+
+                                        <textarea class="form-control"
+                                                  name="critical_reason"
+                                                  id="instrumentalCriticalReason"
+                                                  rows="3"
+                                                  maxlength="5000"
+                                                  placeholder="Опишите критические изменения..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="instrumental-result-sidebar__notice">
+                                    <i class="bi bi-shield-check"></i>
+
+                                    <span>
+                                    После сохранения исследование получит статус
+                                    «Заключение готово».
+                                </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Результат --}}
+                        <div class="col-lg-8">
+                            <div class="instrumental-result-content">
+
+                                <section class="instrumental-result-card">
+                                    <div class="instrumental-result-card__header">
+                                        <div class="instrumental-result-card__icon">
+                                            <i class="bi bi-card-text"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-result-card__title">
+                                                Описание и протокол
+                                            </div>
+
+                                            <div class="instrumental-result-card__subtitle">
+                                                Ход исследования, измерения и выявленные изменения
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <textarea class="form-control"
+                                              name="description"
+                                              rows="5"
+                                              maxlength="30000"
+                                              placeholder="Введите описание исследования..."></textarea>
+                                </section>
+
+                                <section class="instrumental-result-card instrumental-result-card--primary">
+                                    <div class="instrumental-result-card__header">
+                                        <div class="instrumental-result-card__icon">
+                                            <i class="bi bi-file-earmark-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-result-card__title">
+                                                Заключение
+                                                <span class="text-danger">*</span>
+                                            </div>
+
+                                            <div class="instrumental-result-card__subtitle">
+                                                Основной итог инструментального исследования
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <textarea class="form-control"
+                                              name="conclusion"
+                                              rows="4"
+                                              maxlength="30000"
+                                              required
+                                              placeholder="Введите заключение специалиста..."></textarea>
+                                </section>
+
+                                <section class="instrumental-result-card">
+                                    <div class="instrumental-result-card__header">
+                                        <div class="instrumental-result-card__icon">
+                                            <i class="bi bi-list-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-result-card__title">
+                                                Рекомендации
+                                            </div>
+
+                                            <div class="instrumental-result-card__subtitle">
+                                                Дополнительные обследования и дальнейшие действия
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <textarea class="form-control"
+                                              name="recommendations"
+                                              rows="3"
+                                              maxlength="10000"
+                                              placeholder="Введите рекомендации при их наличии..."></textarea>
+                                </section>
+
+                                <section class="instrumental-result-card">
+                                    <div class="instrumental-result-card__header">
+                                        <div class="instrumental-result-card__icon">
+                                            <i class="bi bi-paperclip"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-result-card__title">
+                                                Цифровые материалы
+                                            </div>
+
+                                            <div class="instrumental-result-card__subtitle">
+                                                Заключение, снимки или архив исследования
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="file"
+                                           class="d-none"
+                                           name="result_files[]"
+                                           id="instrumentalResultFiles"
+                                           accept=".pdf,.jpg,.jpeg,.png,.webp,.zip"
+                                           multiple>
+
+                                    <label class="instrumental-result-upload"
+                                           for="instrumentalResultFiles">
+
+                                    <span class="instrumental-result-upload__icon">
+                                        <i class="bi bi-cloud-arrow-up"></i>
+                                    </span>
+
+                                        <span class="instrumental-result-upload__content">
+                                        <span class="instrumental-result-upload__title">
+                                            Перетащите файлы или выберите на компьютере
+                                        </span>
+
+                                        <span class="instrumental-result-upload__formats">
+                                            PDF, JPG, PNG, WEBP или ZIP-архив
+                                        </span>
+                                    </span>
+
+                                        <span class="instrumental-result-upload__button">
+                                        Выбрать
+                                    </span>
+                                    </label>
+
+                                    <div class="instrumental-result-upload__summary"
+                                         id="instrumentalResultFilesSummary">
+                                        Файлы не выбраны
+                                    </div>
+
+                                    <div class="instrumental-result-upload__limits">
+                                        До 10 файлов, не более 100 МБ каждый
+                                    </div>
+
+                                    <div class="instrumental-result-existing"
+                                         id="instrumentalResultExistingFiles">
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer instrumental-result-modal__footer">
+                    <div class="instrumental-result-modal__footer-hint">
+                        <i class="bi bi-info-circle"></i>
+                        Поля со звёздочкой обязательны
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button"
+                                class="btn btn-light"
+                                data-bs-dismiss="modal">
+                            Отмена
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            Сохранить заключение
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade instrumental-view-modal"
+         id="modalViewInstrumentalResearch"
+         tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header instrumental-view-modal__header">
+                    <div class="instrumental-view-modal__heading">
+                        <div class="instrumental-view-modal__icon">
+                            <i class="bi bi-file-earmark-medical"></i>
+                        </div>
+
+                        <div class="min-w-0">
+                            <div class="instrumental-view-modal__eyebrow">
+                                Результат инструментального исследования
+                            </div>
+
+                            <h5 class="modal-title instrumental-view-modal__title"
+                                id="viewInstrumentalName">
+                                Результат исследования
+                            </h5>
+
+                            <div class="instrumental-view-modal__meta">
+                            <span class="instrumental-view-modal__type"
+                                  id="viewInstrumentalType">
+                                —
+                            </span>
+
+                                <span class="instrumental-view-modal__contrast"
+                                      id="viewInstrumentalContrast">
+                                —
+                            </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"></button>
+                </div>
+
+                <div class="modal-body instrumental-view-modal__body">
+                    <div class="row g-4">
+
+                        <div class="col-lg-4">
+                            <aside class="instrumental-view-summary">
+                                <div class="instrumental-view-summary__title">
+                                    <i class="bi bi-info-circle"></i>
+                                    Основные сведения
+                                </div>
+
+                                <div class="instrumental-view-summary__items">
+                                    <div class="instrumental-view-summary__item">
+                                        <div class="instrumental-view-summary__item-icon">
+                                            <i class="bi bi-calendar2-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-summary__label">
+                                                Дата выполнения
+                                            </div>
+
+                                            <div class="instrumental-view-summary__value"
+                                                 id="viewInstrumentalPerformedAt">
+                                                —
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="instrumental-view-summary__item">
+                                        <div class="instrumental-view-summary__item-icon">
+                                            <i class="bi bi-file-earmark-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-summary__label">
+                                                Дата заключения
+                                            </div>
+
+                                            <div class="instrumental-view-summary__value"
+                                                 id="viewInstrumentalResultAt">
+                                                —
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="instrumental-view-summary__item">
+                                        <div class="instrumental-view-summary__item-icon">
+                                            <i class="bi bi-building"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-summary__label">
+                                                Организация
+                                            </div>
+
+                                            <div class="instrumental-view-summary__value"
+                                                 id="viewInstrumentalOrganization">
+                                                —
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="instrumental-view-summary__item">
+                                        <div class="instrumental-view-summary__item-icon">
+                                            <i class="bi bi-person-badge"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-summary__label">
+                                                Специалист
+                                            </div>
+
+                                            <div class="instrumental-view-summary__value"
+                                                 id="viewInstrumentalSpecialist">
+                                                —
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="instrumental-view-summary__item">
+                                        <div class="instrumental-view-summary__item-icon">
+                                            <i class="bi bi-bullseye"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-summary__label">
+                                                Область исследования
+                                            </div>
+
+                                            <div class="instrumental-view-summary__value"
+                                                 id="viewInstrumentalBodyArea">
+                                                —
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="instrumental-view-summary__notice">
+                                    <i class="bi bi-shield-check"></i>
+
+                                    <span>
+                                    Заключение сохранено в медицинской карте пациента.
+                                </span>
+                                </div>
+                            </aside>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <div class="instrumental-view-content">
+
+                                <section class="instrumental-view-section">
+                                    <div class="instrumental-view-section__header">
+                                        <div class="instrumental-view-section__icon">
+                                            <i class="bi bi-card-text"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-section__title">
+                                                Описание и протокол
+                                            </div>
+
+                                            <div class="instrumental-view-section__subtitle">
+                                                Ход исследования, измерения и обнаруженные изменения
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="instrumental-view-section__text"
+                                         id="viewInstrumentalDescription">
+                                        —
+                                    </div>
+                                </section>
+
+                                <section class="instrumental-view-section instrumental-view-section--conclusion">
+                                    <div class="instrumental-view-section__header">
+                                        <div class="instrumental-view-section__icon">
+                                            <i class="bi bi-clipboard2-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-section__title">
+                                                Заключение
+                                            </div>
+
+                                            <div class="instrumental-view-section__subtitle">
+                                                Основной результат исследования
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="instrumental-view-section__text instrumental-view-section__text--important"
+                                         id="viewInstrumentalConclusion">
+                                        —
+                                    </div>
+                                </section>
+
+                                <section class="instrumental-view-section">
+                                    <div class="instrumental-view-section__header">
+                                        <div class="instrumental-view-section__icon">
+                                            <i class="bi bi-list-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-section__title">
+                                                Рекомендации
+                                            </div>
+
+                                            <div class="instrumental-view-section__subtitle">
+                                                Дальнейшие обследования и действия
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="instrumental-view-section__text"
+                                         id="viewInstrumentalRecommendations">
+                                        —
+                                    </div>
+                                </section>
+
+                                <section class="instrumental-view-section instrumental-view-section--files">
+                                    <div class="instrumental-view-section__header">
+                                        <div class="instrumental-view-section__icon">
+                                            <i class="bi bi-paperclip"></i>
+                                        </div>
+
+                                        <div>
+                                            <div class="instrumental-view-section__title">
+                                                Цифровые материалы
+                                            </div>
+
+                                            <div class="instrumental-view-section__subtitle">
+                                                Заключения, изображения и архивы исследования
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="viewInstrumentalFiles">
+                                        <div class="instrumental-view-files-empty">
+                                            <div class="instrumental-view-files-empty__icon">
+                                                <i class="bi bi-folder2-open"></i>
+                                            </div>
+
+                                            <div>
+                                                <div class="instrumental-view-files-empty__title">
+                                                    Файлы не прикреплены
+                                                </div>
+
+                                                <div class="instrumental-view-files-empty__text">
+                                                    У исследования отсутствуют цифровые материалы
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer instrumental-view-modal__footer">
+                    <div class="instrumental-view-modal__footer-text">
+                        <i class="bi bi-lock"></i>
+                        Доступно только медицинским работникам
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-primary px-4"
+                            data-bs-dismiss="modal">
+                        Закрыть
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade"
+         id="modalDeleteInstrumentalResearch"
+         tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content"
+                  id="deleteInstrumentalResearchForm"
+                  method="post">
+                @csrf
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Удалить исследование
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    Удалить исследование
+                    <strong id="deleteInstrumentalResearchName"></strong>?
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger">
+                        Удалить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div class="modal fade" id="modalViewResult" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -2322,7 +4207,8 @@
                         </h5>
 
                         <div class="assign-test-modal__subtitle">
-                            Выберите тест, который нужно назначить пациенту. В списке отображаются только доступные вам варианты.
+                            Выберите тест, который нужно назначить пациенту. В списке отображаются только доступные вам
+                            варианты.
                         </div>
                     </div>
 
@@ -2352,7 +4238,8 @@
                             </select>
 
                             <div class="assign-test-help">
-                                <strong>Подсказка:</strong> после выбора теста справа появится краткая информация о нём и доступных действиях.
+                                <strong>Подсказка:</strong> после выбора теста справа появится краткая информация о нём
+                                и доступных действиях.
                             </div>
 
                             <div class="assign-test-source-list">
@@ -2409,7 +4296,8 @@
                                 </div>
 
                                 <div class="assign-test-access-empty__text">
-                                    Выберите тест слева. Здесь появится его описание, источник доступности и возможные действия.
+                                    Выберите тест слева. Здесь появится его описание, источник доступности и возможные
+                                    действия.
                                 </div>
                             </div>
 
@@ -2488,174 +4376,345 @@
             </form>
         </div>
     </div>
-    <div class="modal fade prescription-modal-ui" id="prescriptionModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable prescription-modal-compact">
+    @php
+        $prescriptionPatientName = collect([
+            $patient->surname,
+            $patient->name,
+            $patient->patronym,
+        ])->filter(fn ($value) => filled($value))->implode(' ');
+
+        $prescriptionPatientInitials = collect([
+            $patient->surname,
+            $patient->name,
+        ])->filter(fn ($value) => filled($value))
+          ->map(fn ($value) => mb_strtoupper(mb_substr((string) $value, 0, 1)))
+          ->take(2)
+          ->implode('');
+
+        $prescriptionBirthDate = $patient->birth_at
+            ? \Illuminate\Support\Carbon::parse($patient->birth_at)->format('d.m.Y')
+            : 'дата рождения не указана';
+
+        $prescriptionBirthDateValue = $patient->birth_at
+            ? \Illuminate\Support\Carbon::parse($patient->birth_at)->format('Y-m-d')
+            : '';
+
+        $prescriptionDiagnosisCode = data_get($patient, 'prescription_diagnosis_code')
+            ?: optional($patient->diagnose)->code;
+    @endphp
+
+    <div
+        class="modal fade prescription-modal-ui"
+        id="prescriptionModal"
+        tabindex="-1"
+        aria-labelledby="prescriptionModalTitle"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog prescription-modal-compact">
             <div class="modal-content">
-                <form id="patientPrescriptionForm"
-                      method="post"
-                      action="{{ route('doctors.prescriptions.store') }}"
-                      data-suggestions-url="{{ route('api.autofill.prescription') }}">
+                <form
+                    id="patientPrescriptionForm"
+                    method="POST"
+                    action="{{ route('doctors.prescriptions.store') }}"
+                    data-suggestions-url="{{ url('/api/doctors/prescription-autofill') }}"
+                >
                     @csrf
+
                     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
                     <input type="hidden" name="usage_instructions" id="usage_instructions__">
-                    <input type="hidden" name="birth_at" id="birth_at__">
-                    <input type="hidden" name="diagnosis_code" id="diagnosis_code" value="{{ $patient->prescription_diagnosis_code }}">
+                    <input type="hidden" name="birth_at" id="birth_at__" value="{{ $prescriptionBirthDateValue }}">
+                    <input
+                        type="hidden"
+                        name="diagnosis_code"
+                        id="diagnosis_code"
+                        value="{{ $prescriptionDiagnosisCode }}"
+                    >
+                    <input
+                        type="hidden"
+                        name="indicated_in_russia"
+                        id="indicated_in_russia_hidden"
+                        value="0"
+                    >
+                    <input
+                        type="hidden"
+                        name="indicated_by_fda"
+                        id="indicated_by_fda_hidden"
+                        value="0"
+                    >
 
-                    <input type="hidden" name="indicated_in_russia" id="indicated_in_russia_hidden" value="0">
-                    <input type="hidden" name="indicated_by_fda" id="indicated_by_fda_hidden" value="0">
+                    <div class="modal-header">
+                        <div class="presc-modal-heading">
+                            <div class="presc-modal-heading__icon">
+                                <i class="bi bi-file-earmark-medical"></i>
+                            </div>
 
-                    <div class="modal-header border-0 pb-2">
-                        <div>
-                            <h5 class="modal-title mb-1">Выписать рецепт</h5>
-                            <div class="small text-muted">Назначение препарата и оформление рецепта</div>
+                            <div>
+                                <h2 class="modal-title" id="prescriptionModalTitle">
+                                    Выписать рецепт
+                                </h2>
+                                <div class="presc-modal-subtitle">
+                                    Назначение препарата и оформление рецептурного бланка
+                                </div>
+                            </div>
                         </div>
 
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"
+                        ></button>
                     </div>
 
-                    <div class="modal-body pt-2">
-                        <div class="row g-4">
+                    <div class="modal-body">
+                        <div
+                            class="alert alert-danger d-none"
+                            id="prescription_form_alert"
+                            role="alert"
+                        ></div>
 
-                            <div class="col-xl-8 col-lg-7">
-                                <div class="alert alert-danger d-none mb-3" id="prescription_form_alert">
-                                    Текст ошибки
-                                </div>
-
-                                <div class="presc-section mb-3">
+                        <div class="presc-layout">
+                            <div class="presc-main">
+                                <section class="presc-section">
                                     <div class="presc-section-head">
-                                        <div class="presc-section-title mb-0">Статус показания</div>
-                                        <div class="presc-section-hint">Можно выбрать только один вариант</div>
+                                        <div>
+                                            <div class="presc-section-title">
+                                                Статус показания
+                                            </div>
+                                            <div class="presc-section-hint">
+                                                Выберите режим фильтрации списка препаратов
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="presc-indication-switch">
                                         <label class="presc-radio-card">
-                                            <input type="radio" name="indication_source" value="" checked>
+                                            <input
+                                                type="radio"
+                                                name="indication_source"
+                                                value=""
+                                                checked
+                                            >
                                             <span class="presc-radio-card__body">
-                                            <span class="presc-radio-card__title">Не указывать</span>
-                                            <span
-                                                class="presc-radio-card__text">Показывать все доступные препараты</span>
+                                            <span class="presc-radio-card__icon">
+                                                <i class="bi bi-list-ul"></i>
+                                            </span>
+                                            <span>
+                                                <span class="presc-radio-card__title">
+                                                    Не указывать
+                                                </span>
+                                                <span class="presc-radio-card__text">
+                                                    Все доступные препараты
+                                                </span>
+                                            </span>
                                         </span>
                                         </label>
 
                                         <label class="presc-radio-card">
-                                            <input type="radio" name="indication_source" value="russia">
+                                            <input
+                                                type="radio"
+                                                name="indication_source"
+                                                value="russia"
+                                            >
                                             <span class="presc-radio-card__body">
-                                            <span class="presc-radio-card__title">Показан в РФ</span>
-                                            <span class="presc-radio-card__text">Только препараты с показанием в рекомендациях РФ</span>
+                                            <span class="presc-radio-card__icon">
+                                                <i class="bi bi-shield-check"></i>
+                                            </span>
+                                            <span>
+                                                <span class="presc-radio-card__title">
+                                                    Показан в РФ
+                                                </span>
+                                                <span class="presc-radio-card__text">
+                                                    По рекомендациям РФ
+                                                </span>
+                                            </span>
                                         </span>
                                         </label>
 
                                         <label class="presc-radio-card">
-                                            <input type="radio" name="indication_source" value="fda">
+                                            <input
+                                                type="radio"
+                                                name="indication_source"
+                                                value="fda"
+                                            >
                                             <span class="presc-radio-card__body">
-                                            <span class="presc-radio-card__title">Показан FDA</span>
-                                            <span class="presc-radio-card__text">Только препараты с показанием FDA для этого диагноза</span>
+                                            <span class="presc-radio-card__icon">
+                                                <i class="bi bi-patch-check"></i>
+                                            </span>
+                                            <span>
+                                                <span class="presc-radio-card__title">
+                                                    Показан FDA
+                                                </span>
+                                                <span class="presc-radio-card__text">
+                                                    По рекомендациям FDA
+                                                </span>
+                                            </span>
                                         </span>
                                         </label>
                                     </div>
-                                </div>
+                                </section>
 
-                                <div class="presc-section mb-3">
-                                    <div class="presc-section-title">Основное</div>
+                                <section class="presc-section">
+                                    <div class="presc-section-title">
+                                        Пациент и препарат
+                                    </div>
 
-                                    <div class="row g-3">
-                                        <div class="col-md-5">
-                                            <label class="form-label">Пациент</label>
-                                            <input type="text"
-                                                   class="form-control form-control-sm presc-readonly"
-                                                   value="{{ $patient->prescription_full_name }}"
-                                                   disabled>
+                                    <div class="presc-patient-card">
+                                        <div class="presc-patient-card__avatar">
+                                            {{ $prescriptionPatientInitials !== '' ? $prescriptionPatientInitials : 'П' }}
                                         </div>
 
-                                        <div class="col-md-7">
-                                            <label for="drug_id_modal" class="form-label">Лекарство</label>
-                                            <div class="presc-drug-picker">
-                                                <select id="drug_id_modal"
-                                                        name="drug_id"
-                                                        class="js-prescription-drug-select"
-                                                        data-source="{{ route('api.drugs.search') }}"
-                                                        data-placeholder="Начните вводить препарат">
-                                                    <option value=""></option>
-                                                </select>
+                                        <div class="presc-patient-card__content">
+                                            <div class="presc-patient-card__name">
+                                                {{ $prescriptionPatientName !== '' ? $prescriptionPatientName : 'Пациент #' . $patient->id }}
                                             </div>
-                                            <div class="form-text" id="drug_select_hint">
-                                                Статус показания можно использовать как фильтр списка препаратов.
+                                            <div class="presc-patient-card__meta">
+                                            <span>
+                                                <i class="bi bi-calendar3"></i>
+                                                {{ $prescriptionBirthDate }}
+                                            </span>
+
+                                                @if($prescriptionDiagnosisCode)
+                                                    <span>
+                                                    <i class="bi bi-clipboard2-pulse"></i>
+                                                    МКБ-10: {{ $prescriptionDiagnosisCode }}
+                                                </span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div id="strict_message_modal" class="alert alert-warning d-none mt-3 mb-0 py-2">
-                                        <i class="bi bi-exclamation-triangle me-1"></i>
-                                        Данный препарат отпускается по рецепту 148-1/у-88
+                                    <div class="presc-field mt-3">
+                                        <label for="drug_id_modal" class="form-label">
+                                            Лекарство
+                                        </label>
+
+                                        <div class="presc-drug-picker">
+                                            <select
+                                                id="drug_id_modal"
+                                                class="form-select"
+                                                name="drug_id"
+                                                required
+                                                data-source="{{ route('api.drugs.search') }}"
+                                                data-placeholder="Начните вводить название препарата"
+                                            >
+                                                <option value=""></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-text" id="drug_select_hint">
+                                            Поиск выполняется по русскому названию и МНН.
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="presc-section mb-3">
-                                    <div class="presc-section-title">Параметры рецепта</div>
+                                    <div
+                                        id="strict_message_modal"
+                                        class="presc-strict-warning d-none"
+                                    >
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        <span>
+                                        Препарат оформляется на бланке
+                                        <strong>№ 148-1/у-88</strong>
+                                    </span>
+                                    </div>
+                                </section>
 
-                                    <div class="row g-3 presc-top-row">
-                                        <div class="col-md-3">
-                                            <label for="drug_form_modal" class="form-label">Форма</label>
-                                            <select id="drug_form_modal" name="drug_form"
-                                                    class="form-select form-select-sm" disabled>
+                                <section class="presc-section">
+                                    <div class="presc-section-title">
+                                        Параметры рецепта
+                                    </div>
+
+                                    <div class="presc-fields-grid">
+                                        <div class="presc-field">
+                                            <label for="drug_form_modal" class="form-label">
+                                                Форма
+                                            </label>
+                                            <select
+                                                id="drug_form_modal"
+                                                name="drug_form"
+                                                class="form-select"
+                                                disabled
+                                                required
+                                            >
                                                 <option value="">Выберите форму</option>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-3">
-                                            <label for="dosage_modal" class="form-label">Дозировка</label>
-                                            <select id="dosage_modal" name="dosage" class="form-select form-select-sm"
-                                                    disabled>
+                                        <div class="presc-field">
+                                            <label for="dosage_modal" class="form-label">
+                                                Дозировка
+                                            </label>
+                                            <select
+                                                id="dosage_modal"
+                                                name="dosage"
+                                                class="form-select"
+                                                disabled
+                                                required
+                                            >
                                                 <option value="">Выберите дозировку</option>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-3">
-                                            <label for="quantity_modal" class="form-label"
-                                                   title="Кол-во лекарственной формы">
-                                                Кол-во формы
+                                        <div class="presc-field">
+                                            <label for="quantity_modal" class="form-label">
+                                                Количество формы
                                             </label>
-                                            <select id="quantity_modal" name="quantity"
-                                                    class="form-select form-select-sm" disabled>
+                                            <select
+                                                id="quantity_modal"
+                                                name="quantity"
+                                                class="form-select"
+                                                disabled
+                                                required
+                                            >
                                                 <option value="">Выберите количество</option>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-3">
-                                            <label for="standard_modal" class="form-label">Кол-во стандартов</label>
+                                        <div class="presc-field">
+                                            <label for="standard_modal" class="form-label">
+                                                Количество стандартов
+                                            </label>
                                             <input
-                                                class="form-control form-control-sm"
+                                                class="form-control"
                                                 type="number"
                                                 name="standard"
                                                 id="standard_modal"
                                                 min="1"
                                                 value="1"
                                                 disabled
+                                                required
                                             >
                                         </div>
-                                    </div>
 
-                                    <div class="row g-3 mt-1">
-                                        <div class="col-md-4" id="validity_block_modal">
-                                            <label for="validity_period_modal" class="form-label">Действителен
-                                                до</label>
-                                            <select class="form-select form-select-sm" id="validity_period_modal"
-                                                    name="validity_period">
+                                        <div
+                                            class="presc-field presc-field--validity"
+                                            id="validity_block_modal"
+                                        >
+                                            <label for="validity_period_modal" class="form-label">
+                                                Срок действия
+                                            </label>
+                                            <select
+                                                class="form-select"
+                                                id="validity_period_modal"
+                                                name="validity_period"
+                                            >
                                                 <option value="60">60 дней</option>
                                                 <option value="365">1 год</option>
                                             </select>
                                         </div>
                                     </div>
-                                </div>
+                                </section>
 
-                                <div class="presc-section mb-0">
-                                    <div class="presc-section-title">Схема приёма</div>
+                                <section class="presc-section">
+                                    <div class="presc-section-title">
+                                        Схема приёма
+                                    </div>
 
                                     <div class="presc-regimen">
                                         <span class="presc-regimen__label">По</span>
 
                                         <input
-                                            class="form-control form-control-sm presc-regimen__input"
+                                            class="form-control presc-regimen__input"
                                             type="number"
                                             name="taking_drug"
                                             id="taking_drug_modal"
@@ -2665,12 +4724,17 @@
                                             disabled
                                         >
 
-                                        <span id="drug_type_modal" class="presc-regimen__text">драже</span>
+                                        <span
+                                            id="drug_type_modal"
+                                            class="presc-regimen__text"
+                                        >
+                                        единице препарата
+                                    </span>
 
                                         <select
                                             id="taking_count_modal"
                                             name="taking_count"
-                                            class="form-select form-select-sm presc-regimen__select"
+                                            class="form-select presc-regimen__select"
                                             disabled
                                         >
                                             <option value="1">1</option>
@@ -2680,13 +4744,33 @@
                                             <option value="5">5</option>
                                         </select>
 
-                                        <span id="taking_time_modal" class="presc-regimen__text">раз</span>
-                                        <span class="presc-regimen__text">в день на</span>
-                                        <span id="days_count_modal" class="presc-regimen__badge">—</span>
-                                        <span id="days_label_modal" class="presc-regimen__text">дней</span>
+                                        <span
+                                            id="taking_time_modal"
+                                            class="presc-regimen__text"
+                                        >
+                                        раз
+                                    </span>
+
+                                        <span class="presc-regimen__text">
+                                        в день, курс
+                                    </span>
+
+                                        <span
+                                            id="days_count_modal"
+                                            class="presc-regimen__badge"
+                                        >
+                                        —
+                                    </span>
+
+                                        <span
+                                            id="days_label_modal"
+                                            class="presc-regimen__text"
+                                        >
+                                        дней
+                                    </span>
 
                                         <select
-                                            class="form-select form-select-sm presc-regimen__select"
+                                            class="form-select presc-regimen__select presc-regimen__select--meal"
                                             name="taking_time_meal"
                                             id="taking_time_meal_modal"
                                             disabled
@@ -2695,56 +4779,103 @@
                                             <option value="2">до</option>
                                         </select>
 
-                                        <span class="presc-regimen__text">еды</span>
+                                        <span class="presc-regimen__text">
+                                        еды
+                                    </span>
                                     </div>
-                                </div>
+                                </section>
                             </div>
 
-                            <div class="col-xl-4 col-lg-5">
-                                <div class="presc-suggestions-panel" id="prescriptionSuggestionsCard">
-                                    <div class="presc-suggestions-panel__header">
-                                        <div>
-                                            <div class="presc-suggestions-panel__title">Что можно назначить по МНН</div>
-                                            <div class="presc-suggestions-panel__subtitle">
-                                                Подборка по диагнозу, возрасту, выбранному фильтру и ограничениям
-                                            </div>
-                                        </div>
-
-                                        <div class="presc-suggestions-panel__meta">
-                <span id="prescriptionSuggestionsFilterLabel" class="presc-filter-chip">
-                    Без фильтра
-                </span>
-                                            <span id="prescriptionSuggestionsCount" class="presc-count-chip">
-                    0
-                </span>
-                                        </div>
+                            <aside
+                                class="presc-side-card"
+                                id="prescriptionSuggestionsCard"
+                            >
+                                <div class="presc-side-card__head">
+                                    <div class="presc-side-card__icon">
+                                        <i class="bi bi-stars"></i>
                                     </div>
 
-                                    <div class="presc-suggestions-panel__body">
-                                        <div id="prescriptionSuggestionsLoading" class="presc-suggestions-state d-none">
-                                            <div class="presc-loader"></div>
-                                            <div>Подбираем рекомендации…</div>
+                                    <div>
+                                        <div class="presc-side-card__title">
+                                            Что можно назначить по МНН
                                         </div>
-
-                                        <div id="prescriptionSuggestionsEmpty" class="presc-suggestions-state">
-                                            Выберите режим показаний или диагноз, чтобы показать рекомендации по МНН.
+                                        <div class="presc-side-card__hint">
+                                            Подбор по диагнозу, возрасту и ограничениям
                                         </div>
-
-                                        <div id="prescriptionSuggestionsList" class="presc-suggestions-list d-none"></div>
                                     </div>
                                 </div>
-                            </div>
+
+                                <div class="presc-side-card__toolbar">
+                                <span
+                                    class="presc-filter-badge"
+                                    id="prescriptionSuggestionsFilterLabel"
+                                >
+                                    Без фильтра показаний
+                                </span>
+
+                                    <span class="presc-count-badge">
+                                    <span id="prescriptionSuggestionsCount">0</span>
+                                    препаратов
+                                </span>
+                                </div>
+
+                                <div
+                                    id="prescriptionSuggestionsLoading"
+                                    class="presc-suggestions-state d-none"
+                                >
+                                    <span class="spinner-border spinner-border-sm"></span>
+                                    <span>Подбираем препараты…</span>
+                                </div>
+
+                                <div
+                                    id="prescriptionSuggestionsEmpty"
+                                    class="presc-suggestions-state"
+                                >
+                                    <i class="bi bi-capsule"></i>
+                                    <span>
+                                    Подходящие рекомендации появятся здесь.
+                                </span>
+                                </div>
+
+                                <div
+                                    id="prescriptionSuggestionsList"
+                                    class="d-none"
+                                ></div>
+                            </aside>
                         </div>
                     </div>
 
-                    <div class="modal-footer border-0 pt-2">
-                        <button type="submit" class="btn btn-primary btn-sm px-3">
-                            <i class="bi bi-journal-check me-1"></i> Выписать рецепт
+                    <div class="modal-footer">
+                        <div class="presc-footer-note">
+                            <i class="bi bi-shield-check"></i>
+                            Проверьте форму, дозировку и схему приёма перед сохранением
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-light presc-btn"
+                            data-bs-dismiss="modal"
+                        >
+                            Отмена
                         </button>
 
-                        <button id="printRecipeButton_modal" type="button" class="btn btn-outline-success btn-sm px-3"
-                                disabled>
-                            <i class="bi bi-printer me-1"></i> Распечатать рецепт
+                        <button
+                            id="printRecipeButton_modal"
+                            type="button"
+                            class="btn btn-outline-success presc-btn"
+                            disabled
+                        >
+                            <i class="bi bi-printer"></i>
+                            Распечатать
+                        </button>
+
+                        <button
+                            id="prescriptionSubmitButton"
+                            type="submit"
+                            class="btn btn-primary presc-btn presc-btn--primary"
+                        >
+                            <i class="bi bi-journal-check"></i>
+                            Выписать рецепт
                         </button>
                     </div>
                 </form>
@@ -2752,4 +4883,127 @@
         </div>
     </div>
 
+    <script>
+        window.addEventListener('load', function () {
+            const query = new URLSearchParams(window.location.search);
+
+            if (query.get('tab') !== 'labs') {
+                return;
+            }
+
+            /*
+             * Открываем вкладку «Анализы и исследования».
+             */
+            const labsTabButton = document.querySelector(
+                '#cardTabs [data-bs-target="#pane-labs"]'
+            );
+
+            if (labsTabButton) {
+                if (window.bootstrap?.Tab) {
+                    bootstrap.Tab
+                        .getOrCreateInstance(labsTabButton)
+                        .show();
+                } else {
+                    labsTabButton.click();
+                }
+            }
+
+            const findById = function (selector, id) {
+                if (!id) {
+                    return null;
+                }
+
+                return Array.from(
+                    document.querySelectorAll(selector)
+                ).find(function (button) {
+                    return String(button.dataset.id) === String(id);
+                }) || null;
+            };
+
+            const findByPayloadId = function (selector, id) {
+                if (!id) {
+                    return null;
+                }
+
+                return Array.from(
+                    document.querySelectorAll(selector)
+                ).find(function (button) {
+                    try {
+                        const payload = JSON.parse(
+                            button.dataset.payload || '{}'
+                        );
+
+                        return String(payload.id) === String(id);
+                    } catch (error) {
+                        return false;
+                    }
+                }) || null;
+            };
+
+            /*
+             * Небольшая задержка нужна, чтобы успели
+             * подключиться обработчики модальных окон.
+             */
+            window.setTimeout(function () {
+                const labResearchId = query.get('research');
+                const instrumentalResearchId =
+                    query.get('instrumental_research');
+
+                let targetButton = null;
+
+                /*
+                 * Лабораторный анализ:
+                 * готовый открываем в режиме просмотра,
+                 * незавершённый — в режиме редактирования.
+                 */
+                if (labResearchId) {
+                    targetButton =
+                        findById(
+                            '[data-lab-view]',
+                            labResearchId
+                        )
+                        || findById(
+                            '[data-lab-edit]',
+                            labResearchId
+                        );
+                }
+
+                /*
+                 * Инструментальное исследование:
+                 * готовое открываем в режиме просмотра.
+                 * Для незавершённого открываем внесение результата
+                 * либо редактирование назначения.
+                 */
+                if (!targetButton && instrumentalResearchId) {
+                    targetButton =
+                        findById(
+                            '[data-instrumental-view]',
+                            instrumentalResearchId
+                        )
+                        || findByPayloadId(
+                            '[data-instrumental-result]',
+                            instrumentalResearchId
+                        )
+                        || findByPayloadId(
+                            '[data-instrumental-edit]',
+                            instrumentalResearchId
+                        );
+                }
+
+                if (!targetButton) {
+                    console.warn(
+                        'Не найдена запись для просмотра',
+                        {
+                            labResearchId,
+                            instrumentalResearchId
+                        }
+                    );
+
+                    return;
+                }
+
+                targetButton.click();
+            }, 250);
+        });
+    </script>
 @endsection

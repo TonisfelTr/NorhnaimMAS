@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PrescriptionStoreRequest;
 use App\Jobs\PrescriptionsJob;
 use App\Models\ContraindicationsType;
-use App\Models\Doctor;
 use App\Models\Drug;
 use App\Models\MedicalPrescription;
 use App\Models\Patient;
@@ -15,10 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use InvalidArgumentException;
-use Spatie\Permission\Models\Role;
 
 class PrescriptionsController extends Controller
 {
@@ -62,60 +58,114 @@ class PrescriptionsController extends Controller
         abort(403, 'Доступ запрещён: вы не доктор и не администратор.');
     }
 
-    private function getPrescriptionSeriesByDoctorAddress(string $address): string
-    {
-        $region = $this->getRegionFromAddress($address);
-
-        $regionCodes = [
-            'Москва' => '77', 'Санкт-Петербург' => '78', /* остальные регионы */
-        ];
-
-        if (!$region || !isset($regionCodes[$region])) {
-            throw new InvalidArgumentException("Не удалось определить серию для адреса: '{$address}'.");
-        }
-
-        return $regionCodes[$region] . Carbon::now()->format('y');
-    }
-
-    private function getRegionFromAddress(string $address): ?string
-    {
-        $yandexApiKey = config('yandex.yandex_key');
-        $url = "https://geocode-maps.yandex.ru/1.x/?apikey={$yandexApiKey}&geocode=" . urlencode($address) . "&format=json";
-
-        $response = file_get_contents($url);
-        if (!$response) return null;
-
-        $data = json_decode($response, true);
-        $components = $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['Address']['Components'] ?? null;
-
-        return $components[2]['name'] ?? null;
-    }
-
-    private function generatePrescriptionNumber(string $series): string
-    {
-        $lastNumber = MedicalPrescription::where('series', $series)->orderBy('number', 'desc')->value('number');
-        return str_pad((string)(($lastNumber ?? 0) + 1), 6, '0', STR_PAD_LEFT);
-    }
 
     public function index(): View
     {
-        $doctorFullName = $this->getDoctorFullName();
-        $drugGroups = Drug::distinct()->pluck('group');
+        $doctor = auth()->user()
+            ->doctor()
+            ->firstOrFail();
 
+        $doctorId = (int) $doctor->id;
+        $today = today();
+
+        $drugGroups = Drug::query()
+            ->whereNotNull('group')
+            ->where('group', '<>', '')
+            ->distinct()
+            ->orderBy('group')
+            ->pluck('group');
+
+        /*
+         * Количество рецептов по группам препаратов за сегодня.
+         */
         $statistics = [];
+
         foreach ($drugGroups as $group) {
-            $statistics[$group] = MedicalPrescription::join('drugs', 'medical_prescriptions.generic_name', '=', 'drugs.latin_name')
-                ->where('drugs.group', $group)
-                ->where('medical_prescriptions.doctor_name', $doctorFullName)
-                ->whereDate('medical_prescriptions.issued_at', today())
-                ->count();
+            $statistics[$group] = MedicalPrescription::query()
+                ->join(
+                    'drugs',
+                    'medical_prescriptions.generic_name',
+                    '=',
+                    'drugs.latin_name'
+                )
+                ->where(
+                    'medical_prescriptions.doctor_id',
+                    $doctorId
+                )
+                ->where(
+                    'drugs.group',
+                    $group
+                )
+                ->whereDate(
+                    'medical_prescriptions.issued_at',
+                    $today
+                )
+                ->distinct()
+                ->count('medical_prescriptions.id');
         }
 
-        $prescriptions = MedicalPrescription::where('doctor_name', $doctorFullName)
-            ->select('patient_name', 'generic_name', 'issued_at', 'id')
-            ->paginate(20, ['*'], 'prescriptions_page');
+        /*
+         * Журнал рецептов текущего врача.
+         */
+        $prescriptions = MedicalPrescription::query()
+            ->where('doctor_id', $doctorId)
+            ->select([
+                'id',
+                'patient_id',
+                'patient_name',
+                'generic_name',
+                'issued_at',
+            ])
+            ->orderByDesc('issued_at')
+            ->orderByDesc('id')
+            ->paginate(
+                20,
+                ['*'],
+                'prescriptions_page'
+            );
 
-        return view('doctors.prescriptions.prescriptions_tables', compact('statistics', 'prescriptions'));
+        /*
+         * Базовый запрос по рецептам текущего врача за сегодня.
+         */
+//        $todayPrescriptionsQuery = MedicalPrescription::query()
+//            ->where('doctor_id', $doctorId)
+//            ->whereDate('issued_at', $today);
+
+
+        // Рецептов оформленных сегодня
+        $currentPrescription = MedicalPrescription::where('doctor_id', $doctorId)
+            ->where('issued_at', '>=', now()->copy()->startOfDay())
+            ->where('issued_at', '<=', now()->copy()->endOfDay())
+            ->count('id');
+
+        // Кол-во пациентов, получивших рецепт.
+        $patientsWithPrescriptionsToday = MedicalPrescription::query()
+            ->where('doctor_id', $doctorId)
+            ->where('issued_at', '>=', now()->copy()->startOfDay())
+            ->where('issued_at', '<=', now()->copy()->endOfDay())
+            ->whereNotNull('patient_id')
+            ->distinct()
+            ->count('patient_id');
+
+
+        $patientPrescriptionToday = MedicalPrescription::query()
+            ->where('doctor_id', $doctorId)
+            ->where('issued_at', '<=', now()->copy()->endOfDay())
+            ->where('issued_at', '>=', now()->copy()->startOfDay ())
+            ->whereNotNull('patient_id')
+            ->distinct()
+            ->count('patient_id');
+
+        return view(
+            'doctors.prescriptions.prescriptions_tables',
+            compact(
+                'statistics',
+                'prescriptions',
+                // 'prescriptedToday',
+                'patientPrescriptionToday',
+            // 'strictDispensedToday'
+            )
+        );
     }
 
     public function create(): View
@@ -128,18 +178,48 @@ class PrescriptionsController extends Controller
 
     public function store(PrescriptionStoreRequest $request)
     {
-        $patient = Patient::findOrFail($request->post('patient_id'));
-        $drug = Drug::findOrFail($request->post('drug_id'));
-        $doctor = Doctor::findOrFail(auth()->user()->doctor->id);
+        $patient = Patient::query()
+            ->findOrFail($request->integer('patient_id'));
 
-        $patientNameInitial = mb_substr($patient->name ?? '', 0, 1, 'UTF-8');
-        $patientPatronymInitial = mb_substr($patient->patronym ?? '', 0, 1, 'UTF-8');
+        $drug = Drug::query()
+            ->findOrFail($request->integer('drug_id'));
+
+        $doctor = $request->user()?->doctor;
+
+        if (!$doctor) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'prescription' =>
+                        'Невозможно создать рецепт: '
+                        . 'у пользователя не найдена карточка врача.',
+                ])
+                ->with('open_prescription_modal', true);
+        }
+
+        $patientNameInitial = mb_substr(
+            $patient->name ?? '',
+            0,
+            1,
+            'UTF-8'
+        );
+
+        $patientPatronymInitial = mb_substr(
+            $patient->patronym ?? '',
+            0,
+            1,
+            'UTF-8'
+        );
 
         $data = [
+            'doctor_id' => (int) $doctor->getKey(),
             'doctor_name' => $this->getDoctorFullName(),
 
+            'patient_id' => (int) $patient->getKey(),
             'patient_name' => trim(
-                "{$patient->surname} {$patientNameInitial}. {$patientPatronymInitial}."
+                "{$patient->surname} "
+                . "{$patientNameInitial}. "
+                . "{$patientPatronymInitial}."
             ),
 
             'generic_name' => $drug->latin_name,
@@ -148,25 +228,23 @@ class PrescriptionsController extends Controller
             'quantity' => $request->quantity,
             'standards' => $request->standard,
             'usage_instructions' => $request->usage_instructions,
-            'prescription_form' => $drug->strict ? '№ 148-1/88-у' : '№ 107-1/у',
-            'issued_at' => now()->toDateTimeString(),
+            'prescription_form' => '№ 107-1/у',
+            'issued_at' => now()->toDateString(),
             'validity_period' => $request->validity_period,
-            'birth_at' => Carbon::parse($request->birth_at)->format('Y-m-d'),
-            'patient_id' => $patient->id,
+            'birth_at' => Carbon::parse(
+                $request->birth_at
+            )->toDateString(),
+            'is_strict' => false,
         ];
-
-        if ($drug->strict) {
-
-
-            $data['series'] = $this->getPrescriptionSeriesByDoctorAddress($doctor->address_job);
-            $data['number'] = $this->generatePrescriptionNumber($data['series']);
-        }
 
         PrescriptionsJob::dispatch($data);
 
         return redirect()
-            ->route('doctors.patients.medical_card', $request->patient_id)
-            ->with('success', 'Рецепт успешно создан.');
+            ->route(
+                'doctors.patients.medical_card',
+                $patient->id
+            )
+            ->with('success', 'Рецепт передан на создание.');
     }
 
     public function print(Request $request)
@@ -198,18 +276,11 @@ class PrescriptionsController extends Controller
             'dateAsYear' => date('Y'),
         ];
 
-//        if ($drug->strict) {
-//            $prescriptionNumber = PrescriptionNumber::firstOrCreate(['series' => '148СМ']);
-//            $prescriptionNumber->increment('number');
-//
-//            $data['series'] = $prescriptionNumber->series;
-//            $data['number'] = str_pad($prescriptionNumber->number, 6, '0', STR_PAD_LEFT);
-//        }
 
-        $bladeTemplate = $drug->strict
-            ? 'doctors.prescriptions.148-1у'
-            : 'doctors.prescriptions.107-1у';
-        $htmlContent = view($bladeTemplate, $data)->render();
+        $htmlContent = view(
+            'doctors.prescriptions.107-1у',
+            $data
+        )->render();
 
         return response($htmlContent);
     }
@@ -238,9 +309,7 @@ class PrescriptionsController extends Controller
             'drugLatinName' => $this->toGenitiveCase($prescription->generic_name),
             'drugDose' => $prescription->dosage,
             'drugQuantity' => $prescription->quantity,
-            'drugStandardCount' => $prescription->prescription_form === '148-1/у-88' && $prescription->standards
-                ? $prescription->standards . ' мл'
-                : '',
+            'drugStandardCount' => '',
             'drugStandards' => $prescription->standards,
             'drugUsingSchema' => $prescription->usage_instructions,
             'dateAsDay' => now()->format('d'),
@@ -248,11 +317,10 @@ class PrescriptionsController extends Controller
             'dateAsYear' => now()->format('Y'),
         ];
 
-        $bladeTemplate = $prescription->prescription_form === '148-1/у-88'
-            ? 'doctors.prescriptions.148-1у'
-            : 'doctors.prescriptions.107-1у';
-
-        $htmlContent = view($bladeTemplate, $data)->render();
+        $htmlContent = view(
+            'doctors.prescriptions.107-1у',
+            $data
+        )->render();
 
         return response($htmlContent);
     }

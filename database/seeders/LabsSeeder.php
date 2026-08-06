@@ -16,6 +16,7 @@ class LabsSeeder extends Seeder
     {
         LabParameter::truncate();
         DB::table('lab_reference_ranges')->truncate();
+        DB::table('lab_parameters_critical_ranges')->truncate();
 
         $labs = json_decode(file_get_contents(storage_path('app/private/labs.json')), true)['parameters'];
 
@@ -35,7 +36,7 @@ class LabsSeeder extends Seeder
 
                     if (isset($lab['ref_ranges'])) {
                         foreach ($lab['ref_ranges'] as $range) {
-                            $insertResult = DB::statement('insert into "lab_reference_ranges" (parameter_id, sex, age_min_y, age_max_y, min, max) values ( ?, ?, ?, ?, ?, ?)',
+                            $insertResult = DB::statement('insert into "lab_reference_ranges" (parameter_id, sex, age_min_y, age_max_y, min, max, created_at, updated_at) values ( ?, ?, ?, ?, ?, ?, ?, ?)',
                                 [
                                     $newLabParameter->id,
                                     $range['sex'],
@@ -43,6 +44,8 @@ class LabsSeeder extends Seeder
                                     $range['age_max_y'],
                                     $range['min'],
                                     $range['max'],
+                                    now(),
+                                    now()
                                 ]);
 
                             if (!$insertResult) {
@@ -50,6 +53,27 @@ class LabsSeeder extends Seeder
                                 break;
                             }
 
+                        }
+                    }
+
+                    if (isset($lab['critical_ranges'])) {
+                        foreach ($lab['critical_ranges'] as $range) {
+                            $insertResult = DB::statement('insert into "lab_parameters_critical_ranges" (parameter_id, sex, age_min_y, age_max_y, critical_low, critical_high, created_at, updated_at) values ( ?, ?, ?, ?, ?, ?, ?, ?)',
+                            [
+                                $newLabParameter->id,
+                                $range['sex'],
+                                $range['age_min_y'],
+                                $range['age_max_y'],
+                                $range['critical_low'],
+                                $range['critical_high'],
+                                now(),
+                                now()
+                            ]);
+
+                            if (!$insertResult) {
+                                DB::rollback();
+                                break;
+                            }
                         }
                     }
                 } catch (\Exception $e) {
