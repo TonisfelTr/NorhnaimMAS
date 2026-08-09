@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Doctors;
 
+use App\Enums\AssignmentStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
 use App\Models\InstrumentalResearch;
@@ -206,23 +207,34 @@ class AnalysesPanelController extends Controller
 
     public function journal(Request $request): View
     {
-        $doctor = auth()->user()->doctor()->firstOrFail();
-        $doctorId = $doctor->id;
+        $doctor = auth()->user()
+            ->doctor()
+            ->firstOrFail();
 
-        $instrumentalResearchesQuery = InstrumentalResearch::query()
-            ->with([
-                'patient',
-                'media',
-            ]);
+        $doctorId = (int) $doctor->id;
+
+        /*
+         * Журнал ЛАБОРАТОРНЫХ исследований.
+         */
+        $labResearchesQuery = LabResearch::query()
+            ->with($this->labResearchRelations());
 
         $this->applyDoctorScope(
-            $instrumentalResearchesQuery,
+            $labResearchesQuery,
             $doctorId
         );
 
+        /*
+         * Поиск.
+         */
         if ($request->filled('search')) {
-            $search = trim((string)$request->search);
-            $search = preg_replace('/[.,]+/u', ' ', $search) ?? '';
+            $search = trim((string) $request->search);
+
+            $search = preg_replace(
+                '/[.,]+/u',
+                ' ',
+                $search
+            ) ?? '';
 
             $searchParts = preg_split(
                 '/\s+/u',
@@ -231,7 +243,7 @@ class AnalysesPanelController extends Controller
                 PREG_SPLIT_NO_EMPTY
             ) ?: [];
 
-            $instrumentalResearchesQuery->where(
+            $labResearchesQuery->where(
                 function (Builder $query) use ($searchParts): void {
                     foreach ($searchParts as $searchPart) {
                         $searchValue = '%' . $searchPart . '%';
@@ -239,16 +251,45 @@ class AnalysesPanelController extends Controller
                         $query->where(
                             function (Builder $query) use ($searchValue): void {
                                 $query
-                                    ->where('name', 'ilike', $searchValue)
-                                    ->orWhere('body_area', 'ilike', $searchValue)
-                                    ->orWhere('organization', 'ilike', $searchValue)
+                                    ->where(
+                                        'laboratory',
+                                        'ilike',
+                                        $searchValue
+                                    )
+                                    ->orWhere(
+                                        'sample_type',
+                                        'ilike',
+                                        $searchValue
+                                    )
                                     ->orWhereHas(
                                         'patient',
-                                        function (Builder $query) use ($searchValue): void {
-                                            $query
-                                                ->where('surname', 'ilike', $searchValue)
-                                                ->orWhere('name', 'ilike', $searchValue)
-                                                ->orWhere('patronym', 'ilike', $searchValue);
+                                        function (Builder $patientQuery) use ($searchValue): void {
+                                            $patientQuery
+                                                ->where(
+                                                    'surname',
+                                                    'ilike',
+                                                    $searchValue
+                                                )
+                                                ->orWhere(
+                                                    'name',
+                                                    'ilike',
+                                                    $searchValue
+                                                )
+                                                ->orWhere(
+                                                    'patronym',
+                                                    'ilike',
+                                                    $searchValue
+                                                );
+                                        }
+                                    )
+                                    ->orWhereHas(
+                                        'results.parameter',
+                                        function (Builder $parameterQuery) use ($searchValue): void {
+                                            $parameterQuery->where(
+                                                'name',
+                                                'ilike',
+                                                $searchValue
+                                            );
                                         }
                                     );
                             }
@@ -258,68 +299,224 @@ class AnalysesPanelController extends Controller
             );
         }
 
+        /*
+         * Дата с.
+         */
         if ($request->filled('date_from')) {
-            $instrumentalResearchesQuery->whereDate(
-                'result_at',
-                '>=',
-                $request->date_from
-            );
-        }
+            $dateFrom = (string)$request->date_from;
 
+            $labResearchesQuery->where(
+                function (Builder $query) use ($dateFrom): void {
+                    $query->where('research_date', '>=', $dateFrom);
+
+                }
+            );
+
+        };
+
+
+        /*
+         * Дата по.
+         */
         if ($request->filled('date_to')) {
-            $instrumentalResearchesQuery->whereDate(
-                'result_at',
-                '<=',
-                $request->date_to
+            $dateTo = (string) $request->date_to;
+
+            $labResearchesQuery->where(
+                function (Builder $query) use ($dateTo): void {
+                    $query->where('research_date', '<=', $dateTo);
+                }
             );
         }
 
-        if ($request->filled('status')) {
-            $instrumentalResearchesQuery->where(
-                'status',
-                $request->status
-            );
-        }
-
-        $instrumentalResearches = $instrumentalResearchesQuery
-            ->orderByDesc('result_at')
+        /*
+         * Получаем лабораторные исследования.
+         */
+        $labResearches = $labResearchesQuery
+            ->orderByDesc('research_date')
+            ->orderByDesc('planned_at')
             ->orderByDesc('created_at')
             ->get()
-            ->each(function (InstrumentalResearch $research): void {
-                $journalUrl = route(
-                    'doctors.patients.medical_card',
-                    [
-                        'patient' => $research->patient_id,
-                        'tab' => 'labs',
-                        'section' => 'instrumental',
-                        'instrumental_research' => $research->id,
-                    ]
+            ->map(function (LabResearch $research): LabResearch {
+
+                /*
+                 * Вычисляем normal / warning / critical.
+                 */
+                $this->decorateLabResearchAttention($research);
+
+                $isOverdue =
+                    in_array(
+                        $research->status,
+                        ['ordered', 'processing'],
+                        true
+                    )
+                    && $research->planned_at !== null
+                    && Carbon::parse($research->planned_at)->isPast();
+
+                $resultsCount = $research->results->count();
+
+                if ($isOverdue) {
+                    $displayStatus = 'overdue';
+                    $statusLabel = 'Просрочено';
+
+                    $summaryValue = 'Результат просрочен';
+                    $summaryText = 'Превышен ожидаемый срок выполнения';
+
+                } elseif (
+                    $research->status === 'ready'
+                    && $research->attention_level === 'critical'
+                ) {
+                    $displayStatus = 'critical';
+                    $statusLabel = 'Критично';
+
+                    $summaryValue = 'Критическое значение';
+
+                    $summaryText = trim(
+                        ($research->attention_parameter_name ?? '')
+                        . ': '
+                        . ($research->attention_value ?? '')
+                        . (
+                        $research->attention_unit
+                            ? ' ' . $research->attention_unit
+                            : ''
+                        )
+                    );
+
+                } elseif (
+                    $research->status === 'ready'
+                    && $research->attention_level === 'warning'
+                ) {
+                    $displayStatus = 'warning';
+                    $statusLabel = 'Отклонение';
+
+                    $summaryValue = 'Есть отклонения';
+
+                    $summaryText = trim(
+                        ($research->attention_parameter_name ?? '')
+                        . ': '
+                        . ($research->attention_value ?? '')
+                        . (
+                        $research->attention_unit
+                            ? ' ' . $research->attention_unit
+                            : ''
+                        )
+                    );
+
+                } elseif ($research->status === 'ready') {
+                    $displayStatus = 'ready';
+                    $statusLabel = 'Готово';
+
+                    $summaryValue = $resultsCount . ' показателей';
+                    $summaryText = 'Результаты готовы к просмотру';
+
+                } elseif ($research->status === 'processing') {
+                    $displayStatus = 'processing';
+                    $statusLabel = 'В работе';
+
+                    $summaryValue = 'Выполняется';
+                    $summaryText = 'Результат ещё не получен';
+
+                } elseif ($research->status === 'ordered') {
+                    $displayStatus = 'ordered';
+                    $statusLabel = 'Назначено';
+
+                    $summaryValue = 'Назначено';
+                    $summaryText = 'Исследование ожидает выполнения';
+
+                } else {
+                    $displayStatus = (string) $research->status;
+                    $statusLabel = ucfirst(
+                        (string) $research->status
+                    );
+
+                    $summaryValue = '—';
+                    $summaryText = '';
+                }
+
+                $displayDate = $research->research_date
+                    ?? $research->planned_at
+                    ?? $research->created_at;
+
+                $research->setAttribute(
+                    'display_status',
+                    $displayStatus
+                );
+
+                $research->setAttribute(
+                    'status_label',
+                    $statusLabel
+                );
+
+                $research->setAttribute(
+                    'summary_value',
+                    $summaryValue
+                );
+
+                $research->setAttribute(
+                    'summary_text',
+                    $summaryText
+                );
+
+                $research->setAttribute(
+                    'display_date',
+                    $displayDate
+                        ? Carbon::parse($displayDate)
+                        ->format('d.m.Y')
+                        : '—'
+                );
+
+                $research->setAttribute(
+                    'display_time',
+                    $displayDate
+                        ? Carbon::parse($displayDate)
+                        ->format('H:i')
+                        : ''
                 );
 
                 $research->setAttribute(
                     'result_url',
-                    $journalUrl
+                    route(
+                        'doctors.patients.medical_card',
+                        [
+                            'patient' => $research->patient_id,
+                            'tab' => 'labs',
+                            'research' => $research->id,
+                        ]
+                    )
                 );
 
-                $research->setAttribute(
-                    'journal_url',
-                    $journalUrl
-                );
-
-                $research->setAttribute(
-                    'media_count',
-                    $research->media
-                        ->where(
-                            'collection_name',
-                            InstrumentalResearch::MEDIA_COLLECTION_RESULTS
-                        )
-                        ->count()
-                );
+                return $research;
             });
+
+        /*
+         * Фильтр по вычисляемому статусу.
+         */
+        if ($request->filled('status')) {
+            $requestedStatus = (string) $request->status;
+
+            $labResearches = $labResearches
+                ->filter(
+                    function (LabResearch $research) use ($requestedStatus): bool {
+
+                        if ($requestedStatus === 'new') {
+                            return $research->status === 'ready'
+                                && $research->result_showed_at === null;
+                        }
+
+                        if ($requestedStatus === 'viewed') {
+                            return $research->status === 'ready'
+                                && $research->result_showed_at !== null;
+                        }
+
+                        return $research->display_status
+                            === $requestedStatus;
+                    }
+                )
+                ->values();
+        }
 
         return view(
             'doctors.analyses.journal',
-            compact('instrumentalResearches')
+            compact('labResearches')
         );
     }
 
@@ -2261,96 +2458,6 @@ class AnalysesPanelController extends Controller
             ->implode(' ');
     }
 
-
-    /**
-     * Применяет фильтры к списку лабораторных назначений.
-     *
-     * @param Builder<LabResearch> $query Запрос назначений.
-     * @param Request $request HTTP-запрос.
-     *
-     * @return void
-     */
-    private function applyAssignmentFilters(
-        Builder $query,
-        Request $request
-    ): void
-    {
-        $search = trim((string)$request->query('search', ''));
-
-        if ($search !== '') {
-            $tokens = preg_split(
-                '/\s+/u',
-                $search,
-                -1,
-                PREG_SPLIT_NO_EMPTY
-            ) ?: [];
-
-            foreach ($tokens as $token) {
-                $searchValue = '%' . $token . '%';
-
-                $query->where(
-                    static function (Builder $filterQuery) use (
-                        $searchValue
-                    ): void {
-                        $filterQuery
-                            ->where('laboratory', 'ilike', $searchValue)
-                            ->orWhereHas(
-                                'patient',
-                                static function (Builder $patientQuery) use (
-                                    $searchValue
-                                ): void {
-                                    $patientQuery
-                                        ->where('surname', 'ilike', $searchValue)
-                                        ->orWhere('name', 'ilike', $searchValue)
-                                        ->orWhere('patronym', 'ilike', $searchValue);
-                                }
-                            );
-                    }
-                );
-            }
-        }
-
-        $stage = trim((string)$request->query('stage', ''));
-
-        match ($stage) {
-            'assigned' => $query
-                ->where('status', self::ASSIGNMENT_STATUS_ORDERED)
-                ->whereDate('planned_at', '>=', today()),
-            'processing' => $query->where(
-                'status',
-                self::ASSIGNMENT_STATUS_PROCESSING
-            ),
-            'ready' => $query->where(
-                'status',
-                self::ASSIGNMENT_STATUS_READY
-            ),
-            'overdue' => $query
-                ->whereIn('status', [
-                    self::ASSIGNMENT_STATUS_ORDERED,
-                    self::ASSIGNMENT_STATUS_PROCESSING,
-                ])
-                ->whereDate('planned_at', '<', today()),
-            default => null,
-        };
-
-        $period = trim((string)$request->query('period', ''));
-
-        match ($period) {
-            'today' => $query->whereDate('created_at', today()),
-            'week' => $query->where(
-                'created_at',
-                '>=',
-                now()->subDays(7)
-            ),
-            'month' => $query->where(
-                'created_at',
-                '>=',
-                now()->subDays(30)
-            ),
-            default => null,
-        };
-    }
-
     /**
      * Возвращает отображаемое ФИО пациента или врача.
      *
@@ -2399,14 +2506,13 @@ class AnalysesPanelController extends Controller
      */
     private function resolveAssignmentStage(
         LabResearch $research
-    ): array
-    {
+    ): array {
         $plannedAt = $research->planned_at
             ? Carbon::parse($research->planned_at)
             : null;
 
         $isOverdue = in_array(
-                (string)$research->status,
+                (string) $research->status,
                 [
                     self::ASSIGNMENT_STATUS_ORDERED,
                     self::ASSIGNMENT_STATUS_PROCESSING,
@@ -2421,26 +2527,43 @@ class AnalysesPanelController extends Controller
                 'key' => 'overdue',
                 'label' => 'Просрочено',
                 'class' => 'danger',
-                'index' => (string)$research->status
+                'index' => (string) $research->status
                 === self::ASSIGNMENT_STATUS_PROCESSING
                     ? 3
                     : 1,
             ];
         }
 
-        return match ((string)$research->status) {
+        /*
+         * Результат уже просмотрен врачом.
+         */
+        if (
+            (string) $research->status === self::ASSIGNMENT_STATUS_READY
+            && $research->result_showed_at !== null
+        ) {
+            return [
+                'key' => 'viewed',
+                'label' => 'Просмотрено',
+                'class' => 'success',
+                'index' => 5,
+            ];
+        }
+
+        return match ((string) $research->status) {
             self::ASSIGNMENT_STATUS_PROCESSING => [
                 'key' => 'processing',
                 'label' => 'Выполняется',
                 'class' => 'progress',
                 'index' => 3,
             ],
+
             self::ASSIGNMENT_STATUS_READY => [
                 'key' => 'ready',
                 'label' => 'Готово',
                 'class' => 'success',
                 'index' => 4,
             ],
+
             default => [
                 'key' => 'assigned',
                 'label' => 'Назначено',
@@ -3863,9 +3986,7 @@ class AnalysesPanelController extends Controller
      *
      * @return JsonResponse
      */
-    public function assignmentSearchParameters(
-        Request $request
-    ): JsonResponse
+    public function assignmentSearchParameters(Request $request): JsonResponse
     {
         $search = trim((string)$request->query('q', ''));
         $sampleType = trim(
@@ -3940,15 +4061,13 @@ class AnalysesPanelController extends Controller
             ->with([
                 'patient:id,surname,name,patronym,birth_at',
                 'doctor:id,surname,name,patronym,clinic_id',
-            ])
-            ->whereIn('status', [
-                self::ASSIGNMENT_STATUS_ORDERED,
-                self::ASSIGNMENT_STATUS_PROCESSING,
-                self::ASSIGNMENT_STATUS_READY,
             ]);
+        if ($request->has('stage')) {
+            $query->where('status', $request->get('stage'))
+                ->where('planned_at', '>=', now());
+        }
 
         $this->applyDoctorScope($query, (int)$doctor->id);
-        $this->applyAssignmentFilters($query, $request);
 
         $assignments = $query
             ->orderByDesc('created_at')
@@ -4193,10 +4312,9 @@ class AnalysesPanelController extends Controller
      * @return View
      */
     public function assignmentPrint(
-        Request     $request,
+        Request $request,
         LabResearch $labResearch
-    ): View
-    {
+    ): View {
         $this->authorizeAssignmentAccess($labResearch);
 
         $labResearch->loadMissing([
@@ -4204,8 +4322,19 @@ class AnalysesPanelController extends Controller
             'doctor',
         ]);
 
-        $parameterIds = collect($labResearch->parameters ?? [])
-            ->map(static fn($id): int => (int)$id)
+        $patient = $labResearch->patient;
+        $doctor = $labResearch->doctor;
+
+        /*
+         * Параметры, входящие в направление.
+         */
+        $parameterIds = collect(
+            $labResearch->parameters ?? []
+        )
+            ->map(
+                static fn ($id): int =>
+                (int) $id
+            )
             ->filter()
             ->unique()
             ->values();
@@ -4216,48 +4345,229 @@ class AnalysesPanelController extends Controller
             ->orderBy('name')
             ->get();
 
-        $parameterGroups = $parameters
-            ->groupBy(
-                static fn(LabParameter $parameter): string => trim((string)($parameter->group ?? ''))
-                    ?: 'Лабораторные показатели'
-            );
+        /*
+         * ---------------------------------------------------------
+         * ДАННЫЕ ДЛЯ УНИВЕРСАЛЬНОЙ ТАБЛИЦЫ
+         * ---------------------------------------------------------
+         */
+        $items = $parameters
+            ->map(function (LabParameter $parameter): array {
 
-        $doctor = $labResearch->doctor;
-        $clinic = $doctor && method_exists($doctor, 'clinic')
+                /*
+                 * Для направления результата ещё нет.
+                 *
+                 * Референс пока берём из полей самого параметра,
+                 * если они там заполнены.
+                 */
+                $min = $parameter->min
+                    ?? $parameter->ref_min
+                    ?? $parameter->normal_min
+                    ?? null;
+
+                $max = $parameter->max
+                    ?? $parameter->ref_max
+                    ?? $parameter->normal_max
+                    ?? null;
+
+                if ($min !== null && $max !== null) {
+                    $reference = $min . '–' . $max;
+                } elseif ($min !== null) {
+                    $reference = 'от ' . $min;
+                } elseif ($max !== null) {
+                    $reference = 'до ' . $max;
+                } else {
+                    $reference = '—';
+                }
+
+                return [
+                    'id' => (int) $parameter->id,
+                    'name' => (string) $parameter->name,
+                    'reference' => $reference,
+                    'value' => null,
+                    'unit' => (string) (
+                        $parameter->unit ?? ''
+                    ),
+                    'group' => trim(
+                        (string) (
+                            $parameter->group
+                            ?? $parameter->group_code
+                            ?? ''
+                        )
+                    ),
+                ];
+            })
+            ->values();
+
+        /*
+         * Клиника врача.
+         */
+        $clinic = $doctor
+        && method_exists($doctor, 'clinic')
             ? $doctor->clinic()->first()
             : null;
 
+        /*
+         * ФИО пациента.
+         */
+        $patientName = $this
+            ->resolveAssignmentPersonName(
+                $patient,
+                'Пациент #' . $labResearch->patient_id
+            );
+
+        /*
+         * ФИО врача.
+         */
+        $doctorName = $this
+            ->resolveAssignmentPersonName(
+                $doctor,
+                'Врач #' . $labResearch->doctor_id
+            );
+
+        /*
+         * Дата рождения.
+         */
+        $patientBirthDate =
+            $patient?->birth_at
+                ? Carbon::parse(
+                $patient->birth_at
+            )->format('d.m.Y')
+                : '—';
+
+        /*
+         * Диагноз.
+         *
+         * Если у пациента есть связь diagnose,
+         * выводим код + название.
+         */
+        $diagnosisText = null;
+
+        if ($patient) {
+            $patient->loadMissing('diagnose');
+
+            if ($patient->diagnose) {
+                $diagnosisText = trim(
+                    collect([
+                        $patient->diagnose->code ?? null,
+                        $patient->diagnose->name
+                        ?? $patient->diagnose->title
+                            ?? null,
+                    ])
+                        ->filter()
+                        ->implode(' — ')
+                );
+            }
+        }
+
+        /*
+         * Приоритет.
+         */
+        $priorityLabel =
+            (string) $labResearch->priority
+            === self::ASSIGNMENT_PRIORITY_URGENT
+                ? 'Срочно'
+                : 'Обычный порядок';
+
+        /*
+         * Название клиники.
+         *
+         * Сначала используем реальные данные клиники,
+         * а config — как запасной вариант.
+         */
+        $clinicName =
+            $clinic?->name
+            ?? config('app.clinic_name')
+            ?? config('app.name')
+            ?? 'Медицинская организация';
+
+        $clinicAddress =
+            $clinic?->address
+            ?? config('app.clinic_address')
+            ?? '';
+
+        $clinicPhone =
+            $clinic?->phone
+            ?? config('app.clinic_phone')
+            ?? '';
+
         return view(
             'doctors.analyses.assignment-print',
-            compact(
-                'labResearch',
-                'parameters',
-                'parameterGroups',
-                'clinic'
-            ) + [
+            [
+                'isResult' => false,
+
+                'documentTitle' =>
+                    'Направление на лабораторное исследование',
+
+                'documentSubtitle' =>
+                    $labResearch->laboratory
+                        ?: 'Лабораторное исследование',
+
+                'documentNumber' =>
+                    $labResearch->id,
+
+                'documentForm' =>
+                    null,
+
+                'clinicName' =>
+                    $clinicName,
+
+                'clinicAddress' =>
+                    $clinicAddress,
+
+                'clinicPhone' =>
+                    $clinicPhone,
+
+                /*
+                 * Лучше передать сам Patient,
+                 * а имя/дату — отдельно.
+                 */
+                'patient' =>
+                    $patient,
+
                 'patientName' =>
-                    $this->resolveAssignmentPersonName(
-                        $labResearch->patient,
-                        'Пациент #' . $labResearch->patient_id
-                    ),
-                'doctorName' =>
-                    $this->resolveAssignmentPersonName(
-                        $doctor,
-                        'Врач #' . $labResearch->doctor_id
-                    ),
-                'priorityLabel' =>
-                    (string)$labResearch->priority
-                    === self::ASSIGNMENT_PRIORITY_URGENT
-                        ? 'Срочно'
-                        : 'Обычный порядок',
+                    $patientName,
+
                 'patientBirthDate' =>
-                    $labResearch->patient?->birth_at
+                    $patientBirthDate,
+
+                'doctorName' =>
+                    $doctorName,
+
+                'sampleType' =>
+                    $labResearch->sample_type
+                        ?: '—',
+
+                'researchDate' =>
+                    $labResearch->planned_at
                         ? Carbon::parse(
-                        $labResearch->patient->birth_at
+                        $labResearch->planned_at
                     )->format('d.m.Y')
                         : '—',
-                'printedAt' => now()->format('d.m.Y H:i'),
-                'autoPrint' => $request->boolean('auto'),
+
+                'priorityLabel' =>
+                    $priorityLabel,
+
+                'diagnosisText' =>
+                    $diagnosisText,
+
+                'comment' =>
+                    $labResearch->comment,
+
+                'items' =>
+                    $items,
+
+                'generatedAt' =>
+                    now()->format('d.m.Y H:i'),
+
+                'documentCode' =>
+                    'Направление №'
+                    . $labResearch->id,
+
+                /*
+                 * Сохраняем поддержку ?auto=1.
+                 */
+                'autoPrint' =>
+                    $request->boolean('auto'),
             ]
         );
     }

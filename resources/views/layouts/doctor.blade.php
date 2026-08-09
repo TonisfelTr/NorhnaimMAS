@@ -31,7 +31,7 @@
             <li><a href="{{ route('doctors.main') }}" class="nav-link link-body-emphasis"><i class="bi bi-speedometer2"></i> Статистика</a></li>
             <li><a href="{{ route('doctors.reception.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-person-lines-fill"></i> Регистратура</a></li>
             <li><a href="{{ route('doctors.tests.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-ui-checks-grid"></i> Тесты</a></li>
-            <li><a href="{{ route('doctors.analyses.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-search-heart"></i> Анализы</a></li>
+            <li><a href="{{ route('doctors.analyses.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-activity"></i> Лаборатория</a></li>
             <li><a href="{{ route('doctors.prescriptions.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-prescription"></i> Выписки</a></li>
             <li><a href="#" class="nav-link link-body-emphasis"><i class="bi bi-gear"></i> Настройки</a></li>
         </ul>

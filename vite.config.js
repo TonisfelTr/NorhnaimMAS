@@ -39,7 +39,8 @@ export default defineConfig({
                 'resources/js/mass_delete.js',
                 'resources/js/registry_script.js',
                 'resources/js/medical_card.js',
-                'resources/js/test-run.js'
+                'resources/js/test-run.js',
+                'resources/js/assignments.js'
             ],
             refresh: true,
         }),

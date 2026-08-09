@@ -2607,11 +2607,31 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalViewLab" tabindex="-1" aria-hidden="true"
+    @php
+        $currentDoctorId = auth()->user()?->doctor()->first()?->id;
+
+        $isTreatingDoctor =
+            $currentDoctorId !== null
+            && $patient->doctor_id !== null
+            && (int) $currentDoctorId === (int) $patient->doctor_id;
+    @endphp
+
+    <div class="modal fade"
+         id="modalViewLab"
+         tabindex="-1"
+         aria-hidden="true"
          data-api-params="{{ route('api.params.search') }}"
          data-gender="{{ $patient->lab_gender }}"
          data-sex="{{ $patient->lab_sex }}"
-         data-age="{{ $patient->age_for_labs }}">
+         data-age="{{ $patient->age_for_labs }}"
+         data-can-fill-missing="{{ $isTreatingDoctor ? '1' : '0' }}"
+         data-fill-missing-url-template="{{ route(
+         'doctors.patients.researches.result.fill-missing',
+         [
+             'labResearch' => '__RESEARCH__',
+             'parameter' => '__PARAMETER__',
+         ]
+     ) }}">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -2907,167 +2927,371 @@
          data-sex="{{ $patient->lab_sex }}"
          data-age="{{ $patient->age_for_labs }}"
          data-api-save-template="{{ route('api.store.labtemplate') }}"
-         data-templates='@json($templatesMap)'>
+         data-templates='@json($templatesMap)'
+         data-open-on-error="{{ $errors->labOrder->any() ? '1' : '0' }}"
+         data-old-param-ids='@json(old('param_ids', []))'>
+
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <form class="modal-content" method="post"
+            <form class="modal-content"
+                  method="post"
                   action="{{ route('doctors.patients.researches.store', $patient->id) }}">
                 @csrf
+
                 <div class="modal-header">
                     <h5 class="modal-title">Создать направление на анализ</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
+
+                    @if($errors->labOrder->any())
+                        <div class="alert alert-danger mb-3">
+                            <div class="fw-semibold mb-2">
+                                Не удалось сохранить направление
+                            </div>
+
+                            <ul class="mb-0 ps-3">
+                                @foreach($errors->labOrder->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="row g-3">
 
                         <div class="col-xl-4 col-lg-5">
                             <div class="border rounded p-3 h-100">
+
                                 <div class="mb-2">
-                                    <label class="form-label">Плановая дата/время забора</label>
-                                    <input type="date" class="form-control" name="planned_at"
-                                           value="{{ $patient->default_date }}">
+                                    <label class="form-label">
+                                        Плановая дата/время забора
+                                    </label>
+
+                                    <input type="date"
+                                           class="form-control @error('planned_at', 'labOrder') is-invalid @enderror"
+                                           name="planned_at"
+                                           value="{{ old('planned_at', $patient->default_date) }}">
+
+                                    @error('planned_at', 'labOrder')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
                                 </div>
 
                                 <div class="row g-2">
+
                                     <div class="col-6">
-                                        <label class="form-label">Приоритет</label>
-                                        <select class="form-select" name="priority">
-                                            <option value="normal">Обычный</option>
-                                            <option value="urgent">Срочно</option>
+                                        <label class="form-label">
+                                            Приоритет
+                                        </label>
+
+                                        <select class="form-select @error('priority', 'labOrder') is-invalid @enderror"
+                                                name="priority">
+
+                                            <option value="normal"
+                                                @selected(old('priority', 'normal') === 'normal')>
+                                                Обычный
+                                            </option>
+
+                                            <option value="urgent"
+                                                @selected(old('priority') === 'urgent')>
+                                                Срочно
+                                            </option>
+
                                         </select>
+
+                                        @error('priority', 'labOrder')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                        @enderror
                                     </div>
+
                                     <div class="col-6">
-                                        <label class="form-label">Статус</label>
-                                        <input class="form-control" value="Назначено" disabled>
-                                        <input type="hidden" name="status" value="ordered">
+                                        <label class="form-label">
+                                            Статус
+                                        </label>
+
+                                        <input class="form-control"
+                                               value="Назначено"
+                                               disabled>
                                     </div>
+
                                 </div>
 
                                 <div class="mt-2">
-                                    <label class="form-label">Лаборатория (опц.)</label>
-                                    <input class="form-control" name="laboratory" placeholder="Название/отделение">
+                                    <label class="form-label">
+                                        Лаборатория (опц.)
+                                    </label>
+
+                                    <input class="form-control @error('laboratory', 'labOrder') is-invalid @enderror"
+                                           name="laboratory"
+                                           value="{{ old('laboratory') }}"
+                                           placeholder="Название/отделение">
+
+                                    @error('laboratory', 'labOrder')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
                                 </div>
 
                                 <div class="mt-2">
-                                    <label class="form-label">Комментарий</label>
-                                    <textarea class="form-control" name="comment" rows="3"
-                                              placeholder="Например: перед началом терапии"></textarea>
+                                    <label class="form-label">
+                                        Комментарий
+                                    </label>
+
+                                    <textarea class="form-control @error('comment', 'labOrder') is-invalid @enderror"
+                                              name="comment"
+                                              rows="3"
+                                              placeholder="Например: перед началом терапии">{{ old('comment') }}</textarea>
+
+                                    @error('comment', 'labOrder')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
                                 </div>
 
                                 <hr>
 
                                 <div class="mb-2">
-                                    <label class="form-label">Шаблон набора</label>
+                                    <label class="form-label">
+                                        Шаблон набора
+                                    </label>
+
                                     <div class="input-group">
-                                        <select id="orderTplSelect" class="form-select">
-                                            <option value="">— не выбран —</option>
+                                        <select id="orderTplSelect"
+                                                class="form-select">
+
+                                            <option value="">
+                                                — не выбран —
+                                            </option>
+
                                             @foreach($labTemplates as $tpl)
                                                 <option value="{{ $tpl->id }}">
-                                                    {{ $tpl->name }} {{ $tpl->doctor_id ? '（личный）' : '（общий）' }}
+                                                    {{ $tpl->name }}
+                                                    {{ $tpl->doctor_id ? '（личный）' : '（общий）' }}
                                                 </option>
                                             @endforeach
+
                                         </select>
-                                        <button class="btn btn-outline-secondary" type="button" id="btnOrderTplApply">
+
+                                        <button class="btn btn-outline-secondary"
+                                                type="button"
+                                                id="btnOrderTplApply">
                                             Применить
                                         </button>
                                     </div>
-                                    <div class="form-text">Шаблон заполнит список параметров справа.</div>
+
+                                    <div class="form-text">
+                                        Шаблон заполнит список параметров справа.
+                                    </div>
                                 </div>
 
                                 <div class="mt-2">
-                                    <label class="form-label">Сохранить выбранные как шаблон</label>
+                                    <label class="form-label">
+                                        Сохранить выбранные как шаблон
+                                    </label>
+
                                     <div class="input-group">
-                                        <input id="orderTplName" type="text" class="form-control"
+                                        <input id="orderTplName"
+                                               type="text"
+                                               class="form-control"
                                                placeholder="Название шаблона">
-                                        <button class="btn btn-outline-primary" type="button" id="btnOrderTplSave">
+
+                                        <button class="btn btn-outline-primary"
+                                                type="button"
+                                                id="btnOrderTplSave">
                                             Сохранить
                                         </button>
                                     </div>
-                                    <div class="form-text">Шаблон будет доступен только вам.</div>
+
+                                    <div class="form-text">
+                                        Шаблон будет доступен только вам.
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
 
                         <div class="col-xl-8 col-lg-7">
                             <div class="border rounded p-3">
+
                                 <div class="row g-2">
+
                                     <div class="col-md-12">
-                                        <label class="form-label">Материал</label>
-                                        <select id="sampleType" name="sampleType" class="form-select">
-                                            <option value="моча">моча</option>
-                                            <option value="кровь">кровь</option>
-                                            <option value="кровь/моча">кровь/моча</option>
-                                            <option value="плазма">плазма</option>
-                                            <option value="расчёт">расчёт</option>
-                                            <option value="сыворотка">сыворотка</option>
+                                        <label class="form-label">
+                                            Материал
+                                        </label>
+
+                                        <select id="sampleType"
+                                                name="sampleType"
+                                                class="form-select @error('sampleType', 'labOrder') is-invalid @enderror">
+
+                                            <option value="моча"
+                                                @selected(old('sampleType', 'моча') === 'моча')>
+                                                моча
+                                            </option>
+
+                                            <option value="кровь"
+                                                @selected(old('sampleType') === 'кровь')>
+                                                кровь
+                                            </option>
+
+                                            <option value="кровь/моча"
+                                                @selected(old('sampleType') === 'кровь/моча')>
+                                                кровь/моча
+                                            </option>
+
+                                            <option value="плазма"
+                                                @selected(old('sampleType') === 'плазма')>
+                                                плазма
+                                            </option>
+
+                                            <option value="расчёт"
+                                                @selected(old('sampleType') === 'расчёт')>
+                                                расчёт
+                                            </option>
+
+                                            <option value="сыворотка"
+                                                @selected(old('sampleType') === 'сыворотка')>
+                                                сыворотка
+                                            </option>
+
                                         </select>
+
+                                        @error('sampleType', 'labOrder')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                        @enderror
                                     </div>
+
                                     <div class="col-md">
-                                        <label class="form-label">Поиск параметра</label>
-                                        <input id="paramSearch" class="form-control" autocomplete="off"
+                                        <label class="form-label">
+                                            Поиск параметра
+                                        </label>
+
+                                        <input id="paramSearch"
+                                               class="form-control"
+                                               autocomplete="off"
                                                placeholder="напр.: Hb, натрий, «Гемоглобин»">
-                                        <div id="paramMenu" class="dropdown-menu"></div>
-                                        <div class="form-text">Начните вводить название или просто кликните в поле,
+
+                                        <div id="paramMenu"
+                                             class="dropdown-menu"></div>
+
+                                        <div class="form-text">
+                                            Начните вводить название или просто кликните в поле,
                                             чтобы показать список.
                                         </div>
                                     </div>
+
                                     <div class="col-md-5">
-                                        <label class="form-label">Группа</label>
-                                        <div class="input-group">
-                                            <select id="paramGroup" class="form-select">
-                                                <option value="">Все группы</option>
-                                                <option value="cbc">ОАК</option>
-                                                <option value="cbc_indices">Эритроцитарные индексы</option>
-                                                <option value="diff">Лейкоформула (%)</option>
-                                                <option value="diff_abs">Лейкоформула (абс.)</option>
-                                                <option value="urinalysis">ОАМ</option>
-                                                <option value="metabolic">Метаболические</option>
-                                                <option value="liver">Печёночные</option>
-                                                <option value="renal">Почечные</option>
-                                                <option value="electrolytes">Электролиты</option>
-                                                <option value="lipids">Липиды</option>
-                                                <option value="iron">Железо</option>
-                                                <option value="vitamins">Витамины</option>
-                                                <option value="endocrine">Эндокринные</option>
-                                                <option value="drug_levels">Уровни препаратов</option>
-                                            </select>
-                                        </div>
+                                        <label class="form-label">
+                                            Группа
+                                        </label>
+
+                                        <select id="paramGroup"
+                                                class="form-select">
+                                            <option value="">Все группы</option>
+                                            <option value="cbc">ОАК</option>
+                                            <option value="cbc_indices">Эритроцитарные индексы</option>
+                                            <option value="diff">Лейкоформула (%)</option>
+                                            <option value="diff_abs">Лейкоформула (абс.)</option>
+                                            <option value="urinalysis">ОАМ</option>
+                                            <option value="metabolic">Метаболические</option>
+                                            <option value="liver">Печёночные</option>
+                                            <option value="renal">Почечные</option>
+                                            <option value="electrolytes">Электролиты</option>
+                                            <option value="lipids">Липиды</option>
+                                            <option value="iron">Железо</option>
+                                            <option value="vitamins">Витамины</option>
+                                            <option value="endocrine">Эндокринные</option>
+                                            <option value="drug_levels">Уровни препаратов</option>
+                                        </select>
                                     </div>
+
                                 </div>
 
                                 <hr>
 
                                 <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <div class="fw-semibold">Выбранные параметры <span id="orderSelCount">(0)</span>
+                                    <div class="fw-semibold">
+                                        Выбранные параметры
+                                        <span id="orderSelCount">(0)</span>
                                     </div>
                                 </div>
 
+                                @error('param_ids', 'labOrder')
+                                <div class="alert alert-danger py-2 px-3 mb-2">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+
+                                @error('param_ids.*', 'labOrder')
+                                <div class="alert alert-danger py-2 px-3 mb-2">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+
                                 <div class="table-responsive">
-                                    <table class="table align-middle mb-0" id="orderParamsTable">
+                                    <table class="table align-middle mb-0"
+                                           id="orderParamsTable">
+
                                         <thead class="table-light">
                                         <tr>
-                                            <th style="min-width:280px">Параметр</th>
-                                            <th>Реф. интервал</th>
-                                            <th>Ед.</th>
-                                            <th class="text-end" style="width:70px;"></th>
+                                            <th style="min-width:280px">
+                                                Параметр
+                                            </th>
+                                            <th>
+                                                Реф. интервал
+                                            </th>
+                                            <th>
+                                                Ед.
+                                            </th>
+                                            <th class="text-end"
+                                                style="width:70px;"></th>
                                         </tr>
                                         </thead>
-                                        <tbody>
 
-                                        </tbody>
+                                        <tbody></tbody>
+
                                     </table>
                                 </div>
 
                             </div>
                         </div>
+
                     </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Отмена</button>
-                    <button class="btn btn-primary" type="submit" name="save" value="1">Сохранить направление</button>
-                    <button class="btn btn-primary" type="submit" name="save_and_new" value="1">Сохранить и ещё</button>
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+
+                    <button class="btn btn-primary"
+                            type="submit"
+                            name="save"
+                            value="1">
+                        Сохранить направление
+                    </button>
+
+                    <button class="btn btn-primary"
+                            type="submit"
+                            name="save_and_new"
+                            value="1">
+                        Сохранить и ещё
+                    </button>
                 </div>
+
             </form>
         </div>
     </div>

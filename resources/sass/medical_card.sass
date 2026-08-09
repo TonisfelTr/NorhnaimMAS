@@ -3750,3 +3750,38 @@
     &--warning
         background: #fff0c8
         color: #936300
+
+
+// Ручное заполнение отсутствующего лабораторного результата лечащим врачом
+.lab-missing-result-editor
+    display: grid
+    grid-template-columns: auto minmax(115px, 1fr) auto
+    gap: 8px
+    align-items: center
+    min-width: 300px
+
+    &__dash
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        width: 22px
+        color: #98a2b3
+        font-size: 16px
+        font-weight: 700
+
+    &__input
+        min-width: 0
+
+    &__save
+        display: inline-flex
+        align-items: center
+        gap: 5px
+        white-space: nowrap
+
+@media (max-width: 767.98px)
+    .lab-missing-result-editor
+        grid-template-columns: auto minmax(100px, 1fr)
+
+        &__save
+            grid-column: 2
+            justify-self: start

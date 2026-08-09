@@ -1411,10 +1411,20 @@
                                                         </span>
                                                     </td>
                                                     <td>{{ $row['date'] }}</td>
-                                                    <td>{{ $row['status'] }}</td>
-                                                    <td>{{ $row['patient'] }}</td>
+                                                    <td>{{ match($row['status']) {
+                                                        'ready' => 'Готово',
+                                                        'processing' => 'В работе',
+                                                        'ordered' => 'Назначено',
+                                                        'new' => 'Новый',
+                                                        'viewed' => 'Просмотрено',
+                                                        'critical' => 'Критично',
+                                                        'warning' => 'Отклонение',
+                                                        'overdue' => 'Просрочено',
+                                                        'completed' => 'Выполнено',
+                                                        'cancelled' => 'Отменено'
+}                                                   }}</td>
                                                     <td class="lab-record-doctor">
-                                                        <div class="lab-record-doctor__name">
+                                                        <div class="lab-record-doctor__name" @if(auth()->user()->doctor->id === $row['doctor_id']) style="color: darkred;" @endif>
                                                             {{ $row['doctor'] }}
                                                         </div>
                                                         @if(!empty($row['doctor_accreditation']))

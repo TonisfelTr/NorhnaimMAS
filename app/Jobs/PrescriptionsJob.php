@@ -40,6 +40,8 @@ class PrescriptionsJob implements ShouldQueue
                     'patient_id' => $this->data['patient_id'],
                     'prescription_form' =>
                         $this->data['prescription_form'] ?? null,
+                    'is_strict' =>
+                        (bool) ($this->data['is_strict'] ?? false),
                 ]
             );
 
@@ -104,6 +106,9 @@ class PrescriptionsJob implements ShouldQueue
                     'prescription_id' => $prescription->id,
                     'doctor_id' => $prescription->doctor_id,
                     'patient_id' => $prescription->patient_id,
+                    'is_strict' => $prescription->is_strict,
+                    'prescription_form' =>
+                        $prescription->prescription_form,
                 ]
             );
         } catch (Throwable $exception) {

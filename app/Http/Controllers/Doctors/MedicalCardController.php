@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePatientMedcardRequest;
 use App\Models\LabParameter;
 use App\Models\LabResearchTemplate;
 use App\Models\Patient;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -239,8 +240,14 @@ class MedicalCardController extends Controller
             ->medicalFile()
             ->count();
 
-        $researches = $patient->labResearches()
-            ->orderBy('created_at', 'desc')
+        $researches = $patient->labResearches();
+        if ($researchID = request()->get('research')) {
+
+            $researches->where('id', $researchID)
+                ->whereNotNull('result_showed_at')
+                ->update(['result_showed_at' => now()]);
+        }
+        $researches->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($research) {
                 [$paramsPayload, $valuesMap] = $this->buildLabResearchPayloads($research);

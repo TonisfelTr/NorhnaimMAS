@@ -1,374 +1,391 @@
 <!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Лабораторное направление №{{ $labResearch->id }}</title>
+    <meta charset="UTF-8">
+    <title>{{ $documentTitle ?? 'Лабораторное исследование' }}</title>
     <style>
-        * {
-            box-sizing: border-box;
+        @page {
+            size: A4;
+            margin: 16mm;
         }
 
         body {
             margin: 0;
-            background: #eef2f5;
-            color: #111827;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 13px;
-            line-height: 1.45;
+            font-family: DejaVu Sans, Arial, sans-serif;
+            color: #1f2937;
+            background: #f3f4f6;
+        }
+
+        .print-page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 8px 28px rgba(0,0,0,.18);
+            padding: 18mm 16mm 16mm;
+            box-sizing: border-box;
         }
 
         .print-toolbar {
-            display: flex;
             width: 210mm;
-            margin: 18px auto 10px;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        .print-button {
-            min-height: 38px;
-            padding: 8px 14px;
-            border: 1px solid #0793a4;
-            border-radius: 8px;
-            background: #0793a4;
-            color: #fff;
-            font: inherit;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .sheet {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0 auto 24px;
-            padding: 16mm 17mm;
-            background: #fff;
-            box-shadow: 0 12px 32px rgba(15, 23, 42, .12);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            gap: 22px;
-            padding-bottom: 13px;
-            border-bottom: 2px solid #0793a4;
-        }
-
-        .clinic-name {
-            color: #057786;
-            font-size: 18px;
-            font-weight: 800;
-        }
-
-        .clinic-details {
-            margin-top: 5px;
-            color: #5f6b7a;
-            font-size: 11px;
-            line-height: 1.5;
-        }
-
-        .document-number {
-            flex: 0 0 auto;
+            margin: 12px auto;
             text-align: right;
         }
 
-        .document-number__label {
-            color: #6b7280;
-            font-size: 11px;
-            text-transform: uppercase;
+        .btn-print {
+            padding: 9px 16px;
+            border: 1px solid #0f766e;
+            background: #0f766e;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
         }
 
-        .document-number__value {
-            margin-top: 3px;
-            font-size: 18px;
-            font-weight: 800;
+        .btn-print:hover {
+            background: #115e59;
         }
 
-        h1 {
-            margin: 22px 0 5px;
-            font-size: 22px;
-            line-height: 1.25;
-            text-align: center;
-        }
-
-        .subtitle {
-            margin-bottom: 20px;
-            color: #6b7280;
-            text-align: center;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0;
-            margin-bottom: 20px;
-            border: 1px solid #dce3e9;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .info-item {
-            min-height: 68px;
-            padding: 11px 13px;
-            border-right: 1px solid #e6ebef;
-            border-bottom: 1px solid #e6ebef;
-        }
-
-        .info-item:nth-child(2n) {
-            border-right: 0;
-        }
-
-        .info-item:nth-last-child(-n + 2) {
-            border-bottom: 0;
-        }
-
-        .info-label {
-            margin-bottom: 5px;
-            color: #778292;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-        }
-
-        .info-value {
-            font-size: 13px;
-            font-weight: 700;
-            overflow-wrap: anywhere;
-        }
-
-        .section-title {
-            margin: 20px 0 8px;
-            color: #057786;
-            font-size: 15px;
-            font-weight: 800;
-        }
-
-        .parameter-table {
+        .header {
+            display: table;
             width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #dce3e9;
+            border-bottom: 2px solid #0f766e;
+            padding-bottom: 10px;
+            margin-bottom: 18px;
         }
 
-        .parameter-table th,
-        .parameter-table td {
-            padding: 9px 10px;
-            border-right: 1px solid #e6ebef;
-            border-bottom: 1px solid #e6ebef;
-            text-align: left;
+        .header-left,
+        .header-right {
+            display: table-cell;
             vertical-align: top;
         }
 
-        .parameter-table th:last-child,
-        .parameter-table td:last-child {
-            border-right: 0;
+        .header-right {
+            text-align: right;
+            width: 180px;
         }
 
-        .parameter-table tr:last-child td {
-            border-bottom: 0;
+        .clinic-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f766e;
+            margin-bottom: 4px;
         }
 
-        .parameter-table th {
-            background: #f5f8fa;
-            color: #5f6b7a;
-            font-size: 11px;
+        .clinic-meta {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #4b5563;
         }
 
-        .group-row td {
-            background: #eaf8fa;
-            color: #057786;
+        .doc-form {
+            font-size: 12px;
+            color: #4b5563;
+            margin-bottom: 6px;
+        }
+
+        .doc-number {
+            font-size: 28px;
             font-weight: 800;
+            color: #111827;
+        }
+
+        .title {
+            text-align: center;
+            margin: 20px 0 8px;
+            font-size: 28px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #4b5563;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: 1px solid #dbe3ea;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+        }
+
+        .info-grid {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-row {
+            display: table-row;
+        }
+
+        .info-col {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+            padding: 8px 10px;
+        }
+
+        .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #6b7280;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111827;
+            line-height: 1.4;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f766e;
+            margin: 18px 0 10px;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        table.data-table th,
+        table.data-table td {
+            border: 1px solid #dbe3ea;
+            padding: 10px 8px;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        table.data-table th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #111827;
+            text-align: left;
         }
 
         .comment-box {
+            border: 1px solid #dbe3ea;
+            border-radius: 12px;
+            padding: 14px 16px;
             min-height: 70px;
-            padding: 12px 13px;
-            border: 1px solid #dce3e9;
-            border-radius: 9px;
-            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #111827;
         }
 
         .signatures {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 34px;
-            margin-top: 34px;
+            margin-top: 42px;
+            display: table;
+            width: 100%;
         }
 
-        .signature-line {
-            padding-top: 26px;
-            border-bottom: 1px solid #525f6f;
-        }
-
-        .signature-label {
-            margin-top: 5px;
-            color: #778292;
-            font-size: 10px;
+        .sign-col {
+            display: table-cell;
+            width: 50%;
+            vertical-align: bottom;
             text-align: center;
+            padding: 0 16px;
+        }
+
+        .sign-line {
+            border-top: 1px solid #9ca3af;
+            margin-top: 34px;
+            padding-top: 6px;
+            font-size: 12px;
+            color: #4b5563;
         }
 
         .footer {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
             margin-top: 28px;
-            padding-top: 10px;
-            border-top: 1px solid #e2e8ee;
-            color: #8a94a4;
-            font-size: 10px;
+            display: table;
+            width: 100%;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .footer-left,
+        .footer-right {
+            display: table-cell;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .muted {
+            color: #6b7280;
+            font-weight: 400;
         }
 
         @media print {
-            @page {
-                size: A4;
-                margin: 0;
-            }
-
             body {
                 background: #fff;
             }
 
             .print-toolbar {
-                display: none;
+                display: none !important;
             }
 
-            .sheet {
-                width: 210mm;
-                min-height: 297mm;
-                margin: 0;
+            .print-page {
                 box-shadow: none;
+                margin: 0;
+                width: auto;
+                min-height: auto;
+                padding: 0;
             }
         }
     </style>
 </head>
 <body>
+
 <div class="print-toolbar">
-    <button class="print-button" type="button" onclick="window.print()">
-        Печать
-    </button>
+    <button class="btn-print" onclick="window.print()">Печать</button>
 </div>
 
-<main class="sheet">
-    <header class="header">
-        <div>
-            <div class="clinic-name">
-                {{ data_get($clinic, 'name', config('app.name', 'Медицинская организация')) }}
-            </div>
-            <div class="clinic-details">
-                @if(data_get($clinic, 'address'))
-                    <div>{{ data_get($clinic, 'address') }}</div>
-                @endif
-                @if(data_get($clinic, 'phone'))
-                    <div>Телефон: {{ data_get($clinic, 'phone') }}</div>
-                @endif
-                @if(data_get($clinic, 'email'))
-                    <div>{{ data_get($clinic, 'email') }}</div>
-                @endif
+<div class="print-page">
+    <div class="header">
+        <div class="header-left">
+            <div class="clinic-name">{{ $clinicName ?? 'Медицинская организация' }}</div>
+            <div class="clinic-meta">
+                {{ $clinicAddress ?? 'Адрес организации' }}<br>
+                {{ $clinicPhone ?? 'Телефон организации' }}
             </div>
         </div>
 
-        <div class="document-number">
-            <div class="document-number__label">Номер направления</div>
-            <div class="document-number__value">№ {{ $labResearch->id }}</div>
-        </div>
-    </header>
+        <div class="header-right">
+            @if(!empty($documentForm))
+                <div class="doc-form">{{ $documentForm }}</div>
+            @endif
 
-    <h1>Направление на лабораторное исследование</h1>
-    <div class="subtitle">
-        {{ $labResearch->laboratory ?: 'Лабораторное исследование' }}
+            @if(!empty($documentNumber))
+                <div class="doc-number">№ {{ $documentNumber }}</div>
+            @endif
+        </div>
     </div>
 
-    <section class="info-grid">
-        <div class="info-item">
-            <div class="info-label">Пациент</div>
-            <div class="info-value">{{ $patientName }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Дата рождения</div>
-            <div class="info-value">{{ $patientBirthDate }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Направивший врач</div>
-            <div class="info-value">{{ $doctorName }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Биоматериал</div>
-            <div class="info-value">{{ $labResearch->sample_type ?: 'Не указан' }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Планируемая дата сдачи</div>
-            <div class="info-value">
-                {{ $labResearch->planned_at ? \Illuminate\Support\Carbon::parse($labResearch->planned_at)->format('d.m.Y') : '—' }}
-            </div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Приоритет</div>
-            <div class="info-value">{{ $priorityLabel }}</div>
-        </div>
-    </section>
+    <div class="title">{{ $documentTitle }}</div>
 
-    <div class="section-title">Назначенные показатели</div>
-    <table class="parameter-table">
+    @if(!empty($documentSubtitle))
+        <div class="subtitle">{{ $documentSubtitle }}</div>
+    @endif
+
+    <div class="card">
+        <div class="info-grid">
+            <div class="info-row">
+                <div class="info-col">
+                    <div class="label">Пациент</div>
+                    <div class="value">{{ $patient->full_name ?? $patient->name ?? '—' }}</div>
+                </div>
+                <div class="info-col">
+                    <div class="label">Дата рождения</div>
+                    <div class="value">{{ $patient->birth_date ?? '—' }}</div>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-col">
+                    <div class="label">Направивший врач</div>
+                    <div class="value">{{ $doctorName ?? '—' }}</div>
+                </div>
+                <div class="info-col">
+                    <div class="label">Биоматериал</div>
+                    <div class="value">{{ $sampleType ?? '—' }}</div>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-col">
+                    <div class="label">
+                        {{ $isResult ? 'Дата исследования' : 'Планируемая дата сдачи' }}
+                    </div>
+                    <div class="value">{{ $researchDate ?? '—' }}</div>
+                </div>
+                <div class="info-col">
+                    <div class="label">Приоритет</div>
+                    <div class="value">{{ $priorityLabel ?? '—' }}</div>
+                </div>
+            </div>
+
+            @if(!empty($diagnosisText))
+                <div class="info-row">
+                    <div class="info-col" colspan="2" style="display: table-cell; width: 100%; padding: 8px 10px;">
+                        <div class="label">Диагноз / код МКБ</div>
+                        <div class="value">{{ $diagnosisText }}</div>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="section-title">
+        {{ $isResult ? 'Результаты исследования' : 'Назначенные показатели' }}
+    </div>
+
+    <table class="data-table">
         <thead>
         <tr>
-            <th style="width: 44px">№</th>
+            <th style="width: 40px;">№</th>
             <th>Показатель</th>
-            <th style="width: 140px">Единица измерения</th>
+            <th style="width: 180px;">Норма</th>
+            @if($isResult)
+                <th style="width: 140px;">Результат</th>
+            @endif
+            <th style="width: 120px;">Ед. изм.</th>
         </tr>
         </thead>
         <tbody>
-        @php($parameterNumber = 0)
-        @forelse($parameterGroups as $groupName => $groupParameters)
-            <tr class="group-row">
-                <td colspan="3">{{ $groupName }}</td>
+        @forelse($items as $index => $item)
+            <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ $item['name'] ?? '—' }}</td>
+                <td>{{ $item['reference'] ?? '—' }}</td>
+                @if($isResult)
+                    <td>{{ $item['value'] ?? '—' }}</td>
+                @endif
+                <td>{{ $item['unit'] ?? '—' }}</td>
             </tr>
-            @foreach($groupParameters as $parameter)
-                @php($parameterNumber++)
-                <tr>
-                    <td>{{ $parameterNumber }}</td>
-                    <td>{{ $parameter->name }}</td>
-                    <td>{{ $parameter->unit ?: '—' }}</td>
-                </tr>
-            @endforeach
         @empty
             <tr>
-                <td colspan="3">Показатели не найдены.</td>
+                <td colspan="{{ $isResult ? 5 : 4 }}" style="text-align: center;">Нет данных</td>
             </tr>
         @endforelse
         </tbody>
     </table>
 
-    @if(trim((string) $labResearch->comment) !== '')
+    @if(!empty($comment))
         <div class="section-title">Комментарий врача</div>
-        <div class="comment-box">{{ $labResearch->comment }}</div>
+        <div class="comment-box">
+            {{ $comment }}
+        </div>
     @endif
 
-    <section class="signatures">
-        <div>
-            <div class="signature-line"></div>
-            <div class="signature-label">Подпись врача</div>
+    <div class="signatures">
+        <div class="sign-col">
+            <div class="sign-line">Подпись врача</div>
         </div>
-        <div>
-            <div class="signature-line"></div>
-            <div class="signature-label">Подпись пациента</div>
+        <div class="sign-col">
+            <div class="sign-line">{{ $isResult ? 'Печать / подпись лаборатории' : 'Подпись пациента' }}</div>
         </div>
-    </section>
+    </div>
 
-    <footer class="footer">
-        <span>Сформировано: {{ $printedAt }}</span>
-        <span>Направление №{{ $labResearch->id }}</span>
-    </footer>
-</main>
+    <div class="footer">
+        <div class="footer-left">
+            Сформировано: {{ $generatedAt ?? now()->format('d.m.Y H:i') }}
+        </div>
+        <div class="footer-right">
+            {{ $documentCode ?? '' }}
+        </div>
+    </div>
+</div>
 
-@if($autoPrint)
-    <script>
-        window.addEventListener('load', function () {
-            window.setTimeout(function () {
-                window.print();
-            }, 250);
-        });
-    </script>
-@endif
 </body>
 </html>

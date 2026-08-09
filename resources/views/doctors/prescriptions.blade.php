@@ -1,4 +1,4 @@
-@extends('layouts.doctor')
+@extends('doctors.reception')
 
 @section('title', trim($__env->yieldContent('prescription-title', 'Рецептурный отпуск')))
 
@@ -638,6 +638,142 @@
             color: #fff;
         }
 
+
+        /* Расширенная верхняя навигация */
+        .rx-nav__dropdown .dropdown-toggle::after {
+            margin-left: 2px;
+            opacity: .72;
+        }
+
+        .rx-nav__dropdown-menu,
+        .rx-create-menu {
+            min-width: 290px;
+            margin-top: 10px !important;
+            padding: 8px;
+            border: 1px solid #dfe7ec;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 18px 46px rgba(15, 23, 42, .16);
+        }
+
+        .rx-nav__dropdown-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            padding: 10px 11px;
+            border-radius: 11px;
+            color: #344054;
+            text-decoration: none;
+            transition: .14s ease;
+        }
+
+        .rx-nav__dropdown-item:hover,
+        .rx-nav__dropdown-item.active {
+            background: #eef8fa;
+            color: var(--rx-primary-dark);
+        }
+
+        .rx-nav__dropdown-item.is-disabled {
+            cursor: default;
+            opacity: .52;
+            pointer-events: none;
+        }
+
+        .rx-nav__dropdown-icon {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            place-items: center;
+            border-radius: 10px;
+            background: #f2f7f8;
+            color: var(--rx-primary-dark);
+            font-size: 14px;
+        }
+
+        .rx-nav__dropdown-copy {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .rx-nav__dropdown-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
+        .rx-nav__dropdown-hint {
+            margin-top: 3px;
+            color: #83909f;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .rx-nav__dropdown-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: #f2f4f7;
+            color: #667085;
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        .rx-nav__dropdown-divider {
+            height: 1px;
+            margin: 6px 4px;
+            background: #edf1f4;
+        }
+
+        .rx-topbar__action--primary {
+            border-color: rgba(255, 255, 255, .36);
+            background: rgba(255, 255, 255, .20);
+        }
+
+        .rx-topbar__action--primary:hover,
+        .rx-topbar__action--primary.show {
+            background: rgba(255, 255, 255, .28);
+        }
+
+        .rx-create-menu .rx-nav__dropdown-item {
+            width: 100%;
+        }
+
+        @media (max-width: 991.98px) {
+            .rx-nav__dropdown-menu,
+            .rx-create-menu {
+                min-width: 100%;
+                margin-top: 4px !important;
+                border-color: rgba(255, 255, 255, .18);
+                background: rgba(255, 255, 255, .97);
+                box-shadow: none;
+            }
+
+            .rx-nav__dropdown {
+                width: 100%;
+            }
+
+            .rx-nav__dropdown > .rx-nav__link {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .rx-topbar__actions .dropdown {
+                width: 100%;
+            }
+
+            .rx-topbar__actions .dropdown > .rx-topbar__action {
+                justify-content: center;
+            }
+        }
+
         @media print {
             .rx-topbar,
             .rx-hero__actions,
@@ -733,14 +869,72 @@
 @endsection
 
 @section('main')
+    @php
+        $specialistReferralRoute = \Illuminate\Support\Facades\Route::has(
+            'doctors.referrals.specialists.index'
+        )
+            ? route('doctors.referrals.specialists.index')
+            : null;
+
+        $specialistReferralCreateRoute = \Illuminate\Support\Facades\Route::has(
+            'doctors.referrals.specialists.create'
+        )
+            ? route('doctors.referrals.specialists.create')
+            : null;
+
+        $hospitalReferralRoute = \Illuminate\Support\Facades\Route::has(
+            'doctors.referrals.hospital.index'
+        )
+            ? route('doctors.referrals.hospital.index')
+            : null;
+
+        $hospitalReferralCreateRoute = \Illuminate\Support\Facades\Route::has(
+            'doctors.referrals.hospital.create'
+        )
+            ? route('doctors.referrals.hospital.create')
+            : null;
+
+        $consultationsRoute = \Illuminate\Support\Facades\Route::has(
+            'doctors.referrals.consultations.index'
+        )
+            ? route('doctors.referrals.consultations.index')
+            : null;
+
+        $labAssignmentsRoute = \Illuminate\Support\Facades\Route::has(
+            'doctors.analyses.assignments'
+        )
+            ? route('doctors.analyses.assignments')
+            : null;
+
+        $isPrescriptionSection = request()->routeIs(
+            'doctors.prescriptions.index',
+            'doctors.prescriptions.new',
+            'doctors.prescriptions.print*',
+            'doctors.prescriptions.repeat'
+        );
+
+        $isReferralSection = request()->routeIs(
+            'doctors.referrals.*',
+            'doctors.analyses.assignments*'
+        );
+
+        $isReferenceSection = request()->routeIs(
+            'doctors.prescriptions.base'
+        );
+    @endphp
+
     <nav class="navbar navbar-expand-lg rx-topbar">
         <div class="container-fluid rx-topbar__container">
-            <a class="rx-brand" href="{{ route('doctors.prescriptions.index') }}">
+            <a
+                class="rx-brand"
+                href="{{ route('doctors.prescriptions.index') }}"
+                title="Медицинские назначения и выписные документы"
+            >
                 <span class="rx-brand__icon">
-                    <i class="bi bi-prescription2"></i>
+                    <i class="bi bi-clipboard2-pulse"></i>
                 </span>
 
-                <span>Рецепты</span>
+                <span>Назначения</span>
             </a>
 
             <button
@@ -759,49 +953,255 @@
                 <ul class="navbar-nav rx-nav me-auto">
                     <li class="nav-item">
                         <a
-                            class="nav-link rx-nav__link {{ request()->routeIs('doctors.prescriptions.index') ? 'active' : '' }}"
+                            class="nav-link rx-nav__link {{ $isPrescriptionSection ? 'active' : '' }}"
                             href="{{ route('doctors.prescriptions.index') }}"
                         >
-                            <i class="bi bi-file-earmark-medical"></i>
-                            Выписки
+                            <i class="bi bi-prescription2"></i>
+                            Рецепты
                         </a>
                     </li>
 
-                    <li class="nav-item">
+                    <li class="nav-item dropdown rx-nav__dropdown">
                         <a
-                            class="nav-link rx-nav__link {{ request()->routeIs('doctors.prescriptions.new') ? 'active' : '' }}"
-                            href="{{ route('doctors.prescriptions.new') }}"
+                            class="nav-link rx-nav__link dropdown-toggle {{ $isReferralSection ? 'active' : '' }}"
+                            href="#"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
                         >
-                            <i class="bi bi-plus-circle"></i>
-                            Новый рецепт
+                            <span>
+                                <i class="bi bi-signpost-split me-2"></i>
+                                Направления
+                            </span>
                         </a>
+
+                        <div class="dropdown-menu rx-nav__dropdown-menu">
+                            <a
+                                class="rx-nav__dropdown-item {{ $labAssignmentsRoute ? '' : 'is-disabled' }}"
+                                href="{{ $labAssignmentsRoute ?: '#' }}"
+                                @if(!$labAssignmentsRoute) aria-disabled="true" @endif
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-droplet-half"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        Лабораторные исследования
+                                    </span>
+                                    <span class="rx-nav__dropdown-hint">
+                                        Назначение анализов и печать направления
+                                    </span>
+                                </span>
+                            </a>
+
+                            <a
+                                class="rx-nav__dropdown-item {{ $specialistReferralRoute ? '' : 'is-disabled' }}"
+                                href="{{ $specialistReferralRoute ?: '#' }}"
+                                @if(!$specialistReferralRoute) aria-disabled="true" @endif
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        К профильному специалисту
+                                        @if(!$specialistReferralRoute)
+                                            <span class="rx-nav__dropdown-badge">подключить</span>
+                                        @endif
+                                    </span>
+                                    <span class="rx-nav__dropdown-hint">
+                                        Консультация врача другой специальности
+                                    </span>
+                                </span>
+                            </a>
+
+                            <a
+                                class="rx-nav__dropdown-item {{ $hospitalReferralRoute ? '' : 'is-disabled' }}"
+                                href="{{ $hospitalReferralRoute ?: '#' }}"
+                                @if(!$hospitalReferralRoute) aria-disabled="true" @endif
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-hospital"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        В стационар
+                                        @if(!$hospitalReferralRoute)
+                                            <span class="rx-nav__dropdown-badge">подключить</span>
+                                        @endif
+                                    </span>
+                                    <span class="rx-nav__dropdown-hint">
+                                        Плановая или экстренная госпитализация
+                                    </span>
+                                </span>
+                            </a>
+
+                            <a
+                                class="rx-nav__dropdown-item {{ $consultationsRoute ? '' : 'is-disabled' }}"
+                                href="{{ $consultationsRoute ?: '#' }}"
+                                @if(!$consultationsRoute) aria-disabled="true" @endif
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-people"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        Консилиум / консультация
+                                        @if(!$consultationsRoute)
+                                            <span class="rx-nav__dropdown-badge">подключить</span>
+                                        @endif
+                                    </span>
+                                    <span class="rx-nav__dropdown-hint">
+                                        Внутреннее или внешнее консультирование
+                                    </span>
+                                </span>
+                            </a>
+                        </div>
                     </li>
 
-                    <li class="nav-item">
+                    <li class="nav-item dropdown rx-nav__dropdown">
                         <a
-                            class="nav-link rx-nav__link {{ request()->routeIs('doctors.prescriptions.base') ? 'active' : '' }}"
-                            href="{{ route('doctors.prescriptions.base') }}"
+                            class="nav-link rx-nav__link dropdown-toggle {{ $isReferenceSection ? 'active' : '' }}"
+                            href="#"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
                         >
-                            <i class="bi bi-capsule-pill"></i>
-                            База препаратов
+                            <span>
+                                <i class="bi bi-journal-bookmark me-2"></i>
+                                Справочники
+                            </span>
                         </a>
+
+                        <div class="dropdown-menu rx-nav__dropdown-menu">
+                            <a
+                                class="rx-nav__dropdown-item {{ request()->routeIs('doctors.prescriptions.base') ? 'active' : '' }}"
+                                href="{{ route('doctors.prescriptions.base') }}"
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-capsule-pill"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        База препаратов
+                                    </span>
+                                    <span class="rx-nav__dropdown-hint">
+                                        Формы, дозировки, показания и противопоказания
+                                    </span>
+                                </span>
+                            </a>
+                        </div>
                     </li>
                 </ul>
 
                 <div class="rx-topbar__actions">
-                    <a class="rx-topbar__action" href="{{ route('doctors.prescriptions.new') }}">
-                        <i class="bi bi-plus-lg"></i>
-                        Выписать рецепт
-                    </a>
+                    <div class="dropdown">
+                        <button
+                            class="rx-topbar__action rx-topbar__action--primary dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        >
+                            <i class="bi bi-plus-circle"></i>
+                            Оформить
+                        </button>
 
-                    <a class="rx-topbar__action" href="{{ route('doctors.prescriptions.index') }}">
+                        <div class="dropdown-menu dropdown-menu-end rx-create-menu">
+                            <a
+                                class="rx-nav__dropdown-item"
+                                href="{{ route('doctors.prescriptions.new') }}"
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-prescription2"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        Новый рецепт
+                                    </span>
+                                    <span class="rx-nav__dropdown-hint">
+                                        Лекарственное назначение и печатная форма
+                                    </span>
+                                </span>
+                            </a>
+
+                            <a
+                                class="rx-nav__dropdown-item {{ $labAssignmentsRoute ? '' : 'is-disabled' }}"
+                                href="{{ $labAssignmentsRoute ?: '#' }}"
+                                @if(!$labAssignmentsRoute) aria-disabled="true" @endif
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-droplet-half"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        Направление на анализы
+                                    </span>
+                                    <span class="rx-nav__dropdown-hint">
+                                        Лабораторное исследование
+                                    </span>
+                                </span>
+                            </a>
+
+                            <div class="rx-nav__dropdown-divider"></div>
+
+                            <a
+                                class="rx-nav__dropdown-item {{ $specialistReferralCreateRoute ? '' : 'is-disabled' }}"
+                                href="{{ $specialistReferralCreateRoute ?: '#' }}"
+                                @if(!$specialistReferralCreateRoute) aria-disabled="true" @endif
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-person-plus"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        К специалисту
+                                        @if(!$specialistReferralCreateRoute)
+                                            <span class="rx-nav__dropdown-badge">подключить</span>
+                                        @endif
+                                    </span>
+                                </span>
+                            </a>
+
+                            <a
+                                class="rx-nav__dropdown-item {{ $hospitalReferralCreateRoute ? '' : 'is-disabled' }}"
+                                href="{{ $hospitalReferralCreateRoute ?: '#' }}"
+                                @if(!$hospitalReferralCreateRoute) aria-disabled="true" @endif
+                            >
+                                <span class="rx-nav__dropdown-icon">
+                                    <i class="bi bi-hospital"></i>
+                                </span>
+
+                                <span class="rx-nav__dropdown-copy">
+                                    <span class="rx-nav__dropdown-title">
+                                        В стационар
+                                        @if(!$hospitalReferralCreateRoute)
+                                            <span class="rx-nav__dropdown-badge">подключить</span>
+                                        @endif
+                                    </span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <button
+                        class="rx-topbar__action"
+                        type="button"
+                        onclick="window.location.reload()"
+                    >
                         <i class="bi bi-arrow-clockwise"></i>
                         Обновить
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
-
-    @yield('prescription-content')
+    @yield('sub-main')
 @endsection

@@ -109,7 +109,19 @@
     </style>
 @endsection
 
-@section('prescription-content')
+@section('sub-main')
+    {{--
+        Контракт с PrescriptionsController@index:
+
+        $prescriptions — LengthAwarePaginator. Используется для total(),
+        пагинации, firstItem()/lastItem() и URL страниц.
+
+        $rows — Collection подготовленных строк ТОЛЬКО текущей страницы.
+        Она нужна для @foreach и не заменяет paginator.
+
+        $filters — уже нормализованный в контроллере массив GET-фильтров.
+        Никакой бизнес-логики и @php в этом Blade нет.
+    --}}
     <main class="rx-page">
         <div class="rx-container">
             @if(session('success'))
@@ -166,7 +178,7 @@
                     </div>
 
                     <div class="rx-stat__value">
-                        {{ $newPrescriptionsCount }}
+                        {{ $currentPrescription }}
                     </div>
 
                     <div class="rx-stat__hint">
@@ -186,7 +198,7 @@
                     </div>
 
                     <div class="rx-stat__value">
-                        {{ $uniquePatientsCount }}
+                        {{ $patientsWithPrescriptionsToday }}
                     </div>
 
                     <div class="rx-stat__hint">
@@ -206,7 +218,7 @@
                     </div>
 
                     <div class="rx-stat__value">
-                        {{ $strictPrescriptionsCount }}
+                        {{ $strictPrescriptionsToday }}
                     </div>
 
                     <div class="rx-stat__hint">
@@ -226,7 +238,7 @@
                     </div>
 
                     <div class="rx-stat__value">
-                        {{ $repeatedPrescriptionsCount }}
+                        {{ $repeatedPrescriptionsToday }}
                     </div>
 
                     <div class="rx-stat__hint">

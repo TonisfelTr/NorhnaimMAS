@@ -491,26 +491,66 @@ class AjaxController extends Controller
         return response()->json($forms);
     }
 
-    public function searchPatientFor(int $id)
+    public function searchPatientFor(int $id): JsonResponse
     {
-        $patient = Patient::findOrFail($id);
+        $patient = Patient::query()
+            ->with([
+                'doctor',
+                'diagnose',
+            ])
+            ->findOrFail($id);
+
+        $birthAt = $patient->birth_at
+            ? Carbon::parse($patient->birth_at)
+            : null;
+
+        $fullName = collect([
+            $patient->surname,
+            $patient->name,
+            $patient->patronym,
+        ])->filter()->implode(' ');
+
+        $doctorName = collect([
+            data_get($patient, 'doctor.surname'),
+            data_get($patient, 'doctor.name'),
+            data_get($patient, 'doctor.patronym'),
+        ])->filter()->implode(' ');
 
         return response()->json([
-            'id' => $patient->id,
+            'id' => (int) $patient->id,
+            'full_name' => $fullName,
             'surname' => $patient->surname,
             'name' => $patient->name,
             'patronym' => $patient->patronym,
-            'birth_at' => $patient->birth_at ? Carbon::parse($patient->birth_at)->format('Y-m-d') : '',
+            'birth_at' => $birthAt?->format('Y-m-d'),
+            'birth_at_display' => $birthAt?->format('d.m.Y'),
+            'age' => $birthAt?->age,
+            'gender' => $patient->gender,
+            'medcard_number' => $patient->medcard_number,
             'address_registration' => $patient->address_registration,
             'address_residence' => $patient->address_residence,
             'serial' => $patient->serial,
             'number' => $patient->number,
             'department_code' => $patient->department_code,
             'issued_by' => $patient->issued_by,
-            'issued_at' => $patient->issued_at ? Carbon::parse($patient->issued_at)->format('Y-m-d') : '',
+            'issued_at' => $patient->issued_at
+                ? Carbon::parse($patient->issued_at)->format('Y-m-d')
+                : null,
             'birth_place' => $patient->birth_place,
             'snils' => $patient->snils,
             'oms' => $patient->oms,
+            'phone' => $patient->phone,
+            'email' => $patient->email,
+            'doctor' => [
+                'id' => data_get($patient, 'doctor.id'),
+                'name' => $doctorName,
+            ],
+            'diagnosis' => [
+                'id' => $patient->diagnose_id,
+                'code' => data_get($patient, 'diagnose.code'),
+                'title' => data_get($patient, 'diagnose.title')
+                    ?: data_get($patient, 'diagnose.name'),
+            ],
         ]);
     }
 

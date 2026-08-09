@@ -597,64 +597,112 @@
             font-weight: 850;
         }
 
+        /* ==============================
+           Этап выполнения исследования
+           ============================== */
+
+        /*
+         * Не завязываемся на дополнительный класс <td>.
+         * Колонка сама получает достаточную ширину, если внутри есть степпер.
+         */
+        .lab-table td:has(.lab-stepper) {
+            width: 450px;
+            min-width: 450px;
+        }
+
         .lab-stepper {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 8px;
-            margin-top: 13px;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            align-items: start;
+            width: 100%;
+            min-width: 420px;
+            margin-top: 11px;
+            padding: 0 2px;
+            gap: 0;
         }
 
         .lab-step {
             position: relative;
-            padding-top: 18px;
-            color: #94a3b8;
+            min-width: 0;
+            margin: 0;
+            padding: 22px 4px 0;
+            color: #98a2b3;
             font-size: 11px;
+            font-weight: 700;
+            line-height: 1.2;
             text-align: center;
+            white-space: normal;
+            overflow-wrap: normal;
+            word-break: normal;
         }
 
+        /* Кружок этапа */
         .lab-step::before {
             content: '';
             position: absolute;
-            top: 0;
+            top: 3px;
             left: 50%;
             z-index: 2;
             width: 11px;
             height: 11px;
-            border: 3px solid #fff;
+            border: 2px solid #cbd5e1;
             border-radius: 50%;
-            background: #cbd5e1;
-            box-shadow: 0 0 0 1px #cbd5e1;
+            background: #fff;
             transform: translateX(-50%);
+            box-sizing: border-box;
         }
 
+        /* Линия от текущей точки к следующей */
         .lab-step::after {
             content: '';
             position: absolute;
-            top: 5px;
-            right: 50%;
+            top: 7px;
+            left: 50%;
+            z-index: 1;
             width: 100%;
             height: 2px;
-            background: #dbe4ea;
+            background: #dce5eb;
         }
 
-        .lab-step:first-child::after {
+        .lab-step:last-child::after {
             display: none;
         }
 
-        .lab-step.is-done,
-        .lab-step.is-current {
+        /* Пройденные этапы */
+        .lab-step.is-done {
             color: var(--lab-primary-dark);
-            font-weight: 750;
         }
 
-        .lab-step.is-done::before,
-        .lab-step.is-current::before {
+        .lab-step.is-done::before {
+            border-color: var(--lab-primary);
             background: var(--lab-primary);
-            box-shadow: 0 0 0 1px var(--lab-primary);
+            box-shadow: inset 0 0 0 2px #fff;
         }
 
         .lab-step.is-done::after {
             background: var(--lab-primary-light);
+        }
+
+        /* Текущий этап */
+        .lab-step.is-current {
+            color: var(--lab-primary-dark);
+            font-weight: 800;
+        }
+
+        .lab-step.is-current::before {
+            border-color: var(--lab-primary);
+            background: var(--lab-primary);
+            box-shadow: inset 0 0 0 2px #fff;
+        }
+
+        /*
+         * Если в Blade подпись обёрнута в span — ограничиваем её
+         * собственной колонкой. Если span нет, правила выше всё равно работают.
+         */
+        .lab-step > span {
+            display: block;
+            width: 100%;
+            min-width: 0;
         }
 
         .lab-info-list {
@@ -895,18 +943,6 @@
                         </a>
                     </li>
                 </ul>
-
-                <div class="lab-topbar__actions">
-                    <a class="lab-topbar__action" href="{{ route('doctors.analyses.assignments.store') }}">
-                        <i class="bi bi-plus-circle"></i>
-                        Назначить
-                    </a>
-
-                    <a class="lab-topbar__action" href="/upload">
-                        <i class="bi bi-cloud-arrow-up"></i>
-                        Загрузить результат
-                    </a>
-                </div>
             </div>
         </div>
     </nav>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Doctors;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DirectionPrintRequest;
+use App\Http\Requests\StoreLabResearchRequest;
 use App\Models\Clinic;
 use App\Models\LabResearch;
 use App\Models\LabResearchResult;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class ResearchController extends Controller
 {
-    public function store(Request $request, Patient $patient)
+    public function store(StoreLabResearchRequest $request, Patient $patient)
     {
         $labResearch = new LabResearch();
         $labResearch->planned_at = $request->planned_at;
@@ -291,6 +292,236 @@ class ResearchController extends Controller
             'patient' => $patient,
             'parameters' => $parametersPrepared,
             'labResearch' => $labResearch,
+        ]);
+    }
+
+
+    /**
+     * Отметить результат лабораторного исследования
+     * как просмотренный врачом.
+     */
+    public function markAsRead(LabResearch $labResearch)
+    {
+        $markedNow = false;
+
+        if (is_null($labResearch->result_showed_at)) {
+            $labResearch->result_showed_at = now();
+            $labResearch->save();
+
+            $markedNow = true;
+        }
+
+        $labResearch->refresh();
+
+        return response()->json([
+            'success' => true,
+            'marked_now' => $markedNow,
+            'research_id' => $labResearch->id,
+            'result_showed_at' => $labResearch->result_showed_at,
+        ]);
+    }
+
+    public function changeResultValue(
+        Request $request,
+        LabResearch $labResearch,
+        int $parameter
+    ) {
+        /*
+         * Проверка permission ОБЯЗАТЕЛЬНО на сервере.
+         * Скрытия поля в Blade недостаточно.
+         */
+        abort_unless(
+            auth()->check()
+            && auth()->user()->can('doctor.analyses.change'),
+            403,
+            'Недостаточно прав для изменения результата анализа.'
+        );
+
+        $request->validate([
+            'value' => ['required'],
+        ]);
+
+        $value = $request->input('value');
+
+        if (!is_scalar($value)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Некорректное значение.',
+            ], 422);
+        }
+
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Значение не может быть пустым.',
+            ], 422);
+        }
+
+        if (mb_strlen($value) > 255) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Значение слишком длинное.',
+            ], 422);
+        }
+
+        /*
+         * Ищем конкретный результат этого параметра
+         * именно в указанном исследовании.
+         */
+        $result = LabResearchResult::query()
+            ->where('lab_research_id', $labResearch->id)
+            ->where('lab_parameter_id', $parameter)
+            ->orderByDesc('id')
+            ->firstOrFail();
+
+        $oldValue = $result->value;
+
+        $result->value = $value;
+        $result->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Значение изменено.',
+            'research_id' => $labResearch->id,
+            'parameter_id' => $parameter,
+            'result_id' => $result->id,
+            'old_value' => $oldValue,
+            'value' => $result->value,
+        ]);
+    }
+
+    public function fillMissingResultValue(
+        Request $request,
+        LabResearch $labResearch,
+        int $parameter
+    ) {
+        $doctorId = auth()->user()
+            ?->doctor()
+            ->first()
+            ?->id;
+
+        abort_unless(
+            $doctorId,
+            403,
+            'Профиль врача не найден.'
+        );
+
+        $patient = Patient::query()
+            ->findOrFail($labResearch->patient_id);
+
+        /*
+         * Только лечащий врач пациента.
+         */
+        abort_unless(
+            (int) $patient->doctor_id === (int) $doctorId,
+            403,
+            'Заполнять отсутствующий результат может только лечащий врач пациента.'
+        );
+
+        /*
+         * Параметр должен входить в это исследование.
+         */
+        $parameterIds = collect($labResearch->parameters ?? [])
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique();
+
+        abort_unless(
+            $parameterIds->contains($parameter),
+            404,
+            'Параметр не относится к данному исследованию.'
+        );
+
+        $data = $request->validate([
+            'value' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+        ]);
+
+        $value = trim((string) $data['value']);
+
+        if ($value === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Введите значение результата.',
+            ], 422);
+        }
+
+        $result = DB::transaction(function () use (
+            $labResearch,
+            $patient,
+            $parameter,
+            $value
+        ) {
+            $result = LabResearchResult::query()
+                ->where(
+                    'lab_research_id',
+                    $labResearch->id
+                )
+                ->where(
+                    'lab_parameter_id',
+                    $parameter
+                )
+                ->lockForUpdate()
+                ->first();
+
+            /*
+             * Уже заполненное значение этим методом
+             * изменять нельзя.
+             */
+            if ($result) {
+                $currentValue = trim(
+                    (string) $result->value
+                );
+
+                $isMissing = in_array(
+                    $currentValue,
+                    ['', '-', '—'],
+                    true
+                );
+
+                if (!$isMissing) {
+                    abort(
+                        409,
+                        'Результат уже заполнен.'
+                    );
+                }
+            }
+
+            /*
+             * Если строки результата ещё нет —
+             * создаём.
+             */
+            if (!$result) {
+                $result = new LabResearchResult();
+
+                $result->lab_research_id =
+                    $labResearch->id;
+
+                $result->lab_parameter_id =
+                    $parameter;
+
+                $result->patient_id =
+                    $patient->id;
+            }
+
+            $result->value = $value;
+            $result->save();
+
+            return $result;
+        });
+
+        return response()->json([
+            'success' => true,
+            'research_id' => $labResearch->id,
+            'parameter_id' => $parameter,
+            'result_id' => $result->id,
+            'value' => $result->value,
+            'message' => 'Значение сохранено.',
         ]);
     }
 }

@@ -28,3 +28,4 @@ docker-compose.yml
 /init.sql/
 /Doctor::query()->select('id', 'user_id')->limit(20)->get()->toArray();
 /docker/
+/start.sh

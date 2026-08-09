@@ -280,14 +280,64 @@ function initLabOrderReopen() {
         }
     });
 
-    if (sessionStorage.getItem(flag) === '1') {
+    if (document.querySelector('.modal[data-open-on-error="1"]')) {
         sessionStorage.removeItem(flag);
-
-        setTimeout(() => {
-            openBootstrapTab('#pane-labs');
-            getBootstrapModal(modal)?.show();
-        }, 50);
+        return;
     }
+
+    if (sessionStorage.getItem(flag) !== '1') {
+        return;
+    }
+
+    sessionStorage.removeItem(flag);
+
+    setTimeout(() => {
+        openBootstrapTab('#pane-labs');
+        getBootstrapModal(modal)?.show();
+    }, 50);
+}
+
+function initModalValidationErrors() {
+    const modal = document.querySelector(
+        '.modal[data-open-on-error="1"]'
+    );
+
+    if (!modal) {
+        return false;
+    }
+
+    /*
+     * Ошибка формы важнее deep-link на просмотр исследования.
+     * Удаляем параметры до события window.load, чтобы встроенный
+     * Blade-скрипт тоже не открыл старую модалку результата.
+     */
+    const url = new URL(window.location.href);
+    url.searchParams.delete('research');
+    url.searchParams.delete('instrumental_research');
+
+    window.history.replaceState(
+        {},
+        '',
+        url.pathname + url.search + url.hash
+    );
+
+    const tabTarget = modal.dataset.errorTab;
+
+    if (tabTarget) {
+        openBootstrapTab(tabTarget);
+    }
+
+    window.setTimeout(() => {
+        document.querySelectorAll('.modal.show').forEach(openModal => {
+            if (openModal !== modal) {
+                getBootstrapModal(openModal)?.hide();
+            }
+        });
+
+        getBootstrapModal(modal)?.show();
+    }, 75);
+
+    return true;
 }
 
 function normalizeParam(item) {
@@ -499,6 +549,18 @@ function getResultValue(payload) {
         ?? '';
 }
 
+function isMissingLabValue(value) {
+    if (value == null) {
+        return true;
+    }
+
+    const normalized = String(value).trim();
+
+    return normalized === ''
+        || normalized === '—'
+        || normalized === '-';
+}
+
 function getDatasetParams(button) {
     return safeJsonParse(button?.dataset?.params, null)
         ?? safeJsonParse(button?.dataset?.paramIds, []);
@@ -526,9 +588,13 @@ function mergeParamWithResult(rawParam, values) {
         };
     }
 
+    const resultValue = getResultValue(resultPayload);
+
     return {
         ...param,
-        value: getResultValue(resultPayload) || param.value || ''
+        value: resultValue !== ''
+            ? resultValue
+            : (param.value ?? '')
     };
 }
 
@@ -1177,7 +1243,77 @@ function initLabViewModal() {
     const counter = qs('#v_selCount', modal);
     const hideNormal = qs('#v_toggleHideNormal', modal);
 
+    const canFillMissing =
+        modal.dataset.canFillMissing === '1';
+
+    const fillMissingUrlTemplate =
+        modal.dataset.fillMissingUrlTemplate || '';
+
     let params = [];
+    let currentResearchId = null;
+    let currentTriggerButton = null;
+
+    function getFillMissingUrl(parameterId) {
+        if (
+            !fillMissingUrlTemplate
+            || !currentResearchId
+            || !parameterId
+        ) {
+            return '';
+        }
+
+        return fillMissingUrlTemplate
+            .replace(
+                '__RESEARCH__',
+                encodeURIComponent(currentResearchId)
+            )
+            .replace(
+                '__PARAMETER__',
+                encodeURIComponent(parameterId)
+            );
+    }
+
+    function renderValueCell(param) {
+        if (
+            canFillMissing
+            && isMissingLabValue(param.value)
+        ) {
+            return `
+                <div class="lab-missing-result-editor">
+                    <span
+                        class="lab-missing-result-editor__dash"
+                        title="Результат лабораторией не заполнен"
+                    >—</span>
+
+                    <input
+                        type="text"
+                        class="form-control form-control-sm lab-missing-result-editor__input"
+                        data-missing-result-input
+                        data-parameter-id="${escapeHtml(param.id)}"
+                        placeholder="Введите значение"
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-primary lab-missing-result-editor__save"
+                        data-save-missing-result
+                        data-parameter-id="${escapeHtml(param.id)}"
+                        title="Сохранить значение"
+                    >
+                        <i class="bi bi-check-lg"></i>
+                        <span>Сохранить</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        return escapeHtml(
+            isMissingLabValue(param.value)
+                ? '—'
+                : String(param.value)
+        );
+    }
 
     function render() {
         if (!tbody) {
@@ -1185,22 +1321,49 @@ function initLabViewModal() {
         }
 
         tbody.innerHTML = params.map(param => {
-            const flag = evaluateParamFlag(param.value, param);
+            const flag = evaluateParamFlag(
+                param.value,
+                param
+            );
 
             return `
-                <tr class="lab-result-row lab-result-row--${escapeHtml(flag.kind)} ${hideNormal?.checked && flag.kind === 'normal' ? 'd-none' : ''}">
-                    <td><div class="fw-semibold">${escapeHtml(param.name)}</div></td>
+                <tr
+                    class="lab-result-row
+                           lab-result-row--${escapeHtml(flag.kind)}
+                           ${hideNormal?.checked && flag.kind === 'normal' ? 'd-none' : ''}"
+                    data-parameter-id="${escapeHtml(param.id)}"
+                >
                     <td>
-                        <div>${escapeHtml(getRefText(param))}</div>
+                        <div class="fw-semibold">
+                            ${escapeHtml(param.name)}
+                        </div>
+                    </td>
+
+                    <td>
+                        <div>
+                            ${escapeHtml(getRefText(param))}
+                        </div>
+
                         ${getCriticalRefText(param)
-                ? `<div class="lab-critical-reference">Крит.: ${escapeHtml(getCriticalRefText(param))}</div>`
+                ? `<div class="lab-critical-reference">
+                                   Крит.: ${escapeHtml(getCriticalRefText(param))}
+                               </div>`
                 : ''}
                     </td>
-                    <td>${escapeHtml(param.unit || '—')}</td>
-                    <td>${escapeHtml(param.value || '—')}</td>
+
+                    <td>
+                        ${escapeHtml(param.unit || '—')}
+                    </td>
+
+                    <td>
+                        ${renderValueCell(param)}
+                    </td>
+
                     <td class="text-center">
-                        <span class="badge ${flag.className}"
-                              title="${escapeHtml(flag.title || '')}">
+                        <span
+                            class="badge ${flag.className}"
+                            title="${escapeHtml(flag.title || '')}"
+                        >
                             ${escapeHtml(flag.text)}
                         </span>
                     </td>
@@ -1213,92 +1376,304 @@ function initLabViewModal() {
         }
     }
 
-    modal.addEventListener('show.bs.modal', async event => {
-        const button = event.relatedTarget;
+    modal.addEventListener(
+        'show.bs.modal',
+        async event => {
+            const button = event.relatedTarget;
 
-        if (!button?.matches('[data-lab-view]')) {
-            return;
-        }
-
-        const values =
-            safeJsonParse(button.dataset.values, {}) || {};
-
-        params = toArray(
-            getDatasetParams(button)
-        ).map(item => {
-            return mergeParamWithResult(item, values);
-        });
-
-        render();
-
-        params = await hydrateParams(
-            params,
-            modal.dataset.apiParams,
-            modal
-        );
-
-        qs('#v_collected_at', modal).textContent =
-            button.dataset.collectedAt || '—';
-
-        qs('#v_status', modal).textContent =
-            'Готово';
-
-        qs('#v_lab_name', modal).textContent =
-            button.dataset.laboratory || '—';
-
-        qs('#v_comment', modal).textContent =
-            button.dataset.comment || '—';
-
-        render();
-
-        /*
-         * Фиксируем просмотр результата в БД.
-         */
-        const viewUrl = button.dataset.viewUrl;
-
-        if (!viewUrl) {
-            return;
-        }
-
-        try {
-            const response = await fetch(viewUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': csrf(),
-                },
-            });
-
-            const result = await response.json()
-                .catch(() => ({}));
-
-            if (!response.ok || result.success !== true) {
-                throw new Error(
-                    result.message
-                    || `HTTP ${response.status}`
-                );
+            if (!button?.matches('[data-lab-view]')) {
+                return;
             }
 
+            currentTriggerButton = button;
+            currentResearchId = button.dataset.id || null;
+
+            const values =
+                safeJsonParse(
+                    button.dataset.values,
+                    {}
+                ) || {};
+
+            params = toArray(
+                getDatasetParams(button)
+            ).map(item => {
+                return mergeParamWithResult(
+                    item,
+                    values
+                );
+            });
+
+            render();
+
+            params = await hydrateParams(
+                params,
+                modal.dataset.apiParams,
+                modal
+            );
+
+            qs('#v_collected_at', modal).textContent =
+                button.dataset.collectedAt || '—';
+
+            qs('#v_status', modal).textContent =
+                'Готово';
+
+            qs('#v_lab_name', modal).textContent =
+                button.dataset.laboratory || '—';
+
+            qs('#v_comment', modal).textContent =
+                button.dataset.comment || '—';
+
+            render();
+
             /*
-             * Чтобы повторное открытие этой же строки
-             * не отправляло запрос снова.
+             * Фиксируем просмотр результата в БД.
              */
-            button.dataset.viewed = '1';
-        } catch (error) {
-            console.error(
-                'Не удалось зафиксировать просмотр анализа:',
-                error
-            );
+            const viewUrl = button.dataset.viewUrl;
 
-            showToast?.(
-                'Результат открыт, но просмотр не был зафиксирован'
-            );
+            if (!viewUrl || button.dataset.viewed === '1') {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    viewUrl,
+                    {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            Accept: 'application/json',
+                            'X-Requested-With':
+                                'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrf(),
+                        },
+                    }
+                );
+
+                const result = await response.json()
+                    .catch(() => ({}));
+
+                const success =
+                    result.success === true
+                    || result.status === 'success';
+
+                if (!response.ok || !success) {
+                    throw new Error(
+                        result.message
+                        || `HTTP ${response.status}`
+                    );
+                }
+
+                button.dataset.viewed = '1';
+            } catch (error) {
+                console.error(
+                    'Не удалось зафиксировать просмотр анализа:',
+                    error
+                );
+
+                showToast?.(
+                    'Результат открыт, но просмотр не был зафиксирован'
+                );
+            }
         }
-    });
+    );
 
-    hideNormal?.addEventListener('change', render);
+    tbody?.addEventListener(
+        'click',
+        async event => {
+            const saveButton =
+                event.target.closest(
+                    '[data-save-missing-result]'
+                );
+
+            if (!saveButton || !canFillMissing) {
+                return;
+            }
+
+            const parameterId =
+                saveButton.dataset.parameterId;
+
+            const row =
+                saveButton.closest('tr');
+
+            const input =
+                row?.querySelector(
+                    '[data-missing-result-input]'
+                );
+
+            if (
+                !parameterId
+                || !currentResearchId
+                || !input
+            ) {
+                return;
+            }
+
+            const value =
+                String(input.value ?? '').trim();
+
+            if (value === '') {
+                input.classList.add('is-invalid');
+                input.focus();
+                return;
+            }
+
+            input.classList.remove('is-invalid');
+
+            const url =
+                getFillMissingUrl(parameterId);
+
+            if (!url) {
+                showToast?.(
+                    'Не удалось сформировать адрес сохранения'
+                );
+                return;
+            }
+
+            const oldButtonHtml =
+                saveButton.innerHTML;
+
+            input.disabled = true;
+            saveButton.disabled = true;
+
+            saveButton.innerHTML = `
+                <span
+                    class="spinner-border spinner-border-sm"
+                    aria-hidden="true"
+                ></span>
+                <span>Сохраняем</span>
+            `;
+
+            try {
+                const response = await fetch(
+                    url,
+                    {
+                        method: 'PATCH',
+                        credentials: 'same-origin',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type':
+                                'application/json',
+                            'X-Requested-With':
+                                'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrf(),
+                        },
+                        body: JSON.stringify({
+                            value,
+                        }),
+                    }
+                );
+
+                const result = await response.json()
+                    .catch(() => ({}));
+
+                if (
+                    !response.ok
+                    || result.success !== true
+                ) {
+                    throw new Error(
+                        result.message
+                        || `HTTP ${response.status}`
+                    );
+                }
+
+                const param = params.find(
+                    item =>
+                        String(item.id)
+                        === String(parameterId)
+                );
+
+                if (param) {
+                    param.value = result.value;
+                }
+
+                /*
+                 * Обновляем data-values на кнопке.
+                 * Благодаря этому повторное открытие модалки
+                 * не вернёт старый прочерк.
+                 */
+                if (currentTriggerButton) {
+                    const values =
+                        safeJsonParse(
+                            currentTriggerButton
+                                .dataset.values,
+                            {}
+                        ) || {};
+
+                    const oldPayload =
+                        values[String(parameterId)];
+
+                    if (
+                        oldPayload
+                        && typeof oldPayload === 'object'
+                        && !Array.isArray(oldPayload)
+                    ) {
+                        values[String(parameterId)] = {
+                            ...oldPayload,
+                            value: result.value,
+                        };
+                    } else {
+                        values[String(parameterId)] =
+                            result.value;
+                    }
+
+                    currentTriggerButton.dataset.values =
+                        JSON.stringify(values);
+                }
+
+                render();
+
+                showToast?.(
+                    'Значение анализа сохранено'
+                );
+            } catch (error) {
+                console.error(
+                    'Не удалось сохранить значение анализа:',
+                    error
+                );
+
+                input.disabled = false;
+                saveButton.disabled = false;
+                saveButton.innerHTML = oldButtonHtml;
+
+                showToast?.(
+                    error.message
+                    || 'Не удалось сохранить значение'
+                );
+            }
+        }
+    );
+
+    tbody?.addEventListener(
+        'keydown',
+        event => {
+            if (event.key !== 'Enter') {
+                return;
+            }
+
+            const input =
+                event.target.closest(
+                    '[data-missing-result-input]'
+                );
+
+            if (!input) {
+                return;
+            }
+
+            event.preventDefault();
+
+            input
+                .closest('tr')
+                ?.querySelector(
+                    '[data-save-missing-result]'
+                )
+                ?.click();
+        }
+    );
+
+    hideNormal?.addEventListener(
+        'change',
+        render
+    );
 }
 
 function initLabActions() {
@@ -5777,6 +6152,10 @@ function initPatientInfoForm() {
 }
 
 function initLabResultDeepLink() {
+    if (document.querySelector('.modal[data-open-on-error="1"]')) {
+        return;
+    }
+
     const query = new URLSearchParams(window.location.search);
     const researchId = query.get('research');
 
@@ -6398,6 +6777,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLabResultModal();
     initLabViewModal();
     initLabActions();
+    initModalValidationErrors();
     initLabResultDeepLink();
     initInstrumentalResearchModals();
     initInstrumentalResultFiles();

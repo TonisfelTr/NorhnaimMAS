@@ -169,70 +169,95 @@
                     </section>
                 </main>
 
-                <aside>
-                    <section class="lab-panel">
-                        <div class="lab-panel__header">
-                            <div>
-                                <h2 class="lab-panel__title">Требуют внимания</h2>
-                                <div class="lab-panel__subtitle">
-                                    Критические и непросмотренные результаты
-                                </div>
-                            </div>
+                <section class="lab-panel">
+                    <div class="lab-panel__header">
+                        <div>
+                            <h2 class="lab-panel__title">
+                                Требуют внимания
+                            </h2>
 
-                            <span class="lab-count">{{ $criticalResearchesResultCount + $newResearchesResultCount }}</span>
+                            <div class="lab-panel__subtitle">
+                                Результаты с отклонениями и критическими значениями
+                            </div>
                         </div>
 
-                        <div class="lab-panel__body">
-                            @if($attentionItems)
-                                <div class="lab-attention-list">
-                                    @foreach($attentionItems as $item)
-                                        <article class="lab-attention-card {{ data_get($item, 'critical') ? 'lab-attention-card--critical' : '' }}">
-                                            <div class="lab-attention-card__top">
-                                                <div>
-                                                    <div class="lab-primary-text">
-                                                        {{ $item->patient->full_name }}
-                                                    </div>
+                        <span class="lab-count">
+            {{ $attentionItems->count() }}
+        </span>
+                    </div>
 
-                                                    <div class="lab-secondary-text">
-                                                        Анализ от {{ $item->research_date->format('d.m.Y') }}
-                                                    </div>
+                    <div class="lab-panel__body">
+                        @if($attentionItems->isNotEmpty())
+                            <div class="lab-attention-list">
+                                @foreach($attentionItems as $item)
+                                    <article
+                                        class="lab-attention-card
+                        {{ data_get($item, 'critical')
+                            ? 'lab-attention-card--critical'
+                            : '' }}"
+                                    >
+                                        <div class="lab-attention-card__top">
+                                            <div>
+                                                <div class="lab-primary-text">
+                                                    {{ $item->patient->full_name }}
                                                 </div>
 
-                                                <span class="lab-status lab-status--{{ data_get($item, 'critical') ? 'critical' : 'warning' }}">
-                                                    {{ data_get($item, 'critical') ? 'Критично' : 'Отклонение' }}
-                                                </span>
+                                                <div class="lab-secondary-text">
+                                                    Анализ от
+                                                    {{ $item->research_date->format('d.m.Y') }}
+                                                </div>
                                             </div>
 
-                                            <div class="lab-primary-text mt-3">
-                                                {{ $item->attention_parameter_name }}
-                                            </div>
+                                            <span
+                                                class="lab-status
+                                lab-status--{{ data_get($item, 'critical')
+                                    ? 'critical'
+                                    : 'warning' }}"
+                                            >
+                                {{ data_get($item, 'critical')
+                                    ? 'Критично'
+                                    : 'Отклонение' }}
+                            </span>
+                                        </div>
 
-                                            <div class="lab-attention-card__value">
-                                                {{ $item->attention_value }} {{ $item->attention_unit }}
-                                            </div>
+                                        <div class="lab-primary-text mt-3">
+                                            {{ $item->attention_parameter_name }}
+                                        </div>
 
-                                            <div class="lab-secondary-text">
-                                                Референс: {{ $item->attention_reference }}
-                                            </div>
+                                        <div class="lab-attention-card__value">
+                                            {{ $item->attention_value }}
+                                            {{ $item->attention_unit }}
+                                        </div>
 
-                                            <div class="mt-3">
-                                                <a class="lab-action" href="{{ $item->result_url }}">
-                                                    Открыть результат
-                                                </a>
-                                            </div>
-                                        </article>
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="lab-empty">
-                                    <div class="lab-empty__icon">✓</div>
-                                    <h3>Всё спокойно</h3>
-                                    <p>Результатов, требующих срочного внимания, нет.</p>
-                                </div>
-                            @endif
-                        </div>
-                    </section>
-                </aside>
+                                        <div class="lab-secondary-text">
+                                            Референс:
+                                            {{ $item->attention_reference }}
+                                        </div>
+
+                                        <div class="mt-3">
+                                            <a
+                                                class="lab-action"
+                                                href="{{ $item->result_url }}"
+                                            >
+                                                Открыть результат
+                                            </a>
+                                        </div>
+                                    </article>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="lab-empty">
+                                <div class="lab-empty__icon">✓</div>
+
+                                <h3>Всё спокойно</h3>
+
+                                <p>
+                                    Результатов, требующих срочного внимания, нет.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </section>
             </div>
         </div>
     </div>

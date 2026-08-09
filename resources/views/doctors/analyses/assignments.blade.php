@@ -4,6 +4,7 @@
 
 @section('assets')
     @parent
+    @vite('resources/js/assignments.js')
 
     <style>
         .assignment-flash {
@@ -326,6 +327,76 @@
                 display: none;
             }
         }
+
+        .assignment-patient-card {
+            margin-top: 12px;
+            padding: 14px;
+            border: 1px solid #d7e7ea;
+            border-radius: 14px;
+            background: #f7fbfc;
+        }
+
+        .assignment-patient-card__head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .assignment-patient-card__name {
+            color: #1f2937;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .assignment-patient-card__meta {
+            margin-top: 3px;
+            color: #667085;
+            font-size: 11px;
+        }
+
+        .assignment-patient-card__source {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #e4f6f8;
+            color: #087f8c;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .assignment-patient-card__grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px 14px;
+        }
+
+        .assignment-patient-card__grid > div {
+            display: flex;
+            min-width: 0;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .assignment-patient-card__grid span {
+            color: #8792a2;
+            font-size: 10px;
+        }
+
+        .assignment-patient-card__grid strong {
+            overflow: hidden;
+            color: #344054;
+            font-size: 12px;
+            text-overflow: ellipsis;
+        }
+
+        .assignment-patient-card__wide {
+            grid-column: span 2;
+        }
     </style>
 @endsection
 
@@ -517,7 +588,7 @@
                                         </span>
 
                                         <div class="lab-stepper">
-                                            @foreach(['Назначено', 'Материал принят', 'Выполняется', 'Готово'] as $index => $label)
+                                            @foreach(['Назначено', 'Выполняется', 'Готово', "Просмотрено"] as $index => $label)
                                                 <div
                                                     class="lab-step {{ ($index + 1) < $row['stage_index'] ? 'is-done' : (($index + 1) === $row['stage_index'] ? 'is-current' : '') }}"
                                                 >
@@ -578,6 +649,7 @@
         data-open="{{ $assignmentModalOpen ? '1' : '0' }}"
         data-patient-search-url="{{ $patientSearchUrl }}"
         data-parameter-search-url="{{ $parameterSearchUrl }}"
+        data-patient-details-url="{{ route('api.patients.for.search', ['param' => '__PATIENT__']) }}"
     >
         <div class="modal-dialog">
             <form
@@ -655,6 +727,51 @@
                             @error('patient_id', 'assignment')
                             <div class="assignment-error">{{ $message }}</div>
                             @enderror
+                            <div id="assignmentPatientCard" class="assignment-patient-card d-none">
+                                <div class="assignment-patient-card__head">
+                                    <div>
+                                        <div id="assignmentPatientFullName" class="assignment-patient-card__name">—</div>
+                                        <div id="assignmentPatientMeta" class="assignment-patient-card__meta">—</div>
+                                    </div>
+
+                                    <span class="assignment-patient-card__source">
+            <i class="bi bi-database-check"></i>
+            Данные из медкарты
+        </span>
+                                </div>
+
+                                <div class="assignment-patient-card__grid">
+                                    <div>
+                                        <span>№ медкарты</span>
+                                        <strong id="assignmentPatientMedcard">—</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Полис ОМС</span>
+                                        <strong id="assignmentPatientOms">—</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>СНИЛС</span>
+                                        <strong id="assignmentPatientSnils">—</strong>
+                                    </div>
+
+                                    <div>
+                                        <span>Телефон</span>
+                                        <strong id="assignmentPatientPhone">—</strong>
+                                    </div>
+
+                                    <div class="assignment-patient-card__wide">
+                                        <span>Диагноз</span>
+                                        <strong id="assignmentPatientDiagnosis">—</strong>
+                                    </div>
+
+                                    <div class="assignment-patient-card__wide">
+                                        <span>Лечащий врач</span>
+                                        <strong id="assignmentPatientDoctor">—</strong>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="assignment-field assignment-col-4">
@@ -886,486 +1003,4 @@
             </form>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const modalElement = document.getElementById('createLabAssignmentModal');
-            const modalToggleButton = document.getElementById('createLabAssignmentButton');
-            const modalCloseButtons = modalElement
-                ? Array.from(modalElement.querySelectorAll('[data-assignment-close]'))
-                : [];
-
-            if (!modalElement || !modalToggleButton) {
-                return;
-            }
-
-            const patientInput = document.getElementById('assignmentPatientSearch');
-            const patientIdInput = document.getElementById('assignmentPatientId');
-            const patientMenu = document.getElementById('assignmentPatientMenu');
-            const sampleType = document.getElementById('assignmentSampleType');
-            const parameterInput = document.getElementById('assignmentParameterSearch');
-            const parameterMenu = document.getElementById('assignmentParameterMenu');
-            const selectedList = document.getElementById('assignmentSelectedList');
-            const selectedEmpty = document.getElementById('assignmentSelectedEmpty');
-            const selectedCount = document.getElementById('assignmentSelectedCount');
-            const titleInput = document.getElementById('assignmentTitle');
-
-            const patientSearchUrl = modalElement.dataset.patientSearchUrl || '';
-            const parameterSearchUrl = modalElement.dataset.parameterSearchUrl || '';
-
-            let patientTimer = null;
-            let parameterTimer = null;
-            let patientController = null;
-            let parameterController = null;
-            let automaticTitle = titleInput.value.trim() === '';
-
-            function positionAssignmentModal() {
-                if (!modalElement.classList.contains('is-open')) {
-                    return;
-                }
-
-                const buttonRect = modalToggleButton.getBoundingClientRect();
-                const viewportPadding = 16;
-                const modalWidth = modalElement.offsetWidth;
-                const modalHeight = modalElement.offsetHeight;
-
-                let left = buttonRect.right - modalWidth;
-                left = Math.max(
-                    viewportPadding,
-                    Math.min(left, window.innerWidth - modalWidth - viewportPadding)
-                );
-
-                const top = Math.max(
-                    viewportPadding,
-                    buttonRect.bottom + 12
-                );
-
-                const availableHeight = Math.max(
-                    280,
-                    window.innerHeight - top - viewportPadding
-                );
-
-                modalElement.style.left = left + 'px';
-                modalElement.style.top = top + 'px';
-                modalElement.style.maxHeight = availableHeight + 'px';
-
-                const modalContent = modalElement.querySelector('.modal-content');
-
-                if (modalContent) {
-                    modalContent.style.maxHeight = availableHeight + 'px';
-                }
-            }
-
-            function openAssignmentModal() {
-                modalElement.classList.add('is-open');
-                modalElement.setAttribute('aria-hidden', 'false');
-                modalToggleButton.setAttribute('aria-expanded', 'true');
-
-                window.requestAnimationFrame(function () {
-                    positionAssignmentModal();
-                    patientInput.focus();
-                });
-            }
-
-            function closeAssignmentModal() {
-                closeMenu(patientMenu);
-                closeMenu(parameterMenu);
-                modalElement.classList.remove('is-open');
-                modalElement.setAttribute('aria-hidden', 'true');
-                modalToggleButton.setAttribute('aria-expanded', 'false');
-            }
-
-            function escapeText(value) {
-                return String(value ?? '').trim();
-            }
-
-            function normalizeItems(payload) {
-                if (Array.isArray(payload)) {
-                    return payload;
-                }
-
-                const candidates = [
-                    payload?.results,
-                    payload?.items,
-                    payload?.data,
-                    payload?.data?.results,
-                    payload?.data?.items
-                ];
-
-                return candidates.find(Array.isArray) || [];
-            }
-
-            function openMenu(menu) {
-                menu.classList.add('is-open');
-            }
-
-            function closeMenu(menu) {
-                menu.classList.remove('is-open');
-                menu.replaceChildren();
-            }
-
-            function showState(menu, text) {
-                const state = document.createElement('div');
-                state.className = 'assignment-autocomplete__state';
-                state.textContent = text;
-                menu.replaceChildren(state);
-                openMenu(menu);
-            }
-
-            function buildSearchUrl(baseUrl, params) {
-                const url = new URL(baseUrl, window.location.origin);
-
-                Object.entries(params).forEach(function ([key, value]) {
-                    if (value !== null && value !== undefined && value !== '') {
-                        url.searchParams.set(key, value);
-                    }
-                });
-
-                return url.toString();
-            }
-
-            function selectedItems() {
-                return Array.from(
-                    selectedList.querySelectorAll('[data-selected-parameter]')
-                );
-            }
-
-            function updateSelectedState() {
-                const items = selectedItems();
-                selectedCount.textContent = String(items.length);
-                selectedEmpty.classList.toggle('d-none', items.length > 0);
-
-                if (!automaticTitle) {
-                    return;
-                }
-
-                const names = items
-                    .map(function (item) {
-                        return item.dataset.name || '';
-                    })
-                    .filter(Boolean);
-
-                if (names.length === 0) {
-                    titleInput.value = '';
-                } else if (names.length === 1) {
-                    titleInput.value = names[0];
-                } else {
-                    titleInput.value = names[0] + ' и ещё ' + (names.length - 1);
-                }
-            }
-
-            function hasSelectedParameter(id) {
-                return selectedItems().some(function (item) {
-                    return String(item.dataset.id) === String(id);
-                });
-            }
-
-            function addParameter(item) {
-                const id = item.id ?? item.value;
-                const name = escapeText(item.name ?? item.text ?? item.title);
-
-                if (!id || !name || hasSelectedParameter(id)) {
-                    return;
-                }
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'assignment-selected__item';
-                wrapper.dataset.selectedParameter = '';
-                wrapper.dataset.id = String(id);
-                wrapper.dataset.name = name;
-                wrapper.dataset.unit = escapeText(item.unit);
-                wrapper.dataset.group = escapeText(item.group);
-                wrapper.dataset.sampleType = escapeText(item.sample_type);
-
-                const hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.name = 'parameter_ids[]';
-                hidden.value = String(id);
-
-                const label = document.createElement('span');
-                label.textContent = name;
-
-                const remove = document.createElement('button');
-                remove.className = 'assignment-selected__remove';
-                remove.type = 'button';
-                remove.dataset.removeParameter = '';
-                remove.setAttribute('aria-label', 'Удалить показатель');
-                remove.textContent = '×';
-
-                wrapper.append(hidden, label, remove);
-                selectedList.append(wrapper);
-                updateSelectedState();
-            }
-
-            function clearParameters() {
-                selectedItems().forEach(function (item) {
-                    item.remove();
-                });
-                updateSelectedState();
-            }
-
-            function renderPatients(items) {
-                patientMenu.replaceChildren();
-
-                if (!items.length) {
-                    showState(patientMenu, 'Пациенты не найдены');
-                    return;
-                }
-
-                items.forEach(function (item) {
-                    const id = item.id ?? item.value;
-                    const text = escapeText(item.text ?? item.full_name ?? item.fio);
-
-                    if (!id || !text) {
-                        return;
-                    }
-
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className = 'assignment-autocomplete__item';
-                    button.textContent = text;
-
-                    if (item.birth_at) {
-                        const meta = document.createElement('span');
-                        meta.className = 'assignment-autocomplete__item-meta';
-                        meta.textContent = 'Дата рождения: ' + item.birth_at;
-                        button.append(meta);
-                    }
-
-                    button.addEventListener('click', function () {
-                        patientIdInput.value = String(id);
-                        patientInput.value = text;
-                        closeMenu(patientMenu);
-                    });
-
-                    patientMenu.append(button);
-                });
-
-                openMenu(patientMenu);
-            }
-
-            function renderParameters(items) {
-                parameterMenu.replaceChildren();
-
-                const prepared = items.filter(function (item) {
-                    const id = item.id ?? item.value;
-                    return id && !hasSelectedParameter(id);
-                });
-
-                if (!prepared.length) {
-                    showState(parameterMenu, 'Подходящие показатели не найдены');
-                    return;
-                }
-
-                prepared.forEach(function (item) {
-                    const name = escapeText(item.name ?? item.text ?? item.title);
-
-                    if (!name) {
-                        return;
-                    }
-
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className = 'assignment-autocomplete__item';
-                    button.textContent = name;
-
-                    const metaValues = [
-                        item.group,
-                        item.unit,
-                        item.sample_type
-                    ].map(escapeText).filter(Boolean);
-
-                    if (metaValues.length) {
-                        const meta = document.createElement('span');
-                        meta.className = 'assignment-autocomplete__item-meta';
-                        meta.textContent = metaValues.join(' · ');
-                        button.append(meta);
-                    }
-
-                    button.addEventListener('click', function () {
-                        addParameter(item);
-                        parameterInput.value = '';
-                        closeMenu(parameterMenu);
-                        parameterInput.focus();
-                    });
-
-                    parameterMenu.append(button);
-                });
-
-                openMenu(parameterMenu);
-            }
-
-            patientInput.addEventListener('input', function () {
-                patientIdInput.value = '';
-                clearTimeout(patientTimer);
-
-                const query = patientInput.value.trim();
-
-                if (query.length < 2 || patientSearchUrl === '') {
-                    closeMenu(patientMenu);
-                    return;
-                }
-
-                patientTimer = window.setTimeout(async function () {
-                    patientController?.abort();
-                    patientController = new AbortController();
-                    showState(patientMenu, 'Поиск пациента…');
-
-                    try {
-                        const response = await fetch(
-                            buildSearchUrl(patientSearchUrl, {q: query}),
-                            {
-                                headers: {'X-Requested-With': 'XMLHttpRequest'},
-                                signal: patientController.signal
-                            }
-                        );
-
-                        if (!response.ok) {
-                            throw new Error('HTTP ' + response.status);
-                        }
-
-                        renderPatients(normalizeItems(await response.json()));
-                    } catch (error) {
-                        if (error.name !== 'AbortError') {
-                            showState(patientMenu, 'Не удалось загрузить пациентов');
-                        }
-                    }
-                }, 280);
-            });
-
-            sampleType.addEventListener('change', function () {
-                closeMenu(parameterMenu);
-                parameterInput.value = '';
-                parameterInput.disabled = sampleType.value === '';
-                parameterInput.placeholder = sampleType.value
-                    ? 'Введите название показателя'
-                    : 'Сначала выберите биоматериал';
-
-                const wrongMaterialSelected = selectedItems().some(function (item) {
-                    return item.dataset.sampleType
-                        && item.dataset.sampleType !== sampleType.value;
-                });
-
-                if (wrongMaterialSelected) {
-                    clearParameters();
-                }
-            });
-
-            parameterInput.addEventListener('input', function () {
-                clearTimeout(parameterTimer);
-
-                const query = parameterInput.value.trim();
-
-                if (
-                    query.length < 2
-                    || parameterSearchUrl === ''
-                    || sampleType.value === ''
-                ) {
-                    closeMenu(parameterMenu);
-                    return;
-                }
-
-                parameterTimer = window.setTimeout(async function () {
-                    parameterController?.abort();
-                    parameterController = new AbortController();
-                    showState(parameterMenu, 'Поиск показателей…');
-
-                    try {
-                        const response = await fetch(
-                            buildSearchUrl(parameterSearchUrl, {
-                                q: query,
-                                sample_type: sampleType.value
-                            }),
-                            {
-                                headers: {'X-Requested-With': 'XMLHttpRequest'},
-                                signal: parameterController.signal
-                            }
-                        );
-
-                        if (!response.ok) {
-                            throw new Error('HTTP ' + response.status);
-                        }
-
-                        renderParameters(normalizeItems(await response.json()));
-                    } catch (error) {
-                        if (error.name !== 'AbortError') {
-                            showState(parameterMenu, 'Не удалось загрузить показатели');
-                        }
-                    }
-                }, 280);
-            });
-
-            selectedList.addEventListener('click', function (event) {
-                const button = event.target.closest('[data-remove-parameter]');
-
-                if (!button) {
-                    return;
-                }
-
-                button.closest('[data-selected-parameter]')?.remove();
-                updateSelectedState();
-            });
-
-            titleInput.addEventListener('input', function () {
-                automaticTitle = titleInput.value.trim() === '';
-            });
-
-            modalToggleButton.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                if (modalElement.classList.contains('is-open')) {
-                    closeAssignmentModal();
-                    return;
-                }
-
-                openAssignmentModal();
-            });
-
-            modalCloseButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    closeAssignmentModal();
-                    modalToggleButton.focus();
-                });
-            });
-
-            document.addEventListener('click', function (event) {
-                if (!patientMenu.contains(event.target) && event.target !== patientInput) {
-                    closeMenu(patientMenu);
-                }
-
-                if (!parameterMenu.contains(event.target) && event.target !== parameterInput) {
-                    closeMenu(parameterMenu);
-                }
-
-                if (
-                    modalElement.classList.contains('is-open')
-                    && !modalElement.contains(event.target)
-                    && !modalToggleButton.contains(event.target)
-                ) {
-                    closeAssignmentModal();
-                }
-            });
-
-            document.addEventListener('keydown', function (event) {
-                if (
-                    event.key === 'Escape'
-                    && modalElement.classList.contains('is-open')
-                ) {
-                    closeAssignmentModal();
-                    modalToggleButton.focus();
-                }
-            });
-
-            window.addEventListener('resize', positionAssignmentModal);
-            window.addEventListener('scroll', positionAssignmentModal, true);
-
-            sampleType.dispatchEvent(new Event('change'));
-            updateSelectedState();
-
-            if (modalElement.dataset.open === '1') {
-                openAssignmentModal();
-            }
-        });
-    </script>
 @endsection
