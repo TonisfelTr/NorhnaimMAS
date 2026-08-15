@@ -6443,7 +6443,79 @@ function initInstrumentalResearchModals() {
     const query =
         new URLSearchParams(window.location.search);
 
+    /*
+     * Переход со страницы лабораторных назначений:
+     * /doctors/patients/{id}?open=lab
+     *
+     * Открываем вкладку «Анализы и исследования» и сразу
+     * модальное окно создания лабораторного направления.
+     */
+    if (query.get('open') === 'lab') {
+        const createLabButton = qs(
+            '[data-bs-toggle="modal"][data-bs-target="#modalAddLabOrder"]'
+        );
+
+        if (createLabButton) {
+            openResearchModal(
+                createLabButton,
+                '#modalAddLabOrder'
+            );
+
+            const url = new URL(window.location.href);
+            url.searchParams.delete('open');
+
+            window.history.replaceState(
+                {},
+                '',
+                url.pathname + url.search + url.hash
+            );
+        } else {
+            console.warn(
+                'Не найдена кнопка открытия #modalAddLabOrder'
+            );
+        }
+    }
+
+    /*
+     * Переход из верхнего меню:
+     * /doctors/patients/{id}?open=instrumental
+     *
+     * Сначала открываем вкладку «Анализы и исследования»,
+     * затем модальное окно создания инструментального исследования.
+     */
+    if (query.get('open') === 'instrumental') {
+        const createButton = qs(
+            '[data-bs-toggle="modal"][data-bs-target="#modalAddInstrumentalResearch"]'
+        );
+
+        if (createButton) {
+            openResearchModal(
+                createButton,
+                '#modalAddInstrumentalResearch'
+            );
+
+            /*
+             * Убираем одноразовый параметр, чтобы F5
+             * повторно не открывал модальное окно.
+             */
+            const url = new URL(window.location.href);
+            url.searchParams.delete('open');
+
+            window.history.replaceState(
+                {},
+                '',
+                url.pathname + url.search + url.hash
+            );
+        } else {
+            console.warn(
+                'Не найдена кнопка открытия #modalAddInstrumentalResearch'
+            );
+        }
+    }
+
     if (query.get('section') === 'instrumental') {
+        openBootstrapTab('#pane-labs');
+
         setTimeout(() => {
             qs('#instrumentalResearchesPanel')
                 ?.scrollIntoView({

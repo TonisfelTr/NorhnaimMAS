@@ -4,7 +4,6 @@
 
 @section('assets')
     @parent
-    @vite('resources/js/assignments.js')
 
     <style>
         .assignment-flash {
@@ -397,6 +396,147 @@
         .assignment-patient-card__wide {
             grid-column: span 2;
         }
+
+        .lab-patient-search-modal {
+            overflow: hidden;
+            border: 0;
+            border-radius: 20px;
+            box-shadow:
+                0 24px 60px rgba(15, 23, 42, .16),
+                0 4px 16px rgba(15, 23, 42, .08);
+        }
+
+        .lab-patient-search-modal .modal-header {
+            padding: 24px 24px 8px;
+        }
+
+        .lab-patient-search-modal .modal-title {
+            color: #253047;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .lab-patient-search-modal .modal-body {
+            padding: 18px 24px 24px;
+        }
+
+        .lab-patient-search-input {
+            position: relative;
+        }
+
+        .lab-patient-search-input > i {
+            position: absolute;
+            z-index: 2;
+            top: 50%;
+            left: 15px;
+            color: #8995a7;
+            font-size: 16px;
+            pointer-events: none;
+            transform: translateY(-50%);
+        }
+
+        .lab-patient-search-input .form-control {
+            height: 48px;
+            padding-right: 15px;
+            padding-left: 43px;
+            border: 1px solid #e0e7ef;
+            border-radius: 13px;
+            background: #f8fafc;
+            font-size: 14px;
+        }
+
+        .lab-patient-search-input .form-control:focus {
+            border-color: #1595a5;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(21, 149, 165, .10);
+        }
+
+        .lab-patient-search-state {
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 9px;
+            color: #98a2b3;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .lab-patient-search-state > i {
+            color: #b9c3ce;
+            font-size: 28px;
+        }
+
+        .lab-patient-search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 12px;
+            max-height: 390px;
+            overflow-y: auto;
+        }
+
+        .lab-patient-search-result {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 12px 13px;
+            border: 1px solid transparent;
+            border-radius: 13px;
+            background: #fff;
+            cursor: pointer;
+            text-align: left;
+            transition:
+                background .15s ease,
+                border-color .15s ease,
+                transform .15s ease;
+        }
+
+        .lab-patient-search-result:hover {
+            border-color: #d5eef1;
+            background: #f0f9fa;
+        }
+
+        .lab-patient-search-result__avatar {
+            width: 39px;
+            height: 39px;
+            flex: 0 0 39px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 11px;
+            border-radius: 11px;
+            background: #edf8fa;
+            color: #128b9b;
+            font-size: 17px;
+        }
+
+        .lab-patient-search-result__content {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .lab-patient-search-result__name {
+            display: block;
+            color: #263247;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .lab-patient-search-result__meta {
+            display: block;
+            margin-top: 3px;
+            color: #8a95a5;
+            font-size: 12px;
+        }
+
+        .lab-patient-search-result__arrow {
+            margin-left: 10px;
+            color: #a4adba;
+            font-size: 14px;
+        }
+
     </style>
 @endsection
 
@@ -420,11 +560,10 @@
 
                 <div class="lab-hero__actions">
                     <button
-                        id="createLabAssignmentButton"
                         class="lab-button lab-button--primary"
                         type="button"
-                        aria-controls="createLabAssignmentModal"
-                        aria-expanded="false"
+                        data-bs-toggle="modal"
+                        data-bs-target="#labPatientSearchModal"
                     >
                         <i class="bi bi-plus-circle"></i>
                         Новое назначение
@@ -510,7 +649,7 @@
                     <div>
                         <h2 class="lab-panel__title">Текущие назначения</h2>
                         <div class="lab-panel__subtitle">
-                            {{ 1  }} записей
+                            {{ $rows->count() }} записей
                         </div>
                     </div>
                 </div>
@@ -616,7 +755,7 @@
                                                 Открыть
                                             </a>
                                         </div>
-                                        </td>
+                                    </td>
                                 </tr>
                             @endforeach
                             </tbody>
@@ -639,368 +778,347 @@
         </div>
     </div>
 
-    <div
-        class="assignment-modal"
-        id="createLabAssignmentModal"
-        role="dialog"
-        aria-modal="false"
-        aria-label="Новое лабораторное направление"
-        aria-hidden="true"
-        data-open="{{ $assignmentModalOpen ? '1' : '0' }}"
-        data-patient-search-url="{{ $patientSearchUrl }}"
-        data-parameter-search-url="{{ $parameterSearchUrl }}"
-        data-patient-details-url="{{ route('api.patients.for.search', ['param' => '__PATIENT__']) }}"
-    >
-        <div class="modal-dialog">
-            <form
-                class="modal-content"
-                method="POST"
-                action="{{ $assignmentStoreUrl }}"
-            >
-                @csrf
 
-                <div class="modal-header">
+    <div class="modal fade"
+         id="labPatientSearchModal"
+         tabindex="-1"
+         aria-labelledby="labPatientSearchModalTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content lab-patient-search-modal">
+
+                <div class="modal-header border-0 pb-0">
                     <div>
-                        <h2 class="modal-title">Новое лабораторное направление</h2>
-                        <div class="assignment-modal__subtitle">
-                            Выберите пациента, биоматериал и показатели для печати направления.
+                        <h5 class="modal-title" id="labPatientSearchModalTitle">
+                            Найти пациента
+                        </h5>
+                        <div class="small text-muted mt-1">
+                            Выберите пациента для создания лабораторного направления
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-assignment-close
-                        aria-label="Закрыть"
-                    ></button>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
-                    @if($errors->assignment->any())
-                        <div class="alert alert-danger mb-4">
-                            <strong>Не удалось сохранить направление.</strong>
-                            <ul class="mb-0 mt-2">
-                                @foreach($errors->assignment->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                    <div class="lab-patient-search-input">
+                        <i class="bi bi-search"></i>
 
-                    <div class="assignment-form-grid">
-                        <div class="assignment-field assignment-col-8">
-                            <label
-                                class="assignment-label assignment-required"
-                                for="assignmentPatientSearch"
-                            >
-                                Пациент
-                            </label>
-
-                            <div class="assignment-autocomplete">
-                                <input
-                                    id="assignmentPatientSearch"
-                                    class="assignment-control"
-                                    type="search"
-                                    name="patient_label"
-                                    value="{{ old('patient_label') }}"
-                                    autocomplete="off"
-                                    placeholder="Начните вводить ФИО пациента"
-                                >
-
-                                <input
-                                    id="assignmentPatientId"
-                                    type="hidden"
-                                    name="patient_id"
-                                    value="{{ old('patient_id') }}"
-                                >
-
-                                <div
-                                    id="assignmentPatientMenu"
-                                    class="assignment-autocomplete__menu"
-                                ></div>
-                            </div>
-
-                            <div class="assignment-hint">
-                                Введите не менее двух символов и выберите пациента из списка.
-                            </div>
-
-                            @error('patient_id', 'assignment')
-                            <div class="assignment-error">{{ $message }}</div>
-                            @enderror
-                            <div id="assignmentPatientCard" class="assignment-patient-card d-none">
-                                <div class="assignment-patient-card__head">
-                                    <div>
-                                        <div id="assignmentPatientFullName" class="assignment-patient-card__name">—</div>
-                                        <div id="assignmentPatientMeta" class="assignment-patient-card__meta">—</div>
-                                    </div>
-
-                                    <span class="assignment-patient-card__source">
-            <i class="bi bi-database-check"></i>
-            Данные из медкарты
-        </span>
-                                </div>
-
-                                <div class="assignment-patient-card__grid">
-                                    <div>
-                                        <span>№ медкарты</span>
-                                        <strong id="assignmentPatientMedcard">—</strong>
-                                    </div>
-
-                                    <div>
-                                        <span>Полис ОМС</span>
-                                        <strong id="assignmentPatientOms">—</strong>
-                                    </div>
-
-                                    <div>
-                                        <span>СНИЛС</span>
-                                        <strong id="assignmentPatientSnils">—</strong>
-                                    </div>
-
-                                    <div>
-                                        <span>Телефон</span>
-                                        <strong id="assignmentPatientPhone">—</strong>
-                                    </div>
-
-                                    <div class="assignment-patient-card__wide">
-                                        <span>Диагноз</span>
-                                        <strong id="assignmentPatientDiagnosis">—</strong>
-                                    </div>
-
-                                    <div class="assignment-patient-card__wide">
-                                        <span>Лечащий врач</span>
-                                        <strong id="assignmentPatientDoctor">—</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="assignment-field assignment-col-4">
-                            <label
-                                class="assignment-label assignment-required"
-                                for="assignmentSampleType"
-                            >
-                                Биоматериал
-                            </label>
-
-                            <select
-                                id="assignmentSampleType"
-                                class="assignment-control"
-                                name="sample_type"
-                            >
-                                <option value="">Выберите материал</option>
-                                @foreach($sampleTypes as $sampleType)
-                                    <option
-                                        value="{{ $sampleType }}"
-                                        @selected(old('sample_type') === $sampleType)
-                                    >
-                                        {{ mb_strtoupper(mb_substr($sampleType, 0, 1)) . mb_substr($sampleType, 1) }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            @error('sample_type', 'assignment')
-                            <div class="assignment-error">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="assignment-field assignment-col-12">
-                            <label
-                                class="assignment-label assignment-required"
-                                for="assignmentParameterSearch"
-                            >
-                                Состав направления
-                            </label>
-
-                            <div class="assignment-autocomplete">
-                                <input
-                                    id="assignmentParameterSearch"
-                                    class="assignment-control"
-                                    type="search"
-                                    autocomplete="off"
-                                    placeholder="Сначала выберите биоматериал"
-                                    disabled
-                                >
-
-                                <div
-                                    id="assignmentParameterMenu"
-                                    class="assignment-autocomplete__menu"
-                                ></div>
-                            </div>
-
-                            <div class="assignment-selected">
-                                <div class="assignment-selected__head">
-                                    <div class="assignment-selected__title">
-                                        Выбранные показатели
-                                    </div>
-                                    <div
-                                        id="assignmentSelectedCount"
-                                        class="assignment-selected__count"
-                                    >
-                                        {{ $oldSelectedParameters->count() }}
-                                    </div>
-                                </div>
-
-                                <div
-                                    id="assignmentSelectedList"
-                                    class="assignment-selected__list"
-                                >
-                                    @foreach($oldSelectedParameters as $parameter)
-                                        <div
-                                            class="assignment-selected__item"
-                                            data-selected-parameter
-                                            data-id="{{ $parameter->id }}"
-                                            data-name="{{ $parameter->name }}"
-                                            data-unit="{{ $parameter->unit }}"
-                                            data-group="{{ $parameter->group }}"
-                                            data-sample-type="{{ $parameter->sample_type }}"
-                                        >
-                                            <input
-                                                type="hidden"
-                                                name="parameter_ids[]"
-                                                value="{{ $parameter->id }}"
-                                            >
-                                            <span>{{ $parameter->name }}</span>
-                                            <button
-                                                class="assignment-selected__remove"
-                                                type="button"
-                                                data-remove-parameter
-                                                aria-label="Удалить показатель"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    @endforeach
-                                </div>
-
-                                <div
-                                    id="assignmentSelectedEmpty"
-                                    class="assignment-selected__empty {{ $oldSelectedParameters->isNotEmpty() ? 'd-none' : '' }}"
-                                >
-                                    Показатели ещё не добавлены.
-                                </div>
-                            </div>
-
-                            @error('parameter_ids', 'assignment')
-                            <div class="assignment-error">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="assignment-field assignment-col-6">
-                            <label class="assignment-label" for="assignmentTitle">
-                                Название направления
-                            </label>
-                            <input
-                                id="assignmentTitle"
-                                class="assignment-control"
-                                type="text"
-                                name="laboratory"
-                                value="{{ old('laboratory') }}"
-                                maxlength="255"
-                                placeholder="Сформируется автоматически"
-                            >
-                            <div class="assignment-hint">
-                                Название можно изменить вручную перед сохранением.
-                            </div>
-                        </div>
-
-                        <div class="assignment-field assignment-col-6">
-                            <label
-                                class="assignment-label assignment-required"
-                                for="assignmentPlannedAt"
-                            >
-                                Планируемая дата сдачи
-                            </label>
-                            <input
-                                id="assignmentPlannedAt"
-                                class="assignment-control"
-                                type="date"
-                                name="planned_at"
-                                value="{{ old('planned_at', $defaultPlannedAt) }}"
-                            >
-
-                            @error('planned_at', 'assignment')
-                            <div class="assignment-error">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="assignment-field assignment-col-4">
-                            <label
-                                class="assignment-label assignment-required"
-                                for="assignmentPriority"
-                            >
-                                Приоритет
-                            </label>
-                            <select
-                                id="assignmentPriority"
-                                class="assignment-control"
-                                name="priority"
-                            >
-                                <option value="normal" @selected(old('priority', 'normal') === 'normal')>
-                                    Обычный
-                                </option>
-                                <option value="urgent" @selected(old('priority') === 'urgent')>
-                                    Срочный
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="assignment-field assignment-col-8">
-                            <label class="assignment-label" for="assignmentComment">
-                                Клиническая информация / комментарий
-                            </label>
-                            <textarea
-                                id="assignmentComment"
-                                class="assignment-control"
-                                name="comment"
-                                maxlength="2000"
-                                placeholder="Укажите диагноз, жалобы или важные сведения для лаборатории"
-                            >{{ old('comment') }}</textarea>
-                        </div>
-
-                        <div class="assignment-col-12">
-                            <div class="assignment-modal__note">
-                                <i class="bi bi-database-check"></i>
-                                <div>
-                                    После сохранения направление попадёт в таблицу
-                                    <strong>lab_researches</strong>. Список показателей сохраняется
-                                    в поле <strong>parameters</strong>, поэтому направление можно
-                                    распечатать до получения результатов.
-                                </div>
-                            </div>
-                        </div>
+                        <input type="search"
+                               class="form-control"
+                               id="labPatientSearchInput"
+                               placeholder="ФИО, телефон или дата рождения"
+                               autocomplete="off">
                     </div>
+
+                    <div id="labPatientSearchHint"
+                         class="lab-patient-search-state">
+                        <i class="bi bi-person-search"></i>
+                        <div>Начните вводить данные пациента</div>
+                    </div>
+
+                    <div id="labPatientSearchLoading"
+                         class="lab-patient-search-state d-none">
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                        <div>Поиск пациента...</div>
+                    </div>
+
+                    <div id="labPatientSearchResults"
+                         class="lab-patient-search-results"></div>
                 </div>
-
-                <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="lab-button lab-button--secondary"
-                        data-assignment-close
-                    >
-                        Отмена
-                    </button>
-
-                    <button
-                        type="submit"
-                        name="submit_action"
-                        value="save"
-                        class="lab-button lab-button--secondary"
-                    >
-                        <i class="bi bi-check2-circle"></i>
-                        Сохранить
-                    </button>
-
-                    <button
-                        type="submit"
-                        name="submit_action"
-                        value="save_print"
-                        class="lab-button lab-button--primary"
-                    >
-                        <i class="bi bi-printer"></i>
-                        Сохранить и печатать
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('labPatientSearchModal');
+            const input = document.getElementById('labPatientSearchInput');
+            const results = document.getElementById('labPatientSearchResults');
+            const hint = document.getElementById('labPatientSearchHint');
+            const loading = document.getElementById('labPatientSearchLoading');
+
+            if (!modal || !input || !results) {
+                return;
+            }
+
+            const searchUrl = @json(route('api.patients.search'));
+
+            let timer = null;
+            let controller = null;
+
+            const escapeHtml = function (value) {
+                const div = document.createElement('div');
+                div.textContent = value ?? '';
+                return div.innerHTML;
+            };
+
+            const showHint = function (icon, text) {
+                if (!hint) {
+                    return;
+                }
+
+                hint.innerHTML = `
+                    <i class="bi ${icon}"></i>
+                    <div>${escapeHtml(text)}</div>
+                `;
+
+                hint.classList.remove('d-none');
+            };
+
+            const hideHint = function () {
+                hint?.classList.add('d-none');
+            };
+
+            const showLoading = function () {
+                loading?.classList.remove('d-none');
+            };
+
+            const hideLoading = function () {
+                loading?.classList.add('d-none');
+            };
+
+            modal.addEventListener('shown.bs.modal', function () {
+                input.focus();
+            });
+
+            modal.addEventListener('hidden.bs.modal', function () {
+                clearTimeout(timer);
+
+                if (controller) {
+                    controller.abort();
+                    controller = null;
+                }
+
+                input.value = '';
+                results.innerHTML = '';
+                hideLoading();
+
+                showHint(
+                    'bi-person-search',
+                    'Начните вводить ФИО, телефон или дату рождения'
+                );
+            });
+
+            input.addEventListener('input', function () {
+                clearTimeout(timer);
+
+                const query = input.value.trim();
+
+                if (query.length < 2) {
+                    if (controller) {
+                        controller.abort();
+                        controller = null;
+                    }
+
+                    results.innerHTML = '';
+                    hideLoading();
+
+                    showHint(
+                        query.length
+                            ? 'bi-keyboard'
+                            : 'bi-person-search',
+                        query.length
+                            ? 'Введите минимум 2 символа'
+                            : 'Начните вводить ФИО, телефон или дату рождения'
+                    );
+
+                    return;
+                }
+
+                timer = setTimeout(function () {
+                    searchPatients(query);
+                }, 250);
+            });
+
+            input.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter') {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const query = input.value.trim();
+
+                if (query.length < 2) {
+                    return;
+                }
+
+                clearTimeout(timer);
+                searchPatients(query);
+            });
+
+            async function searchPatients(query) {
+                if (controller) {
+                    controller.abort();
+                }
+
+                const currentController = new AbortController();
+                controller = currentController;
+
+                results.innerHTML = '';
+                hideHint();
+                showLoading();
+
+                try {
+                    const url = new URL(searchUrl, window.location.origin);
+                    url.searchParams.set('q', query);
+
+                    const response = await fetch(url.toString(), {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        signal: currentController.signal
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+
+                    const data = await response.json();
+
+                    const patients = Array.isArray(data)
+                        ? data
+                        : (
+                            Array.isArray(data?.results)
+                                ? data.results
+                                : (
+                                    Array.isArray(data?.data)
+                                        ? data.data
+                                        : []
+                                )
+                        );
+
+                    if (controller !== currentController) {
+                        return;
+                    }
+
+                    renderPatients(patients);
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        return;
+                    }
+
+                    console.error('Ошибка поиска пациентов:', error);
+
+                    results.innerHTML = '';
+
+                    showHint(
+                        'bi-exclamation-circle',
+                        'Не удалось выполнить поиск пациентов'
+                    );
+                } finally {
+                    if (controller === currentController) {
+                        hideLoading();
+                        controller = null;
+                    }
+                }
+            }
+
+            function renderPatients(patients) {
+                results.innerHTML = '';
+
+                if (!Array.isArray(patients) || !patients.length) {
+                    showHint(
+                        'bi-person-x',
+                        'Пациенты не найдены'
+                    );
+
+                    return;
+                }
+
+                hideHint();
+
+                patients.forEach(function (patient) {
+                    const patientId = patient.id;
+
+                    const fullName =
+                        patient.text ||
+                        patient.full_name ||
+                        patient.name ||
+                        [
+                            patient.last_name,
+                            patient.first_name,
+                            patient.middle_name
+                        ].filter(Boolean).join(' ') ||
+                        'Пациент';
+
+                    const birthDate =
+                        patient.birth_at ||
+                        patient.birth_date ||
+                        patient.birthday ||
+                        '';
+
+                    const phone =
+                        patient.phone ||
+                        patient.phone_number ||
+                        '';
+
+                    const item = document.createElement('button');
+
+                    item.type = 'button';
+                    item.className = 'lab-patient-search-result';
+
+                    let meta = '';
+
+                    if (birthDate) {
+                        meta += 'Дата рождения: ' + escapeHtml(birthDate);
+                    }
+
+                    if (phone) {
+                        if (meta) {
+                            meta += ' · ';
+                        }
+
+                        meta += escapeHtml(phone);
+                    }
+
+                    item.innerHTML = `
+                        <span class="lab-patient-search-result__avatar">
+                            <i class="bi bi-person"></i>
+                        </span>
+
+                        <span class="lab-patient-search-result__content">
+                            <span class="lab-patient-search-result__name">
+                                ${escapeHtml(fullName)}
+                            </span>
+
+                            ${
+                        meta
+                            ? `
+                                        <span class="lab-patient-search-result__meta">
+                                            ${meta}
+                                        </span>
+                                      `
+                            : ''
+                    }
+                        </span>
+
+                        <span class="lab-patient-search-result__arrow">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+                    `;
+
+                    item.addEventListener('click', function () {
+                        if (!patientId) {
+                            return;
+                        }
+
+                        window.location.href =
+                            '/doctors/patients/' +
+                            encodeURIComponent(patientId) +
+                            '?open=lab';
+                    });
+
+                    results.appendChild(item);
+                });
+            }
+        });
+    </script>
+
 @endsection
