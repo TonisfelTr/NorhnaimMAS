@@ -1,365 +1,243 @@
 @extends('layouts.welcome')
+
 @section('title', 'Главная')
-@section('assets')
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+@section('body_class', 'nh-home-page')
+
+@section('page_header')
+    <section class="nh-hero">
+        <div class="nh-shell">
+            <div class="nh-hero__surface">
+                <div class="nh-hero__content">
+                    <div class="nh-hero__copy">
+                        <div class="nh-brand-lockup nh-brand-lockup--hero">
+                            <img
+                                class="nh-brand-lockup__img"
+                                src="{{ asset('assets/images/home/norhneim-viking-logo.png') }}"
+                                alt="Норхнейм — клиническая система"
+                                loading="eager"
+                                fetchpriority="high"
+                            >
+                        </div>
+
+                        <div class="nh-kicker">Спокойная цифровая среда для клинической практики</div>
+
+                        <h1 class="nh-hero__title">
+                            Психиатрическая практика.
+                            <span>Спокойно и системно.</span>
+                        </h1>
+
+                        <p class="nh-hero__lead">
+                            Инструменты для ведения пациента, анализа анамнеза,
+                            работы с диагностическими критериями, назначениями
+                            и медицинскими справочниками — в единой рабочей среде.
+                        </p>
+
+                        <div class="nh-hero__actions">
+                            <a href="#nh-editorial" class="nh-btn nh-btn--primary">
+                                Возможности системы
+                                <i class="bi bi-arrow-down-right"></i>
+                            </a>
+                            <a href="#nh-cities" class="nh-btn nh-btn--ghost">Найти клинику</a>
+                        </div>
+
+                        <div class="nh-hero__meta" aria-label="Ключевые особенности">
+                            <span><i class="bi bi-check2"></i> Критерии МКБ-10</span>
+                            <span><i class="bi bi-check2"></i> Панель врача</span>
+                            <span><i class="bi bi-check2"></i> Клинические справочники</span>
+                        </div>
+                    </div>
+
+                    <figure class="nh-hero__visual nh-hero__visual--large">
+                        <img
+                            src="{{ asset('assets/images/home/nordic-clinic.jpg') }}"
+                            alt="Спокойное рабочее пространство в скандинавском стиле"
+                            loading="eager"
+                            fetchpriority="high"
+                            onerror="this.parentElement.classList.add('is-fallback'); this.remove();"
+                        >
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </section>
 @endsection
+
 @section('main')
-    <section class="welcome">
-        <div class="container pt-5">
-            <h1 class="container__header"><span class="container__header-span">Мы те, кто заботится</span> о Вашем
-                                                                                                           времени и
-                                                                                                           здоровье</h1>
-        </div>
-    </section>
-    <section class="cities">
-        <div class="container">
-            <p class="section-cities__p">Найдите своего врача, выбрав свой город</p>
-            <div class="images-container">
-                @if(rand(0, 100) > 50)
-                    <div class="images-container__with-overlay images-container__big-left">
-                        <a href="{{ route('main.clinics.filters.city', 'ростов-на-дону') }}">
-                            <div class="images-container__overlay d-none">
-                                <p>Ростов-на-Дону</p>
-                            </div>
-                            <picture>
-                                <source srcset="{{ url('assets/images/cities/rostov-na-donu.webp') }}" type="image/webp">
-                                <img src="{{ url('assets/images/cities/rostov-na-dону.png') }}" loading="lazy">
-                            </picture>
-                        </a>
-                    </div>
-                @else
-                    <div class="images-container__with-overlay images-container__big-left">
-                        <a href="{{ route('main.clinics.filters.city', 'москва') }}">
-                            <div class="images-container__overlay d-none">
-                                <p>Москва</p>
-                            </div>
-                            <picture>
-                                <source srcset="{{ url('assets/images/cities/moscow.webp') }}" type="image/webp">
-                                <img src="{{ url('assets/images/cities/moscow.png') }}" loading="lazy">
-                            </picture>
-                        </a>
-                    </div>
-                @endif
-
-                <div class="images-container__part">
-                    <div class="images-container__square-part">
-                        @if(rand(0, 100) > 50)
-                            <div class="images-container__with-overlay images-container__square-top">
-                                <a href="{{ route('main.clinics.filters.city', 'екатеринбург') }}">
-                                    <div class="images-container__overlay d-none">
-                                        <p>Екатеринбург</p>
-                                    </div>
-                                    <picture>
-                                        <source srcset="{{ url('assets/images/cities/ekaterinburg.webp') }}" type="image/webp">
-                                        <img src="{{ url('assets/images/cities/ekaterinburg.png') }}" loading="lazy">
-                                    </picture>
-                                </a>
-                            </div>
-                        @else
-                            <div class="images-container__with-overlay images-container__square-top">
-                                <a href="{{ route('main.clinics.filters.city', 'челябинск') }}">
-                                    <div class="images-container__overlay d-none">
-                                        <p>Челябинск</p>
-                                    </div>
-                                    <picture>
-                                        <source srcset="{{ url('assets/images/cities/chelyabinsk.webp') }}" type="image/webp">
-                                        <img src="{{ url('assets/images/cities/chelyabinsk.png') }}" loading="lazy">
-                                    </picture>
-                                </a>
-                            </div>
-                        @endif
-
-                        @if(rand(0, 100) > 50)
-                            <div class="images-container__with-overlay images-container__square-top">
-                                <a href="{{ route('main.clinics.filters.city', 'красноярск') }}">
-                                    <div class="images-container__overlay d-none">
-                                        <p>Красноярск</p>
-                                    </div>
-                                    <picture>
-                                        <source srcset="{{ url('assets/images/cities/krasnoyarsk.webp') }}" type="image/webp">
-                                        <img src="{{ url('assets/images/cities/krasnoyarsk.png') }}" loading="lazy">
-                                    </picture>
-                                </a>
-                            </div>
-                        @else
-                            <div class="images-container__with-overlay images-container__square-top">
-                                <a href="{{ route('main.clinics.filters.city', 'томск') }}">
-                                    <div class="images-container__overlay d-none">
-                                        <p>Томск</p>
-                                    </div>
-                                    <picture>
-                                        <source srcset="{{ url('assets/images/cities/tomsk.webp') }}" type="image/webp">
-                                        <img src="{{ url('assets/images/cities/tomsk.png') }}" loading="lazy">
-                                    </picture>
-                                </a>
-                            </div>
-                        @endif
-
-                        @if(($kemerovo = rand(0, 100)) <= 25)
-                            <div class="images-container__with-overlay images-container__square-top">
-                                <a href="{{ route('main.clinics.filters.city', 'кемерово') }}">
-                                    <div class="images-container__overlay d-none">
-                                        <p>Кемерово</p>
-                                    </div>
-                                    <picture>
-                                        <source srcset="{{ url('assets/images/cities/kemerovo.webp') }}" type="image/webp">
-                                        <img src="{{ url('assets/images/cities/kemerovo.png') }}" loading="lazy">
-                                    </picture>
-                                </a>
-                            </div>
-                        @elseif($kemerovo > 25 && $kemerovo <= 75)
-                            <div class="images-container__with-overlay images-container__square-top">
-                                <a href="{{ route('main.clinics.filters.city', 'новосибирск') }}">
-                                    <div class="images-container__overlay d-none">
-                                        <p>Новосибирск</p>
-                                    </div>
-                                    <picture>
-                                        <source srcset="{{ url('assets/images/cities/novosibirsk.webp') }}" type="image/webp">
-                                        <img src="{{ url('assets/images/cities/novosibirsk.png') }}" loading="lazy">
-                                    </picture>
-                                </a>
-                            </div>
-                        @elseif($kemerovo > 75)
-                            <div class="images-container__with-overlay images-container__square-top">
-                                <a href="{{ route('main.clinics.filters.city', 'краснодар') }}">
-                                    <div class="images-container__overlay d-none">
-                                        <p>Краснодар</p>
-                                    </div>
-                                    <picture>
-                                        <source srcset="{{ url('assets/images/cities/krasnodar.webp') }}" type="image/webp">
-                                        <img src="{{ url('assets/images/cities/krasnodar.png') }}" loading="lazy">
-                                    </picture>
-                                </a>
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="images-container__with-overlay images-container__small-bottom">
-                        <a href="{{ route('main.clinics.filters.city', 'санкт-петербург') }}">
-                            <div class="images-container__overlay d-none">
-                                <p>Санкт-Петербург</p>
-                            </div>
-                            <picture>
-                                <source srcset="{{ url('assets/images/cities/saint-petersburg.webp') }}" type="image/webp">
-                                <img src="{{ url('assets/images/cities/saint-petersburg.png') }}" loading="lazy">
-                            </picture>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="information">
-        <div class="container pt-5">
-            <h1 class="container__header greater text-center"><span class="container__header-span">Наши</span>
-                возможности</h1>
-            <div class="row-cols-6 d-flex flex-wrap justify-content-between">
-                <ul class="abilities__main">
-                    <li class="abilities__bg-diagnostic">
-                        <h1 class="abilities__header">Диагностика</h1>
-                        <ul>
-                            <li>Проведение тестов</li>
-                            <li>Опрос пациента</li>
-                            <li>Соблюдение критериев МКБ-10</li>
-                        </ul>
-                    </li>
-                    <li class="abilities__bg-cure">
-                        <h1 class="abilities__header">Лечение</h1>
-                        <ul>
-                            <li>Назначение препаратов по рекомендациям ВОЗ</li>
-                            <li>Запись к врачу</li>
-                            <li>Выбор клиники</li>
-                        </ul>
-                    </li>
-                    <li class="abilities__bg-library">
-                        <h1 class="abilities__header">Библиотека</h1>
-                        <ul>
-                            <li>Статьи</li>
-                            <li>Исследования</li>
-                        </ul>
-                    </li>
-                    <li class="abilities__bg-medicines">
-                        <h1 class="abilities__header">Лекарственный справочник</h1>
-                        <ul>
-                            <li>Инструкции препаратов</li>
-                            <li>Зарегистрированные формы</li>
-                        </ul>
-                    </li>
-                    <li class="abilities__bg-law">
-                        <h1 class="abilities__header">Юридическая защита</h1>
-                        <ul>
-                            <li>Закон РФ о психиатрической помощи</li>
-                            <li>Советы по правовым прениям</li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </section>
-    <section class="advertisement">
-        <div class="doctor-block">
-            <div class="row d-inline-flex justify-content-center w-100">
-                <div class="col-lg-1">
-                    <img src="{{ asset('assets/images/doctors/doctor.png') }}">
-                </div>
-                <div class="col-lg-5 doctor-block__text">
-                    Для Вас быстрая работа и максимально корректная диагностика
-                </div>
-            </div>
-        </div>
-        <div class="container pt-5">
-            <h1 class="container__header"><span class="container__header-span">Подберите тариф</span> под Ваши нужды
-            </h1>
-            <p class="section-advertisement__p">Мы предлагаем квалифицированную помощь. Выберите тариф, который Вам
-                                                подходит:</p>
-            <div class="row align-items-stretch">
-                <div class="col-sm-3">
-                    <div class="card">
-                        <h5 class="card-header text-center bg-info text-white">Бесплатно</h5>
-                        <div class="card-body">
-                            <h3 class="card-title text-center">Гость</h3>
-                            <p class="card-text text-center tarrif-description">Тариф для ознакомления с системой</p>
-                            <h1 class="text-center p-3 text-price">0 <span>₽\мес</span></h1>
-                            <ul>
-                                <li>Презентация возможностей</li>
-                                <li>Диагностика</li>
-                                <li>Панель пациента</li>
-                            </ul>
-                            <div class="btn-group w-100">
-                                <a href="#" class="btn btn-primary text-center">Попробовать</a>
-                            </div>
+    <div class="nh-home">
+        <section class="nh-principles" aria-label="Принципы системы">
+            <div class="nh-shell">
+                <div class="nh-principles__grid">
+                    <article>
+                        <div class="nh-principles__icon"><i class="bi bi-journal-text"></i></div>
+                        <div>
+                            <strong>Клиническая логика</strong>
+                            <p>Интерфейс следует привычному пути работы с пациентом, а не заставляет изучать новый процесс.</p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title text-center card-unhead">Ассистент</h3>
-                            <p class="card-text text-center tarrif-description">Тариф для врачей с поддержкой
-                                                                                системы</p>
-                            <h1 class="text-center p-3 text-price">900 <span>₽\мес</span></h1>
-                            <ul>
-                                <li>Врачебная панель</li>
-                                <li>Ведение анамнезов</li>
-                                <li>Помощь с диагностикой</li>
-                                <li>Выписка рецептов</li>
-                                <li>Медикаментозный подбор</li>
-                            </ul>
-                            <div class="btn-group w-100">
-                                <a href="#" class="btn btn-primary text-center">Попробовать</a>
-                            </div>
+                        <span>01</span>
+                    </article>
+                    <article>
+                        <div class="nh-principles__icon"><i class="bi bi-database"></i></div>
+                        <div>
+                            <strong>Один контекст</strong>
+                            <p>Анамнез, диагностика, назначения и справочные данные собраны в одной системе.</p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <h3 class="card-title text-center card-unhead">Знахарь</h3>
-                            <p class="card-text text-center tarrif-description">Тариф для пациентов, которым нужна
-                                                                                анонимная помощь</p>
-                            <h1 class="text-center p-3 text-price">1100 <span>₽\мес</span></h1>
-                            <ul>
-                                <li>Панель пациента</li>
-                                <li>Диагностика</li>
-                                <li>Медикаментозный подбор</li>
-                                <li>Консультация с врачом</li>
-                                <li>Полная анонимность</li>
-                                <li>Юридическая помощь</li>
-                            </ul>
-                            <div class="btn-group w-100">
-                                <a href="#" class="btn btn-primary">Попробовать</a>
-                            </div>
+                        <span>02</span>
+                    </article>
+                    <article>
+                        <div class="nh-principles__icon"><i class="bi bi-check2-circle"></i></div>
+                        <div>
+                            <strong>Минимум отвлечений</strong>
+                            <p>Спокойная визуальная среда помогает сосредоточиться на клинической задаче.</p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-sm-3">
-                    <div class="card">
-                        <h5 class="card-header text-center bg-info text-white">Лучший вариант!</h5>
-                        <div class="card-body">
-                            <h3 class="card-title text-center">Библиотекарь</h3>
-                            <p class="card-text text-center tarrif-description">Тариф для тех, кто интересуется
-                                                                                психиатрией в научном плане</p>
-                            <h1 class="text-center p-3 text-price">1600 <span>₽\мес</span></h1>
-                            <ul>
-                                <li>Врачебная панель</li>
-                                <li>Юридическая помощь</li>
-                                <li>Доступ к библиотеке научных статей</li>
-                                <li>Возможность стать <span class="text-decoration-underline">Администратором</span>
-                                </li>
-                            </ul>
-                            <div class="btn-group w-100">
-                                <a href="#" class="btn btn-primary">Попробовать</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    @if (!$feedbacks->isEmpty())
-        <section class="feedback">
-            <div class="container pt-5">
-                <h1 class="container__header"><span class="container__header-span">Отзывы специалистов</span> о нашей
-                                                                                                              работе
-                </h1>
-                <div id="carousel-feedbacks" class="carousel slide">
-                    <div class="carousel-indicators">
-                        <button type="button" data-bs-target="#carousel-feedbacks" data-bs-slide-to="0" class="active"
-                                aria-current="true" aria-label="Slide 1"></button>
-                        <button type="button" data-bs-target="#carousel-feedbacks" data-bs-slide-to="1"
-                                aria-label="Slide 2"></button>
-                        <button type="button" data-bs-target="#carousel-feedbacks" data-bs-slide-to="2"
-                                aria-label="Slide 3"></button>
-                    </div>
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
-                            <div class="row p-3 pl-10 feedback-container">
-                                <picture class="feedback-slider__image">
-                                    <source srcset="{{ url('assets/images/backgrounds/feedback_placeholder.webp') }}"
-                                            type="image/webp">
-                                    <img src="{{ url('assets/images/backgrounds/feedback_placeholder.png') }}"
-                                         alt="Нет фотографии" loading="lazy">
-                                </picture>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="row p-3 pl-10 feedback-container">
-                                <picture class="feedback-slider__image">
-                                    <source srcset="{{ url('assets/images/backgrounds/feedback_placeholder.webp') }}"
-                                            type="image/webp">
-                                    <img src="{{ url('assets/images/backgrounds/feedback_placeholder.png') }}"
-                                         alt="Нет фотографии" loading="lazy">
-                                </picture>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
-                            <div class="row p-3 pl-10">
-                                <picture class="feedback-slider__image">
-                                    <source srcset="{{ url('assets/images/backgrounds/feedback_placeholder.webp') }}"
-                                            type="image/webp">
-                                    <img src="{{ url('assets/images/backgrounds/feedback_placeholder.png') }}"
-                                         alt="Нет фотографии" loading="lazy">
-                                </picture>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="carousel-control-prev bs-carousel-dark-arrow" type="button"
-                            data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                        <span class="bi bi-chevron-left font-35 color-arrow" aria-hidden="true"></span>
-                        <span class="visually-hidden">Предыдущий</span>
-                    </button>
-                    <button class="carousel-control-next bs-carousel-dark-arrow " type="button"
-                            data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                        <span class="bi bi-chevron-right font-35 color-arrow" aria-hidden="true"></span>
-                        <span class="visually-hidden">Следующий</span>
-                    </button>
+                        <span>03</span>
+                    </article>
                 </div>
             </div>
         </section>
-        <script>
-            $(document).ready(function () {
-                $('#carousel-feedbacks').carousel();
-            });
-        </script>
-    @endif
+
+        <section class="nh-editorial" id="nh-editorial">
+            <div class="nh-shell nh-editorial__grid">
+                <figure class="nh-editorial__visual">
+                    <img
+                        src="{{ asset('assets/images/home/editorial-soft.png') }}"
+                        alt="Спокойное пространство для работы врача"
+                        loading="lazy"
+                        onerror="this.parentElement.classList.add('is-fallback'); this.remove();"
+                    >
+                </figure>
+
+                <div class="nh-editorial__content">
+                    <div class="nh-kicker">Создано для врачей</div>
+                    <h2>Для ежедневной работы<br>в психиатрической практике</h2>
+                    <p>
+                        Норхнейм помогает структурировать информацию, принимать
+                        обоснованные решения и сохранять время для самого важного —
+                        для пациента.
+                    </p>
+
+                    <div class="nh-editorial__features">
+                        <article>
+                            <div class="nh-editorial__feature-icon"><i class="bi bi-folder2-open"></i></div>
+                            <span>Анамнез<br>и документы</span>
+                        </article>
+                        <article>
+                            <div class="nh-editorial__feature-icon"><i class="bi bi-activity"></i></div>
+                            <span>Диагностика<br>и критерии</span>
+                        </article>
+                        <article>
+                            <div class="nh-editorial__feature-icon"><i class="bi bi-capsule"></i></div>
+                            <span>Назначения<br>и препараты</span>
+                        </article>
+                        <article>
+                            <div class="nh-editorial__feature-icon"><i class="bi bi-book"></i></div>
+                            <span>Справочники<br>и статьи</span>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="nh-section nh-plans" id="nh-plans">
+            <div class="nh-shell">
+                <div class="nh-section-head">
+                    <div>
+                        <div class="nh-kicker">Тарифы</div>
+                        <h2>Выберите подходящий сценарий работы.</h2>
+                    </div>
+                    <p>
+                        Без игровых уровней и агрессивных бейджей. Разница между вариантами —
+                        только в доступных рабочих инструментах.
+                    </p>
+                </div>
+
+                <div class="nh-plan-grid">
+                    @foreach($plans as $plan)
+                        <article class="nh-plan {{ $plan['primary'] ? 'nh-plan--primary' : '' }}">
+                            <div class="nh-plan__topline">{{ $plan['eyebrow'] }}</div>
+                            <h3>{{ $plan['name'] }}</h3>
+                            <p class="nh-plan__description">{{ $plan['description'] }}</p>
+                            <div class="nh-plan__price">{{ $plan['price'] }} <small>/ месяц</small></div>
+
+                            <ul>
+                                @foreach($plan['features'] as $feature)
+                                    <li>{{ $feature }}</li>
+                                @endforeach
+                            </ul>
+
+                            <a href="#" class="nh-btn {{ $plan['primary'] ? 'nh-btn--primary' : 'nh-btn--outline' }}">
+                                {{ $plan['price'] === '0 ₽' ? 'Подробнее' : 'Попробовать' }}
+                            </a>
+                        </article>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section class="nh-partners" id="nh-partners">
+            <div class="nh-shell">
+                <div class="nh-partners__head">
+                    <div>
+                        <div class="nh-kicker">Партнёры · демонстрационные данные</div>
+                        <h2>Работаем в связке с клиниками и профильными организациями.</h2>
+                    </div>
+                    <p>
+                        Сейчас здесь стоят тестовые названия. Позже этот блок можно подключить
+                        к отдельной таблице партнёров без изменения шаблона страницы.
+                    </p>
+                </div>
+
+                <div class="nh-partners__grid">
+                    @foreach($partners as $partner)
+                        <article class="nh-partner-card">
+                            <div class="nh-partner-card__mark">{{ $partner['mark'] }}</div>
+                            <div>
+                                <strong>{{ $partner['name'] }}</strong>
+                                <span>{{ $partner['type'] }}</span>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section class="nh-section nh-cities" id="nh-cities">
+            <div class="nh-shell">
+                <div class="nh-section-head">
+                    <div>
+                        <div class="nh-kicker">Клиники</div>
+                        <h2>Найдите специалиста в своём городе.</h2>
+                    </div>
+                    <p>
+                        Стабильный список городов без случайной мозаики.
+                        Пользователь сразу понимает, куда нажать и что произойдёт дальше.
+                    </p>
+                </div>
+
+                <div class="nh-city-list">
+                    @foreach($cities as $city)
+                        <a href="{{ route('main.clinics.filters.city', $city['slug']) }}" class="nh-city-list__item">
+                            <span>{{ $city['name'] }}</span>
+                            <i class="bi bi-arrow-up-right"></i>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section class="nh-closing">
+            <div class="nh-shell">
+                <div class="nh-closing__inner">
+                    <div>
+                        <div class="nh-kicker">Норхнейм</div>
+                        <h2>Рабочий инструмент для клинической практики.</h2>
+                        <p>Начните с возможностей системы или перейдите к поиску клиники.</p>
+                    </div>
+                    <div class="nh-closing__actions">
+                        <a href="#nh-editorial" class="nh-btn nh-btn--primary">Возможности</a>
+                        <a href="#nh-plans" class="nh-btn nh-btn--ghost">Тарифы</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 @endsection

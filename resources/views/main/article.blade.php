@@ -1,68 +1,62 @@
 @extends('layouts.welcome')
 @section('title', 'Научные статьи')
-@section('assets')
-@endsection
-@section('main')
-    @if ($articles->isNotEmpty())
-    <section class="article">
-        <div class="container pt-3">
-            <div class="row">
-                <div class="col-md-8">
-                    <h1><span>Научная</span> библиотека1</h1>
-                    <p class="text-secondary-emphasis articles__description">
-                        Мы собираем различные статьи и Вы, если вы врач, можете опубликовать свои труды, основывающиеся на своих
-                        навыках. Также, здесь могут быть опубликованы труды учёных - исследования, в том числе переводы с других
-                        языков.
-                    </p>
-                </div>
-                <form class="col-md-4" method="get" enctype="multipart/form-data" action="">
-                    <div class="input-group">
-                        <span class="input-group-text border-0 bg-transparent magnifier-block">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0 with-btn-filter" name="search" placeholder="Поиск..." aria-label="Поиск" value="{{ request()->get('search') }}"/>
-                        <button class="btn btn-outline-primary" type="submit">
-                            Искать
-                        </button>
-                    </div>
-                </form>
+@section('body_class', 'nh-public-page nh-library-page')
+
+@section('page_header')
+    <section class="nh-public-hero">
+        <div class="nh-public-shell nh-public-hero__grid">
+            <div>
+                <div class="nh-public-kicker">Библиотека Норхнейма</div>
+                <h1>Научная библиотека</h1>
+                <p>
+                    Мы собираем различные статьи и Вы, если вы врач, можете опубликовать свои труды, основывающиеся на своих
+                    навыках. Также, здесь могут быть опубликованы труды учёных - исследования, в том числе переводы с других
+                    языков.
+                </p>
             </div>
-            @foreach($articles as $article)
-                <div class="row pt-3 pb-3">
-                    <div class="col-md-12">
-                        <div class="article-card__body">
-                            <a href="{{ route('main.articles.show', $article->id) }}">
-                                <h3 class="article-card__header">{{ $article->name }}</h3>
-                            </a>
-                            <p>
-                                @foreach ($article->hashtags()->get() as $hashtag)
-                                    #{{ $hashtag->hashtag }}
-                                @endforeach
-                            </p>
-                            <p>{{ Str::limit(strip_tags($article->content), 150) }}</p>
-                            <p class="mb-0"><strong>Авторы исследования:</strong> {{ $article->authors }}</p>
-                            <p class="text-secondary pt-0">{{ $article->created_at }}, опубликовано {{ $article->user->login }}</p>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-            {{ $articles->links('pagination::bootstrap-5') }}
+            <form class="nh-search" method="get" action="">
+                <i class="bi bi-search"></i>
+                <input type="text" name="search" placeholder="Поиск по библиотеке" value="{{ request()->get('search') }}">
+                <button type="submit">Найти</button>
+            </form>
         </div>
     </section>
-    @else
-        <div class="container">
-            <div class="row not-found">
-                <div class="col-md-3">
-                    <picture>
-                        <source srcset="{{ asset('assets/images/doctors/no-found-doctor.webp') }}" type="image/webp">
-                        <img src="{{ asset('assets/images/doctors/no-found-doctor.png') }}">
-                    </picture>
+@endsection
+
+@section('main')
+    <section class="nh-public-section">
+        <div class="nh-public-shell">
+            @if ($articles->isNotEmpty())
+                <div class="nh-reading-list">
+                    @foreach($articles as $article)
+                        <article class="nh-reading-card">
+                            <div class="nh-reading-card__meta">
+                                <span>{{ $article->created_at }}</span>
+                                <span>{{ $article->user->login }}</span>
+                            </div>
+                            <a class="nh-reading-card__title" href="{{ route('main.articles.show', $article->id) }}">
+                                {{ $article->name }}
+                            </a>
+                            <p>{{ Str::limit(strip_tags($article->content), 190) }}</p>
+                            <div class="nh-reading-card__footer">
+                                <div class="nh-tags">
+                                    @foreach ($article->hashtags()->get() as $hashtag)
+                                        <span>#{{ $hashtag->hashtag }}</span>
+                                    @endforeach
+                                </div>
+                                <span class="nh-reading-card__author">{{ $article->authors }}</span>
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
-                <div class="col-md-9 pt-5">
-                    <h1>Здесь пусто</h1>
-                    <p>Не смогли ничего найти. Попробуйте позже, возможно тогда мы добавим записи.</p>
+                <div class="nh-pagination">{{ $articles->links('pagination::bootstrap-5') }}</div>
+            @else
+                <div class="nh-empty-state">
+                    <i class="bi bi-journal-x"></i>
+                    <h2>Материалы не найдены</h2>
+                    <p>Попробуйте изменить поисковый запрос или вернуться к библиотеке позже.</p>
                 </div>
-            </div>
+            @endif
         </div>
-    @endif
+    </section>
 @endsection

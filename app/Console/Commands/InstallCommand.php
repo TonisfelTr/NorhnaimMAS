@@ -87,6 +87,7 @@ class InstallCommand extends Command
             'CreateNullClinicSeeder'     => 'Нулевая клиника (ID=0)',
             'SideEffectsFillSeeder'      => 'Побочные эффекты',
             'ContraindicationsSeeder'    => 'Противопоказания',
+            'FillReceptorsTableSeeder'    => 'Фармакологические мишени',
             'DrugSeeder'                 => 'Препараты',
             'LawyersFillSeeder'          => 'Юристы',
             'RolePermissionSeeder'       => 'Роли и права',
