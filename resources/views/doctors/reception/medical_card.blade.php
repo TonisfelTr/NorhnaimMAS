@@ -1,7 +1,7 @@
 @extends('doctors.reception')
 @section('title', "{$patient->getFullNameWithInitials()} - медицинская карта пациента")
 @section('assets')
-    @vite('resources/sass/medical_card.sass')
+    @parent
     @vite('resources/js/medical_card.js')
 
     <!-- PRESCRIPTION_MODAL_FIXED_STYLES_START -->
@@ -538,9 +538,201 @@
     <!-- PRESCRIPTION_MODAL_FIXED_STYLES_END -->
 @endsection
 @section('sub-main')
+    @php
+        /*
+         * Ошибки относятся к отправленной форме, а не ко всей медкарте.
+         * Поддерживаем default и отдельные bags patientUpdate / anamnesis.
+         * _medical_card_form используется только для интерфейса, не для доступа.
+         */
+        $medicalCardOldInput = session()->getOldInput();
+        $medicalCardSubmittedForm = $medicalCardOldInput['_medical_card_form'] ?? null;
+
+        if (!is_string($medicalCardSubmittedForm)) {
+            $medicalCardSubmittedForm = null;
+        }
+
+        // Совместимость с последней отправкой до установки этого исправления.
+        if ($medicalCardSubmittedForm === null) {
+            if (
+                array_key_exists('surname', $medicalCardOldInput)
+                && array_key_exists('email', $medicalCardOldInput)
+            ) {
+                $medicalCardSubmittedForm = 'patient_info';
+            } elseif (
+                array_key_exists('title', $medicalCardOldInput)
+                && array_key_exists('diag_source', $medicalCardOldInput)
+            ) {
+                $medicalCardSubmittedForm = 'anamnesis';
+            }
+        }
+
+        $medicalCardDefaultErrors = $errors->getBag('default');
+        $patientInfoErrors = $errors->getBag('patientUpdate');
+        $anamnesisErrors = $errors->getBag('anamnesis');
+
+        if (!$patientInfoErrors->any() && $medicalCardSubmittedForm === 'patient_info') {
+            $patientInfoErrors = $medicalCardDefaultErrors;
+        }
+
+        if (!$anamnesisErrors->any() && $medicalCardSubmittedForm === 'anamnesis') {
+            $anamnesisErrors = $medicalCardDefaultErrors;
+        }
+
+        // Ошибки этих форм не дублируем в загрузке документов и исследованиях.
+        $otherMedicalCardErrors = in_array(
+            $medicalCardSubmittedForm,
+            ['patient_info', 'anamnesis'],
+            true
+        )
+            ? new \Illuminate\Support\MessageBag()
+            : $medicalCardDefaultErrors;
+
+        $medicalCardErrorTab = $patientInfoErrors->any()
+            ? 'patient-info'
+            : ($anamnesisErrors->any() ? 'anamnesis' : null);
+
+        /*
+         * ================================================================
+         * CHILD / REPRESENTATIVE CONTEXT
+         * ================================================================
+         * Новые удостоверяющие документы и представители живут отдельно
+         * от legacy-паспортных полей patients.
+         */
+        $rawPatientBirthAt = $patient->getRawOriginal('birth_at') ?: $patient->birth_at;
+        $patientBirthDateObject = null;
+
+        try {
+            $patientBirthDateObject = $rawPatientBirthAt
+                ? \Illuminate\Support\Carbon::parse($rawPatientBirthAt)
+                : null;
+        } catch (\Throwable $exception) {
+            $patientBirthDateObject = null;
+        }
+
+        $patientAge = $patientBirthDateObject?->age;
+        $isMinorPatient = $patientAge !== null && $patientAge < 18;
+        $isChildUnder14 = $patientAge !== null && $patientAge < 14;
+
+        /*
+         * HTML input[type=date] принимает только YYYY-MM-DD.
+         * Accessor Patient::birth_at возвращает dd.mm.YYYY, поэтому
+         * для формы используем raw-значение/Carbon отдельно.
+         */
+        $patientBirthDateInput = $patientBirthDateObject?->format('Y-m-d') ?? '';
+
+        $patientGenderLabel = match ($patient->gender) {
+            'M' => 'Мужской',
+            'F' => 'Женский',
+            default => 'не указан',
+        };
+
+        $patientAgeLabel = null;
+
+        if ($patientAge !== null) {
+            $ageMod10 = $patientAge % 10;
+            $ageMod100 = $patientAge % 100;
+
+            $ageWord = ($ageMod10 === 1 && $ageMod100 !== 11)
+                ? 'год'
+                : (($ageMod10 >= 2 && $ageMod10 <= 4 && ($ageMod100 < 12 || $ageMod100 > 14))
+                    ? 'года'
+                    : 'лет');
+
+            $patientAgeLabel = $patientAge . ' ' . $ageWord;
+        }
+
+        $patientDocumentTypeLabels = [
+            'passport_rf' => 'Паспорт гражданина РФ',
+            'birth_certificate' => 'Свидетельство о рождении',
+            'foreign_passport' => 'Иностранный паспорт',
+            'residence_permit' => 'Вид на жительство',
+            'temporary_identity' => 'Временное удостоверение личности',
+            'foreign_identity' => 'Иностранный документ, удостоверяющий личность',
+            'other' => 'Другой документ',
+        ];
+
+        $representativeTypeLabels = [
+            'mother' => 'Мать',
+            'father' => 'Отец',
+            'adoptive_parent' => 'Усыновитель',
+            'guardian' => 'Опекун',
+            'trustee' => 'Попечитель',
+            'authorized' => 'Уполномоченный представитель',
+            'other' => 'Другой представитель',
+        ];
+
+        $authorityDocumentTypeLabels = [
+            'guardianship_order' => 'Документ об установлении опеки/попечительства',
+            'power_of_attorney' => 'Доверенность',
+            'other' => 'Другой документ',
+        ];
+
+        $formatPatientCardDate = static function ($value): string {
+            if (!$value) {
+                return '—';
+            }
+
+            try {
+                return \Illuminate\Support\Carbon::parse($value)->format('d.m.Y');
+            } catch (\Throwable $exception) {
+                return (string) $value;
+            }
+        };
+
+        $patientIdentityDocument = \Illuminate\Support\Facades\DB::table('patient_identity_documents')
+            ->where('patient_id', $patient->id)
+            ->where('is_active', true)
+            ->orderByDesc('is_primary')
+            ->orderByDesc('id')
+            ->first();
+
+        $primaryRepresentative = null;
+        $representativeIdentityDocument = null;
+        $representativeAuthorityDocument = null;
+
+        if ($isMinorPatient) {
+            $primaryRepresentative = \Illuminate\Support\Facades\DB::table('patient_representatives')
+                ->where('patient_id', $patient->id)
+                ->where('is_active', true)
+                ->orderByDesc('is_primary')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($primaryRepresentative) {
+                $representativeIdentityDocument = \Illuminate\Support\Facades\DB::table('patient_representative_documents')
+                    ->where('representative_id', $primaryRepresentative->id)
+                    ->where('document_purpose', 'identity')
+                    ->where('is_active', true)
+                    ->orderByDesc('is_primary')
+                    ->orderByDesc('id')
+                    ->first();
+
+                $representativeAuthorityDocument = \Illuminate\Support\Facades\DB::table('patient_representative_documents')
+                    ->where('representative_id', $primaryRepresentative->id)
+                    ->where('document_purpose', 'authority')
+                    ->where('is_active', true)
+                    ->orderByDesc('is_primary')
+                    ->orderByDesc('id')
+                    ->first();
+            }
+        }
+
+        $patientIdentityDocumentLabel = $patientIdentityDocument
+            ? ($patientIdentityDocument->document_name
+                ?: ($patientDocumentTypeLabels[$patientIdentityDocument->document_type] ?? 'Документ пациента'))
+            : ($isChildUnder14 ? 'Свидетельство о рождении' : 'Документ пациента');
+
+        $primaryRepresentativeFullName = $primaryRepresentative
+            ? collect([
+                $primaryRepresentative->surname,
+                $primaryRepresentative->name,
+                $primaryRepresentative->patronym,
+            ])->filter()->implode(' ')
+            : null;
+    @endphp
     <div id="medicalCardRoot"
          class="medical-card-page"
-         data-active-tab="{{ session('active_tab') }}"
+         data-active-tab="{{ $medicalCardErrorTab ?? session('active_tab') }}"
          data-address-suggest-url="{{ route('api-search-address') }}">
         <div class="mc-wrap">
 
@@ -566,9 +758,23 @@
                                 Дата рождения: {{ $patient->birth_at }}
                             </span>
 
+                            @if($patientAgeLabel)
+                                <span class="mc-patient-chip">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    Возраст: {{ $patientAgeLabel }}
+                                </span>
+                            @endif
+
+                            @if($isMinorPatient)
+                                <span class="mc-patient-chip">
+                                    <i class="bi bi-person-heart"></i>
+                                    Несовершеннолетний
+                                </span>
+                            @endif
+
                             <span class="mc-patient-chip">
                                 <i class="bi bi-gender-ambiguous"></i>
-                                Пол: {{ $patient->gender }}
+                                Пол: {{ $patientGenderLabel }}
                             </span>
 
                             <span class="mc-patient-chip">
@@ -616,11 +822,43 @@
                             <i class="bi bi-activity"></i>
                         </div>
 
-                        <div>
-                            <div class="mc-patient-meta-label">Диагноз</div>
-                            <div class="mc-patient-meta-value {{ $patient->diagnose->code ? '' : 'is-warning' }}">
-                                {{ $patient->diagnose->code }}
-                            </div>
+                        @php
+                            $currentDiagnosis = $patient->diagnose;
+
+                            $currentDiagnosisCode = $currentDiagnosis?->code;
+
+                            $currentDiagnosisTitle =
+                                $currentDiagnosis?->title
+                                ?? $currentDiagnosis?->name
+                                ?? null;
+                        @endphp
+
+                        <div class="mc-patient-meta-value">
+                            @if($currentDiagnosisCode)
+                                <div class="fw-bold fs-5">
+                                    {{ $currentDiagnosisCode }}
+                                </div>
+
+                                @if($currentDiagnosisTitle)
+                                    <div class="mt-1">
+                                        {{ $currentDiagnosisTitle }}
+                                    </div>
+                                @endif
+
+                                <div class="mt-2">
+            <span class="badge rounded-pill text-bg-light border">
+                Основной диагноз
+            </span>
+                                </div>
+                            @else
+                                <div class="is-warning fw-semibold">
+                                    Диагноз не установлен
+                                </div>
+
+                                <div class="small text-muted mt-1">
+                                    Нет установленного основного диагноза
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -682,6 +920,13 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-certificates" data-bs-toggle="tab"
+                                    data-bs-target="#pane-certificates" type="button" role="tab"
+                                    aria-controls="pane-certificates" aria-selected="false">
+                                Справки
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-tests" type="button">
                                 Тесты
                             </button>
@@ -714,8 +959,10 @@
                                 <h2 class="patient-info-hero__title">Общая информация</h2>
                                 <div class="patient-info-hero__subtitle">
                                     Редактирование основных регистрационных данных: ФИО, дата рождения, пол,
-                                    паспорт, адрес прописки, адрес фактического проживания, контакты и номер медицинской
-                                    карты.
+                                    документ, удостоверяющий личность, адреса, контакты и номер медицинской карты.
+                                    @if($isMinorPatient)
+                                        Для несовершеннолетнего дополнительно отображаются сведения о законном представителе.
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -750,15 +997,27 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="patient-info-summary-item">
-                                    <div class="patient-info-summary-item__icon"><i class="bi bi-building"></i></div>
-                                    <div>
-                                        <div class="patient-info-summary-item__label">Место работы</div>
-                                        <div class="patient-info-summary-item__value">
-                                            {{ $patient->job_organization ?? '—' }}
+                                @if($isMinorPatient)
+                                    <div class="patient-info-summary-item">
+                                        <div class="patient-info-summary-item__icon"><i class="bi bi-people"></i></div>
+                                        <div>
+                                            <div class="patient-info-summary-item__label">Основной представитель</div>
+                                            <div class="patient-info-summary-item__value">
+                                                {{ $primaryRepresentativeFullName ?: 'Не указан' }}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @else
+                                    <div class="patient-info-summary-item">
+                                        <div class="patient-info-summary-item__icon"><i class="bi bi-building"></i></div>
+                                        <div>
+                                            <div class="patient-info-summary-item__label">Место работы</div>
+                                            <div class="patient-info-summary-item__value">
+                                                {{ $patient->job_organization ?? '—' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                                 <div class="patient-info-summary-item">
                                     <div class="patient-info-summary-item__icon"><i class="bi bi-envelope"></i></div>
                                     <div>
@@ -770,11 +1029,11 @@
                         </div>
                     </div>
 
-                    @if($errors->any())
-                        <div class="alert alert-danger">
-                            Возникли ошибки при сохранении карты пациента:
-                            <ul>
-                                @foreach($errors->all() as $error)
+                    @if($patientInfoErrors->any())
+                        <div class="alert alert-danger" id="patientInfoValidationErrors" role="alert">
+                            Изменения не сохранены. Проверьте данные пациента:
+                            <ul class="mb-0 mt-2">
+                                @foreach($patientInfoErrors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
@@ -787,6 +1046,7 @@
                           data-insurance-suggest-url="{{ route('api-search-organizations') }}"
                           action="{{ route('doctors.patients.medical_card.update', $patient->id) }}">
                         @csrf
+                        <input type="hidden" name="_medical_card_form" value="patient_info">
 
                         <div class="patient-info-form-card__head">
                             <div>
@@ -844,7 +1104,7 @@
                                                type="date"
                                                name="birth_at"
                                                class="form-control"
-                                               value="{{ old('birth_at', $patient->birth_at) }}">
+                                               value="{{ old('birth_at', $patientBirthDateInput) }}">
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label" for="patientGender">Пол</label>
@@ -894,18 +1154,31 @@
                                                value="{{ old('snils', $patient->snils ?? '') }}">
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="patientEmail">Email</label>
-                                        <input id="patientEmail"
-                                               type="email"
+                                    @if(!$isMinorPatient)
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="patientEmail">Email</label>
+                                            <input id="patientEmail"
+                                                   type="email"
+                                                   name="email"
+                                                   class="form-control js-mask-email {{ $patientInfoErrors->has('email') ? 'is-invalid' : '' }}"
+                                                   aria-invalid="{{ $patientInfoErrors->has('email') ? 'true' : 'false' }}"
+                                                   @if($patientInfoErrors->has('email')) aria-describedby="patientEmailError" @endif
+                                                   maxlength="255"
+                                                   inputmode="email"
+                                                   autocomplete="email"
+                                                   placeholder="patient@example.ru"
+                                                   value="{{ old('email', $patient->email ?? '') }}">
+                                            @if($patientInfoErrors->has('email'))
+                                                <div id="patientEmailError" class="invalid-feedback">
+                                                    {{ $patientInfoErrors->first('email') }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <input type="hidden"
                                                name="email"
-                                               class="form-control js-mask-email"
-                                               maxlength="255"
-                                               inputmode="email"
-                                               autocomplete="email"
-                                               placeholder="patient@example.ru"
                                                value="{{ old('email', $patient->email ?? '') }}">
-                                    </div>
+                                    @endif
                                     <div class="col-md-5">
                                         <label class="form-label" for="patientInsuranceCompany">Страховая
                                             организация</label>
@@ -940,156 +1213,371 @@
                                 </div>
                             </section>
 
-                            <section class="patient-info-section patient-info-section--main">
-                                <div class="patient-info-section-title">
-                                    <i class="bi bi-briefcase text-primary"></i>
-                                    <span class="patient-info-section-title__text">
-                                        <span>Социальные и трудовые сведения</span>
-                                        <span class="patient-info-section-title__hint">Профессия, место работы и отметки, которые уже есть в таблице пациентов.</span>
-                                    </span>
-                                </div>
-
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="patientProfession">Профессия</label>
-                                        <input id="patientProfession"
-                                               type="text"
-                                               name="profession"
-                                               class="form-control"
-                                               maxlength="255"
-                                               placeholder="Например: бухгалтер, водитель, пенсионер"
-                                               value="{{ old('profession', $patient->profession) }}">
+                            @if(!$isMinorPatient)
+                                <section class="patient-info-section patient-info-section--main">
+                                    <div class="patient-info-section-title">
+                                        <i class="bi bi-briefcase text-primary"></i>
+                                        <span class="patient-info-section-title__text">
+                                            <span>Социальные и трудовые сведения</span>
+                                            <span class="patient-info-section-title__hint">Профессия, место работы и социальные отметки пациента.</span>
+                                        </span>
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="patientAddressJob">Место работы /
-                                            организация</label>
-                                        <input id="patientAddressJob"
-                                               type="text"
-                                               name="job_organization"
-                                               class="form-control"
-                                               maxlength="500"
-                                               placeholder="Название организации или место работы"
-                                               value="{{ old('job_organization', $patient->job_organization) }}">
-                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="patientProfession">Профессия</label>
+                                            <input id="patientProfession"
+                                                   type="text"
+                                                   name="profession"
+                                                   class="form-control"
+                                                   maxlength="255"
+                                                   placeholder="Например: бухгалтер, водитель, пенсионер"
+                                                   value="{{ old('profession', $patient->profession) }}">
+                                        </div>
 
-                                    <div class="col-12">
-                                        <div class="patient-info-check-grid">
-                                            <label class="patient-info-check-card" for="patientSociallyDangerous">
-                                                <input type="hidden" name="socially_dangerous" value="0">
-                                                <input id="patientSociallyDangerous"
-                                                       class="form-check-input"
-                                                       type="checkbox"
-                                                       name="socially_dangerous"
-                                                       value="1"
-                                                    @checked((bool)$patient->socially_dangerous)>
-                                                <span>
-                                                    <span
-                                                        class="patient-info-check-card__title">Социально опасный</span>
-                                                    <span class="patient-info-check-card__hint d-block">Отметка для регистрационных и медицинских предупреждений.</span>
-                                                </span>
-                                            </label>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="patientAddressJob">Место работы / организация</label>
+                                            <input id="patientAddressJob"
+                                                   type="text"
+                                                   name="job_organization"
+                                                   class="form-control"
+                                                   maxlength="500"
+                                                   placeholder="Название организации или место работы"
+                                                   value="{{ old('job_organization', $patient->job_organization) }}">
+                                        </div>
 
-                                            <label class="patient-info-check-card" for="patientDisability">
-                                                <input type="hidden" name="disability" value="0">
-                                                <input id="patientDisability"
-                                                       class="form-check-input"
-                                                       type="checkbox"
-                                                       name="disability"
-                                                       value="1"
-                                                    @checked((bool)$patient->disability)>
-                                                <span>
-                                                    <span class="patient-info-check-card__title">Инвалидность</span>
-                                                    <span class="patient-info-check-card__hint d-block">Наличие действующего статуса инвалида</span>
-                                                </span>
-                                            </label>
+                                        <div class="col-12">
+                                            <div class="patient-info-check-grid">
+                                                <label class="patient-info-check-card" for="patientSociallyDangerous">
+                                                    <input type="hidden" name="socially_dangerous" value="0">
+                                                    <input id="patientSociallyDangerous"
+                                                           class="form-check-input"
+                                                           type="checkbox"
+                                                           name="socially_dangerous"
+                                                           value="1"
+                                                        @checked((bool)$patient->socially_dangerous)>
+                                                    <span>
+                                                        <span class="patient-info-check-card__title">Социально опасный</span>
+                                                        <span class="patient-info-check-card__hint d-block">Отметка для регистрационных и медицинских предупреждений.</span>
+                                                    </span>
+                                                </label>
 
-                                            <label class="patient-info-check-card" for="patientMarried">
-                                                <input type="hidden" name="married" value="0">
-                                                <input id="patientMarried"
-                                                       class="form-check-input"
-                                                       type="checkbox"
-                                                       name="married"
-                                                       value="1"
-                                                    @checked((bool)$patient->married)>
-                                                <span>
-                                                    <span class="patient-info-check-card__title">Состоит в браке</span>
-                                                </span>
-                                            </label>
+                                                <label class="patient-info-check-card" for="patientDisability">
+                                                    <input type="hidden" name="disability" value="0">
+                                                    <input id="patientDisability"
+                                                           class="form-check-input"
+                                                           type="checkbox"
+                                                           name="disability"
+                                                           value="1"
+                                                        @checked((bool)$patient->disability)>
+                                                    <span>
+                                                        <span class="patient-info-check-card__title">Инвалидность</span>
+                                                        <span class="patient-info-check-card__hint d-block">Наличие действующего статуса инвалида.</span>
+                                                    </span>
+                                                </label>
+
+                                                <label class="patient-info-check-card" for="patientMarried">
+                                                    <input type="hidden" name="married" value="0">
+                                                    <input id="patientMarried"
+                                                           class="form-check-input"
+                                                           type="checkbox"
+                                                           name="married"
+                                                           value="1"
+                                                        @checked((bool)$patient->married)>
+                                                    <span>
+                                                        <span class="patient-info-check-card__title">Состоит в браке</span>
+                                                    </span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </section>
-
-                            <section class="patient-info-section patient-info-section--passport">
-                                <div class="patient-info-section-title">
-                                    <i class="bi bi-passport text-primary"></i>
-                                    <span class="patient-info-section-title__text">
-                                        <span>Паспорт</span>
-                                        <span class="patient-info-section-title__hint">Серия, номер, дата выдачи, код подразделения и орган выдачи.</span>
-                                    </span>
-                                </div>
-                                <div class="row g-3">
-
-                                    <div class="col-md-2">
-                                        <label class="form-label" for="patientPassportSeries">Серия</label>
-                                        <input id="patientPassportSeries"
-                                               type="text"
-                                               name="passport_series"
-                                               class="form-control js-passport-part js-mask-digits"
-                                               maxlength="4"
-                                               inputmode="numeric"
-                                               autocomplete="off"
-                                               data-mask-max="4"
-                                               placeholder="0000"
-                                               value="{{ old('passport_series', $patient->serial) }}">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label" for="patientPassportNumber">Номер</label>
-                                        <input id="patientPassportNumber"
-                                               type="text"
-                                               name="passport_number"
-                                               class="form-control js-passport-part js-mask-digits"
-                                               maxlength="6"
-                                               inputmode="numeric"
-                                               autocomplete="off"
-                                               data-mask-max="6"
-                                               placeholder="000000"
-                                               value="{{ old('passport_number', $patient->number) }}">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label" for="patientPassportIssuedAt">Дата выдачи</label>
-                                        <input id="patientPassportIssuedAt"
-                                               type="date"
-                                               name="passport_issued_at"
-                                               class="form-control js-passport-part"
-                                               value="{{ old('passport_issued_at', $patient->issued_at) }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="patientPassportDepartmentCode">Код
-                                            подразделения</label>
-                                        <input id="patientPassportDepartmentCode"
-                                               type="text"
-                                               name="passport_department_code"
-                                               class="form-control js-passport-part js-mask-department-code"
-                                               maxlength="7"
-                                               inputmode="numeric"
-                                               autocomplete="off"
-                                               placeholder="000-000"
-                                               value="{{ old('passport_department_code', $patient->department_code) }}">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label" for="patientPassportIssuedBy">Кем выдан</label>
-                                        <textarea id="patientPassportIssuedBy"
-                                                  name="passport_issued_by"
-                                                  class="form-control js-passport-part"
-                                                  rows="2"
-                                                  maxlength="500"
-                                                  placeholder="Наименование органа, выдавшего паспорт">{{ old('passport_issued_by', $patient->issued_by) }}</textarea>
+                                </section>
+                            @else
+                                <section class="patient-info-section patient-info-section--main">
+                                    <div class="patient-info-section-title">
+                                        <i class="bi bi-person-heart text-primary"></i>
+                                        <span class="patient-info-section-title__text">
+                                            <span>Социальные сведения ребёнка</span>
+                                            <span class="patient-info-section-title__hint">Для несовершеннолетнего трудовые и семейные поля не отображаются.</span>
+                                        </span>
                                     </div>
 
-                                </div>
-                            </section>
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="patient-info-check-grid">
+                                                <label class="patient-info-check-card" for="patientSociallyDangerous">
+                                                    <input type="hidden" name="socially_dangerous" value="0">
+                                                    <input id="patientSociallyDangerous"
+                                                           class="form-check-input"
+                                                           type="checkbox"
+                                                           name="socially_dangerous"
+                                                           value="1"
+                                                        @checked((bool)$patient->socially_dangerous)>
+                                                    <span>
+                                                        <span class="patient-info-check-card__title">Социально опасный</span>
+                                                        <span class="patient-info-check-card__hint d-block">Регистрационная и медицинская отметка.</span>
+                                                    </span>
+                                                </label>
+
+                                                <label class="patient-info-check-card" for="patientDisability">
+                                                    <input type="hidden" name="disability" value="0">
+                                                    <input id="patientDisability"
+                                                           class="form-check-input"
+                                                           type="checkbox"
+                                                           name="disability"
+                                                           value="1"
+                                                        @checked((bool)$patient->disability)>
+                                                    <span>
+                                                        <span class="patient-info-check-card__title">Инвалидность</span>
+                                                        <span class="patient-info-check-card__hint d-block">Наличие действующего статуса инвалидности.</span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            @endif
+
+                            @if(!$isMinorPatient)
+                                <section class="patient-info-section patient-info-section--passport">
+                                    <div class="patient-info-section-title">
+                                        <i class="bi bi-passport text-primary"></i>
+                                        <span class="patient-info-section-title__text">
+                                            <span>Паспорт</span>
+                                            <span class="patient-info-section-title__hint">Серия, номер, дата выдачи, код подразделения и орган выдачи.</span>
+                                        </span>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="form-label" for="patientPassportSeries">Серия</label>
+                                            <input id="patientPassportSeries"
+                                                   type="text"
+                                                   name="serial"
+                                                   class="form-control js-passport-part js-mask-digits"
+                                                   maxlength="4"
+                                                   inputmode="numeric"
+                                                   autocomplete="off"
+                                                   data-mask-max="4"
+                                                   placeholder="0000"
+                                                   value="{{ old('serial', $patient->serial) }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="patientPassportNumber">Номер</label>
+                                            <input id="patientPassportNumber"
+                                                   type="text"
+                                                   name="number"
+                                                   class="form-control js-passport-part js-mask-digits"
+                                                   maxlength="6"
+                                                   inputmode="numeric"
+                                                   autocomplete="off"
+                                                   data-mask-max="6"
+                                                   placeholder="000000"
+                                                   value="{{ old('number', $patient->number) }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label" for="patientPassportIssuedAt">Дата выдачи</label>
+                                            <input id="patientPassportIssuedAt"
+                                                   type="date"
+                                                   name="issued_at"
+                                                   class="form-control js-passport-part"
+                                                   value="{{ old('issued_at', $patient->issued_at) }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="patientPassportDepartmentCode">Код подразделения</label>
+                                            <input id="patientPassportDepartmentCode"
+                                                   type="text"
+                                                   name="department_code"
+                                                   class="form-control js-passport-part js-mask-department-code"
+                                                   maxlength="7"
+                                                   inputmode="numeric"
+                                                   autocomplete="off"
+                                                   placeholder="000-000"
+                                                   value="{{ old('department_code', $patient->department_code) }}">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" for="patientPassportIssuedBy">Кем выдан</label>
+                                            <textarea id="patientPassportIssuedBy"
+                                                      name="issued_by"
+                                                      class="form-control js-passport-part"
+                                                      rows="2"
+                                                      maxlength="500"
+                                                      placeholder="Наименование органа, выдавшего паспорт">{{ old('passport_issued_by', $patient->issued_by) }}</textarea>
+                                        </div>
+                                    </div>
+                                </section>
+                            @else
+                                <section class="patient-info-section patient-info-section--passport">
+                                    <div class="patient-info-section-title">
+                                        <i class="bi bi-person-badge text-primary"></i>
+                                        <span class="patient-info-section-title__text">
+                                            <span>{{ $patientIdentityDocumentLabel }}</span>
+                                            <span class="patient-info-section-title__hint">Основной документ ребёнка хранится в patient_identity_documents.</span>
+                                        </span>
+                                    </div>
+
+                                    @if($patientIdentityDocument)
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label">Тип документа</label>
+                                                <div class="form-control bg-light">
+                                                    {{ $patientDocumentTypeLabels[$patientIdentityDocument->document_type] ?? ($patientIdentityDocument->document_name ?: $patientIdentityDocument->document_type) }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Серия</label>
+                                                <div class="form-control bg-light">{{ $patientIdentityDocument->serial ?: '—' }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Номер</label>
+                                                <div class="form-control bg-light">{{ $patientIdentityDocument->number ?: '—' }}</div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <label class="form-label">Кем выдан</label>
+                                                <div class="form-control bg-light" style="min-height: 42px; height: auto; white-space: normal;">
+                                                    {{ $patientIdentityDocument->issued_by ?: '—' }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Дата выдачи</label>
+                                                <div class="form-control bg-light">{{ $formatPatientCardDate($patientIdentityDocument->issued_at) }}</div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="alert alert-warning mb-0">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            Основной документ ребёнка не найден. Проверьте данные, внесённые при записи в регистратуру.
+                                        </div>
+                                    @endif
+                                </section>
+
+                                <section class="patient-info-section patient-info-section--main">
+                                    <div class="patient-info-section-title">
+                                        <i class="bi bi-people text-primary"></i>
+                                        <span class="patient-info-section-title__text">
+                                            <span>Законный представитель</span>
+                                            <span class="patient-info-section-title__hint">Основной активный представитель несовершеннолетнего пациента.</span>
+                                        </span>
+                                    </div>
+
+                                    @if($primaryRepresentative)
+                                        <div class="row g-3">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Кем приходится</label>
+                                                <div class="form-control bg-light">
+                                                    {{ $representativeTypeLabels[$primaryRepresentative->representative_type] ?? $primaryRepresentative->representative_type }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <label class="form-label">ФИО представителя</label>
+                                                <div class="form-control bg-light">{{ $primaryRepresentativeFullName ?: '—' }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Дата рождения</label>
+                                                <div class="form-control bg-light">{{ $formatPatientCardDate($primaryRepresentative->birth_at) }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">СНИЛС</label>
+                                                <div class="form-control bg-light">{{ $primaryRepresentative->snils ?: '—' }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Телефон</label>
+                                                <div class="form-control bg-light">{{ $primaryRepresentative->phone ?: '—' }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">E-mail</label>
+                                                <div class="form-control bg-light">{{ $primaryRepresentative->email ?: '—' }}</div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <div class="fw-bold mb-3">
+                                            <i class="bi bi-passport me-1"></i>
+                                            Документ представителя
+                                        </div>
+
+                                        @if($representativeIdentityDocument)
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Тип документа</label>
+                                                    <div class="form-control bg-light">
+                                                        {{ $patientDocumentTypeLabels[$representativeIdentityDocument->document_type] ?? ($representativeIdentityDocument->document_name ?: $representativeIdentityDocument->document_type) }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Серия</label>
+                                                    <div class="form-control bg-light">{{ $representativeIdentityDocument->serial ?: '—' }}</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Номер</label>
+                                                    <div class="form-control bg-light">{{ $representativeIdentityDocument->number ?: '—' }}</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Дата выдачи</label>
+                                                    <div class="form-control bg-light">{{ $formatPatientCardDate($representativeIdentityDocument->issued_at) }}</div>
+                                                </div>
+                                                @if($representativeIdentityDocument->department_code)
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Код подразделения</label>
+                                                        <div class="form-control bg-light">{{ $representativeIdentityDocument->department_code }}</div>
+                                                    </div>
+                                                @endif
+                                                <div class="{{ $representativeIdentityDocument->department_code ? 'col-md-8' : 'col-12' }}">
+                                                    <label class="form-label">Кем выдан</label>
+                                                    <div class="form-control bg-light" style="min-height: 42px; height: auto; white-space: normal;">
+                                                        {{ $representativeIdentityDocument->issued_by ?: '—' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="alert alert-warning">
+                                                Документ, удостоверяющий личность представителя, не найден.
+                                            </div>
+                                        @endif
+
+                                        @if($representativeAuthorityDocument)
+                                            <hr class="my-4">
+
+                                            <div class="fw-bold mb-3">
+                                                <i class="bi bi-file-earmark-check me-1"></i>
+                                                Документ, подтверждающий полномочия
+                                            </div>
+
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Тип документа</label>
+                                                    <div class="form-control bg-light">
+                                                        {{ $authorityDocumentTypeLabels[$representativeAuthorityDocument->document_type] ?? ($representativeAuthorityDocument->document_name ?: $representativeAuthorityDocument->document_type) }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Серия</label>
+                                                    <div class="form-control bg-light">{{ $representativeAuthorityDocument->serial ?: '—' }}</div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Номер</label>
+                                                    <div class="form-control bg-light">{{ $representativeAuthorityDocument->number ?: '—' }}</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Дата выдачи</label>
+                                                    <div class="form-control bg-light">{{ $formatPatientCardDate($representativeAuthorityDocument->issued_at) }}</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label">Кем выдан</label>
+                                                    <div class="form-control bg-light" style="min-height: 42px; height: auto; white-space: normal;">
+                                                        {{ $representativeAuthorityDocument->issued_by ?: '—' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="alert alert-warning mb-0">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            Основной представитель несовершеннолетнего пациента не указан.
+                                        </div>
+                                    @endif
+                                </section>
+                            @endif
 
                             <section class="patient-info-section patient-info-section--addresses">
                                 <div class="patient-info-section-title">
@@ -1228,11 +1716,11 @@
                 <div class="tab-pane fade mc-pane"
                      id="pane-docs"
                      role="tabpanel">
-                    @if($errors->any())
+                    @if($otherMedicalCardErrors->any())
                         <div class="alert alert-danger">
                             При загрузке файла произошли ошибки:
                             <ul>
-                                @foreach($errors->all() as $error)
+                                @foreach($otherMedicalCardErrors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
@@ -1534,12 +2022,12 @@
                         </div>
                     @endif
 
-                    @if($errors->any())
+                    @if($otherMedicalCardErrors->any())
                         <div class="alert alert-danger">
                             <strong>Не удалось сохранить данные.</strong>
 
                             <ul class="mb-0 mt-2">
-                                @foreach($errors->all() as $error)
+                                @foreach($otherMedicalCardErrors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
@@ -1950,6 +2438,11 @@
                             </section>
                         </div>
                     </div>
+                </div>
+
+                <div class="tab-pane fade mc-pane" id="pane-certificates" role="tabpanel"
+                     aria-labelledby="tab-certificates" tabindex="0">
+                    @include('doctors.reception.certificates.index')
                 </div>
 
                 <div class="tab-pane fade" id="pane-tests" role="tabpanel">
@@ -2508,6 +3001,8 @@
         </div>
     </div>
 
+    @include('doctors.reception.certificates.modals')
+
     <div class="modal fade" id="modalAddLab" tabindex="-1" aria-hidden="true"
          data-mode="result"
          data-api-params="{{ route('api.params.search') }}"
@@ -2709,11 +3204,13 @@
          tabindex="-1"
          aria-hidden="true"
          data-api-analyze="{{ route('doctors.patients.analyze.anamnesis') }}"
-         data-open-on-load="{{ $errors->any() ? '1' : '0' }}">
+         data-patient-id="{{ $patient->id }}"
+         data-open-on-load="{{ $anamnesisErrors->any() ? '1' : '0' }}">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <form class="modal-content" method="post"
                   action="{{ route('doctors.patients.anamneses.store', ['patient' => $patient->id]) }}">
                 @csrf
+                <input type="hidden" name="_medical_card_form" value="anamnesis">
 
                 <div class="modal-header">
                     <h3 class="modal-title">Добавить запись анамнеза</h3>
@@ -2721,10 +3218,10 @@
                 </div>
 
                 <div class="modal-body">
-                    @if($errors->any())
-                        <div class="alert-danger">
-                            <ul>
-                                @foreach($errors->all() as $error)
+                    @if($anamnesisErrors->any())
+                        <div class="alert alert-danger" role="alert">
+                            <ul class="mb-0">
+                                @foreach($anamnesisErrors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
@@ -2906,6 +3403,7 @@
                                 </div>
 
                                 <input type="hidden" id="diagSource" name="diag_source" value="ai">
+                                <input type="hidden" id="setAsCurrentInput" name="set_as_current" value="0">
                             </div>
                         </div>
                     </div>

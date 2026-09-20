@@ -118,4 +118,57 @@ class Patient extends Model
     {
         return $this->hasMany(MedicineDocument::class);
     }
+
+    public function militaryCommissionDocuments(): HasMany
+    {
+        return $this->hasMany(MilitaryCommissionDocument::class);
+    }
+
+
+    public function identityDocuments(): HasMany
+    {
+        return $this->hasMany(
+            PatientIdentityDocument::class,
+            'patient_id'
+        );
+    }
+
+    /**
+     * Основной действующий документ пациента.
+     *
+     * Для взрослого это обычно паспорт РФ.
+     * Для ребенка младше 14 лет — свидетельство о рождении.
+     */
+    public function primaryIdentityDocument(): HasOne
+    {
+        return $this
+            ->hasOne(
+                PatientIdentityDocument::class,
+                'patient_id'
+            )
+            ->where('is_primary', true)
+            ->where('is_active', true);
+    }
+
+    public function representatives(): HasMany
+    {
+        return $this->hasMany(
+            PatientRepresentative::class,
+            'patient_id'
+        );
+    }
+
+    /**
+     * Основной действующий представитель пациента.
+     */
+    public function primaryRepresentative(): HasOne
+    {
+        return $this
+            ->hasOne(
+                PatientRepresentative::class,
+                'patient_id'
+            )
+            ->where('is_primary', true)
+            ->where('is_active', true);
+    }
 }

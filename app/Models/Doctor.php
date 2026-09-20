@@ -42,6 +42,14 @@ class Doctor extends Model implements HasMedia
         return $this->hasMany(DoctorPricelist::class);
     }
 
+    public function militaryCommissionDocuments(): HasMany
+    {
+        return $this->hasMany(
+            MilitaryCommissionDocument::class,
+            'created_by_doctor_id'
+        );
+    }
+
     public function lowestPrice(): float
     {
         return $this->pricelists()->min('price') ?? 0;

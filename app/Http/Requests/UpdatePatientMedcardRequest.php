@@ -50,7 +50,6 @@ class UpdatePatientMedcardRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('patients', 'email')->ignore($this->patient->id),
             ],
 
             'insurance_company' => ['nullable', 'string', 'max:255'],
@@ -65,7 +64,7 @@ class UpdatePatientMedcardRequest extends FormRequest
             'married' => ['boolean'],
 
             // Паспорт
-            'series' => ['nullable', 'string', 'max:4'],
+            'serial' => ['nullable', 'string', 'max:4'],
             'number' => ['nullable', 'string', 'max:6'],
             'issued_at' => ['nullable', 'date', 'before_or_equal:today'],
             'department_code' => ['nullable', 'string', 'max:7'],

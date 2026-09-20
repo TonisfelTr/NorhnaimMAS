@@ -17,8 +17,13 @@
 
         html,
         body {
+            width: 210mm;
+            height: 297mm;
+
             margin: 0;
             padding: 0;
+
+            overflow: hidden;
 
             background: #fff;
             color: #111;
@@ -33,17 +38,24 @@
         }
 
         body {
-            font-size: 12pt;
-            line-height: 1.25;
+            font-size: 10.5pt;
+            line-height: 1.2;
         }
 
         .sheet {
             position: relative;
 
             width: 210mm;
-            min-height: 297mm;
+            height: 296mm;
+            min-height: 0;
 
-            padding: 12mm 14mm 13mm;
+            padding: 10mm 13mm 10mm;
+
+            overflow: hidden;
+
+            break-inside: avoid;
+            page-break-inside: avoid;
+            page-break-after: avoid;
 
             background: #fff;
         }
@@ -62,9 +74,9 @@
         .head {
             position: relative;
 
-            min-height: 43mm;
+            min-height: 34mm;
 
-            padding-top: 7mm;
+            padding-top: 5mm;
         }
 
         .stamp-box {
@@ -73,30 +85,30 @@
             top: 0;
             left: 0;
 
-            width: 65mm;
-            height: 30mm;
+            width: 62mm;
+            height: 25mm;
 
             display: flex;
             align-items: center;
             justify-content: center;
 
-            padding: 4mm;
+            padding: 3mm;
 
             border: .35mm dashed #444;
             border-radius: 2mm;
 
             color: #333;
 
-            font-size: 9pt;
-            line-height: 1.35;
+            font-size: 8pt;
+            line-height: 1.25;
 
             text-align: center;
             text-transform: uppercase;
         }
 
         .title {
-            padding-left: 70mm;
-            padding-top: 6mm;
+            padding-left: 65mm;
+            padding-top: 4mm;
 
             text-align: center;
         }
@@ -104,7 +116,7 @@
         .title h1 {
             margin: 0;
 
-            font-size: 20pt;
+            font-size: 17pt;
             font-weight: 700;
 
             letter-spacing: .2mm;
@@ -113,16 +125,16 @@
         }
 
         .title .sub {
-            margin-top: 4mm;
+            margin-top: 3mm;
 
-            font-size: 12pt;
+            font-size: 10.5pt;
             font-weight: 600;
 
             text-transform: uppercase;
         }
 
         .fields {
-            margin-top: 4mm;
+            margin-top: 1mm;
         }
 
         .row {
@@ -131,11 +143,11 @@
 
             gap: 3mm;
 
-            min-height: 10mm;
+            min-height: 7.5mm;
         }
 
         .row.large {
-            min-height: 12mm;
+            min-height: 8.5mm;
         }
 
         .label {
@@ -150,21 +162,21 @@
             min-width: 0;
             flex: 1;
 
-            min-height: 6mm;
+            min-height: 5mm;
 
-            padding: 0 1mm 1mm;
+            padding: 0 1mm .6mm;
 
             border-bottom: .25mm solid #333;
 
-            font-size: 11.5pt;
+            font-size: 10.5pt;
         }
 
         .hint {
-            margin-top: 1mm;
+            margin-top: 0;
 
             color: #444;
 
-            font-size: 8.5pt;
+            font-size: 7.5pt;
 
             text-align: center;
         }
@@ -175,58 +187,58 @@
             grid-template-columns:
                 1fr 1fr;
 
-            gap: 8mm;
+            gap: 6mm;
         }
 
         .block {
-            margin-top: 4mm;
+            margin-top: 2.5mm;
         }
 
         .block-label {
-            margin-bottom: 2mm;
+            margin-bottom: 1mm;
 
             font-weight: 600;
         }
 
         .multi {
-            min-height: 20mm;
+            min-height: 15mm;
 
-            padding: 1mm 1mm 0;
+            padding: .5mm 1mm 0;
 
             background-image:
                 linear-gradient(
                     to bottom,
-                    transparent 7.3mm,
-                    #333 7.3mm,
-                    #333 7.55mm,
-                    transparent 7.55mm
+                    transparent 6.5mm,
+                    #333 6.5mm,
+                    #333 6.75mm,
+                    transparent 6.75mm
                 );
 
             background-size:
-                100% 8mm;
+                100% 7mm;
 
-            font-size: 11.5pt;
-            line-height: 8mm;
+            font-size: 10.5pt;
+            line-height: 7mm;
 
             white-space: pre-wrap;
         }
 
         .footer {
-            margin-top: 15mm;
+            margin-top: 7mm;
         }
 
         .referrer {
-            margin-bottom: 15mm;
+            margin-bottom: 8mm;
         }
 
         .referrer-note {
             max-width: 100mm;
 
-            margin-top: 2mm;
+            margin-top: 1mm;
 
             color: #333;
 
-            font-size: 8.5pt;
+            font-size: 7.5pt;
             line-height: 1.35;
         }
 
@@ -236,7 +248,7 @@
             grid-template-columns:
                 1fr 1fr;
 
-            gap: 18mm;
+            gap: 14mm;
 
             align-items: end;
         }
@@ -247,13 +259,13 @@
 
             gap: 3mm;
 
-            min-height: 14mm;
+            min-height: 10mm;
         }
 
         .sign-line {
             flex: 1;
 
-            height: 9mm;
+            height: 6mm;
 
             border-bottom: .25mm solid #333;
         }
@@ -282,6 +294,26 @@
         }
 
         @media print {
+            html,
+            body {
+                width: 210mm;
+                height: 297mm;
+
+                overflow: hidden;
+            }
+
+            .sheet {
+                width: 210mm;
+                height: 296mm;
+                min-height: 0;
+
+                overflow: hidden;
+
+                break-inside: avoid;
+                page-break-inside: avoid;
+                page-break-after: avoid;
+            }
+
             .screen-only {
                 display: none !important;
             }
@@ -346,6 +378,19 @@
 
             <div class="value">
                 {{ $birthAt }}
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="label">
+                Адрес регистрации:
+            </div>
+
+            <div class="value">
+                {{ $registrationAddress }}
             </div>
 
         </div>
@@ -574,4 +619,3 @@
 
 </body>
 </html>
-

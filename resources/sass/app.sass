@@ -4410,3 +4410,378 @@ body.nh-public-page
         .nh-directory-transition__inner
             align-items: flex-start
             justify-content: flex-start
+
+// ============================================================================
+// Норхнейм — блоки для врача и пациента на главной
+// Изображения лежат в resources/sass/assets/images/backgrounds/
+// ============================================================================
+
+.nh-home-page
+    .nh-hero__visual--hero
+        background: #ebe8df url('./assets/images/backgrounds/hero-scandinavian.png') center / cover no-repeat
+
+    .nh-editorial--doctor
+        padding-top: 0
+        padding-bottom: 18px
+
+    .nh-editorial__visual--doctor
+        min-height: 445px
+        border-radius: 0 0 28px 28px
+        background: #e8ece7 url('./assets/images/backgrounds/doctor-workspace-scandinavian.png') center / cover no-repeat
+
+    .nh-patient
+        padding: 34px 0 72px
+        background: #f5f3ee
+
+    .nh-patient__grid
+        display: grid
+        grid-template-columns: minmax(0, 1.02fr) minmax(460px, .98fr)
+        gap: 70px
+        align-items: center
+
+    .nh-patient__content
+        min-width: 0
+        padding: 32px 0
+
+    .nh-patient__content h2
+        max-width: 650px
+        margin: 0
+        color: #1e2b29
+        font-size: clamp(42px, 4.5vw, 62px)
+        line-height: 1.02
+        font-weight: 600
+        letter-spacing: -.05em
+
+    .nh-patient__lead
+        max-width: 680px
+        margin: 24px 0 0
+        color: #6c7775
+        font-size: 17px
+        line-height: 1.75
+
+    .nh-patient__features
+        display: grid
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        gap: 20px 24px
+        margin-top: 34px
+
+    .nh-patient-feature
+        display: grid
+        grid-template-columns: 50px minmax(0, 1fr)
+        gap: 13px
+        align-items: center
+        min-width: 0
+
+        strong
+            display: block
+            margin-bottom: 4px
+            color: #263432
+            font-size: 14px
+            line-height: 1.35
+            font-weight: 600
+
+        span
+            display: block
+            color: #75817e
+            font-size: 12px
+            line-height: 1.5
+
+    .nh-patient-feature__icon
+        display: grid
+        width: 48px
+        height: 48px
+        place-items: center
+        border-radius: 14px
+        background: #edf2ee
+        color: #6e8a83
+        font-size: 20px
+
+    .nh-patient__visual
+        position: relative
+        min-height: 455px
+        margin: 0
+        overflow: hidden
+        border: 1px solid #dfe4df
+        border-radius: 28px
+        background: #ebe8df url('./assets/images/backgrounds/patient-home-scandinavian.png') center / cover no-repeat
+        box-shadow: 0 18px 50px rgba(41, 63, 57, .08)
+
+        &::after
+            content: ''
+            position: absolute
+            inset: 0
+            pointer-events: none
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.18)
+
+    .nh-patient-cabinet
+        padding: 82px 0 92px
+        border-top: 1px solid #dfe4df
+        background: #fbfaf7
+
+    .nh-patient-cabinet__head
+        display: grid
+        grid-template-columns: minmax(0, 1fr) minmax(300px, .62fr)
+        gap: 52px
+        align-items: end
+        margin-bottom: 38px
+
+        h2
+            max-width: 760px
+            margin: 0
+            color: #20302e
+            font-size: clamp(36px, 4.1vw, 54px)
+            line-height: 1.05
+            font-weight: 600
+            letter-spacing: -.045em
+
+        > p
+            margin: 0
+            color: #6d7976
+            font-size: 15px
+            line-height: 1.75
+
+    .nh-patient-cabinet__grid
+        display: grid
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+        gap: 14px
+
+    .nh-patient-card
+        position: relative
+        min-height: 250px
+        padding: 26px
+        border: 1px solid #dce2dd
+        border-radius: 20px
+        background: #fff
+
+        > span
+            position: absolute
+            top: 25px
+            right: 25px
+            color: #9aa6a2
+            font-size: 10px
+            line-height: 1
+            font-weight: 700
+            letter-spacing: .1em
+
+        h3
+            margin: 24px 0 10px
+            color: #23312f
+            font-size: 19px
+            line-height: 1.25
+            font-weight: 600
+
+        p
+            margin: 0
+            color: #6e7976
+            font-size: 13px
+            line-height: 1.68
+
+    .nh-patient-card__icon
+        display: grid
+        width: 44px
+        height: 44px
+        place-items: center
+        border-radius: 13px
+        background: #e8efeb
+        color: #58776f
+        font-size: 19px
+
+@media (max-width: 1240px)
+    .nh-home-page
+        .nh-patient__grid
+            grid-template-columns: 1fr
+            gap: 28px
+
+        .nh-patient__content
+            padding-bottom: 0
+
+        .nh-patient__visual
+            min-height: 430px
+
+        .nh-patient-cabinet__grid
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+
+@media (max-width: 820px)
+    .nh-home-page
+        .nh-editorial--doctor
+            padding-bottom: 8px
+
+        .nh-editorial__visual--doctor
+            min-height: 280px
+            border-radius: 20px
+
+        .nh-patient
+            padding: 28px 0 58px
+
+        .nh-patient__content
+            padding-top: 8px
+
+        .nh-patient__content h2
+            font-size: clamp(34px, 9vw, 48px)
+
+        .nh-patient__lead
+            font-size: 15px
+
+        .nh-patient__visual
+            min-height: 320px
+            border-radius: 20px
+
+        .nh-patient-cabinet
+            padding: 66px 0 72px
+
+        .nh-patient-cabinet__head
+            grid-template-columns: 1fr
+            gap: 16px
+            margin-bottom: 30px
+
+        .nh-patient-cabinet__grid
+            grid-template-columns: 1fr 1fr
+
+@media (max-width: 520px)
+    .nh-home-page
+        .nh-patient
+            padding: 18px 0 46px
+
+        .nh-patient__content h2
+            font-size: clamp(31px, 10.5vw, 40px)
+            line-height: 1.04
+
+        .nh-patient__lead
+            margin-top: 18px
+            font-size: 14px
+            line-height: 1.65
+
+        .nh-patient__features
+            grid-template-columns: 1fr
+            gap: 15px
+            margin-top: 26px
+
+        .nh-patient__visual
+            min-height: 245px
+            border-radius: 18px
+
+        .nh-patient-cabinet
+            padding: 54px 0 58px
+
+        .nh-patient-cabinet__head h2
+            font-size: clamp(30px, 9vw, 38px)
+
+        .nh-patient-cabinet__grid
+            grid-template-columns: 1fr
+
+        .nh-patient-card
+            min-height: 0
+            padding: 22px
+
+// ============================================================================
+// Норхнейм v10 — компактный бренд в navbar + увеличенный логотип в hero
+// ============================================================================
+
+// В navbar: фирменный знак + подпись «Норхнейм».
+// Используем существующий HTML .nh-navbar__brand-copy из header-компонента.
+.nh-navbar__brand
+    display: flex !important
+    width: auto
+    min-width: 148px
+    height: 46px
+    flex: 0 0 auto
+    align-items: center
+    margin-right: 24px
+    padding: 0 0 0 50px !important
+    overflow: visible
+    border-radius: 0
+    background: transparent url('./assets/images/brand/norhneim-viking-mark.png') left center / 42px 42px no-repeat
+    color: #234b43
+    text-decoration: none
+    font-size: inherit
+    line-height: normal
+
+    &:hover,
+    &:focus
+        color: #234b43
+        text-decoration: none
+
+.nh-navbar__brand-mark
+    display: none !important
+
+.nh-navbar__brand-copy
+    display: flex !important
+    flex-direction: column
+    justify-content: center
+    min-width: 0
+    line-height: 1
+
+    strong
+        display: block
+        color: #234b43
+        font-size: 17px
+        line-height: 1.05
+        font-weight: 700
+        letter-spacing: -.025em
+        white-space: nowrap
+
+    small
+        display: block
+        margin-top: 4px
+        color: #83928e
+        font-size: 8px
+        line-height: 1
+        font-weight: 600
+        letter-spacing: .12em
+        text-transform: uppercase
+        white-space: nowrap
+
+// Полный логотип в первом экране — немного крупнее.
+.nh-home-page
+    .nh-hero__content
+        padding-top: 30px
+
+    .nh-hero__brand-logo
+        display: block
+        width: min(100%, 350px)
+        aspect-ratio: 3.05 / 1
+        margin: 0 0 20px
+        background: transparent url('./assets/images/brand/norhneim-full-logo.png') left center / contain no-repeat
+
+@media (max-width: 820px)
+    .nh-navbar__brand
+        min-width: 134px
+        height: 42px
+        margin-right: 12px
+        padding-left: 44px !important
+        background-size: 38px 38px
+
+    .nh-navbar__brand-copy
+        strong
+            font-size: 15px
+
+        small
+            font-size: 7px
+            letter-spacing: .1em
+
+    .nh-home-page
+        .nh-hero__content
+            padding-top: 22px
+
+        .nh-hero__brand-logo
+            width: min(100%, 300px)
+            margin-bottom: 16px
+
+@media (max-width: 520px)
+    .nh-navbar__brand
+        min-width: 116px
+        height: 38px
+        padding-left: 39px !important
+        background-size: 34px 34px
+
+    .nh-navbar__brand-copy
+        strong
+            font-size: 14px
+
+        small
+            display: none
+
+    .nh-home-page
+        .nh-hero__brand-logo
+            width: min(100%, 260px)
+            margin-bottom: 14px

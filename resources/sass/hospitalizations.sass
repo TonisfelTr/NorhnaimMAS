@@ -1,0 +1,2225 @@
+:root
+    --hospital-primary: #078c9b
+    --hospital-primary-dark: #056b77
+    --hospital-primary-light: #17b7c5
+    --hospital-primary-soft: #eaf8fa
+    --hospital-danger: #dc4a52
+    --hospital-danger-dark: #b4232d
+    --hospital-danger-soft: #fff0f1
+    --hospital-warning: #d97706
+    --hospital-success: #16844a
+    --hospital-text: #172033
+    --hospital-muted: #718096
+    --hospital-border: #e3eaf0
+    --hospital-bg: #f4f7fa
+    --hospital-card: #ffffff
+    --hospital-shadow: 0 16px 42px rgba(15, 23, 42, .07)
+
+.hospital-topbar
+    margin: 0
+    padding: 0
+    background: linear-gradient(135deg, var(--hospital-primary-dark), var(--hospital-primary-light))
+    box-shadow: 0 12px 30px rgba(7, 140, 155, .2)
+
+.hospital-topbar__inner
+    min-height: 68px
+    padding: 9px 24px
+
+.hospital-brand
+    display: inline-flex
+    align-items: center
+    gap: 11px
+    margin-right: 24px
+    color: #fff
+    font-size: 18px
+    font-weight: 900
+    text-decoration: none
+    white-space: nowrap
+
+    &:hover
+        color: #fff
+
+.hospital-brand__icon
+    display: grid
+    width: 42px
+    height: 42px
+    place-items: center
+    border-radius: 14px
+    background: rgba(255, 255, 255, .17)
+    font-size: 19px
+
+.hospital-topbar__nav
+    display: flex
+    align-items: center
+    gap: 5px
+
+.hospital-topbar__link
+    display: inline-flex
+    min-height: 42px
+    align-items: center
+    gap: 8px
+    padding: 9px 13px !important
+    border-radius: 12px
+    color: rgba(255, 255, 255, .88) !important
+    font-size: 14px
+    font-weight: 750
+    text-decoration: none
+    transition: .16s ease
+
+    &:hover,
+    &.active
+        color: #fff !important
+        background: rgba(255, 255, 255, .17)
+
+.hospital-topbar__dropdown
+    width: min(390px, calc(100vw - 28px))
+    padding: 9px
+    border: 0
+    border-radius: 18px
+    box-shadow: 0 24px 65px rgba(15, 23, 42, .18)
+
+.hospital-topbar__dropdown-item
+    display: flex
+    align-items: center
+    gap: 12px
+    padding: 12px
+    border-radius: 13px
+    color: var(--hospital-text)
+    text-decoration: none
+    transition: .15s ease
+
+    + .hospital-topbar__dropdown-item
+        margin-top: 5px
+
+    &:hover,
+    &.active
+        background: var(--hospital-primary-soft)
+        color: var(--hospital-primary-dark)
+
+    &.emergency:hover,
+    &.emergency.active
+        background: var(--hospital-danger-soft)
+        color: var(--hospital-danger-dark)
+
+    strong,
+    small
+        display: block
+
+    strong
+        font-size: 13px
+        font-weight: 850
+
+    small
+        margin-top: 2px
+        color: var(--hospital-muted)
+        font-size: 11px
+
+.hospital-topbar__dropdown-icon
+    display: grid
+    width: 38px
+    height: 38px
+    flex: 0 0 38px
+    place-items: center
+    border-radius: 12px
+    background: #f1f5f9
+    color: var(--hospital-primary-dark)
+
+.hospital-topbar__badge
+    display: inline-flex
+    align-items: center
+    gap: 7px
+    padding: 8px 11px
+    border: 1px solid rgba(255, 255, 255, .22)
+    border-radius: 999px
+    background: rgba(255, 255, 255, .13)
+    color: #fff
+    font-size: 12px
+    font-weight: 800
+
+    &.is-emergency
+        background: rgba(109, 14, 25, .23)
+
+.hospital-topbar__toggler
+    border: 0
+    border-radius: 12px
+    background: rgba(255, 255, 255, .18)
+
+.hospital-page
+    min-height: calc(100vh - 68px)
+    padding: 26px 24px 48px
+    background: radial-gradient(circle at 12% 0, rgba(7, 140, 155, .09), transparent 28%), var(--hospital-bg)
+
+    &.hospital-page--emergency
+        background: radial-gradient(circle at 12% 0, rgba(220, 74, 82, .09), transparent 28%), var(--hospital-bg)
+
+.hospital-page__container
+    max-width: 1720px
+    margin: 0 auto
+
+.hospital-shell
+    display: grid
+    grid-template-columns: 310px minmax(0, 1fr)
+    gap: 22px
+    align-items: start
+
+.hospital-sidebar__sticky
+    position: sticky
+    top: 18px
+    display: grid
+    gap: 15px
+
+.hospital-sidebar-card
+    padding: 17px
+    border: 1px solid var(--hospital-border)
+    border-radius: 20px
+    background: var(--hospital-card)
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .045)
+
+.hospital-sidebar-card--nav
+    padding: 16px
+
+.hospital-sidebar-card__head
+    display: flex
+    align-items: center
+    gap: 11px
+    margin-bottom: 14px
+
+.hospital-sidebar-card__head-icon
+    display: grid
+    width: 40px
+    height: 40px
+    flex: 0 0 40px
+    place-items: center
+    border-radius: 13px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 17px
+
+.hospital-sidebar-card__eyebrow,
+.hospital-section-eyebrow
+    color: var(--hospital-primary-dark)
+    font-size: 10px
+    font-weight: 900
+    letter-spacing: .08em
+    text-transform: uppercase
+
+.hospital-page--emergency
+    .hospital-sidebar-card__eyebrow,
+    .hospital-section-eyebrow
+        color: var(--hospital-danger-dark)
+
+.hospital-sidebar-card__title
+    margin: 3px 0 0
+    color: var(--hospital-text)
+    font-size: 16px
+    font-weight: 850
+
+.hospital-mode-nav
+    display: grid
+    gap: 8px
+    margin-top: 13px
+
+.hospital-mode-link
+    display: flex
+    align-items: center
+    gap: 11px
+    padding: 11px
+    border: 1px solid transparent
+    border-radius: 15px
+    color: #344054
+    text-decoration: none
+    transition: .16s ease
+
+    &:hover
+        border-color: #d8e4e8
+        background: #f8fbfc
+        color: var(--hospital-primary-dark)
+
+    &.active
+        border-color: #a9dde2
+        background: var(--hospital-primary-soft)
+        color: var(--hospital-primary-dark)
+        box-shadow: inset 3px 0 0 var(--hospital-primary)
+
+    &.hospital-mode-link--emergency.active,
+    &.hospital-mode-link--emergency:hover
+        border-color: #f0b7bc
+        background: var(--hospital-danger-soft)
+        color: var(--hospital-danger-dark)
+        box-shadow: inset 3px 0 0 var(--hospital-danger)
+
+.hospital-mode-link__icon
+    display: grid
+    width: 38px
+    height: 38px
+    flex: 0 0 38px
+    place-items: center
+    border-radius: 12px
+    background: #f1f5f9
+    font-size: 16px
+
+.hospital-mode-link__copy
+    min-width: 0
+    flex: 1
+
+    strong,
+    small
+        display: block
+
+    strong
+        font-size: 13px
+        font-weight: 850
+
+    small
+        margin-top: 2px
+        color: var(--hospital-muted)
+        font-size: 11px
+
+.hospital-mode-link__arrow
+    color: #a6b0bc
+    font-size: 11px
+
+.hospital-label
+    margin-bottom: 6px
+    color: #3d4858
+    font-size: 12px
+    font-weight: 800
+
+.hospital-patient-select,
+.hospital-control
+    min-height: 43px
+    border-color: #d8e1e9
+    border-radius: 12px
+    font-size: 13px
+    box-shadow: none
+
+    &:focus
+        border-color: rgba(7, 140, 155, .7)
+        box-shadow: 0 0 0 3px rgba(7, 140, 155, .10)
+
+.hospital-page--emergency
+    .hospital-control:focus,
+    .hospital-patient-select:focus
+        border-color: rgba(220, 74, 82, .65)
+        box-shadow: 0 0 0 3px rgba(220, 74, 82, .10)
+
+.hospital-patient-card
+    display: flex
+    align-items: center
+    gap: 11px
+    margin-top: 12px
+    padding: 12px
+    border: 1px solid #e4ebf0
+    border-radius: 15px
+    background: linear-gradient(135deg, #fbfdff, #f5f9fb)
+
+    &.is-empty
+        opacity: .72
+
+.hospital-patient-card__avatar
+    display: grid
+    width: 43px
+    height: 43px
+    flex: 0 0 43px
+    place-items: center
+    border-radius: 14px
+    background: linear-gradient(135deg, var(--hospital-primary), var(--hospital-primary-light))
+    color: #fff
+    font-size: 13px
+    font-weight: 900
+
+.hospital-page--emergency .hospital-patient-card__avatar
+    background: linear-gradient(135deg, var(--hospital-danger-dark), var(--hospital-danger))
+
+.hospital-patient-card__body
+    min-width: 0
+
+.hospital-patient-card__name
+    overflow: hidden
+    color: var(--hospital-text)
+    font-size: 13px
+    font-weight: 850
+    text-overflow: ellipsis
+    white-space: nowrap
+
+.hospital-patient-card__meta,
+.hospital-patient-card__diagnosis
+    margin-top: 3px
+    color: var(--hospital-muted)
+    font-size: 10.5px
+    line-height: 1.35
+
+.hospital-patient-card__diagnosis
+    color: #536273
+
+.hospital-sidebar-card--notice
+    display: flex
+    align-items: flex-start
+    gap: 11px
+    border-color: #cde8eb
+    background: linear-gradient(135deg, #f5fcfd, #fff)
+
+    strong
+        display: block
+        color: var(--hospital-primary-dark)
+        font-size: 12px
+
+    p
+        margin: 5px 0 0
+        color: #64748b
+        font-size: 10.5px
+        line-height: 1.55
+
+.hospital-notice-icon
+    display: grid
+    width: 34px
+    height: 34px
+    flex: 0 0 34px
+    place-items: center
+    border-radius: 11px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+
+.hospital-main
+    min-width: 0
+
+.hospital-flash
+    display: flex
+    align-items: flex-start
+    gap: 10px
+    border-radius: 15px
+
+.hospital-hero
+    position: relative
+    display: flex
+    align-items: center
+    gap: 19px
+    overflow: hidden
+    padding: 25px 27px
+    border: 1px solid var(--hospital-border)
+    border-radius: 24px
+    background: radial-gradient(circle at 100% 0, rgba(23, 183, 197, .16), transparent 36%), linear-gradient(135deg, #fff, #f5fcfd)
+    box-shadow: var(--hospital-shadow)
+
+.hospital-page--emergency .hospital-hero
+    background: radial-gradient(circle at 100% 0, rgba(220, 74, 82, .16), transparent 36%), linear-gradient(135deg, #fff, #fff7f7)
+
+.hospital-hero__icon
+    display: grid
+    width: 72px
+    height: 72px
+    flex: 0 0 72px
+    place-items: center
+    border-radius: 22px
+    background: linear-gradient(135deg, var(--hospital-primary), var(--hospital-primary-light))
+    color: #fff
+    box-shadow: 0 16px 34px rgba(7, 140, 155, .23)
+    font-size: 28px
+
+.hospital-page--emergency .hospital-hero__icon
+    background: linear-gradient(135deg, var(--hospital-danger-dark), var(--hospital-danger))
+    box-shadow: 0 16px 34px rgba(220, 74, 82, .22)
+
+.hospital-hero__body
+    min-width: 0
+    flex: 1
+
+.hospital-hero__eyebrow
+    display: inline-flex
+    align-items: center
+    gap: 7px
+    margin-bottom: 7px
+    color: var(--hospital-primary-dark)
+    font-size: 11px
+    font-weight: 900
+    letter-spacing: .04em
+    text-transform: uppercase
+
+.hospital-page--emergency .hospital-hero__eyebrow
+    color: var(--hospital-danger-dark)
+
+.hospital-hero h1
+    margin: 0
+    color: var(--hospital-text)
+    font-size: clamp(26px, 3vw, 38px)
+    font-weight: 900
+    letter-spacing: -.035em
+    line-height: 1.08
+
+.hospital-hero p
+    max-width: 820px
+    margin: 9px 0 0
+    color: var(--hospital-muted)
+    font-size: 14px
+    line-height: 1.55
+
+.hospital-hero__chips
+    display: flex
+    flex-wrap: wrap
+    gap: 7px
+    margin-top: 15px
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 6px
+        padding: 6px 9px
+        border: 1px solid #e0e8ee
+        border-radius: 999px
+        background: rgba(255, 255, 255, .78)
+        color: #566575
+        font-size: 10.5px
+        font-weight: 750
+
+.hospital-hero__status
+    display: inline-flex
+    align-items: center
+    gap: 7px
+    align-self: flex-start
+    padding: 7px 10px
+    border-radius: 999px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 10.5px
+    font-weight: 850
+    white-space: nowrap
+
+    &.is-emergency
+        background: var(--hospital-danger-soft)
+        color: var(--hospital-danger-dark)
+
+.hospital-hero__status-dot
+    width: 7px
+    height: 7px
+    border-radius: 50%
+    background: currentColor
+    box-shadow: 0 0 0 4px rgba(7, 140, 155, .10)
+
+.hospital-safety-banner
+    display: flex
+    align-items: flex-start
+    gap: 11px
+    margin-top: 14px
+    padding: 13px 15px
+    border: 1px solid #f3b8be
+    border-radius: 16px
+    background: #fff5f5
+    color: #7f1d27
+    font-size: 12px
+    line-height: 1.5
+
+    i
+        margin-top: 1px
+        color: var(--hospital-danger)
+        font-size: 18px
+
+    strong
+        display: block
+        margin-bottom: 2px
+
+.hospital-content-grid
+    display: grid
+    grid-template-columns: minmax(0, 1fr)
+    gap: 20px
+    align-items: start
+    margin-top: 20px
+
+.hospital-workspace-card,
+.hospital-history-card
+    overflow: hidden
+    border: 1px solid var(--hospital-border)
+    border-radius: 22px
+    background: var(--hospital-card)
+    box-shadow: var(--hospital-shadow)
+
+.hospital-workspace-card__head
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 18px
+    padding: 21px 23px
+    border-bottom: 1px solid var(--hospital-border)
+
+    h2,
+    p
+        margin: 0
+
+    h2
+        margin-top: 3px
+        color: var(--hospital-text)
+        font-size: 21px
+        font-weight: 880
+
+    p
+        margin-top: 5px
+        color: var(--hospital-muted)
+        font-size: 12px
+
+.hospital-workspace-card__badge
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 7px 9px
+    border-radius: 999px
+    background: #f1f5f9
+    color: #64748b
+    font-size: 10px
+    font-weight: 800
+    white-space: nowrap
+
+
+.hospital-key-fields
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 14px
+    padding: 18px 21px
+    border-bottom: 1px solid var(--hospital-border)
+    background: #fbfcfd
+
+.hospital-key-card
+    min-width: 0
+    padding: 17px
+    border: 1px solid var(--hospital-border)
+    border-radius: 18px
+    background: #fff
+    box-shadow: 0 7px 20px rgba(15, 23, 42, .035)
+
+.hospital-key-card--destination
+    background: linear-gradient(145deg, #fff, #f8fcfd)
+
+.hospital-key-card--diagnosis
+    background: linear-gradient(145deg, #fff, #fbfbff)
+
+.hospital-required-mark
+    color: var(--hospital-danger)
+
+.hospital-field-hint
+    margin-top: 5px
+    color: #8b96a4
+    font-size: 9.5px
+    line-height: 1.45
+
+.hospital-preliminary-state
+    display: flex
+    align-items: flex-start
+    gap: 8px
+    margin-bottom: 12px
+    padding: 9px 11px
+    border: 1px solid #dbe7ee
+    border-radius: 12px
+    background: #f8fbfd
+    color: #667085
+    font-size: 10.5px
+    line-height: 1.5
+
+    i
+        flex: 0 0 auto
+        margin-top: 1px
+        color: var(--hospital-primary-dark)
+
+    strong
+        color: #344054
+
+.hospital-preliminary-ai-note
+    display: flex
+    align-items: center
+    gap: 7px
+    margin-top: 10px
+    padding: 8px 10px
+    border-radius: 11px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 10px
+    font-weight: 750
+
+.hospital-first-visit-notice
+    display: flex
+    align-items: flex-start
+    gap: 11px
+    margin-bottom: 12px
+    padding: 12px 13px
+    border: 1px solid #cbe6e9
+    border-radius: 14px
+    background: linear-gradient(135deg, #f3fbfc, #fbfefe)
+
+    strong,
+    p
+        display: block
+        margin: 0
+
+    strong
+        color: var(--hospital-primary-dark)
+        font-size: 12px
+        font-weight: 850
+
+    p
+        margin-top: 3px
+        color: var(--hospital-muted)
+        font-size: 10.5px
+        line-height: 1.5
+
+.hospital-first-visit-notice__icon
+    display: grid
+    width: 34px
+    height: 34px
+    flex: 0 0 34px
+    place-items: center
+    border-radius: 11px
+    background: #dff5f7
+    color: var(--hospital-primary-dark)
+
+.hospital-ai-section--diagnosis
+    border-color: #cfe4e7
+    background: #fbfefe
+
+.hospital-ai-diagnosis-value
+    color: #253247
+    font-size: 13px
+    font-weight: 850
+    line-height: 1.45
+
+.hospital-tabs
+    display: flex
+    gap: 5px
+    padding: 9px 12px 0
+    background: #fbfcfd
+    border-bottom: 1px solid var(--hospital-border)
+
+.hospital-tab
+    display: inline-flex
+    align-items: center
+    gap: 7px
+    padding: 10px 14px
+    border: 0
+    border-bottom: 3px solid transparent
+    background: transparent
+    color: #718096
+    font-size: 12px
+    font-weight: 800
+    transition: .15s ease
+
+    &:hover
+        color: var(--hospital-primary-dark)
+
+    &.active
+        border-bottom-color: var(--hospital-primary)
+        color: var(--hospital-primary-dark)
+
+.hospital-page--emergency .hospital-tab
+    &:hover,
+    &.active
+        color: var(--hospital-danger-dark)
+
+    &.active
+        border-bottom-color: var(--hospital-danger)
+
+.hospital-tab-panel
+    display: none
+    padding: 21px
+
+    &.active
+        display: block
+
+.hospital-ai-grid
+    display: grid
+    grid-template-columns: repeat(2, minmax(320px, 1fr))
+    gap: 17px
+    align-items: start
+
+.hospital-ai-input-card,
+.hospital-ai-result-card
+    width: 100%
+    min-width: 0
+    height: auto
+    align-self: start
+    padding: 18px
+    border: 1px solid var(--hospital-border)
+    border-radius: 18px
+    background: #fff
+
+.hospital-ai-result-card
+    background: linear-gradient(145deg, #fbfdff, #f7fafc)
+
+.hospital-card-title-row
+    display: flex
+    align-items: flex-start
+    gap: 11px
+    margin-bottom: 15px
+
+    h3,
+    p
+        margin: 0
+
+    h3
+        color: var(--hospital-text)
+        font-size: 15px
+        font-weight: 850
+
+    p
+        margin-top: 3px
+        color: var(--hospital-muted)
+        font-size: 11px
+        line-height: 1.45
+
+.hospital-card-title-row__icon
+    display: grid
+    width: 38px
+    height: 38px
+    flex: 0 0 38px
+    place-items: center
+    border-radius: 12px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+
+.hospital-page--emergency .hospital-card-title-row__icon
+    background: var(--hospital-danger-soft)
+    color: var(--hospital-danger-dark)
+
+.hospital-source-list
+    display: grid
+    grid-auto-rows: max-content
+    gap: 8px
+    align-content: start
+
+.hospital-source-option
+    position: relative
+    display: flex
+    width: 100%
+    min-width: 0
+    align-items: center
+    gap: 10px
+    padding: 10px 11px
+    border: 1px solid #e1e8ee
+    border-radius: 13px
+    background: #fff
+    cursor: pointer
+    transition: .15s ease
+
+    &:hover
+        border-color: #b9dadd
+        background: #fbfefe
+
+    input
+        position: absolute
+        opacity: 0
+        pointer-events: none
+
+    strong,
+    small
+        display: block
+
+    strong
+        color: #344054
+        font-size: 12px
+        font-weight: 820
+
+    small
+        margin-top: 1px
+        color: var(--hospital-muted)
+        font-size: 10px
+
+    > span:last-child
+        min-width: 0
+        flex: 1 1 auto
+
+    input:checked + .hospital-source-option__check
+        border-color: var(--hospital-primary)
+        background: var(--hospital-primary)
+        color: #fff
+
+.hospital-page--emergency .hospital-source-option input:checked + .hospital-source-option__check
+    border-color: var(--hospital-danger)
+    background: var(--hospital-danger)
+
+.hospital-source-option__check
+    display: grid
+    width: 22px
+    height: 22px
+    flex: 0 0 22px
+    place-items: center
+    border: 1px solid #cad5df
+    border-radius: 7px
+    color: transparent
+    font-size: 12px
+    transition: .15s ease
+
+.hospital-textarea
+    resize: vertical
+    border-color: #d8e1e9
+    border-radius: 13px
+    font-size: 12.5px
+    line-height: 1.55
+    box-shadow: none
+
+    &:focus
+        border-color: rgba(7, 140, 155, .7)
+        box-shadow: 0 0 0 3px rgba(7, 140, 155, .10)
+
+.hospital-page--emergency .hospital-textarea:focus
+    border-color: rgba(220, 74, 82, .65)
+    box-shadow: 0 0 0 3px rgba(220, 74, 82, .10)
+
+.hospital-textarea-footer
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 10px
+    margin-top: 6px
+    color: #8b96a4
+    font-size: 9.5px
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 5px
+
+.hospital-analyze-button
+    width: 100%
+    min-height: 46px
+    margin-top: 14px
+    border: 0
+    border-radius: 13px
+    background: linear-gradient(135deg, var(--hospital-primary-dark), var(--hospital-primary-light))
+    color: #fff
+    font-size: 12.5px
+    font-weight: 850
+    box-shadow: 0 11px 24px rgba(7, 140, 155, .20)
+    transition: .15s ease
+
+    &:hover:not(:disabled)
+        transform: translateY(-1px)
+        box-shadow: 0 15px 30px rgba(7, 140, 155, .25)
+
+    &:disabled
+        opacity: .72
+        cursor: wait
+
+    .hospital-analyze-button__loading
+        display: none
+
+    &.is-loading
+        .hospital-analyze-button__idle
+            display: none
+
+        .hospital-analyze-button__loading
+            display: inline-flex
+            align-items: center
+            justify-content: center
+            gap: 8px
+
+.hospital-page--emergency .hospital-analyze-button
+    background: linear-gradient(135deg, var(--hospital-danger-dark), var(--hospital-danger))
+    box-shadow: 0 11px 24px rgba(220, 74, 82, .19)
+
+.hospital-ai-empty
+    display: flex
+    min-height: 320px
+    align-items: center
+    justify-content: center
+    flex-direction: column
+    padding: 35px 20px
+    text-align: center
+
+    h3
+        margin: 12px 0 0
+        color: var(--hospital-text)
+        font-size: 16px
+        font-weight: 850
+
+    p
+        max-width: 390px
+        margin: 7px 0 0
+        color: var(--hospital-muted)
+        font-size: 11.5px
+        line-height: 1.55
+
+.hospital-ai-empty__icon
+    display: grid
+    width: 65px
+    height: 65px
+    place-items: center
+    border-radius: 21px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 27px
+
+.hospital-page--emergency .hospital-ai-empty__icon
+    background: var(--hospital-danger-soft)
+    color: var(--hospital-danger-dark)
+
+.hospital-ai-result
+    display: grid
+    gap: 12px
+
+.hospital-ai-result__head
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 12px
+
+.hospital-ai-recommendation
+    display: inline-flex
+    align-items: center
+    gap: 7px
+    padding: 7px 10px
+    border-radius: 999px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 10.5px
+    font-weight: 850
+
+    &.is-danger
+        background: var(--hospital-danger-soft)
+        color: var(--hospital-danger-dark)
+
+    &.is-warning
+        background: #fff7e8
+        color: #a45b00
+
+.hospital-ai-confidence
+    color: #667085
+    font-size: 11px
+    font-weight: 800
+
+.hospital-ai-result__summary
+    padding: 12px 13px
+    border: 1px solid #e4eaf0
+    border-radius: 14px
+    background: #fff
+    color: #3d4b5c
+    font-size: 11.5px
+    line-height: 1.55
+
+.hospital-ai-section
+    padding-top: 11px
+    border-top: 1px solid #e8edf1
+
+    h4
+        display: flex
+        align-items: center
+        gap: 6px
+        margin: 0 0 7px
+        color: #344054
+        font-size: 11px
+        font-weight: 850
+
+    ul
+        margin: 0
+        padding-left: 18px
+        color: #5f6d7c
+        font-size: 10.5px
+        line-height: 1.5
+
+.hospital-ai-models
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 8px
+
+.hospital-ai-model
+    padding: 9px 10px
+    border: 1px solid #e2e8ee
+    border-radius: 12px
+    background: #fff
+
+    strong,
+    small
+        display: block
+
+    strong
+        color: #344054
+        font-size: 10.5px
+
+    small
+        margin-top: 2px
+        color: var(--hospital-muted)
+        font-size: 9.5px
+
+    &.is-used
+        border-color: #bce2c9
+        background: #f4fcf7
+
+.hospital-ai-apply
+    width: 100%
+    min-height: 42px
+    border: 1px solid var(--hospital-primary)
+    border-radius: 12px
+    background: #fff
+    color: var(--hospital-primary-dark)
+    font-size: 11.5px
+    font-weight: 850
+
+    &:hover
+        background: var(--hospital-primary-soft)
+
+.hospital-page--emergency .hospital-ai-apply
+    border-color: var(--hospital-danger)
+    color: var(--hospital-danger-dark)
+
+    &:hover
+        background: var(--hospital-danger-soft)
+
+.hospital-form
+    display: grid
+    gap: 15px
+
+.hospital-form-section
+    padding: 17px
+    border: 1px solid var(--hospital-border)
+    border-radius: 17px
+    background: #fff
+
+.hospital-form-section--planned
+    border-color: #cde7ea
+    background: linear-gradient(145deg, #fff, #f8fdfd)
+
+.hospital-form-section--emergency
+    border-color: #f1c7cb
+    background: linear-gradient(145deg, #fff, #fff9f9)
+
+.hospital-form-section__head
+    display: flex
+    align-items: flex-start
+    gap: 11px
+    margin-bottom: 15px
+
+    h3,
+    p
+        margin: 0
+
+    h3
+        color: var(--hospital-text)
+        font-size: 14px
+        font-weight: 850
+
+    p
+        margin-top: 3px
+        color: var(--hospital-muted)
+        font-size: 10.5px
+
+.hospital-form-section__icon
+    display: grid
+    width: 38px
+    height: 38px
+    flex: 0 0 38px
+    place-items: center
+    border-radius: 12px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+
+.hospital-page--emergency .hospital-form-section__icon
+    background: var(--hospital-danger-soft)
+    color: var(--hospital-danger-dark)
+
+.hospital-form-grid
+    display: grid
+    gap: 12px
+
+.hospital-form-grid--2
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+
+.hospital-form-grid--3
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+
+.hospital-field
+    min-width: 0
+
+.hospital-field--2
+    grid-column: span 2
+
+.hospital-field--full
+    grid-column: 1 / -1
+
+.hospital-selected-patient
+    display: flex
+    min-height: 43px
+    align-items: center
+    padding: 9px 12px
+    border: 1px dashed #ccd7df
+    border-radius: 12px
+    background: #f8fafc
+    color: #536273
+    font-size: 12px
+    font-weight: 750
+
+.hospital-textarea--form
+    min-height: 105px
+
+.hospital-switch
+    display: flex
+    align-items: center
+    gap: 11px
+    padding: 12px
+    border: 1px solid #ead8da
+    border-radius: 14px
+    background: #fffafa
+    cursor: pointer
+
+    input
+        position: absolute
+        opacity: 0
+
+    strong,
+    small
+        display: block
+
+    strong
+        color: #7f1d27
+        font-size: 12px
+
+    small
+        margin-top: 2px
+        color: #8d6970
+        font-size: 10px
+
+    input:checked + .hospital-switch__track
+        background: var(--hospital-danger)
+
+        &::after
+            transform: translateX(18px)
+
+.hospital-switch__track
+    position: relative
+    width: 42px
+    height: 24px
+    flex: 0 0 42px
+    border-radius: 999px
+    background: #cbd5df
+    transition: .15s ease
+
+    &::after
+        content: ''
+        position: absolute
+        top: 3px
+        left: 3px
+        width: 18px
+        height: 18px
+        border-radius: 50%
+        background: #fff
+        box-shadow: 0 2px 5px rgba(15, 23, 42, .18)
+        transition: .15s ease
+
+.hospital-vitals
+    margin-top: 13px
+    padding: 13px
+    border: 1px dashed #e1b7bc
+    border-radius: 15px
+    background: rgba(255, 255, 255, .78)
+
+.hospital-vitals__title
+    display: flex
+    align-items: center
+    gap: 7px
+    margin-bottom: 11px
+    color: #7f1d27
+    font-size: 11.5px
+    font-weight: 850
+
+.hospital-vitals__grid
+    display: grid
+    grid-template-columns: repeat(6, minmax(0, 1fr))
+    gap: 10px
+
+.hospital-form-actions
+    display: grid
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: 12px
+    padding: 16px
+    border: 1px solid var(--hospital-border)
+    border-radius: 17px
+    background: #fbfcfd
+    box-sizing: border-box
+    width: 100%
+    overflow: hidden
+
+.hospital-form-actions__note
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    margin-right: auto
+    color: var(--hospital-muted)
+    font-size: 10.5px
+
+.hospital-save-button
+    display: inline-flex
+    width: 100%
+    min-width: 0
+    min-height: 44px
+    align-items: center
+    justify-content: center
+    gap: 7px
+    padding: 10px 16px
+    border: 1px solid var(--hospital-primary)
+    border-radius: 12px
+    background: var(--hospital-primary)
+    color: #fff
+    font-size: 11.5px
+    font-weight: 850
+    line-height: 1.2
+    text-align: center
+    box-sizing: border-box
+    transition: .15s ease
+
+    &:hover
+        border-color: var(--hospital-primary-dark)
+        background: var(--hospital-primary-dark)
+
+.hospital-save-button--secondary
+    border-color: #d7e0e8
+    background: #fff
+    color: var(--hospital-text)
+    box-shadow: none
+
+    &:hover
+        border-color: #bcc9d5
+        background: #f6f9fb
+        color: var(--hospital-text)
+
+.hospital-save-button--draft
+    border-color: #ced8e1
+    background: #fff
+    color: #536273
+
+    &:hover
+        border-color: #b7c4cf
+        background: #f7f9fb
+
+@media (max-width: 992px)
+    .hospital-form-actions
+        grid-template-columns: 1fr
+
+@media (max-width: 768px)
+    .hospital-form-actions
+        grid-template-columns: 1fr
+        padding: 14px
+
+.hospital-page--emergency .hospital-save-button:not(.hospital-save-button--draft)
+    border-color: var(--hospital-danger)
+    background: var(--hospital-danger)
+
+    &:hover
+        border-color: var(--hospital-danger-dark)
+        background: var(--hospital-danger-dark)
+
+.hospital-history-card
+    position: static
+    top: auto
+
+.hospital-history-card__head
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 12px
+    padding: 19px
+    border-bottom: 1px solid var(--hospital-border)
+
+    h2,
+    p
+        margin: 0
+
+    h2
+        margin-top: 3px
+        color: var(--hospital-text)
+        font-size: 17px
+        font-weight: 850
+
+    p
+        margin-top: 4px
+        color: var(--hospital-muted)
+        font-size: 10.5px
+
+.hospital-history-card__count
+    display: grid
+    min-width: 34px
+    height: 34px
+    place-items: center
+    border-radius: 11px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 12px
+    font-weight: 900
+
+.hospital-page--emergency .hospital-history-card__count
+    background: var(--hospital-danger-soft)
+    color: var(--hospital-danger-dark)
+
+.hospital-history-list
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+    gap: 10px
+    max-height: none
+    overflow: visible
+    padding: 12px
+
+.hospital-history-item
+    padding: 13px
+    border: 1px solid #e4eaf0
+    border-radius: 15px
+    background: #fff
+
+    + .hospital-history-item
+        margin-top: 0
+
+    h3
+        margin: 9px 0 0
+        color: var(--hospital-text)
+        font-size: 12.5px
+        font-weight: 850
+
+    p
+        margin: 7px 0 0
+        color: #657383
+        font-size: 10.5px
+        line-height: 1.5
+
+.hospital-history-item__top
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 9px
+
+    time
+        color: #9aa4af
+        font-size: 9.5px
+
+.hospital-history-item__status
+    display: inline-flex
+    padding: 4px 7px
+    border-radius: 999px
+    font-size: 9px
+    font-weight: 850
+
+    &.is-primary
+        background: var(--hospital-primary-soft)
+        color: var(--hospital-primary-dark)
+
+    &.is-success
+        background: #eaf8ef
+        color: #14733e
+
+    &.is-danger
+        background: var(--hospital-danger-soft)
+        color: var(--hospital-danger-dark)
+
+    &.is-muted
+        background: #f1f5f9
+        color: #64748b
+
+.hospital-history-item__diagnosis
+    margin-top: 5px
+    color: #536273
+    font-size: 10.5px
+
+    span
+        display: inline-flex
+        margin-right: 5px
+        padding: 3px 6px
+        border-radius: 7px
+        background: #f1f5f9
+        color: #44546a
+        font-weight: 850
+
+.hospital-history-item__footer
+    display: grid
+    gap: 4px
+    margin-top: 9px
+    padding-top: 8px
+    border-top: 1px solid #edf1f4
+    color: #7b8794
+    font-size: 9.5px
+
+    span
+        display: flex
+        align-items: flex-start
+        gap: 5px
+
+.hospital-history-empty
+    padding: 40px 17px
+    text-align: center
+
+    h3
+        margin: 12px 0 0
+        color: var(--hospital-text)
+        font-size: 14px
+        font-weight: 850
+
+    p
+        margin: 5px 0 0
+        color: var(--hospital-muted)
+        font-size: 10.5px
+
+.hospital-history-empty__icon
+    display: grid
+    width: 58px
+    height: 58px
+    margin: 0 auto
+    place-items: center
+    border-radius: 19px
+    background: #f1f5f9
+    color: #7c8998
+    font-size: 23px
+
+.hospital-history-pagination
+    padding: 10px 13px
+    border-top: 1px solid var(--hospital-border)
+
+.select2-container--bootstrap-5 .select2-selection
+    min-height: 43px !important
+    border-color: #d8e1e9 !important
+    border-radius: 12px !important
+    font-size: 12px !important
+
+@media (max-width: 1599px)
+    .hospital-ai-grid
+        grid-template-columns: 1fr
+
+@media (max-width: 1350px)
+    .hospital-key-fields
+        grid-template-columns: 1fr
+
+@media (max-width: 1199px)
+    .hospital-shell
+        grid-template-columns: 270px minmax(0, 1fr)
+
+    .hospital-history-list
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+
+@media (max-width: 991px)
+    .hospital-topbar__inner
+        padding: 9px 14px
+
+    .hospital-topbar__nav
+        align-items: stretch
+        margin-top: 12px
+
+    .hospital-topbar__link
+        width: 100%
+
+    .hospital-topbar__badge
+        margin: 10px 0 3px
+
+    .hospital-page
+        padding: 18px 13px 35px
+
+    .hospital-shell
+        grid-template-columns: 1fr
+
+    .hospital-sidebar__sticky
+        position: static
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+    .hospital-sidebar-card--notice
+        grid-column: 1 / -1
+
+    .hospital-vitals__grid
+        grid-template-columns: repeat(3, minmax(0, 1fr))
+
+@media (max-width: 767px)
+    .hospital-sidebar__sticky
+        grid-template-columns: 1fr
+
+    .hospital-sidebar-card--notice
+        grid-column: auto
+
+    .hospital-hero
+        align-items: flex-start
+        flex-direction: column
+        padding: 20px
+
+    .hospital-hero__status
+        align-self: flex-start
+
+    .hospital-workspace-card__head
+        flex-direction: column
+
+    .hospital-key-fields
+        padding: 13px
+
+    .hospital-key-card
+        padding: 14px
+
+    .hospital-form-grid--2,
+    .hospital-form-grid--3
+        grid-template-columns: 1fr
+
+    .hospital-field--2,
+    .hospital-field--full
+        grid-column: auto
+
+    .hospital-vitals__grid
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+    .hospital-form-actions
+        align-items: stretch
+        flex-direction: column
+
+    .hospital-form-actions__note
+        margin-right: 0
+
+    .hospital-save-button
+        width: 100%
+
+@media (max-width: 520px)
+    .hospital-page
+        padding-inline: 8px
+
+    .hospital-hero__icon
+        width: 58px
+        height: 58px
+        flex-basis: 58px
+        border-radius: 18px
+        font-size: 23px
+
+    .hospital-hero__chips
+        align-items: stretch
+        flex-direction: column
+
+    .hospital-tabs
+        display: grid
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+    .hospital-tab
+        justify-content: center
+        padding-inline: 8px
+
+    .hospital-tab-panel
+        padding: 13px
+
+    .hospital-ai-input-card,
+    .hospital-ai-result-card
+        padding: 14px
+
+    .hospital-vitals__grid
+        grid-template-columns: 1fr
+
+/* =========================================================
+   Live patient search
+   ========================================================= */
+
+.hospital-patient-search
+    position: relative
+    z-index: 30
+
+.hospital-patient-search__control
+    position: relative
+
+.hospital-patient-search__icon
+    position: absolute
+    top: 50%
+    left: 13px
+    z-index: 2
+    transform: translateY(-50%)
+    color: #7d8999
+    font-size: 15px
+    pointer-events: none
+
+.hospital-patient-search__input
+    width: 100%
+    min-height: 46px
+    padding: 10px 42px 10px 39px
+    border: 1px solid #d8e1e9
+    border-radius: 13px
+    background: #fff
+    color: var(--hospital-text)
+    font-size: 12.5px
+    box-shadow: none
+
+    &:focus
+        border-color: rgba(7, 140, 155, .72)
+        box-shadow: 0 0 0 3px rgba(7, 140, 155, .10)
+
+    &::-webkit-search-cancel-button
+        appearance: none
+
+.hospital-page--emergency .hospital-patient-search__input:focus
+    border-color: rgba(220, 74, 82, .68)
+    box-shadow: 0 0 0 3px rgba(220, 74, 82, .10)
+
+.hospital-patient-search__clear
+    position: absolute
+    top: 50%
+    right: 9px
+    z-index: 3
+    display: grid
+    width: 28px
+    height: 28px
+    place-items: center
+    padding: 0
+    transform: translateY(-50%)
+    border: 0
+    border-radius: 9px
+    background: #f1f5f9
+    color: #667085
+    font-size: 11px
+    cursor: pointer
+
+    &:hover
+        background: #e7edf3
+        color: #344054
+
+.hospital-patient-search__hint
+    margin-top: 6px
+    color: #8b96a4
+    font-size: 9.5px
+    line-height: 1.45
+
+    &.is-loading
+        color: var(--hospital-primary-dark)
+
+    &.is-error
+        color: var(--hospital-danger-dark)
+
+.hospital-patient-suggestions
+    position: absolute
+    top: 52px
+    left: 0
+    z-index: 80
+    width: min(470px, calc(100vw - 48px))
+    min-width: 100%
+    max-height: 390px
+    overflow-y: auto
+    padding: 7px
+    border: 1px solid #d8e1e9
+    border-radius: 16px
+    background: #fff
+    box-shadow: 0 22px 56px rgba(15, 23, 42, .18)
+
+.hospital-patient-suggestion
+    display: grid
+    width: 100%
+    grid-template-columns: 42px minmax(0, 1fr) 16px
+    align-items: center
+    gap: 10px
+    padding: 10px
+    border: 1px solid transparent
+    border-radius: 13px
+    background: transparent
+    color: inherit
+    text-align: left
+    cursor: pointer
+    transition: .14s ease
+
+    &:hover,
+    &.is-active
+        border-color: #cce7ea
+        background: #f3fbfc
+
+.hospital-page--emergency .hospital-patient-suggestion:hover,
+.hospital-page--emergency .hospital-patient-suggestion.is-active
+    border-color: #f0c8cc
+    background: #fff7f7
+
+.hospital-patient-suggestion__avatar
+    display: grid
+    width: 42px
+    height: 42px
+    place-items: center
+    border-radius: 13px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 11px
+    font-weight: 900
+
+.hospital-page--emergency .hospital-patient-suggestion__avatar
+    background: var(--hospital-danger-soft)
+    color: var(--hospital-danger-dark)
+
+.hospital-patient-suggestion__body
+    min-width: 0
+
+    > strong
+        display: block
+        overflow: hidden
+        color: var(--hospital-text)
+        font-size: 12px
+        font-weight: 850
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.hospital-patient-suggestion__meta
+    display: grid
+    gap: 3px
+    margin-top: 4px
+    color: #667085
+    font-size: 9.5px
+    line-height: 1.35
+
+    > span
+        display: flex
+        min-width: 0
+        align-items: flex-start
+        gap: 5px
+
+        i
+            flex: 0 0 auto
+            margin-top: 1px
+            color: #8a97a8
+
+        &.is-empty
+            color: #98a2b3
+
+.hospital-patient-suggestion__arrow
+    color: #a6b0bc
+    font-size: 10px
+
+.hospital-patient-suggestions__empty
+    display: flex
+    align-items: center
+    gap: 10px
+    padding: 13px
+    color: #667085
+
+    > i
+        display: grid
+        width: 34px
+        height: 34px
+        flex: 0 0 34px
+        place-items: center
+        border-radius: 11px
+        background: #f1f5f9
+        color: #8390a0
+
+    strong,
+    span
+        display: block
+
+    strong
+        color: #344054
+        font-size: 11px
+
+    span
+        margin-top: 2px
+        font-size: 9.5px
+
+
+/* =========================================================
+   Destination hospital: stable fields + city live-search
+   ========================================================= */
+
+.hospital-key-card--destination
+    overflow: visible
+
+.hospital-destination-search
+    position: relative
+    z-index: 20
+    margin-bottom: 15px
+
+.hospital-destination-search__control
+    position: relative
+
+.hospital-destination-search__icon
+    position: absolute
+    top: 50%
+    left: 14px
+    z-index: 2
+    color: var(--hospital-primary-dark)
+    font-size: 15px
+    transform: translateY(-50%)
+    pointer-events: none
+
+.hospital-destination-search__input
+    width: 100%
+    min-width: 0
+    min-height: 48px
+    padding: 10px 46px 10px 42px
+    border: 1px solid #d8e1e9
+    border-radius: 14px
+    background: #fff
+    color: var(--hospital-text)
+    font-size: 13px
+    box-shadow: none
+
+    &:focus
+        border-color: rgba(7, 140, 155, .72)
+        outline: 0
+        box-shadow: 0 0 0 4px rgba(7, 140, 155, .10)
+
+.hospital-page--emergency .hospital-destination-search__input:focus
+    border-color: rgba(220, 74, 82, .68)
+    box-shadow: 0 0 0 4px rgba(220, 74, 82, .10)
+
+.hospital-destination-search__spinner
+    position: absolute
+    top: 50%
+    right: 14px
+    z-index: 3
+    color: var(--hospital-primary-dark)
+    transform: translateY(-50%)
+
+.hospital-destination-search__hint
+    margin-top: 7px
+    color: #7d8a9a
+    font-size: 10px
+    line-height: 1.45
+
+    &.is-error
+        color: #a5464d
+
+    &.is-success
+        color: #087b74
+
+.hospital-destination-suggestions
+    position: absolute
+    top: calc(100% - 24px)
+    left: 0
+    right: 0
+    z-index: 80
+    max-height: 360px
+    overflow-y: auto
+    padding: 7px
+    border: 1px solid #dce5eb
+    border-radius: 15px
+    background: #fff
+    box-shadow: 0 20px 48px rgba(15, 23, 42, .16)
+
+.hospital-destination-suggestion
+    display: grid
+    width: 100%
+    grid-template-columns: 42px minmax(0, 1fr) 18px
+    align-items: center
+    gap: 10px
+    padding: 10px
+    border: 0
+    border-radius: 12px
+    background: transparent
+    color: inherit
+    text-align: left
+    cursor: pointer
+
+    &:hover,
+    &:focus-visible
+        background: #f0fafb
+        outline: 0
+
+.hospital-page--emergency .hospital-destination-suggestion
+    &:hover,
+    &:focus-visible
+        background: #fff3f4
+
+.hospital-destination-suggestion__icon
+    display: grid
+    width: 40px
+    height: 40px
+    place-items: center
+    border-radius: 12px
+    background: var(--hospital-primary-soft)
+    color: var(--hospital-primary-dark)
+    font-size: 17px
+
+.hospital-page--emergency .hospital-destination-suggestion__icon
+    background: var(--hospital-danger-soft)
+    color: var(--hospital-danger-dark)
+
+.hospital-destination-suggestion__body
+    min-width: 0
+
+    strong
+        display: block
+        overflow: hidden
+        color: var(--hospital-text)
+        font-size: 12px
+        font-weight: 850
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.hospital-destination-suggestion__address
+    display: block
+    margin-top: 3px
+    overflow: hidden
+    color: #64748b
+    font-size: 10.5px
+    text-overflow: ellipsis
+    white-space: nowrap
+
+    i
+        margin-right: 4px
+
+.hospital-destination-suggestion__meta
+    display: flex
+    flex-wrap: wrap
+    gap: 4px 10px
+    margin-top: 4px
+    color: #8a96a5
+    font-size: 9.5px
+
+.hospital-destination-suggestion__arrow
+    color: #a6b1bd
+    font-size: 11px
+
+.hospital-destination-suggestions__empty
+    display: flex
+    align-items: flex-start
+    gap: 10px
+    padding: 13px
+    color: #667085
+
+    > i
+        margin-top: 1px
+        color: var(--hospital-primary-dark)
+        font-size: 18px
+
+    strong,
+    span
+        display: block
+
+    strong
+        color: #344054
+        font-size: 11px
+        font-weight: 850
+
+    span
+        margin-top: 3px
+        font-size: 10px
+        line-height: 1.45
+
+.hospital-destination-fields
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 12px
+    align-items: start
+
+    > .hospital-field
+        min-width: 0
+
+    > .hospital-field:not(.hospital-field--full)
+        display: grid
+        grid-template-rows: 38px 48px
+        align-content: start
+
+        > .hospital-label
+            display: flex
+            min-height: 38px
+            align-items: flex-end
+            margin: 0 0 6px
+            line-height: 1.25
+
+        > .hospital-control
+            width: 100%
+            min-width: 0
+            height: 48px
+            box-sizing: border-box
+
+    > .hospital-field--full
+        grid-column: 1 / -1
+
+        > .hospital-control
+            width: 100%
+            min-width: 0
+            min-height: 48px
+            box-sizing: border-box
+
+@media (max-width: 767px)
+    .hospital-destination-fields
+        grid-template-columns: 1fr
+
+        > .hospital-field:not(.hospital-field--full)
+            display: block
+
+            > .hospital-label
+                min-height: 0
+                margin-bottom: 6px
+
+        > .hospital-field--full
+            grid-column: auto
+
+    .hospital-destination-suggestions
+        position: static
+        max-height: 300px
+        margin-top: 7px
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .10)
+
+
+/* =========================================================
+   Preliminary diagnosis: aligned controls
+   ========================================================= */
+
+.hospital-preliminary-fields
+    display: grid
+    grid-template-columns: minmax(145px, .42fr) minmax(260px, 1.58fr)
+    gap: 12px
+    align-items: end
+
+    .hospital-field
+        min-width: 0
+
+    .hospital-label
+        min-height: 18px
+        white-space: nowrap
+
+    .hospital-control
+        width: 100%
+
+@media (max-width: 991.98px)
+    .hospital-form-actions--simple
+        grid-template-columns: 1fr 1fr
+
+        .hospital-save-button:last-child
+            grid-column: 1 / -1
+
+@media (max-width: 575px)
+    .hospital-patient-suggestions
+        width: 100%
+
+    .hospital-preliminary-fields
+        grid-template-columns: 1fr
+
+        .hospital-label
+            white-space: normal
+
+/* =========================================================
+   Compact AI result + simplified actions
+   ========================================================= */
+
+.hospital-ai-compact
+    display: grid
+    gap: 11px
+
+.hospital-ai-compact__confidence
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 9px
+
+.hospital-ai-score
+    display: flex
+    min-height: 54px
+    align-items: center
+    justify-content: space-between
+    gap: 10px
+    padding: 10px 12px
+    border: 1px solid #cce8e9
+    border-radius: 14px
+    background: #f3fbfb
+
+    span
+        color: #526173
+        font-size: 11px
+        font-weight: 800
+
+    strong
+        color: var(--hospital-primary-dark)
+        font-size: 18px
+        font-weight: 900
+
+    &.is-muted
+        border-color: #e2e8ee
+        background: #f8fafc
+
+        strong
+            color: #98a2b3
+
+.hospital-ai-compact__diagnosis
+    display: grid
+    gap: 4px
+    padding: 12px 13px
+    border: 1px solid var(--hospital-border)
+    border-radius: 14px
+    background: #fff
+
+    span
+        color: var(--hospital-muted)
+        font-size: 10.5px
+        font-weight: 750
+
+    strong
+        color: var(--hospital-text)
+        font-size: 13px
+        line-height: 1.4
+
+.hospital-ai-compact__summary
+    padding: 12px 13px
+    border-radius: 14px
+    background: #f7f9fb
+    color: #435166
+    font-size: 11.5px
+    line-height: 1.55
+
+.hospital-ai-compact__review,
+.hospital-ai-compact__attention,
+.hospital-ai-compact__saved
+    display: flex
+    align-items: flex-start
+    gap: 8px
+    padding: 9px 11px
+    border-radius: 12px
+    font-size: 10.5px
+    line-height: 1.45
+
+.hospital-ai-compact__review
+    background: #f2faf6
+    color: #28613d
+
+    &.is-warning
+        background: #fff7e8
+        color: #9a5b05
+
+.hospital-ai-compact__attention
+    border: 1px solid #f1d1d5
+    background: #fff5f6
+    color: #9f2430
+
+.hospital-ai-compact__saved
+    padding: 5px 2px 0
+    color: #7a8797
+
+.hospital-form-actions--simple
+    display: grid
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: 12px
+    width: 100%
+
+    .hospital-save-button
+        width: 100%
+        min-height: 46px
+        justify-content: center
+        white-space: normal
+        text-align: center
+
+.hospital-save-button--secondary
+    border-color: #cbd5df
+    background: #fff
+    color: #415063
+
+    &:hover
+        border-color: #aebbc8
+        background: #f6f8fa
+        color: #263546
+
+.hospital-page--emergency .hospital-save-button--secondary
+    border-color: #d6dee7
+    background: #fff
+    color: #415063
+
+    &:hover
+        border-color: #bcc8d3
+        background: #f7f9fb
+        color: #263546
+
+@media (max-width: 575px)
+    .hospital-ai-compact__confidence
+        grid-template-columns: 1fr
+
+    .hospital-form-actions--simple
+        display: grid
+        grid-template-columns: 1fr
+
+        .hospital-save-button
+            width: 100%
+
+// Persistent primary actions for hospitalization pages.
+// Kept outside tab panels so print/save controls are always visible.
+.hospital-form-actions--always-visible
+    // Базовый .hospital-form-actions имеет width: 100%.
+    // Вместе с горизонтальными margin это давало переполнение карточки.
+    width: auto
+    max-width: none
+    margin: 18px 22px 22px
+    padding: 16px
+    border: 1px solid rgba(15, 118, 130, .14)
+    border-radius: 18px
+    background: rgba(255, 255, 255, .96)
+    box-shadow: 0 10px 28px rgba(17, 39, 63, .08)
+    box-sizing: border-box
+
+@media (max-width: 767.98px)
+    .hospital-form-actions--always-visible
+        width: auto
+        margin: 14px 14px 16px

@@ -6,6 +6,7 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,5 +26,6 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('recaptcha', function () {
             return '<input type="hidden" name="g-recaptcha-response">';
         });
+        Paginator::useBootstrapFive();
     }
 }

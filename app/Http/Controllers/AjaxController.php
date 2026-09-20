@@ -19,6 +19,31 @@ use Illuminate\Support\Facades\Http;
 
 class AjaxController extends Controller
 {
+    const PSYCHIATRISTIC_DOCTORS = [
+        'Психолог',
+        'Патопсихолог',
+        'Детский психолог',
+        'Детский психиатр',
+        'Медицинский психолог',
+        'Психотерапевт',
+        'Детский психотерапевт',
+        'Психиатр'
+    ];
+
+    /*
+     * Старший психиатрический персонал.
+     *
+     * Используется именно для сценария «Врач системы».
+     * Психологи / патопсихологи сюда не входят, потому что для них
+     * уже существует отдельный сценарий data-referral-scope="psy".
+     */
+    const SENIOR_PSYCHIATRIC_DOCTORS = [
+        'Психиатр',
+        'Детский психиатр',
+        'Психотерапевт',
+        'Детский психотерапевт',
+    ];
+
     public function medicineList(int $groupIdentificator): JsonResponse {
         return response()->json([
             "data" => Drug::whereGroup($groupIdentificator)->with('receptors')->get()
@@ -28,8 +53,70 @@ class AjaxController extends Controller
     public function getDoctors(): JsonResponse {
         return response()->json([
             'status' => 'success',
-            'items' => Doctor::get(['id', 'name', 'surname', 'patronym'])->toArray()
+            'items' => Doctor::whereNotIn('status', self::PSYCHIATRISTIC_DOCTORS)
+                    ->get(['id', 'name', 'surname', 'patronym', 'status'])
+                    ->toArray()
             ]);
+    }
+
+    public function getPsyDoctors(): JsonResponse {
+        return response()->json([
+            'status' => 'success',
+            'items' => Doctor::whereIn('status', self::PSYCHIATRISTIC_DOCTORS)
+                        ->get(['id', 'name', 'surname', 'patronym', 'status'])
+                        ->toArray()
+        ]);
+    }
+
+    public function getSeniorPsyDoctors(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+
+        $query = Doctor::query()
+            ->whereIn(
+                'status',
+                self::SENIOR_PSYCHIATRIC_DOCTORS
+            );
+
+        /*
+         * Autocomplete уже передаёт ?q=...
+         * Поэтому фильтруем не только на уровне интерфейса,
+         * а непосредственно в БД.
+         */
+        if ($q !== '') {
+            $search = '%' . $q . '%';
+
+            $query->where(function ($doctorQuery) use ($search) {
+                $doctorQuery
+                    ->where('surname', 'ilike', $search)
+                    ->orWhere('name', 'ilike', $search)
+                    ->orWhere('patronym', 'ilike', $search)
+                    ->orWhere('status', 'ilike', $search)
+                    ->orWhereRaw(
+                        "CONCAT_WS(' ', surname, name, patronym) ILIKE ?",
+                        [$search]
+                    );
+            });
+        }
+
+        $items = $query
+            ->orderBy('status')
+            ->orderBy('surname')
+            ->orderBy('name')
+            ->limit(50)
+            ->get([
+                'id',
+                'name',
+                'surname',
+                'patronym',
+                'status',
+            ])
+            ->toArray();
+
+        return response()->json([
+            'status' => 'success',
+            'items' => $items,
+        ]);
     }
 
     public function getPatient(): JsonResponse {
@@ -516,6 +603,98 @@ class AjaxController extends Controller
             data_get($patient, 'doctor.patronym'),
         ])->filter()->implode(' ');
 
+        /*
+         * Новая схема документов пациента.
+         * Legacy-поля patients.serial/number оставляем только fallback-ом.
+         */
+        $identityDocument = DB::table('patient_identity_documents')
+            ->where('patient_id', $patient->id)
+            ->where('is_active', true)
+            ->orderByDesc('is_primary')
+            ->orderByDesc('updated_at')
+            ->first();
+
+        $representative = DB::table('patient_representatives')
+            ->where('patient_id', $patient->id)
+            ->where('is_active', true)
+            ->orderByDesc('is_primary')
+            ->orderByDesc('updated_at')
+            ->first();
+
+        $representativeIdentity = null;
+        $representativeAuthority = null;
+
+        if ($representative) {
+            $representativeIdentity = DB::table('patient_representative_documents')
+                ->where('representative_id', $representative->id)
+                ->where('document_purpose', 'identity')
+                ->where('is_active', true)
+                ->orderByDesc('is_primary')
+                ->orderByDesc('updated_at')
+                ->first();
+
+            $representativeAuthority = DB::table('patient_representative_documents')
+                ->where('representative_id', $representative->id)
+                ->where('document_purpose', 'authority')
+                ->where('is_active', true)
+                ->orderByDesc('is_primary')
+                ->orderByDesc('updated_at')
+                ->first();
+        }
+
+        $documentName = static function (?object $document): ?string {
+            if (!$document) {
+                return null;
+            }
+
+            $storedName = trim((string) ($document->document_name ?? ''));
+            if ($storedName !== '') {
+                return $storedName;
+            }
+
+            return match ((string) ($document->document_type ?? '')) {
+                'passport_rf' => 'Паспорт гражданина Российской Федерации',
+                'birth_certificate' => 'Свидетельство о рождении',
+                'foreign_passport' => 'Заграничный паспорт',
+                'residence_permit' => 'Вид на жительство',
+                'temporary_identity' => 'Временное удостоверение личности',
+                'foreign_identity' => 'Документ иностранного гражданина',
+                'guardianship_order' => 'Документ об установлении опеки/попечительства',
+                'power_of_attorney' => 'Доверенность',
+                default => 'Другой документ',
+            };
+        };
+
+        $documentAsText = static function (?object $document) use ($documentName): ?string {
+            if (!$document) {
+                return null;
+            }
+
+            $seriesNumber = trim(implode(' ', array_filter([
+                trim((string) ($document->series ?? '')),
+                trim((string) ($document->number ?? '')),
+            ])));
+
+            $parts = array_filter([
+                $documentName($document),
+                $seriesNumber !== '' ? $seriesNumber : null,
+                filled($document->issued_by ?? null) ? 'выдан: ' . trim((string) $document->issued_by) : null,
+                filled($document->issued_at ?? null)
+                    ? 'дата выдачи: ' . Carbon::parse($document->issued_at)->format('d.m.Y')
+                    : null,
+            ]);
+
+            return $parts ? implode(', ', $parts) : null;
+        };
+
+        $representativeFullName = $representative
+            ? collect([
+                $representative->surname,
+                $representative->name,
+                $representative->patronym,
+            ])->filter()->implode(' ')
+            : '';
+
         return response()->json([
             'id' => (int) $patient->id,
             'full_name' => $fullName,
@@ -529,18 +708,50 @@ class AjaxController extends Controller
             'medcard_number' => $patient->medcard_number,
             'address_registration' => $patient->address_registration,
             'address_residence' => $patient->address_residence,
-            'serial' => $patient->serial,
-            'number' => $patient->number,
-            'department_code' => $patient->department_code,
-            'issued_by' => $patient->issued_by,
-            'issued_at' => $patient->issued_at
-                ? Carbon::parse($patient->issued_at)->format('Y-m-d')
-                : null,
             'birth_place' => $patient->birth_place,
             'snils' => $patient->snils,
             'oms' => $patient->oms,
             'phone' => $patient->phone,
             'email' => $patient->email,
+
+            /* Legacy fallback нужен старым картам, которые ещё не мигрировали. */
+            'serial' => $identityDocument?->series ?? $patient->serial,
+            'number' => $identityDocument?->number ?? $patient->number,
+            'department_code' => $identityDocument?->department_code ?? $patient->department_code,
+            'issued_by' => $identityDocument?->issued_by ?? $patient->issued_by,
+            'issued_at' => filled($identityDocument?->issued_at)
+                ? Carbon::parse($identityDocument->issued_at)->format('Y-m-d')
+                : ($patient->issued_at ? Carbon::parse($patient->issued_at)->format('Y-m-d') : null),
+
+            'identity' => $identityDocument ? [
+                'document_type' => $identityDocument->document_type,
+                'document_name' => $documentName($identityDocument),
+                'series' => $identityDocument->series,
+                'number' => $identityDocument->number,
+                'issued_by' => $identityDocument->issued_by,
+                'issued_at' => filled($identityDocument->issued_at)
+                    ? Carbon::parse($identityDocument->issued_at)->format('Y-m-d')
+                    : null,
+                'department_code' => $identityDocument->department_code,
+            ] : null,
+
+            'representative' => $representative ? [
+                'id' => (int) $representative->id,
+                'type' => $representative->representative_type,
+                'full_name' => $representativeFullName,
+                'surname' => $representative->surname,
+                'name' => $representative->name,
+                'patronym' => $representative->patronym,
+                'birth_at' => filled($representative->birth_at)
+                    ? Carbon::parse($representative->birth_at)->format('Y-m-d')
+                    : null,
+                'snils' => $representative->snils,
+                'phone' => $representative->phone,
+                'email' => $representative->email,
+                'identity' => $documentAsText($representativeIdentity),
+                'authority_document' => $documentAsText($representativeAuthority),
+            ] : null,
+
             'doctor' => [
                 'id' => data_get($patient, 'doctor.id'),
                 'name' => $doctorName,

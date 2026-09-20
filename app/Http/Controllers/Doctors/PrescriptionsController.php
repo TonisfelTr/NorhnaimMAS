@@ -1003,12 +1003,8 @@ class PrescriptionsController extends Controller
          */
         $viewData = [
             'currentPrescription' => $currentPrescription,
-
-            'patientsWithPrescriptionsToday' =>
-                $patientsWithPrescriptionsToday,
-
-            'strictPrescriptionsToday' =>
-                $strictPrescriptionsToday,
+            'patientsWithPrescriptionsToday' => $patientsWithPrescriptionsToday,
+            'strictPrescriptionsToday' => $strictPrescriptionsToday,
 
             'repeatedPrescriptionsToday' =>
                 $repeatedPrescriptionsToday,

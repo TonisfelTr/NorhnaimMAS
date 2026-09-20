@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Doctors;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdatePatientMedcardRequest;
 use App\Models\LabParameter;
+use App\Models\InstrumentalResearch;
 use App\Models\LabResearchTemplate;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class MedicalCardController extends Controller
 {
@@ -229,8 +231,40 @@ class MedicalCardController extends Controller
             ->get();
 
         $anamneses = $patient->anamneses()
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->with('doctor')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($anamnesis) {
+                $plainText = trim(
+                    preg_replace(
+                        '/\s+/u',
+                        ' ',
+                        strip_tags(
+                            html_entity_decode(
+                                (string) ($anamnesis->text ?? ''),
+                                ENT_QUOTES | ENT_HTML5,
+                                'UTF-8'
+                            )
+                        )
+                    ) ?? ''
+                );
+
+                $anamnesis->setAttribute(
+                    'doctor_name',
+                    $anamnesis->doctor?->full_name
+                    ?? $anamnesis->doctor?->fullname
+                    ?? '—'
+                );
+
+                $anamnesis->setAttribute(
+                    'preview',
+                    $plainText !== ''
+                        ? Str::limit($plainText, 260)
+                        : '—'
+                );
+
+                return $anamnesis;
+            });
 
         $documents = $patient->documents()
             ->orderBy('created_at', 'desc')
@@ -240,20 +274,32 @@ class MedicalCardController extends Controller
             ->medicalFile()
             ->count();
 
-        $researches = $patient->labResearches();
         if ($researchID = request()->get('research')) {
-
-            $researches->where('id', $researchID)
+            $patient->labResearches()
+                ->where('id', $researchID)
                 ->whereNotNull('result_showed_at')
-                ->update(['result_showed_at' => now()]);
+                ->update([
+                    'result_showed_at' => now(),
+                ]);
         }
-        $researches->orderBy('created_at', 'desc')
+
+        $researches = $patient->labResearches()
+            ->with('patient')
+            ->orderByDesc('created_at')
             ->get()
             ->map(function ($research) {
-                [$paramsPayload, $valuesMap] = $this->buildLabResearchPayloads($research);
+                [$paramsPayload, $valuesMap] =
+                    $this->buildLabResearchPayloads($research);
 
-                $research->setAttribute('params_payload', $paramsPayload);
-                $research->setAttribute('values_map', $valuesMap);
+                $research->setAttribute(
+                    'params_payload',
+                    $paramsPayload
+                );
+
+                $research->setAttribute(
+                    'values_map',
+                    $valuesMap
+                );
 
                 return $research;
             });
@@ -372,6 +418,19 @@ class MedicalCardController extends Controller
             ];
         });
 
+        $instrumentalResearches = $patient
+            ->instrumentalResearches()
+            ->with([
+                'doctor:id,name,surname,patronym',
+                'media',
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $instrumentalResearchTypes = InstrumentalResearch::TYPES;
+        $instrumentalResearchStatuses = InstrumentalResearch::STATUSES;
+        $instrumentalResearchPriorities = InstrumentalResearch::PRIORITIES;
+
         return view('doctors.reception.medical_card', compact(
             'patient',
             'contacts',
@@ -381,8 +440,12 @@ class MedicalCardController extends Controller
             'labTemplates',
             'psyTests',
             'researches',
+            'instrumentalResearches',
+            'instrumentalResearchTypes',
+            'instrumentalResearchStatuses',
+            'instrumentalResearchPriorities',
             'templatesMap',
-            'prescriptions'
+            'prescriptions',
         ));
     }
 

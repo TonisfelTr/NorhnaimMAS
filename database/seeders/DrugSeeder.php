@@ -31,6 +31,8 @@ class DrugSeeder extends Seeder
             return;
         }
 
+        $this->validateReceptors($allDrugs);
+
         DB::transaction(function () use ($allDrugs) {
             // Сначала дочерние таблицы, потом основная
             MedicineContraindication::truncate();
@@ -159,8 +161,9 @@ class DrugSeeder extends Seeder
                         $receptor = Receptor::where('name', $receptorName)->first();
 
                         if (!$receptor) {
-                            logger()->warning("Рецептор не найден: {$receptorName} (препарат: {$drug->name})");
-                            continue;
+                            throw new \RuntimeException(
+                                "Мишень не найдена в receptors: {$receptorName} (препарат: {$drug->name})"
+                            );
                         }
 
                         DrugReceptor::firstOrCreate([
@@ -171,6 +174,44 @@ class DrugSeeder extends Seeder
                 }
             }
         });
+    }
+
+
+    private function validateReceptors(array $allDrugs): void
+    {
+        $known = Receptor::query()->pluck('name')->flip();
+        $unknown = [];
+
+        foreach ($allDrugs as $items) {
+            if (!is_array($items)) {
+                continue;
+            }
+
+            foreach ($items as $item) {
+                $drugName = (string)($item['name'] ?? $item['latin'] ?? 'unknown');
+
+                foreach (($item['receptors'] ?? []) as $target) {
+                    $target = trim((string)$target);
+
+                    if ($target !== '' && !$known->has($target)) {
+                        $unknown[$target][] = $drugName;
+                    }
+                }
+            }
+        }
+
+        if ($unknown) {
+            $lines = [];
+
+            foreach ($unknown as $target => $drugs) {
+                $lines[] = $target . ': ' . implode(', ', array_unique($drugs));
+            }
+
+            throw new \RuntimeException(
+                "JSON содержит неизвестные мишени. Сначала запустите FillReceptorsTableSeeder:\n"
+                . implode("\n", $lines)
+            );
+        }
     }
 
     private function findDiagnoseByCode(string $code): ?Diagnose

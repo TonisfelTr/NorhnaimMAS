@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Services\MedicalDocuments;
+
+use App\Models\Patient;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+final class PsychiatristConclusionAiService
+{
+    public function __construct(
+        private readonly PatientMedicalContextService $contextService,
+    ) {
+    }
+
+    public function generate(Patient $patient): array
+    {
+        $context = $this->contextService->build($patient);
+
+        if (!$this->hasClinicalData($context)) {
+            return [
+                'error' => 'NO_CLINICAL_DATA',
+                'message' => 'В медицинской карте недостаточно клинических данных для формирования заключения.',
+            ];
+        }
+
+        $systemPrompt = <<<'PROMPT'
+Ты — помощник врача-психиатра по подготовке ЧЕРНОВИКА медицинского заключения.
+Тебе передаётся структурированная медицинская история одного пациента из медицинской информационной системы.
+
+ЖЁСТКИЕ ПРАВИЛА:
+1. Используй только факты, явно присутствующие во входных данных. Ничего не выдумывай.
+2. Не устанавливай новый диагноз. Поле diagnosis отражает только диагноз, уже зафиксированный в карте.
+3. Не придумывай жалобы, психический статус, эффект терапии, побочные эффекты и рекомендации.
+4. Если для раздела нет подтверждённых данных — верни пустую строку.
+5. Различай фактические записи врача, результаты исследований и выводы. Не превращай предположение в факт.
+6. Сохраняй существенную хронологию и динамику состояния, если она подтверждается несколькими записями.
+7. Лабораторные и инструментальные исследования включай только если они релевантны психиатрическому состоянию, терапии, безопасности лечения или дифференциальной оценке.
+8. Терапию описывай по реально назначенным препаратам и схемам. Не предлагай новые лекарства или дозировки.
+9. recommendations — только рекомендации, уже зафиксированные в анамнезах, эпикризах или исследованиях. Если их нет — пустая строка.
+10. conclusion может быть клинически связным обобщением подтверждённых сведений, но без добавления новых фактов.
+11. Текст должен быть профессиональным, лаконичным, на русском языке и пригодным для последующей проверки врачом.
+12. Не включай служебные комментарии, дисклеймеры, markdown и пояснения вне JSON.
+
+Верни строго JSON-объект:
+{
+  "complaints": "",
+  "anamnesis": "",
+  "mental_status": "",
+  "diagnosis": "",
+  "therapy": "",
+  "conclusion": "",
+  "recommendations": "",
+  "used_sources": {
+    "anamneses": 0,
+    "epicrises": 0,
+    "symptoms": 0,
+    "conditions": 0,
+    "prescriptions": 0,
+    "laboratory_researches": 0,
+    "instrumental_researches": 0,
+    "tests": 0
+  }
+}
+PROMPT;
+
+        $payload = [
+            'task' => 'Составь черновик заключения психиатра на основании всей релевантной медицинской истории пациента.',
+            'medical_context' => $context,
+        ];
+
+        $raw = $this->askJson($systemPrompt, $payload);
+        if ($raw === null) {
+            return [
+                'error' => 'LLM_UNAVAILABLE',
+                'message' => 'ИИ-сервис не вернул ответ. Проверьте настройки LLM и повторите попытку.',
+            ];
+        }
+
+        $result = $this->decodeJson($raw);
+        if (!is_array($result)) {
+            return [
+                'error' => 'LLM_INVALID_JSON',
+                'message' => 'ИИ вернул ответ в неожиданном формате.',
+            ];
+        }
+
+        $fields = [
+            'complaints',
+            'anamnesis',
+            'mental_status',
+            'diagnosis',
+            'therapy',
+            'conclusion',
+            'recommendations',
+        ];
+
+        $normalized = [];
+        foreach ($fields as $field) {
+            $normalized[$field] = trim((string) ($result[$field] ?? ''));
+        }
+
+        // Диагноз разрешаем только из уже установленного в карте.
+        $diagnosis = $context['current_diagnosis'] ?? null;
+        if (is_array($diagnosis) && (($diagnosis['code'] ?? '') !== '' || ($diagnosis['title'] ?? '') !== '')) {
+            $normalized['diagnosis'] = trim(implode(' — ', array_filter([
+                $diagnosis['code'] ?? null,
+                $diagnosis['title'] ?? null,
+            ])));
+        } else {
+            $normalized['diagnosis'] = '';
+        }
+
+        $normalized['used_sources'] = is_array($result['used_sources'] ?? null)
+            ? $result['used_sources']
+            : [];
+
+        $normalized['context_counts'] = $this->contextCounts($context);
+
+        return $normalized;
+    }
+
+    private function hasClinicalData(array $context): bool
+    {
+        foreach ([
+            'anamneses', 'epicrises', 'symptoms', 'conditions', 'prescriptions',
+            'laboratory_researches', 'instrumental_researches', 'tests',
+        ] as $key) {
+            if (!empty($context[$key])) return true;
+        }
+
+        return !empty($context['current_diagnosis']);
+    }
+
+    private function contextCounts(array $context): array
+    {
+        $counts = [];
+        foreach ([
+            'anamneses', 'epicrises', 'symptoms', 'conditions', 'prescriptions',
+            'laboratory_researches', 'instrumental_researches', 'tests',
+        ] as $key) {
+            $counts[$key] = count((array) ($context[$key] ?? []));
+        }
+        return $counts;
+    }
+
+    private function askJson(string $systemPrompt, array $payload): ?string
+    {
+        $provider = (string) config('llm.provider', 'ollama');
+        $userText = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($userText === false) return null;
+
+        try {
+            if ($provider === 'ollama') {
+                return $this->askOllama($systemPrompt, $userText);
+            }
+
+            return $this->askOpenAi($systemPrompt, $userText);
+        } catch (\Throwable $e) {
+            Log::warning('Psychiatrist conclusion LLM request failed', [
+                'provider' => $provider,
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    private function askOllama(string $systemPrompt, string $userText): ?string
+    {
+        $baseUrl = rtrim(trim((string) config('llm.ollama.base_url')), '/');
+        $model = trim((string) config(
+            'llm.ollama.primary_model',
+            config('llm.ollama.model', 'qwen3:14b')
+        ));
+        if ($baseUrl === '' || $model === '') return null;
+
+        $response = Http::timeout((int) config('llm.ollama.timeout', 300))
+            ->acceptJson()
+            ->post($baseUrl . '/api/chat', [
+                'model' => $model,
+                'stream' => false,
+                'format' => 'json',
+                'think' => (bool) config('llm.ollama.think', false),
+                'keep_alive' => config('llm.ollama.keep_alive', '5m'),
+                'options' => [
+                    'temperature' => (float) config('llm.ollama.temperature', 0.0),
+                    'num_ctx' => (int) config('llm.ollama.num_ctx', 16384),
+                ],
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $userText],
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            Log::warning('Psychiatrist conclusion Ollama HTTP error', ['status' => $response->status()]);
+            return null;
+        }
+
+        return $response->json('message.content');
+    }
+
+    private function askOpenAi(string $systemPrompt, string $userText): ?string
+    {
+        $baseUrl = rtrim(trim((string) config('llm.openai.base_url', 'https://api.openai.com/v1')), '/');
+        $apiKey = trim((string) config('llm.openai.api_key'));
+        $model = trim((string) config('llm.openai.model'));
+        if ($apiKey === '' || $model === '') return null;
+
+        $response = Http::timeout((int) config('llm.openai.timeout', 120))
+            ->withToken($apiKey)
+            ->acceptJson()
+            ->post($baseUrl . '/chat/completions', [
+                'model' => $model,
+                'temperature' => (float) config('llm.openai.temperature', 0.0),
+                'response_format' => ['type' => 'json_object'],
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $userText],
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            Log::warning('Psychiatrist conclusion OpenAI HTTP error', ['status' => $response->status()]);
+            return null;
+        }
+
+        return $response->json('choices.0.message.content');
+    }
+
+    private function decodeJson(string $raw): ?array
+    {
+        $raw = trim($raw);
+        $raw = preg_replace('/^```(?:json)?\s*/i', '', $raw) ?? $raw;
+        $raw = preg_replace('/\s*```$/', '', $raw) ?? $raw;
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded)) return $decoded;
+
+        $start = strpos($raw, '{');
+        $end = strrpos($raw, '}');
+        if ($start === false || $end === false || $end <= $start) return null;
+
+        $decoded = json_decode(substr($raw, $start, $end - $start + 1), true);
+        return is_array($decoded) ? $decoded : null;
+    }
+}

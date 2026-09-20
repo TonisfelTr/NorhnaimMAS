@@ -1,3 +1,5 @@
+import '../css/medical_card_certificates.css';
+import '../sass/medical_card.sass';
 import * as bootstrap from 'bootstrap';
 import { EditorState, EditorSelection, StateEffect, StateField } from '@codemirror/state';
 import {
@@ -6838,8 +6840,1147 @@ $('.js-patient-select').select2({
     }
 });
 
+/**
+ * Инициализация модального окна анамнеза и ИИ-анализатора.
+ *
+ * Важно: этот блок должен вызываться из общего DOMContentLoaded.
+ * В текущей версии medical_card.js разметка анализатора есть в Blade,
+ * но обработчиков #btnRunAiAnalyze и ручного режима не было.
+ */
+function initAnamnesisModal() {
+    const modal = qs('#modalAddAnamnesis');
+
+    if (!modal || modal.dataset.anamnesisInit === '1') {
+        return;
+    }
+
+    modal.dataset.anamnesisInit = '1';
+
+    const form = qs('form.modal-content', modal);
+    const textarea = qs('#anamnesisEditor', modal);
+    const textError = qs('#textError', modal);
+
+    const runButton = qs('#btnRunAiAnalyze', modal);
+    const insertButton = qs('#btnInsertSummary', modal);
+    const appendButton = qs('#btnAppendSummary', modal);
+    const resultBox = qs('#aiResultBox', modal);
+    const separator = qs('#aiSep', modal);
+    const loading = qs('#aiLoading', modal);
+    let elapsedTime = qs('#aiElapsedTime', modal);
+    let remainingTime = qs('#aiRemainingTime', modal);
+    let estimateLabel = qs('#aiEstimateLabel', modal);
+    let estimatedProgress = qs('#aiEstimatedProgress', modal);
+
+    function ensureAnalysisTimingUi() {
+        if (!loading) {
+            return;
+        }
+
+        loading.style.flexDirection = 'column';
+        loading.style.gap = '8px';
+
+        let mainRow = qs('[data-ai-loading-main]', loading);
+
+        if (!mainRow) {
+            mainRow = document.createElement('div');
+            mainRow.dataset.aiLoadingMain = '1';
+            mainRow.className = 'd-flex align-items-center justify-content-center';
+
+            const spinner = qs('.spinner-border', loading);
+            const label = Array.from(loading.children).find(element => (
+                element.tagName === 'SPAN'
+                && element.textContent?.includes('Анализируем')
+            ));
+
+            if (spinner) {
+                mainRow.appendChild(spinner);
+            }
+
+            if (label) {
+                label.classList.add('ms-2');
+                mainRow.appendChild(label);
+            }
+
+            loading.prepend(mainRow);
+        }
+
+        let timingBox = qs('[data-ai-timing-box]', loading);
+
+        if (!timingBox) {
+            timingBox = document.createElement('div');
+            timingBox.dataset.aiTimingBox = '1';
+            timingBox.className = 'w-100 text-center';
+            timingBox.innerHTML = `
+                <div class="small fw-semibold">
+                    Прошло: <span id="aiElapsedTime">00:00</span>
+                    <span class="mx-1">·</span>
+                    Осталось примерно: <span id="aiRemainingTime">—</span>
+                </div>
+                <div id="aiEstimateLabel" class="small text-muted mt-1">
+                    Оставшееся время приблизительное
+                </div>
+                <div class="progress mt-2" style="height:4px;">
+                    <div
+                        id="aiEstimatedProgress"
+                        class="progress-bar progress-bar-striped progress-bar-animated"
+                        role="progressbar"
+                        style="width:2%"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="2"
+                    ></div>
+                </div>
+            `;
+            loading.appendChild(timingBox);
+        }
+
+        elapsedTime = qs('#aiElapsedTime', loading);
+        remainingTime = qs('#aiRemainingTime', loading);
+        estimateLabel = qs('#aiEstimateLabel', loading);
+        estimatedProgress = qs('#aiEstimatedProgress', loading);
+    }
+
+    ensureAnalysisTimingUi();
+    const diagnosesTitle = qs('#aiDiagTitle', modal);
+    const diagnosesBox = qs('#aiDiagnoses', modal);
+    const symptomsTitle = qs('#aiSymTitle', modal);
+    const symptomsBox = qs('#aiSymptoms', modal);
+
+    const diagnosisCodeInput = qs('#diagCodeInput', modal);
+    const diagnosisTitleInput = qs('#diagTitleInput', modal);
+    const symptomsJsonInput = qs('#symptomsJsonInput', modal);
+    const sourceInput = qs('#diagSource', modal);
+
+    const aiSetCurrent = qs('#ai-set-current', modal);
+    const manualSetCurrent = qs('#manual-set-current', modal);
+
+    const manualDiagnosisSearch = qs('#diagnosisSearch', modal);
+    const manualDiagnosisMenu = qs('#diagnosisMenu', modal);
+    const manualSymptomsList = qs('#m-sym-list', modal);
+    const manualSymptomsInput = qs('#m-sym-input', modal);
+    const manualSymptomsAdd = qs('#m-sym-add', modal);
+    const manualSymptomsClear = qs('#m-sym-clear', modal);
+
+    const tabAi = qs('#tab-ai', modal);
+    const tabManual = qs('#tab-manual', modal);
+
+    const analyzeUrl = modal.dataset.apiAnalyze || '';
+    const patientId = Number(modal.dataset.patientId || 0) || null;
+
+    let lastSummary = '';
+    let aiDiagnoses = [];
+    let selectedManualDiagnosis = null;
+    const manualSymptoms = new Set();
+
+    const analysisTimingStorageKey = 'anamnesisAnalyzerTimingV2';
+    const analysisTimingHistoryLimit = 12;
+    let analysisTimerId = null;
+    let analysisStartedAt = 0;
+    let analysisEstimateMs = 0;
+    let analysisSentenceTotal = 0;
+    let analysisEstimateSource = 'default';
+
+    let setAsCurrentInput = form?.querySelector(
+        'input[type="hidden"][name="set_as_current"]'
+    ) || null;
+
+    if (form && !setAsCurrentInput) {
+        setAsCurrentInput = document.createElement('input');
+        setAsCurrentInput.type = 'hidden';
+        setAsCurrentInput.name = 'set_as_current';
+        setAsCurrentInput.value = '0';
+        form.appendChild(setAsCurrentInput);
+    }
+
+    const hide = (element, value = true) => {
+        element?.classList.toggle('d-none', value);
+    };
+
+    const show = element => hide(element, false);
+    const normalize = value => String(value ?? '').trim().toLowerCase();
+
+    function sentenceCount(text) {
+        return (String(text || '').match(/[.!?…]+(?=\s|$)/g) || []).length;
+    }
+
+    function formatAnalysisDuration(milliseconds) {
+        const totalSeconds = Math.max(
+            0,
+            Math.floor(Number(milliseconds || 0) / 1000)
+        );
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        if (hours > 0) {
+            return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function readAnalysisTimingHistory() {
+        try {
+            const parsed = JSON.parse(
+                window.localStorage.getItem(analysisTimingStorageKey) || '[]'
+            );
+
+            if (!Array.isArray(parsed)) {
+                return [];
+            }
+
+            return parsed
+                .map(item => ({
+                    ms: Number(item?.ms || 0),
+                    sentences: Number(item?.sentences || 0)
+                }))
+                .filter(item => (
+                    Number.isFinite(item.ms)
+                    && item.ms >= 3000
+                    && item.ms <= 900000
+                    && Number.isFinite(item.sentences)
+                    && item.sentences > 0
+                ))
+                .slice(-analysisTimingHistoryLimit);
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function saveAnalysisTimingSample(milliseconds, sentences) {
+        const duration = Math.round(Number(milliseconds || 0));
+        const sentenceTotal = Math.max(1, Math.round(Number(sentences || 0)));
+
+        if (duration < 3000 || duration > 900000) {
+            return;
+        }
+
+        try {
+            const history = readAnalysisTimingHistory();
+            history.push({
+                ms: duration,
+                sentences: sentenceTotal
+            });
+
+            window.localStorage.setItem(
+                analysisTimingStorageKey,
+                JSON.stringify(history.slice(-analysisTimingHistoryLimit))
+            );
+        } catch (error) {
+        }
+    }
+
+    function median(values) {
+        const numbers = values
+            .map(Number)
+            .filter(Number.isFinite)
+            .sort((a, b) => a - b);
+
+        if (!numbers.length) {
+            return 0;
+        }
+
+        const middle = Math.floor(numbers.length / 2);
+
+        return numbers.length % 2
+            ? numbers[middle]
+            : (numbers[middle - 1] + numbers[middle]) / 2;
+    }
+
+    function estimateAnalysisDuration(text) {
+        const sentences = Math.max(15, sentenceCount(text));
+        const fallback = Math.min(
+            360000,
+            Math.max(35000, 22000 + sentences * 1500)
+        );
+        const history = readAnalysisTimingHistory();
+
+        if (!history.length) {
+            analysisEstimateSource = 'default';
+            return fallback;
+        }
+
+        const scaledDurations = history.map(item => {
+            const sampleSentences = Math.max(15, item.sentences);
+            const ratio = sentences / sampleSentences;
+            const lengthFactor = Math.max(
+                0.65,
+                Math.min(1.75, Math.sqrt(ratio))
+            );
+
+            return item.ms * lengthFactor;
+        });
+
+        const historicalEstimate = median(scaledDurations) || fallback;
+        const historyWeight = Math.min(0.9, 0.5 + history.length * 0.04);
+
+        analysisEstimateSource = `history:${history.length}`;
+
+        return Math.min(
+            600000,
+            Math.max(
+                20000,
+                Math.round(
+                    fallback * (1 - historyWeight)
+                    + historicalEstimate * historyWeight
+                )
+            )
+        );
+    }
+
+    function updateAnalysisTiming() {
+        if (!analysisStartedAt) {
+            return;
+        }
+
+        const elapsed = Date.now() - analysisStartedAt;
+        let effectiveEstimate = Math.max(analysisEstimateMs, 1000);
+
+        if (elapsed >= effectiveEstimate) {
+            const extension = Math.max(
+                15000,
+                Math.min(60000, analysisEstimateMs * 0.25)
+            );
+
+            while (elapsed >= effectiveEstimate) {
+                effectiveEstimate += extension;
+            }
+        }
+
+        const remaining = Math.max(1000, effectiveEstimate - elapsed);
+        const progress = Math.min(
+            94,
+            Math.max(2, Math.round((elapsed / effectiveEstimate) * 100))
+        );
+
+        if (elapsedTime) {
+            elapsedTime.textContent = formatAnalysisDuration(elapsed);
+        }
+
+        if (remainingTime) {
+            remainingTime.textContent = formatAnalysisDuration(remaining);
+        }
+
+        if (estimatedProgress) {
+            estimatedProgress.style.width = `${progress}%`;
+            estimatedProgress.setAttribute('aria-valuenow', String(progress));
+        }
+    }
+
+    function startAnalysisTiming(text) {
+        if (analysisTimerId) {
+            window.clearInterval(analysisTimerId);
+        }
+
+        analysisSentenceTotal = Math.max(1, sentenceCount(text));
+        analysisEstimateMs = estimateAnalysisDuration(text);
+        analysisStartedAt = Date.now();
+
+        if (elapsedTime) {
+            elapsedTime.textContent = '00:00';
+        }
+
+        if (remainingTime) {
+            remainingTime.textContent = formatAnalysisDuration(analysisEstimateMs);
+        }
+
+        if (estimatedProgress) {
+            estimatedProgress.style.width = '2%';
+            estimatedProgress.setAttribute('aria-valuenow', '2');
+        }
+
+        if (estimateLabel) {
+            const historyCount = Number(
+                String(analysisEstimateSource).split(':')[1] || 0
+            );
+
+            estimateLabel.textContent = historyCount > 0
+                ? `Оценка по ${historyCount} предыдущим успешным анализам`
+                : 'Оставшееся время приблизительное; после нескольких запусков оценка станет точнее';
+        }
+
+        updateAnalysisTiming();
+        analysisTimerId = window.setInterval(updateAnalysisTiming, 1000);
+    }
+
+    function stopAnalysisTiming(saveSample = false) {
+        if (analysisTimerId) {
+            window.clearInterval(analysisTimerId);
+            analysisTimerId = null;
+        }
+
+        if (!analysisStartedAt) {
+            return 0;
+        }
+
+        const elapsed = Date.now() - analysisStartedAt;
+
+        if (saveSample) {
+            saveAnalysisTimingSample(elapsed, analysisSentenceTotal);
+        }
+
+        if (elapsedTime) {
+            elapsedTime.textContent = formatAnalysisDuration(elapsed);
+        }
+
+        if (remainingTime) {
+            remainingTime.textContent = '00:00';
+        }
+
+        if (estimatedProgress) {
+            estimatedProgress.style.width = '100%';
+            estimatedProgress.setAttribute('aria-valuenow', '100');
+        }
+
+        analysisStartedAt = 0;
+        analysisEstimateMs = 0;
+        analysisSentenceTotal = 0;
+
+        return elapsed;
+    }
+
+    function getCurrentSource() {
+        if (tabManual?.classList.contains('active')) {
+            return 'manual';
+        }
+
+        return 'ai';
+    }
+
+    function syncSetAsCurrent() {
+        if (!setAsCurrentInput) {
+            return;
+        }
+
+        const source = sourceInput?.value || getCurrentSource();
+        const checkbox = source === 'manual'
+            ? manualSetCurrent
+            : aiSetCurrent;
+
+        setAsCurrentInput.value = checkbox?.checked ? '1' : '0';
+    }
+
+    function resetHiddenFields() {
+        if (diagnosisCodeInput) diagnosisCodeInput.value = '';
+        if (diagnosisTitleInput) diagnosisTitleInput.value = '';
+        if (symptomsJsonInput) symptomsJsonInput.value = '[]';
+        syncSetAsCurrent();
+    }
+
+    function resetAiUi() {
+        hide(resultBox);
+        hide(separator);
+        hide(diagnosesTitle);
+        hide(diagnosesBox);
+        hide(symptomsTitle);
+        hide(symptomsBox);
+
+        if (resultBox) resultBox.innerHTML = '';
+        if (diagnosesBox) diagnosesBox.innerHTML = '';
+        if (symptomsBox) symptomsBox.innerHTML = '';
+
+        lastSummary = '';
+        aiDiagnoses = [];
+
+        if (insertButton) insertButton.disabled = true;
+        if (appendButton) appendButton.disabled = true;
+    }
+
+    function setBusy(value) {
+        if (runButton) runButton.disabled = value;
+        hide(loading, !value);
+
+        if (insertButton) {
+            insertButton.disabled = value || !lastSummary;
+        }
+
+        if (appendButton) {
+            appendButton.disabled = value || !lastSummary;
+        }
+    }
+
+    function normalizeSymptom(item) {
+        if (typeof item === 'string' || typeof item === 'number') {
+            return String(item).trim();
+        }
+
+        if (!item || typeof item !== 'object') {
+            return '';
+        }
+
+        return String(
+            item.title
+            ?? item.name
+            ?? item.symptom
+            ?? item.text
+            ?? ''
+        ).trim();
+    }
+
+    function extractSymptoms(data) {
+        const values = [
+            ...toArray(data?.raw?.matched_symptoms),
+            ...toArray(data?.matched_symptoms),
+            ...toArray(data?.symptoms)
+        ]
+            .map(normalizeSymptom)
+            .filter(Boolean);
+
+        return Array.from(new Map(
+            values.map(value => [normalize(value), value])
+        ).values());
+    }
+
+    function collectAiSymptoms() {
+        return qsa('input[data-ai-symptom]', symptomsBox)
+            .filter(input => input.checked)
+            .map(input => input.dataset.aiSymptom || '')
+            .filter(Boolean);
+    }
+
+    function syncHiddenFromAi() {
+        const checked = qs('input[name="aiDiagnosis"]:checked', diagnosesBox);
+
+        if (diagnosisCodeInput) {
+            diagnosisCodeInput.value = checked?.value || '';
+        }
+
+        if (diagnosisTitleInput) {
+            diagnosisTitleInput.value = checked?.dataset.title || '';
+        }
+
+        if (symptomsJsonInput) {
+            symptomsJsonInput.value = JSON.stringify(collectAiSymptoms());
+        }
+
+        if (sourceInput) {
+            sourceInput.value = 'ai';
+        }
+
+        syncSetAsCurrent();
+    }
+
+    function syncHiddenFromManual() {
+        if (diagnosisCodeInput) {
+            diagnosisCodeInput.value = selectedManualDiagnosis?.code || '';
+        }
+
+        if (diagnosisTitleInput) {
+            diagnosisTitleInput.value = selectedManualDiagnosis?.title || '';
+        }
+
+        if (symptomsJsonInput) {
+            symptomsJsonInput.value = JSON.stringify(Array.from(manualSymptoms));
+        }
+
+        if (sourceInput) {
+            sourceInput.value = 'manual';
+        }
+
+        syncSetAsCurrent();
+    }
+
+
+    function isValidAiDiagnosis(item) {
+        if (!item || typeof item !== 'object') {
+            return false;
+        }
+
+        const code = String(item.code ?? '').trim();
+        const title = String(item.title ?? item.name ?? '').trim();
+
+        if (
+            !code
+            || !title
+            || code === '—'
+            || title === '—'
+            || normalize(title) === 'без названия'
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function analyzerUnavailableReason(data, validDiagnoses) {
+        const errorCode = String(data?.error ?? '').trim();
+        const message = String(data?.message ?? '').trim();
+
+        if (errorCode) {
+            return message || `Ошибка анализатора: ${errorCode}`;
+        }
+
+        const usingLlm = data?.raw?.prompt_meta?.using_llm
+            ?? data?.prompt_meta?.using_llm
+            ?? null;
+
+        if (usingLlm === false) {
+            return 'ИИ-анализатор сейчас недоступен. Автоматическое определение диагноза не выполнено.';
+        }
+
+        const returnedDiagnoses = toArray(data?.diagnoses).filter(Boolean);
+
+        if (returnedDiagnoses.length > 0 && validDiagnoses.length === 0) {
+            return 'ИИ-анализатор не вернул корректный результат. Автоматическое определение диагноза не выполнено.';
+        }
+
+        if (returnedDiagnoses.length === 0 && validDiagnoses.length === 0) {
+            return 'ИИ-анализатор не смог сформировать диагностический результат.';
+        }
+
+        return '';
+    }
+
+    function renderAnalyzerUnavailable(message) {
+        aiDiagnoses = [];
+        lastSummary = '';
+
+        hide(separator);
+        hide(diagnosesTitle);
+        hide(diagnosesBox);
+        hide(symptomsTitle);
+        hide(symptomsBox);
+
+        if (diagnosesBox) {
+            diagnosesBox.innerHTML = '';
+        }
+
+        if (symptomsBox) {
+            symptomsBox.innerHTML = '';
+        }
+
+        if (resultBox) {
+            resultBox.innerHTML = `
+                <div class="alert alert-danger py-2 px-3 mb-0">
+                    <div class="fw-semibold mb-1">
+                        ИИ-анализатор недоступен
+                    </div>
+                    <div>
+                        ${escapeHtml(message || 'Автоматический анализ не выполнен.')}
+                    </div>
+                    <div class="small mt-1">
+                        Попробуйте повторить анализ позже или используйте вкладку «Вручную».
+                    </div>
+                </div>
+            `;
+            show(resultBox);
+        }
+
+        if (insertButton) {
+            insertButton.disabled = true;
+        }
+
+        if (appendButton) {
+            appendButton.disabled = true;
+        }
+
+        if (aiSetCurrent) {
+            aiSetCurrent.checked = false;
+            aiSetCurrent.disabled = true;
+        }
+
+        resetHiddenFields();
+    }
+
+    function renderAi(data) {
+        aiDiagnoses = toArray(data?.diagnoses)
+            .filter(isValidAiDiagnosis);
+
+        const unavailableReason = analyzerUnavailableReason(
+            data,
+            aiDiagnoses
+        );
+
+        if (unavailableReason) {
+            renderAnalyzerUnavailable(unavailableReason);
+            return false;
+        }
+
+        if (aiSetCurrent) {
+            aiSetCurrent.disabled = false;
+        }
+
+        const symptoms = extractSymptoms(data);
+        const flags = toArray(data?.flags)
+            .map(item => normalizeSymptom(item) || String(item ?? '').trim())
+            .filter(Boolean);
+
+        const primary = aiDiagnoses[0] || null;
+
+        lastSummary = String(data?.summary || '').trim();
+
+        if (!lastSummary) {
+            lastSummary = [
+                primary
+                    ? `Предположительно: ${primary.title || '—'} (${primary.code || '—'})`
+                    : '',
+                symptoms.length
+                    ? `Ключевые симптомы: ${symptoms.join(', ')}`
+                    : '',
+                flags.length
+                    ? `Флаги риска: ${flags.join('. ')}`
+                    : ''
+            ].filter(Boolean).join('\n');
+        }
+
+        if (resultBox) {
+            resultBox.innerHTML = [
+                lastSummary
+                    ? `<div class="alert alert-light border py-2 px-3 mb-2">${escapeHtml(lastSummary).replace(/\n/g, '<br>')}</div>`
+                    : '',
+                flags.length
+                    ? `<div class="alert alert-warning py-2 px-3 mb-0"><strong>Обратите внимание:</strong> ${flags.map(escapeHtml).join('<br>')}</div>`
+                    : ''
+            ].join('');
+            show(resultBox);
+        }
+
+        show(separator);
+
+        if (aiDiagnoses.length && diagnosesBox) {
+            diagnosesBox.innerHTML = aiDiagnoses.slice(0, 5).map((item, index) => {
+                const code = String(item?.code || '').trim();
+                const title = String(item?.title || item?.name || '').trim();
+                const score = item?.score;
+                const requiredMatched = Number(item?.required_matched ?? 0);
+                const requiredNeeded = Number(item?.required_needed ?? 0);
+                const relativeMatched = Number(item?.relative_matched ?? 0);
+                const relativeNeeded = Number(item?.relative_needed ?? 0);
+                const criteriaText = (
+                    requiredNeeded > 0
+                    || relativeNeeded > 0
+                )
+                    ? `обяз.: ${requiredMatched}/${requiredNeeded} · доп.: ${relativeMatched}/${relativeNeeded}`
+                    : '';
+
+                return `
+                    <div class="form-check mb-2">
+                        <input
+                            class="form-check-input"
+                            type="radio"
+                            name="aiDiagnosis"
+                            id="ai_diag_${index}"
+                            value="${escapeHtml(code)}"
+                            data-title="${escapeHtml(title)}"
+                            ${index === 0 ? 'checked' : ''}
+                        >
+                        <label class="form-check-label" for="ai_diag_${index}">
+                            <span class="badge bg-light text-dark border me-2">${escapeHtml(code || '—')}</span>
+                            ${escapeHtml(title || 'Без названия')}
+                            ${score !== undefined && score !== null
+                                ? `<span class="text-muted"> (${escapeHtml(score)}%)</span>`
+                                : ''}
+                            ${criteriaText
+                                ? `<div class="small text-muted mt-1">${escapeHtml(criteriaText)}</div>`
+                                : ''}
+                        </label>
+                    </div>
+                `;
+            }).join('');
+
+            show(diagnosesTitle);
+            show(diagnosesBox);
+        }
+
+        if (symptoms.length && symptomsBox) {
+            symptomsBox.innerHTML = symptoms.map((symptom, index) => `
+                <div class="form-check mb-1">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="ai_sym_${index}"
+                        data-ai-symptom="${escapeHtml(symptom)}"
+                        checked
+                    >
+                    <label class="form-check-label" for="ai_sym_${index}">
+                        ${escapeHtml(symptom)}
+                    </label>
+                </div>
+            `).join('');
+
+            show(symptomsTitle);
+            show(symptomsBox);
+        }
+
+        if (!aiDiagnoses.length && diagnosesBox) {
+            diagnosesBox.innerHTML = '<div class="text-muted small">Диагнозы не предложены.</div>';
+            show(diagnosesTitle);
+            show(diagnosesBox);
+        }
+
+        if (!symptoms.length && symptomsBox) {
+            symptomsBox.innerHTML = '<div class="text-muted small">Симптомы не выделены.</div>';
+            show(symptomsTitle);
+            show(symptomsBox);
+        }
+
+        if (insertButton) insertButton.disabled = !lastSummary;
+        if (appendButton) appendButton.disabled = !lastSummary;
+
+        syncHiddenFromAi();
+
+        return true;
+    }
+
+    async function analyze() {
+        if (!textarea) {
+            console.error('[anamnesis] #anamnesisEditor не найден');
+            return;
+        }
+
+        if (!analyzeUrl) {
+            console.error('[anamnesis] data-api-analyze пуст');
+
+            if (resultBox) {
+                resultBox.innerHTML = '<div class="text-danger">Не задан URL анализатора.</div>';
+                show(resultBox);
+            }
+
+            return;
+        }
+
+        const text = textarea.value.trim();
+
+        resetAiUi();
+        resetHiddenFields();
+
+        if (!text) {
+            if (resultBox) {
+                resultBox.innerHTML = '<div class="text-danger">Сначала заполните текст анамнеза.</div>';
+                show(resultBox);
+            }
+            return;
+        }
+
+        if (sentenceCount(text) < 15) {
+            if (resultBox) {
+                resultBox.innerHTML = '<div class="text-danger">Для анализа нужно не менее 15 предложений.</div>';
+                show(resultBox);
+            }
+            return;
+        }
+
+        setBusy(true);
+        startAnalysisTiming(text);
+        let analysisSucceeded = false;
+
+        try {
+            const data = await fetchJson(analyzeUrl, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf()
+                },
+                body: JSON.stringify({
+                    text,
+                    patient_id: patientId
+                })
+            });
+
+            analysisSucceeded = renderAi(data || {}) === true;
+        } catch (error) {
+            console.error('[anamnesis] analyze error:', error);
+
+            renderAnalyzerUnavailable(
+                error?.message
+                    ? `Ошибка анализа: ${error.message}`
+                    : 'Не удалось связаться с ИИ-анализатором.'
+            );
+        } finally {
+            stopAnalysisTiming(analysisSucceeded);
+            setBusy(false);
+        }
+    }
+
+    async function searchManualDiagnosis(query) {
+        const value = String(query || '').trim();
+
+        if (value.length < 2) {
+            return [];
+        }
+
+        const data = await fetchJson(
+            `/api/diagnoses?q=${encodeURIComponent(value)}&page=1`,
+            {
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }
+        );
+
+        return toArray(data?.results || data?.data || data);
+    }
+
+    function renderManualDiagnosisMenu(items) {
+        if (!manualDiagnosisMenu) {
+            return;
+        }
+
+        if (!items.length) {
+            manualDiagnosisMenu.innerHTML = '';
+            manualDiagnosisMenu.classList.remove('show');
+            return;
+        }
+
+        manualDiagnosisMenu.innerHTML = items.slice(0, 10).map(item => {
+            const code = String(item?.code ?? item?.value ?? item?.id ?? '').trim();
+            const title = String(item?.title ?? item?.name ?? item?.text ?? '').trim();
+
+            return `
+                <button
+                    type="button"
+                    class="dropdown-item"
+                    data-code="${escapeHtml(code)}"
+                    data-title="${escapeHtml(title)}"
+                >
+                    <strong>${escapeHtml(code)}</strong>
+                    ${escapeHtml(title)}
+                </button>
+            `;
+        }).join('');
+
+        manualDiagnosisMenu.classList.add('show');
+    }
+
+    function renderManualSymptoms() {
+        if (!manualSymptomsList) {
+            return;
+        }
+
+        const values = Array.from(manualSymptoms);
+
+        manualSymptomsList.innerHTML = values.length
+            ? values.map(symptom => `
+                <span class="badge text-bg-light border me-1 mb-1">
+                    ${escapeHtml(symptom)}
+                    <button
+                        type="button"
+                        class="btn-close ms-1"
+                        style="font-size:.55rem"
+                        aria-label="Удалить"
+                        data-remove-symptom="${escapeHtml(symptom)}"
+                    ></button>
+                </span>
+            `).join('')
+            : '<div class="text-muted small px-2 py-1">Симптомы не добавлены.</div>';
+
+        syncHiddenFromManual();
+    }
+
+    function addManualSymptom(value) {
+        const symptom = String(value || '').trim();
+
+        if (!symptom) {
+            return;
+        }
+
+        manualSymptoms.add(symptom);
+
+        if (manualSymptomsInput) {
+            manualSymptomsInput.value = '';
+        }
+
+        renderManualSymptoms();
+    }
+
+    runButton?.addEventListener('click', analyze);
+
+    insertButton?.addEventListener('click', () => {
+        if (!textarea || !lastSummary) {
+            return;
+        }
+
+        textarea.value = lastSummary;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        textarea.focus();
+    });
+
+    appendButton?.addEventListener('click', () => {
+        if (!textarea || !lastSummary) {
+            return;
+        }
+
+        const current = textarea.value.trimEnd();
+        textarea.value = current
+            ? `${current}\n\n${lastSummary}`
+            : lastSummary;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        textarea.focus();
+    });
+
+    diagnosesBox?.addEventListener('change', event => {
+        if (event.target.matches('input[name="aiDiagnosis"]')) {
+            syncHiddenFromAi();
+        }
+    });
+
+    symptomsBox?.addEventListener('change', event => {
+        if (event.target.matches('input[data-ai-symptom]')) {
+            syncHiddenFromAi();
+        }
+    });
+
+    aiSetCurrent?.addEventListener('change', syncSetAsCurrent);
+    manualSetCurrent?.addEventListener('change', syncSetAsCurrent);
+
+    tabAi?.addEventListener('shown.bs.tab', () => {
+        if (sourceInput) sourceInput.value = 'ai';
+        syncHiddenFromAi();
+    });
+
+    tabManual?.addEventListener('shown.bs.tab', () => {
+        if (sourceInput) sourceInput.value = 'manual';
+        syncHiddenFromManual();
+    });
+
+    manualDiagnosisSearch?.addEventListener(
+        'input',
+        debounce(async () => {
+            try {
+                renderManualDiagnosisMenu(
+                    await searchManualDiagnosis(manualDiagnosisSearch.value)
+                );
+            } catch (error) {
+                console.error('[anamnesis] diagnosis search error:', error);
+                renderManualDiagnosisMenu([]);
+            }
+        }, 250)
+    );
+
+    manualDiagnosisMenu?.addEventListener('click', event => {
+        const item = event.target.closest('[data-code]');
+
+        if (!item) {
+            return;
+        }
+
+        selectedManualDiagnosis = {
+            code: item.dataset.code || '',
+            title: item.dataset.title || ''
+        };
+
+        if (manualDiagnosisSearch) {
+            manualDiagnosisSearch.value = [
+                selectedManualDiagnosis.code,
+                selectedManualDiagnosis.title
+            ].filter(Boolean).join(' — ');
+        }
+
+        manualDiagnosisMenu.classList.remove('show');
+        syncHiddenFromManual();
+    });
+
+    manualSymptomsAdd?.addEventListener('click', () => {
+        addManualSymptom(manualSymptomsInput?.value);
+    });
+
+    manualSymptomsInput?.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') {
+            return;
+        }
+
+        event.preventDefault();
+        addManualSymptom(manualSymptomsInput.value);
+    });
+
+    manualSymptomsClear?.addEventListener('click', () => {
+        manualSymptoms.clear();
+        renderManualSymptoms();
+    });
+
+    qsa('.m-quick', modal).forEach(button => {
+        button.addEventListener('click', () => {
+            addManualSymptom(button.dataset.sym);
+        });
+    });
+
+    manualSymptomsList?.addEventListener('click', event => {
+        const button = event.target.closest('[data-remove-symptom]');
+
+        if (!button) {
+            return;
+        }
+
+        manualSymptoms.delete(button.dataset.removeSymptom);
+        renderManualSymptoms();
+    });
+
+    document.addEventListener('click', event => {
+        if (
+            manualDiagnosisMenu
+            && !manualDiagnosisMenu.contains(event.target)
+            && event.target !== manualDiagnosisSearch
+        ) {
+            manualDiagnosisMenu.classList.remove('show');
+        }
+    });
+
+    form?.addEventListener('submit', event => {
+        const source = getCurrentSource();
+
+        if (sourceInput) {
+            sourceInput.value = source;
+        }
+
+        if (source === 'manual') {
+            syncHiddenFromManual();
+        } else {
+            syncHiddenFromAi();
+        }
+
+        const text = textarea?.value.trim() || '';
+
+        if (!text) {
+            event.preventDefault();
+            textarea?.classList.add('is-invalid');
+            textError?.classList.remove('d-none');
+            textarea?.focus();
+            return;
+        }
+
+        textarea?.classList.remove('is-invalid');
+        textError?.classList.add('d-none');
+
+        if (!diagnosisCodeInput?.value) {
+            event.preventDefault();
+
+            const message = source === 'manual'
+                ? 'Выберите диагноз во вкладке «Вручную».'
+                : 'Сначала выполните анализ и выберите предложенный диагноз.';
+
+            if (resultBox) {
+                resultBox.innerHTML = `<div class="alert alert-danger py-2 px-3 mb-0">${escapeHtml(message)}</div>`;
+                show(resultBox);
+            } else {
+                window.alert(message);
+            }
+        }
+    });
+
+    modal.addEventListener('shown.bs.modal', () => {
+        textarea?.focus();
+        syncSetAsCurrent();
+    });
+
+    renderManualSymptoms();
+    resetAiUi();
+    resetHiddenFields();
+
+    if (sourceInput) {
+        sourceInput.value = 'ai';
+    }
+
+    if (modal.dataset.openOnLoad === '1') {
+        setTimeout(() => getBootstrapModal(modal)?.show(), 50);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initTooltips();
+    initAnamnesisModal();
     initPatientInfoForm();
     initConfirmForms();
     initDefaultTab();
@@ -6857,3 +7998,538 @@ document.addEventListener('DOMContentLoaded', () => {
     initPrescriptionDrugSelect2();
     initTestAssignments();
 });
+
+/*
+ * Справки — UI-этап. Работает только с полями новых диалогов.
+ * Нет fetch, отправки форм, localStorage и записи в базу.
+ * Существующий редактор эпикриза не изменяется.
+ */
+function initMedicalCardCertificatesUi() {
+    const certificatePane = document.getElementById('pane-certificates');
+    const certificateModals = Array.from(document.querySelectorAll('[data-cert-modal]'));
+
+    if (!certificatePane || certificatePane.dataset.certificatesInitialized === '1') {
+        return;
+    }
+
+    certificatePane.dataset.certificatesInitialized = '1';
+    const query = (root, selector) => root.querySelector(selector);
+    const all = (root, selector) => Array.from(root.querySelectorAll(selector));
+    let printFrame = null;
+
+    const dateText = value => {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ''));
+        return match ? `${match[3]}.${match[2]}.${match[1]}` : '';
+    };
+
+    const node = (tag, className, text) => {
+        const element = document.createElement(tag);
+        if (className) element.className = className;
+        if (text !== undefined) element.textContent = String(text);
+        return element;
+    };
+
+    const showError = (modal, message = '') => {
+        const error = query(modal, '[data-cert-error]');
+        if (!error) return;
+        error.textContent = message;
+        error.hidden = !message;
+    };
+
+    const setMode = (modal, preview) => {
+        query(modal, '[data-cert-editor]').hidden = preview;
+        query(modal, '[data-cert-preview-panel]').hidden = !preview;
+        all(modal, '.mc-cert-mode [data-cert-edit]').forEach(button => {
+            button.classList.toggle('is-active', !preview);
+            button.setAttribute('aria-pressed', String(!preview));
+        });
+        all(modal, '.mc-cert-mode [data-cert-preview]').forEach(button => {
+            button.classList.toggle('is-active', preview);
+            button.setAttribute('aria-pressed', String(preview));
+        });
+        bootstrap.Modal.getInstance(modal)?.handleUpdate();
+    };
+
+    function syncConditionalFields(modal) {
+        const periodFields = query(modal, '[data-cert-period-fields]');
+        if (periodFields) {
+            const period = query(modal, '[data-cert-period]:checked')?.value;
+            const isRange = period === 'range';
+            periodFields.hidden = !isRange;
+            all(periodFields, 'input').forEach(input => {
+                input.disabled = !isRange;
+                input.required = isRange;
+                input.setCustomValidity('');
+            });
+        }
+
+        const includeDiagnosis = query(modal, '[data-cert-include-diagnosis]');
+        if (includeDiagnosis) {
+            const enabled = includeDiagnosis.checked;
+            query(modal, '[data-cert-diagnosis-block]').hidden = !enabled;
+            query(modal, '[data-cert-diagnosis]').disabled = !enabled;
+        }
+
+        const certificateKind = query(modal, '#cert-certificate-kind');
+        const certificateText = query(modal, '[data-cert-certificate-text]');
+        if (certificateKind && certificateText) {
+            // Меняется только подсказка, не медицинское утверждение и не введённый текст.
+            const hints = {
+                general: 'Укажите только подтверждённые сведения для выдачи справки',
+                observation: 'Укажите подтверждённые сведения о наблюдении. Даты и факт наблюдения не подставляются автоматически.',
+                treatment: 'Укажите подтверждённые сведения о лечении и его периоде.',
+            };
+            certificateText.placeholder = hints[certificateKind.value] || hints.general;
+        }
+    }
+
+    function validatePreview(modal) {
+        showError(modal);
+        const from = query(modal, '[data-cert-period-from]');
+        const to = query(modal, '[data-cert-period-to]');
+        if (to) to.setCustomValidity('');
+
+        if (from && to && !from.disabled && from.value && to.value && from.value > to.value) {
+            to.setCustomValidity('Дата окончания периода не может быть раньше даты начала.');
+        }
+
+        const invalid = all(modal, '[data-cert-editor] input, [data-cert-editor] select, [data-cert-editor] textarea')
+            .find(control => !control.disabled && !control.checkValidity());
+
+        if (invalid) {
+            setMode(modal, false);
+            showError(modal, invalid.validationMessage || 'Проверьте заполнение полей формы.');
+            invalid.focus();
+            invalid.reportValidity();
+            return false;
+        }
+        return true;
+    }
+
+    function renderPreview(modal) {
+        const paper = query(modal, '[data-cert-paper]');
+        const kind = query(modal, '[data-cert-document-kind]');
+        const title = kind?.selectedOptions[0]?.textContent.trim() || modal.dataset.certTitle;
+        const doctor = query(modal, '[data-cert-doctor]')?.value.trim() || '';
+        const organization = query(modal, '[data-cert-organization]')?.value.trim() || '';
+        const issued = dateText(query(modal, '[data-cert-issued-date]')?.value);
+        const fragment = document.createDocumentFragment();
+
+        fragment.append(node('div', 'mc-cert-paper__draft', 'МАКЕТ · НЕ СОХРАНЁН В МЕДИЦИНСКОЙ КАРТЕ'));
+        fragment.append(node('div', 'mc-cert-paper__organization', organization || 'Медицинская организация: ____________________'));
+        fragment.append(node('h2', '', title));
+
+        const meta = (label, value) => {
+            const line = node('p', 'mc-cert-paper__meta');
+            line.append(node('strong', '', `${label}: `));
+            line.append(document.createTextNode(value || '____________________'));
+            fragment.append(line);
+        };
+
+        meta('Дата', issued);
+        meta('Пациент', modal.dataset.certPatient);
+        meta('Дата рождения', modal.dataset.certBirth);
+        meta('Номер медицинской карты', modal.dataset.certCard);
+
+        const period = query(modal, '[data-cert-period]:checked');
+        if (period) {
+            meta('Период выписки', period.value === 'range'
+                ? `${dateText(query(modal, '[data-cert-period-from]').value)} — ${dateText(query(modal, '[data-cert-period-to]').value)}`
+                : 'Всё время наблюдения');
+        }
+
+        fragment.append(node('div', 'mc-cert-paper__rule'));
+        all(modal, '[data-cert-field]').forEach(control => {
+            if (control.disabled) return;
+            const section = node('section', 'mc-cert-paper__section');
+            section.append(node('h3', '', control.dataset.certLabel));
+            section.append(node('p', '', control.value.trim() || '____________________'));
+            fragment.append(section);
+        });
+        fragment.append(node('div', 'mc-cert-paper__sign', `Врач: ${doctor || '____________________'}\nПодпись: ____________________`));
+        paper.replaceChildren(fragment);
+        return title;
+    }
+
+    async function printPreview(modal, button) {
+        if (!validatePreview(modal)) return;
+        const title = renderPreview(modal);
+        setMode(modal, true);
+        button.disabled = true;
+        showError(modal);
+
+        if (printFrame) printFrame.remove();
+        const frame = document.createElement('iframe');
+        printFrame = frame;
+        frame.className = 'mc-cert-print-frame';
+        frame.title = 'Печать предварительной формы';
+        frame.setAttribute('aria-hidden', 'true');
+        frame.setAttribute('sandbox', 'allow-same-origin allow-modals');
+        frame.setAttribute('referrerpolicy', 'no-referrer');
+        frame.tabIndex = -1;
+
+        try {
+            // Статический документ не содержит пользовательского HTML или скриптов.
+            const ready = new Promise((resolve, reject) => {
+                const timer = window.setTimeout(() => reject(new Error('print-frame-timeout')), 8000);
+                frame.addEventListener('load', () => {
+                    window.clearTimeout(timer);
+                    resolve();
+                }, { once: true });
+                frame.addEventListener('error', () => {
+                    window.clearTimeout(timer);
+                    reject(new Error('print-frame-error'));
+                }, { once: true });
+            });
+            frame.srcdoc = '<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Макет</title></head><body></body></html>';
+            document.body.append(frame);
+            await ready;
+
+            const printDocument = frame.contentDocument;
+            const printWindow = frame.contentWindow;
+            if (!printDocument || !printWindow) throw new Error('print-frame-unavailable');
+            printDocument.title = `Макет — ${title}`;
+            const style = printDocument.createElement('style');
+            style.textContent = `
+                @page { size: A4; margin: 18mm; }
+                body { margin: 0; color: #000; font: 12pt/1.5 'Times New Roman', serif; }
+                .mc-cert-paper { overflow-wrap: anywhere; }
+                .mc-cert-paper__draft { margin-bottom: 18px; padding: 6px; border: 1px dashed #999; text-align: center; font: 8pt sans-serif; }
+                .mc-cert-paper__organization { text-align: center; font-weight: bold; margin-bottom: 20px; white-space: pre-wrap; }
+                h2 { margin: 0 0 20px; text-align: center; font-size: 16pt; }
+                h3 { margin: 0 0 5px; font-size: 12pt; break-after: avoid; }
+                p { margin: 0; white-space: pre-wrap; orphans: 3; widows: 3; }
+                .mc-cert-paper__meta { margin-bottom: 6px; }
+                .mc-cert-paper__rule { margin: 18px 0; border-top: 1px solid #888; }
+                .mc-cert-paper__section { margin-bottom: 15px; }
+                .mc-cert-paper__sign { margin-top: 30px; white-space: pre-wrap; break-inside: avoid; }
+            `;
+            printDocument.head.append(style);
+            printDocument.body.append(printDocument.importNode(query(modal, '[data-cert-paper]'), true));
+            if (printDocument.fonts?.ready) await printDocument.fonts.ready;
+            await new Promise(resolve => window.setTimeout(resolve, 100));
+            printWindow.addEventListener('afterprint', () => {
+                window.setTimeout(() => {
+                    frame.remove();
+                    if (printFrame === frame) printFrame = null;
+                }, 0);
+            }, { once: true });
+            printWindow.focus();
+            printWindow.print();
+        } catch (error) {
+            frame.remove();
+            if (printFrame === frame) printFrame = null;
+            showError(modal, 'Не удалось открыть печать. Предпросмотр сохранён на экране; повторите попытку.');
+            console.warn('[certificates-ui] Ошибка печати макета:', error);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    const sourceLabels = {
+        anamneses: 'анамнезов',
+        epicrises: 'эпикризов',
+        symptoms: 'симптомов',
+        conditions: 'записей состояния',
+        prescriptions: 'назначений',
+        laboratory_researches: 'лабораторных исследований',
+        instrumental_researches: 'инструментальных исследований',
+        tests: 'тестов',
+    };
+
+    async function generateCertificateAiDraft(modal, button) {
+        const apiUrl = modal.dataset.certAiUrl;
+        const patientId = modal.dataset.certPatientId;
+        const mode = modal.dataset.certAiMode || 'psychiatrist_conclusion';
+        const status = query(modal, '[data-cert-ai-status]');
+
+        const documentLabels = {
+            psychiatrist_conclusion: 'заключения психиатра',
+            medical_extract: 'выписки из медицинской карты',
+            epicrisis: 'эпикриза',
+            medical_certificate: 'медицинской справки',
+            continue_treatment: 'сведений для продолжения лечения',
+        };
+        const documentLabel = documentLabels[mode] || 'документа';
+
+        if (!apiUrl || !patientId) {
+            showError(modal, `Не настроен адрес ИИ-анализатора для ${documentLabel}.`);
+            return;
+        }
+
+        const payload = {
+            mode,
+            patient_id: Number(patientId),
+        };
+
+        if (mode === 'medical_extract') {
+            const periodMode = query(modal, '[data-cert-period]:checked')?.value || 'all';
+            payload.period_mode = periodMode;
+
+            if (periodMode === 'range') {
+                const fromControl = query(modal, '[data-cert-period-from]');
+                const toControl = query(modal, '[data-cert-period-to]');
+                const dateFrom = fromControl?.value || '';
+                const dateTo = toControl?.value || '';
+
+                if (!dateFrom || !dateTo) {
+                    showError(modal, 'Для ИИ-формирования выписки укажите начало и конец периода.');
+                    (dateFrom ? toControl : fromControl)?.focus();
+                    return;
+                }
+
+                if (dateFrom > dateTo) {
+                    showError(modal, 'Дата начала периода не может быть позже даты окончания.');
+                    toControl?.focus();
+                    return;
+                }
+
+                payload.date_from = dateFrom;
+                payload.date_to = dateTo;
+            }
+        }
+
+        if (mode === 'epicrisis') {
+            payload.epicrisis_kind = query(modal, '[data-cert-document-kind]')?.value || 'stage';
+        }
+
+        if (mode === 'medical_certificate') {
+            payload.certificate_kind = query(modal, '[data-cert-document-kind]')?.value || 'general';
+            payload.include_diagnosis = Boolean(query(modal, '[data-cert-include-diagnosis]')?.checked);
+            payload.recipient = query(modal, '#cert-certificate-recipient')?.value || null;
+            payload.purpose = query(modal, '#cert-certificate-purpose')?.value || null;
+        }
+
+        if (mode === 'continue_treatment') {
+            payload.recipient_organization = query(modal, '#cert-treatment-recipient_organization')?.value || null;
+            payload.recipient_doctor = query(modal, '#cert-treatment-recipient_doctor')?.value || null;
+            payload.transfer_reason = query(modal, '#cert-treatment-reason')?.value || null;
+        }
+
+        if (hasChanges(modal)) {
+            const approved = window.confirm(
+                `ИИ заполнит медицинские поля ${documentLabel} заново. Изменения, внесённые вручную в эту форму, могут быть перезаписаны. Продолжить?`
+            );
+            if (!approved) return;
+        }
+
+        const originalHtml = button.innerHTML;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Анализируем карту…';
+        showError(modal);
+        if (status) {
+            status.textContent = `Собираем медицинскую историю пациента и формируем черновик ${documentLabel}…`;
+        }
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const validationMessage = data?.errors
+                    ? Object.values(data.errors).flat().filter(Boolean).join(' ')
+                    : '';
+                throw new Error(validationMessage || data?.message || `Ошибка ИИ-анализатора: HTTP ${response.status}`);
+            }
+
+            const draft = data?.draft || {};
+            const mappings = {
+                psychiatrist_conclusion: {
+                    diagnosis: '#cert-psychiatrist-diagnosis',
+                    complaints: '#cert-psychiatrist-complaints',
+                    anamnesis: '#cert-psychiatrist-anamnesis',
+                    mental_status: '#cert-psychiatrist-mental_status',
+                    conclusion: '#cert-psychiatrist-conclusion',
+                    therapy: '#cert-psychiatrist-therapy',
+                    recommendations: '#cert-psychiatrist-recommendations',
+                },
+                medical_extract: {
+                    diagnosis: '#cert-extract-diagnosis',
+                    anamnesis: '#cert-extract-anamnesis',
+                    researches: '#cert-extract-researches',
+                    treatment: '#cert-extract-treatment',
+                    condition: '#cert-extract-condition',
+                    recommendations: '#cert-extract-recommendations',
+                },
+                epicrisis: {
+                    diagnosis: '#cert-epicrisis-diagnosis',
+                    anamnesis: '#cert-epicrisis-anamnesis',
+                    condition: '#cert-epicrisis-condition',
+                    researches: '#cert-epicrisis-researches',
+                    treatment: '#cert-epicrisis-treatment',
+                    conclusion: '#cert-epicrisis-conclusion',
+                    recommendations: '#cert-epicrisis-recommendations',
+                },
+                medical_certificate: {
+                    certificate_text: '#cert-certificate-text',
+                    additional: '#cert-certificate-additional',
+                },
+                continue_treatment: {
+                    diagnosis: '#cert-treatment-diagnosis',
+                    condition: '#cert-treatment-condition',
+                    therapy: '#cert-treatment-therapy',
+                    effect: '#cert-treatment-effect',
+                    researches: '#cert-treatment-researches',
+                    recommendations: '#cert-treatment-recommendations',
+                },
+            };
+            const mapping = mappings[mode] || {};
+
+            Object.entries(mapping).forEach(([key, selector]) => {
+                const control = query(modal, selector);
+                if (!control) return;
+                control.value = String(draft[key] ?? '');
+                control.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+
+            if (mode === 'medical_certificate' && query(modal, '[data-cert-include-diagnosis]')?.checked) {
+                const diagnosisControl = query(modal, '#cert-certificate-diagnosis');
+                if (diagnosisControl && draft.diagnosis) {
+                    diagnosisControl.value = String(draft.diagnosis);
+                    diagnosisControl.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+
+            setMode(modal, false);
+            const counts = draft.context_counts || {};
+            const used = Object.entries(counts)
+                .filter(([, count]) => Number(count) > 0)
+                .map(([key, count]) => `${Number(count)} ${sourceLabels[key] || key}`);
+
+            if (status) {
+                const periodText = mode === 'medical_extract' && draft?.period?.mode === 'range'
+                    ? ` Период: ${draft.period.from || '—'} — ${draft.period.to || '—'}.`
+                    : '';
+                status.textContent = used.length
+                    ? `Черновик сформирован по медицинской карте: ${used.join(', ')}.${periodText} Проверьте и отредактируйте текст перед печатью.`
+                    : `Черновик ${documentLabel} сформирован.${periodText} Проверьте и отредактируйте текст перед печатью.`;
+            }
+        } catch (error) {
+            console.error(`[certificate-ai:${mode}]`, error);
+            showError(modal, error?.message || `Не удалось сформировать ${documentLabel} с помощью ИИ.`);
+            if (status) {
+                status.textContent = 'ИИ-формирование не выполнено. Можно продолжить заполнение вручную.';
+            }
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalHtml;
+        }
+    }
+
+    const hasChanges = modal => all(modal, '[data-cert-editor] input, [data-cert-editor] select, [data-cert-editor] textarea')
+        .some(control => {
+            if (control.type === 'checkbox' || control.type === 'radio') return control.checked !== control.defaultChecked;
+            if (control.tagName === 'SELECT') {
+                const defaultOption = Array.from(control.options).find(option => option.defaultSelected) || control.options[0];
+                return control.value !== (defaultOption?.value || '');
+            }
+            return control.value !== control.defaultValue;
+        });
+
+    certificateModals.forEach(modal => {
+        const fields = all(modal, '[data-cert-editor] input, [data-cert-editor] select, [data-cert-editor] textarea');
+        fields.forEach(control => {
+            control.addEventListener('input', () => {
+                control.setCustomValidity('');
+                query(modal, '[data-cert-period-to]')?.setCustomValidity('');
+                showError(modal);
+            });
+            control.addEventListener('change', () => {
+                syncConditionalFields(modal);
+                showError(modal);
+            });
+        });
+
+        modal.addEventListener('click', event => {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            if (button.hasAttribute('data-cert-ai-generate')) {
+                void generateCertificateAiDraft(modal, button);
+            } else if (button.hasAttribute('data-cert-preview')) {
+                if (!validatePreview(modal)) return;
+                renderPreview(modal);
+                setMode(modal, true);
+                modal.querySelector('.modal-body').scrollTop = 0;
+            } else if (button.hasAttribute('data-cert-edit')) {
+                setMode(modal, false);
+            } else if (button.hasAttribute('data-cert-print')) {
+                void printPreview(modal, button);
+            } else if (button.hasAttribute('data-cert-reset')) {
+                if (hasChanges(modal) && !window.confirm('Сбросить только поля этой формы? Сохранённые данные медкарты не изменятся.')) return;
+                fields.forEach(control => {
+                    if (control.type === 'checkbox' || control.type === 'radio') {
+                        control.checked = control.defaultChecked;
+                    } else if (control.tagName === 'SELECT') {
+                        const initial = Array.from(control.options).find(option => option.defaultSelected) || control.options[0];
+                        control.value = initial?.value || '';
+                    } else {
+                        control.value = control.defaultValue;
+                    }
+                    control.setCustomValidity('');
+                });
+                syncConditionalFields(modal);
+                showError(modal);
+                setMode(modal, false);
+                query(modal, '[data-cert-paper]').replaceChildren();
+                const aiStatus = query(modal, '[data-cert-ai-status]');
+                if (aiStatus) {
+                    aiStatus.textContent = 'Поля можно заполнить вручную либо сформировать черновик ИИ и затем отредактировать.';
+                }
+            }
+        });
+
+        // Закрытие не стирает введённое. Данные живут только в DOM до обновления страницы.
+        modal.addEventListener('show.bs.modal', () => {
+            setMode(modal, false);
+            showError(modal);
+            query(modal, '.modal-body').scrollTop = 0;
+        });
+        syncConditionalFields(modal);
+    });
+
+    // Переход к уже существующим эпикризам, без копирования их формы и обработчиков.
+    document.querySelectorAll('[data-cert-open-epicrisis]').forEach(button => {
+        button.addEventListener('click', () => {
+            const oldTab = document.querySelector('#cardTabs [data-bs-target="#pane-epicrisis"]');
+            if (!oldTab) {
+                window.alert('Вкладка «Эпикриз» не найдена в медицинской карте.');
+                return;
+            }
+            const openTab = () => {
+                bootstrap.Tab.getOrCreateInstance(oldTab).show();
+                oldTab.focus();
+            };
+            const modal = button.closest('[data-cert-modal]');
+            if (modal?.classList.contains('show')) {
+                modal.addEventListener('hidden.bs.modal', openTab, { once: true });
+                bootstrap.Modal.getOrCreateInstance(modal).hide();
+            } else {
+                openTab();
+            }
+        });
+    });
+
+    window.addEventListener('beforeunload', event => {
+        if (certificateModals.some(hasChanges)) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMedicalCardCertificatesUi, { once: true });
+} else {
+    initMedicalCardCertificatesUi();
+}

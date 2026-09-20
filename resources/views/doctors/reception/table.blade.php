@@ -252,6 +252,41 @@
             font-weight: 800;
         }
 
+        .reception-patient-results {
+            margin-bottom: 22px;
+        }
+
+        .reception-patient-results-note {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--reception-border);
+            color: var(--reception-muted);
+            background: #f8fafc;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .reception-patient-action {
+            display: inline-flex;
+            min-height: 36px;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 7px 12px;
+            border: 1px solid #b7dce2;
+            border-radius: 10px;
+            color: var(--reception-primary-dark);
+            background: var(--reception-primary-soft);
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .reception-patient-action:hover {
+            color: #ffffff;
+            background: var(--reception-primary);
+        }
+
         .reception-table-panel {
             border: 1px solid var(--reception-border);
             border-radius: 24px;
@@ -594,9 +629,18 @@
                 </p>
             </div>
 
-            <div class="reception-header-badge">
-                <i class="bi bi-hospital"></i>
-                Текущая регистратура
+            <div class="d-flex flex-column align-items-end gap-2">
+                <div class="reception-header-badge">
+                    <i class="bi bi-hospital"></i>
+                    Текущая регистратура
+                </div>
+
+                @if($isDebug)
+                    <div class="reception-header-badge">
+                        <i class="bi bi-bug"></i>
+                        DEBUG: доступны все пациенты
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -690,7 +734,7 @@
 
                             <div>
                                 <div class="account-info-label">Клиника</div>
-                                <div class="account-info-value">{{ $hostClinic->name }}</div>
+                                <div class="account-info-value">{{ $hostClinic?->name ?? ($isPrivateDoctor ? 'Частная практика' : 'Не определена') }}</div>
                             </div>
                         </div>
 
@@ -722,6 +766,135 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="reception-table-panel reception-patient-results">
+            <div class="reception-table-header">
+                <h2>Пациенты</h2>
+
+                <div class="reception-table-count">
+                    {{ $patients->total() }} найдено
+                </div>
+            </div>
+
+            <div class="reception-patient-results-note">
+                @if($isDebug)
+                    DEBUG-режим: поиск выполняется по всей таблице patients,
+                    даже если у пациента ещё нет записи в registry_records.
+                @elseif($isPrivateDoctor)
+                    Показаны только пациенты текущего частного врача.
+                @else
+                    Показаны только пациенты текущей клиники.
+                @endif
+            </div>
+
+            @if($patients->count())
+                <div class="reception-table-wrap">
+                    <table class="reception-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Пациент</th>
+                            <th>Дата рождения</th>
+                            <th>Лечащий врач</th>
+                            <th>Адрес прописки</th>
+                            <th>Адрес проживания</th>
+                            <th class="text-center">Действие</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        @foreach($patients as $patient)
+                            <tr>
+                                <td>
+                                    <span class="reception-id">#{{ $patient->id }}</span>
+                                </td>
+
+                                <td>
+                                    <div class="patient-cell">
+                                        <div class="patient-avatar">
+                                            {{ mb_substr($patient->surname ?? 'П', 0, 1) }}{{ mb_substr($patient->name ?? '', 0, 1) }}
+                                        </div>
+
+                                        <div>
+                                            <div class="patient-name">
+                                                {{ $patient->fullname ?? trim(($patient->surname ?? '') . ' ' . ($patient->name ?? '') . ' ' . ($patient->patronym ?? '')) }}
+                                            </div>
+
+                                            <div class="patient-meta">
+                                                {{ $patient->diagnose?->code ? 'Диагноз: ' . $patient->diagnose->code : 'Диагноз не установлен' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @if($patient->birth_at)
+                                        {{ \Carbon\Carbon::parse($patient->birth_at)->format('d.m.Y') }}
+                                    @else
+                                        <span class="empty-muted">Не указана</span>
+                                    @endif
+                                </td>
+
+                                <td>
+                                    @if($patient->doctor)
+                                        <div class="doctor-cell">
+                                            <div class="doctor-profession">
+                                                {{ $patient->doctor->profession ?? 'Врач' }}
+                                            </div>
+                                            <div class="doctor-name">
+                                                {{ $patient->doctor->surname }}
+                                                {{ $patient->doctor->name }}
+                                                {{ $patient->doctor->patronym }}
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="empty-muted">Не назначен</span>
+                                    @endif
+                                </td>
+
+                                <td>
+                                    <div class="address-cell">
+                                        {{ $patient->address_registration ?: '—' }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="address-cell">
+                                        {{ $patient->address_residence ?: '—' }}
+                                    </div>
+                                </td>
+
+                                <td class="text-center">
+                                    <a href="{{ route('doctors.patients.medical_card', $patient->id) }}"
+                                       class="reception-patient-action">
+                                        <i class="bi bi-person-lines-fill"></i>
+                                        Открыть карту
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                @if($patients->hasPages())
+                    <div class="p-3 border-top">
+                        {{ $patients->links() }}
+                    </div>
+                @endif
+            @else
+                <div class="reception-empty">
+                    <div class="reception-empty-icon">
+                        <i class="bi bi-person-x"></i>
+                    </div>
+
+                    <h3>Пациенты не найдены</h3>
+                    <p>
+                        Измените ФИО, дату рождения, врача или адрес и повторите поиск.
+                    </p>
+                </div>
+            @endif
         </div>
 
         <div class="reception-table-panel">

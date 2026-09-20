@@ -1,0 +1,849 @@
+.commission-page
+    --commission-primary: #078c9b
+    --commission-primary-dark: #056c78
+    --commission-primary-soft: #e9f7f8
+    --commission-text: #263349
+    --commission-muted: #7b8aa0
+    --commission-border: #e2e9ee
+    --commission-bg: #f4f7f9
+    --commission-danger: #c83b49
+    --commission-warning: #9a6700
+    min-height: 100vh
+    padding: 28px 20px 48px
+    background: var(--commission-bg)
+    color: var(--commission-text)
+
+.commission-container
+    max-width: 1540px
+    margin: 0 auto
+
+.commission-hero
+    display: flex
+    align-items: center
+    gap: 18px
+    padding: 24px 26px
+    border: 1px solid var(--commission-border)
+    border-radius: 24px
+    background: #fff
+    box-shadow: 0 10px 30px rgba(22, 39, 55, .05)
+
+.commission-hero__icon
+    display: grid
+    width: 58px
+    height: 58px
+    flex: 0 0 58px
+    place-items: center
+    border-radius: 18px
+    background: var(--commission-primary-soft)
+    color: var(--commission-primary)
+    font-size: 25px
+
+.commission-hero__body
+    min-width: 0
+    flex: 1
+
+    h1
+        margin: 1px 0 5px
+        font-size: 25px
+        font-weight: 850
+
+    p
+        margin: 0
+        color: var(--commission-muted)
+        font-size: 12px
+
+.commission-eyebrow
+    color: var(--commission-primary)
+    font-size: 10px
+    font-weight: 900
+    letter-spacing: .08em
+    text-transform: uppercase
+
+.commission-hero__actions
+    display: flex
+    align-items: center
+    gap: 9px
+
+.commission-back
+    display: grid
+    width: 42px
+    height: 42px
+    flex: 0 0 42px
+    place-items: center
+    border: 1px solid var(--commission-border)
+    border-radius: 13px
+    color: #5f6f83
+    text-decoration: none
+
+    &:hover
+        color: var(--commission-primary)
+        border-color: #c8e2e5
+        background: var(--commission-primary-soft)
+
+.commission-button
+    display: inline-flex
+    min-height: 42px
+    align-items: center
+    justify-content: center
+    gap: 8px
+    padding: 9px 15px
+    border: 1px solid transparent
+    border-radius: 12px
+    font-size: 11px
+    font-weight: 800
+    text-decoration: none
+    transition: transform .15s ease, background .15s ease, border-color .15s ease
+
+    &:hover
+        transform: translateY(-1px)
+
+.commission-button--primary
+    color: #fff
+    background: var(--commission-primary)
+
+    &:hover
+        color: #fff
+        background: var(--commission-primary-dark)
+
+.commission-button--secondary
+    color: var(--commission-primary-dark)
+    border-color: #cce4e7
+    background: var(--commission-primary-soft)
+
+.commission-button--ghost
+    color: #617084
+    border-color: var(--commission-border)
+    background: #fff
+
+.commission-alert
+    display: flex
+    align-items: flex-start
+    gap: 10px
+    margin-top: 14px
+    padding: 12px 15px
+    border: 1px solid
+    border-radius: 14px
+    font-size: 11px
+
+    ul
+        margin: 6px 0 0
+        padding-left: 18px
+
+.commission-alert--success
+    color: #166d48
+    border-color: #ccebdc
+    background: #edf9f3
+
+.commission-alert--danger
+    color: #9f2f3b
+    border-color: #f0c8cd
+    background: #fff1f2
+
+.commission-stats
+    display: grid
+    grid-template-columns: repeat(4, minmax(0, 1fr))
+    gap: 12px
+    margin-top: 14px
+
+.commission-stat
+    padding: 16px 18px
+    border: 1px solid var(--commission-border)
+    border-radius: 18px
+    background: #fff
+
+    span
+        display: block
+        color: var(--commission-muted)
+        font-size: 10px
+
+    strong
+        display: block
+        margin-top: 5px
+        font-size: 23px
+        font-weight: 850
+
+.commission-stat--success strong
+    color: #14733e
+
+.commission-panel
+    margin-top: 14px
+    overflow: hidden
+    border: 1px solid var(--commission-border)
+    border-radius: 22px
+    background: #fff
+
+.commission-filters
+    display: flex
+    align-items: flex-end
+    gap: 12px
+    padding: 16px 18px
+    border-bottom: 1px solid var(--commission-border)
+    background: #fbfcfd
+
+.commission-filters__actions
+    display: flex
+    gap: 7px
+
+.commission-field
+    min-width: 0
+    margin-bottom: 13px
+
+    label
+        display: block
+        margin-bottom: 6px
+        color: #4d5b6e
+        font-size: 10px
+        font-weight: 800
+
+    input,
+    select,
+    textarea
+        width: 100%
+        min-height: 42px
+        padding: 9px 11px
+        border: 1px solid #d8e1e8
+        border-radius: 11px
+        outline: none
+        background: #fff
+        color: var(--commission-text)
+        font-size: 11px
+        box-shadow: none
+
+        &:focus
+            border-color: rgba(7, 140, 155, .7)
+            box-shadow: 0 0 0 3px rgba(7, 140, 155, .08)
+
+    textarea
+        min-height: 94px
+        resize: vertical
+        line-height: 1.5
+
+.commission-field--grow
+    flex: 1
+
+.commission-control-wrap
+    position: relative
+
+    > i
+        position: absolute
+        top: 50%
+        left: 13px
+        z-index: 2
+        color: #8390a0
+        transform: translateY(-50%)
+        pointer-events: none
+
+    > input
+        padding-left: 37px
+
+.commission-list
+    display: grid
+
+.commission-row
+    display: grid
+    grid-template-columns: 80px minmax(0, 1fr) auto
+    gap: 17px
+    align-items: center
+    padding: 16px 18px
+    border-bottom: 1px solid #edf1f4
+
+    &:last-child
+        border-bottom: 0
+
+    &:hover
+        background: #fbfcfd
+
+.commission-row__date
+    display: grid
+    min-height: 72px
+    align-content: center
+    justify-items: center
+    border: 1px solid var(--commission-border)
+    border-radius: 16px
+    background: #f8fafb
+
+    strong
+        font-size: 23px
+        line-height: 1
+
+    span,
+    small
+        margin-top: 3px
+        color: var(--commission-muted)
+        font-size: 9px
+
+.commission-row__main
+    min-width: 0
+
+    h2
+        margin: 6px 0 3px
+        font-size: 14px
+        font-weight: 850
+
+    p
+        margin: 0
+        color: #68778c
+        font-size: 10.5px
+
+.commission-row__topline
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 7px
+
+.commission-status
+    display: inline-flex
+    padding: 4px 7px
+    border-radius: 8px
+    font-size: 9px
+    font-weight: 850
+
+    &.is-success
+        color: #14733e
+        background: #eaf8ef
+
+    &.is-danger
+        color: #a1313c
+        background: #fff0f2
+
+    &.is-warning
+        color: #8a5b00
+        background: #fff7df
+
+    &.is-primary
+        color: var(--commission-primary-dark)
+        background: var(--commission-primary-soft)
+
+    &.is-muted
+        color: #68788c
+        background: #f0f3f6
+
+.commission-protocol
+    color: #8793a1
+    font-size: 9.5px
+
+.commission-row__meta
+    display: flex
+    flex-wrap: wrap
+    gap: 10px
+    margin-top: 8px
+    color: #7b8797
+    font-size: 9.5px
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 4px
+
+    .is-ok
+        color: #177549
+
+    .is-bad
+        color: #aa3743
+
+.commission-row__actions
+    display: flex
+    gap: 7px
+
+.commission-icon-button
+    display: grid
+    width: 38px
+    height: 38px
+    place-items: center
+    border: 1px solid var(--commission-border)
+    border-radius: 11px
+    background: #fff
+    color: #657488
+    text-decoration: none
+
+    &:hover
+        color: var(--commission-primary)
+        border-color: #c9e3e6
+        background: var(--commission-primary-soft)
+
+.commission-empty
+    padding: 60px 20px
+    text-align: center
+
+    h2
+        margin: 12px 0 5px
+        font-size: 16px
+
+    p
+        margin: 0 0 14px
+        color: var(--commission-muted)
+        font-size: 11px
+
+.commission-empty__icon
+    display: grid
+    width: 58px
+    height: 58px
+    margin: 0 auto
+    place-items: center
+    border-radius: 18px
+    background: #f0f4f6
+    color: #83909e
+    font-size: 24px
+
+.commission-pagination
+    padding: 14px 18px
+    border-top: 1px solid var(--commission-border)
+
+.commission-workspace
+    display: grid
+    grid-template-columns: minmax(0, 1fr) 340px
+    gap: 15px
+    margin-top: 15px
+
+.commission-workspace__main
+    display: grid
+    gap: 14px
+
+.commission-workspace__aside
+    display: grid
+    align-content: start
+    gap: 14px
+
+.commission-card,
+.commission-summary-card
+    padding: 18px
+    border: 1px solid var(--commission-border)
+    border-radius: 20px
+    background: #fff
+    box-shadow: 0 8px 25px rgba(22, 39, 55, .035)
+
+.commission-card__head,
+.commission-summary-card__head
+    display: flex
+    align-items: flex-start
+    gap: 12px
+    margin-bottom: 16px
+
+    h2,
+    h3
+        margin: 0 0 3px
+        font-size: 14px
+        font-weight: 850
+
+    p
+        margin: 0
+        color: var(--commission-muted)
+        font-size: 10px
+        line-height: 1.45
+
+.commission-card__icon,
+.commission-summary-card__head > span
+    display: grid
+    width: 42px
+    height: 42px
+    flex: 0 0 42px
+    place-items: center
+    border-radius: 13px
+    background: var(--commission-primary-soft)
+    color: var(--commission-primary)
+    font-size: 18px
+
+.commission-step
+    margin-left: auto
+    color: #a3adb8
+    font-size: 10px
+    font-weight: 900
+
+.commission-grid
+    display: grid
+    gap: 11px
+
+.commission-grid--2
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+
+.commission-grid--3
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+
+.required
+    color: var(--commission-danger)
+
+.commission-patient-search,
+.commission-doctor-search
+    position: relative
+    z-index: 20
+
+    > label
+        display: block
+        margin-bottom: 6px
+        color: #4d5b6e
+        font-size: 10px
+        font-weight: 800
+
+    small
+        display: block
+        margin-top: 5px
+        color: #8995a4
+        font-size: 9px
+
+        &.is-error
+            color: var(--commission-danger)
+
+.commission-clear-button
+    position: absolute
+    top: 50%
+    right: 8px
+    display: grid
+    width: 28px
+    height: 28px
+    place-items: center
+    border: 0
+    border-radius: 8px
+    background: #f0f3f5
+    color: #788595
+    transform: translateY(-50%)
+
+.commission-suggestions
+    position: absolute
+    top: calc(100% - 14px)
+    right: 0
+    left: 0
+    z-index: 100
+    max-height: 320px
+    overflow: auto
+    padding: 6px
+    border: 1px solid var(--commission-border)
+    border-radius: 14px
+    background: #fff
+    box-shadow: 0 18px 42px rgba(17, 34, 51, .15)
+
+.commission-suggestion
+    display: flex
+    width: 100%
+    align-items: center
+    gap: 9px
+    padding: 9px
+    border: 0
+    border-radius: 10px
+    background: transparent
+    color: var(--commission-text)
+    text-align: left
+
+    &:hover
+        background: #f1f8f9
+
+.commission-suggestion__icon
+    display: grid
+    width: 34px
+    height: 34px
+    flex: 0 0 34px
+    place-items: center
+    border-radius: 10px
+    background: var(--commission-primary-soft)
+    color: var(--commission-primary)
+
+.commission-suggestion__copy
+    min-width: 0
+    flex: 1
+
+    strong,
+    small
+        display: block
+
+    strong
+        font-size: 10.5px
+
+    small
+        margin-top: 2px
+        color: var(--commission-muted)
+        font-size: 9px
+
+.commission-suggestion__add
+    color: var(--commission-primary)
+
+.commission-suggestion-empty
+    padding: 16px
+    color: var(--commission-muted)
+    font-size: 10px
+    text-align: center
+
+.commission-patient-card
+    display: flex
+    align-items: center
+    gap: 12px
+    margin-top: 13px
+    padding: 13px
+    border: 1px solid #dbe8ea
+    border-radius: 15px
+    background: #f7fbfc
+
+    &.is-empty
+        opacity: .72
+
+    strong,
+    span
+        display: block
+
+    strong
+        font-size: 11.5px
+
+    span
+        margin-top: 3px
+        color: #728096
+        font-size: 9.5px
+
+.commission-patient-card__avatar
+    display: grid
+    width: 44px
+    height: 44px
+    flex: 0 0 44px
+    place-items: center
+    border-radius: 13px
+    background: var(--commission-primary-soft)
+    color: var(--commission-primary)
+    font-size: 19px
+
+.commission-members
+    display: grid
+    gap: 9px
+    margin-top: 13px
+
+.commission-members-empty
+    margin-top: 13px
+    padding: 18px
+    border: 1px dashed #d8e1e7
+    border-radius: 14px
+    color: #8390a0
+    font-size: 10px
+    text-align: center
+
+    i
+        margin-right: 5px
+
+.commission-member
+    padding: 12px
+    border: 1px solid #e0e7ec
+    border-radius: 15px
+    background: #fbfcfd
+
+.commission-member__person
+    display: flex
+    align-items: center
+    gap: 9px
+    margin-bottom: 10px
+
+    strong,
+    small
+        display: block
+
+    strong
+        font-size: 10.5px
+
+    small
+        margin-top: 2px
+        color: var(--commission-muted)
+        font-size: 9px
+
+.commission-member__avatar
+    display: grid
+    width: 36px
+    height: 36px
+    place-items: center
+    border-radius: 11px
+    background: var(--commission-primary-soft)
+    color: var(--commission-primary)
+
+.commission-member__controls
+    display: grid
+    grid-template-columns: minmax(150px, 1fr) auto minmax(130px, .7fr) 36px
+    gap: 8px
+    align-items: end
+
+    .commission-field
+        margin-bottom: 0
+
+.commission-presence-toggle
+    display: flex
+    min-height: 42px
+    align-items: center
+    gap: 6px
+    padding: 0 9px
+    border: 1px solid #d8e1e8
+    border-radius: 11px
+    background: #fff
+    font-size: 9.5px
+    font-weight: 750
+
+.commission-remove-member
+    display: grid
+    width: 36px
+    height: 42px
+    place-items: center
+    border: 1px solid #f0d1d5
+    border-radius: 11px
+    background: #fff6f7
+    color: #b23a47
+
+.commission-special-opinion
+    margin-top: 9px
+
+    summary
+        cursor: pointer
+        color: #768496
+        font-size: 9.5px
+
+    textarea
+        width: 100%
+        margin-top: 7px
+        padding: 8px 10px
+        border: 1px solid #d8e1e8
+        border-radius: 10px
+        font-size: 10px
+
+.commission-summary-card
+    position: sticky
+    top: 15px
+
+.commission-summary-card--law
+    position: static
+
+.commission-metric
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 10px
+    padding: 9px 0
+    border-bottom: 1px solid #eef2f4
+
+    span
+        color: #758397
+        font-size: 9.5px
+
+    strong
+        font-size: 13px
+
+.commission-summary-state
+    margin-top: 10px
+    padding: 9px 10px
+    border-radius: 10px
+    background: #f0f3f6
+    color: #677789
+    font-size: 9.5px
+    font-weight: 800
+    text-align: center
+
+    &.is-success
+        color: #14733e
+        background: #eaf8ef
+
+    &.is-danger
+        color: #a53540
+        background: #fff0f2
+
+.commission-summary-divider
+    height: 1px
+    margin: 14px 0 4px
+    background: #e8edf0
+
+.commission-summary-note,
+.commission-law-note
+    display: flex
+    gap: 7px
+    margin-top: 13px
+    padding: 10px
+    border-radius: 11px
+    background: #f7f9fa
+    color: #7c8998
+    font-size: 9px
+    line-height: 1.5
+
+.commission-check
+    display: flex
+    align-items: flex-start
+    gap: 10px
+    padding: 12px
+    border: 1px solid #dbe8ea
+    border-radius: 13px
+    background: #f8fcfc
+
+    input
+        margin-top: 3px
+
+    strong,
+    small
+        display: block
+
+    strong
+        font-size: 10.5px
+
+    small
+        margin-top: 3px
+        color: var(--commission-muted)
+        font-size: 9px
+
+.commission-form-actions
+    display: flex
+    justify-content: flex-end
+    gap: 9px
+    margin-top: 15px
+    padding: 15px 18px
+    border: 1px solid var(--commission-border)
+    border-radius: 18px
+    background: #fff
+
+@media (max-width: 1199px)
+    .commission-workspace
+        grid-template-columns: 1fr
+
+    .commission-summary-card
+        position: static
+
+@media (max-width: 991px)
+    .commission-stats
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+    .commission-filters
+        display: grid
+        grid-template-columns: 1fr 1fr
+
+    .commission-field--grow
+        grid-column: 1 / -1
+
+    .commission-grid--3
+        grid-template-columns: 1fr
+
+    .commission-member__controls
+        grid-template-columns: 1fr 1fr
+
+@media (max-width: 767px)
+    .commission-page
+        padding: 14px 9px 30px
+
+    .commission-hero
+        align-items: flex-start
+        flex-wrap: wrap
+        padding: 18px
+
+    .commission-hero__actions
+        width: 100%
+
+    .commission-stats,
+    .commission-filters,
+    .commission-grid--2
+        grid-template-columns: 1fr
+
+    .commission-field--grow
+        grid-column: auto
+
+    .commission-row
+        grid-template-columns: 58px minmax(0, 1fr)
+
+    .commission-row__actions
+        grid-column: 1 / -1
+        justify-content: flex-end
+
+    .commission-member__controls
+        grid-template-columns: 1fr
+
+    .commission-remove-member
+        width: 100%
+
+    .commission-form-actions
+        flex-direction: column
+
+        .commission-button
+            width: 100%

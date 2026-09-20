@@ -5,33 +5,48 @@ import LineCheckBox from './vue/LineCheckBox.vue';
 import { computePosition, flip, shift, offset, arrow } from '@floating-ui/dom';
 
 document.addEventListener('DOMContentLoaded', function () {
-    var app = createApp({})
+    const app = createApp({});
+
     function selector(CSSSelector, parentNode = null) {
-        return parentNode ? parentNode.querySelector(CSSSelector) : document.querySelector(CSSSelector)
+        return parentNode ? parentNode.querySelector(CSSSelector) : document.querySelector(CSSSelector);
     }
+
     function selectorAll(CSSSelector, parentNode = null) {
-        return parentNode ? parentNode.querySelectorAll(CSSSelector) : document.querySelectorAll(CSSSelector)
+        return parentNode ? parentNode.querySelectorAll(CSSSelector) : document.querySelectorAll(CSSSelector);
     }
+
     function lcb_checking() {
-        var input = selector('input[type="checkbox"]', this);
-        var lcb_switcher = selector('.line-checkbox__switcher', this);
+        const input = selector('input[type="checkbox"]', this);
+        const lcb_switcher = selector('.line-checkbox__switcher', this);
+
+        if (!input || !lcb_switcher) return;
 
         if (input.checked) {
             input.checked = false;
-            lcb_switcher.classList.remove('checked')
+            lcb_switcher.classList.remove('checked');
         } else {
             input.checked = true;
-            lcb_switcher.classList.add('checked')
+            lcb_switcher.classList.add('checked');
         }
     }
-    function makeBallons() {
-        const tooltip = selector('#tooltip');
+
+    app.component('medicine-table', MedicineTable);
+    app.component('line-check-box', LineCheckBox);
+
+    const medicineTableRoot = selector('#medicine-table');
+    if (medicineTableRoot) {
+        app.mount(medicineTableRoot);
+    }
+
+    selectorAll('.line-checkbox').forEach(e => e.addEventListener('click', lcb_checking));
+
+    const tooltip = selector('#tooltip');
+    if (tooltip) {
         const tooltipContent = selector('.tooltip-inner', tooltip);
         const arrowElement = selector('#arrow');
 
-        function showTooltip(event, content) {
-            tooltipContent.textContent = content;
-            computePosition(event.target, tooltip, {
+        function updateTooltip(referenceEl) {
+            computePosition(referenceEl, tooltip, {
                 placement: 'top',
                 middleware: [
                     offset(6),
@@ -39,21 +54,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     shift({ padding: 5 }),
                     arrow({ element: arrowElement }),
                 ],
-            }).then(({ x, y, placement, middlewareData }) => {
+            }).then(({ x, y, middlewareData }) => {
                 Object.assign(tooltip.style, {
                     left: `${x}px`,
                     top: `${y}px`,
                     display: 'block',
                 });
 
-                const { x: arrowX, y: arrowY } = middlewareData.arrow;
-                const staticSide = {
-                    top: 'bottom',
-                    right: 'left',
-                    bottom: 'top',
-                    left: 'right',
-                }[placement.split('-')[0]];
-
+                const { x: arrowX, y: arrowY } = middlewareData.arrow || {};
                 Object.assign(arrowElement.style, {
                     left: arrowX != null ? `${arrowX}px` : '',
                     top: arrowY != null ? `${arrowY}px` : '',
@@ -63,91 +71,101 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        function showTooltip(event) {
+            event.preventDefault();
+            tooltipContent.innerText = this.dataset.tooltip || this.dataset.title || this.title || '';
+            tooltip.style.display = 'block';
+            updateTooltip(this);
+        }
+
         function hideTooltip() {
             tooltip.style.display = 'none';
         }
 
-        const abbreviations = selectorAll('abbr');
-        abbreviations.forEach((abbr) => {
-            abbr.addEventListener('mouseenter', (event) => {
+        selectorAll('abbr, [data-tooltip]').forEach((reference) => {
+            // Для кнопок с кастомным тултипом убираем нативный title,
+            // чтобы две подсказки не появлялись одновременно.
+            if (reference.dataset.tooltip && reference.hasAttribute('title')) {
+                reference.removeAttribute('title');
+            }
+
+            [
+                ['mouseenter', showTooltip],
+                ['mouseleave', hideTooltip],
+                ['focus', showTooltip],
+                ['blur', hideTooltip],
+            ].forEach(([event, handler]) => reference.addEventListener(event, handler));
+        });
+    }
+
+    function initializeNavbarDropdowns() {
+        if (document.body.dataset.nhDropdownInit === '1') return;
+        document.body.dataset.nhDropdownInit = '1';
+
+        const toggleSelector = [
+            '.dropdown-toggle',
+            '[data-toggle="dropdown"]',
+            '[data-bs-toggle="dropdown"]',
+            '.menu-item-has-children > a',
+            '.has-dropdown > a'
+        ].join(', ');
+
+        const menuSelector = '.dropdown-menu, .submenu, .sub-menu, ul[role="menu"]';
+        const toggles = Array.from(document.querySelectorAll(toggleSelector));
+
+        toggles.forEach((toggle) => {
+            if (!toggle.hasAttribute('data-bs-toggle') && toggle.matches('.dropdown-toggle, [data-toggle="dropdown"], [data-bs-toggle="dropdown"]')) {
+                toggle.setAttribute('data-bs-toggle', 'dropdown');
+            }
+
+            if (!toggle.hasAttribute('aria-expanded')) {
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        if (window.bootstrap && window.bootstrap.Dropdown) {
+            toggles.forEach((toggle) => {
+                if (toggle.matches('.dropdown-toggle, [data-bs-toggle="dropdown"], [data-toggle="dropdown"]')) {
+                    window.bootstrap.Dropdown.getOrCreateInstance(toggle);
+                }
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            const toggle = event.target.closest(toggleSelector);
+
+            if (toggle) {
+                const parent = toggle.closest('.dropdown, .menu-item-has-children, .has-dropdown, li') || toggle.parentElement;
+                const menu = parent ? parent.querySelector(`:scope > ${menuSelector}, ${menuSelector}`) : null;
+
+                if (!menu) return;
+
                 event.preventDefault();
+                event.stopPropagation();
 
-                showTooltip(event, abbr.title);
-            });
-            abbr.addEventListener('mouseleave', hideTooltip);
+                document.querySelectorAll('.dropdown-menu.show, .submenu.show, .sub-menu.show').forEach((opened) => {
+                    if (opened !== menu) opened.classList.remove('show');
+                });
+
+                document.querySelectorAll('.dropdown.show, .menu-item-has-children.show, .has-dropdown.show').forEach((openedParent) => {
+                    if (openedParent !== parent) openedParent.classList.remove('show');
+                });
+
+                const willOpen = !menu.classList.contains('show');
+                menu.classList.toggle('show', willOpen);
+                parent?.classList.toggle('show', willOpen);
+                toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+                return;
+            }
+
+            if (!event.target.closest('.dropdown-menu, .submenu, .sub-menu')) {
+                document.querySelectorAll('.dropdown-menu.show, .submenu.show, .sub-menu.show').forEach((menu) => menu.classList.remove('show'));
+                document.querySelectorAll('.dropdown.show, .menu-item-has-children.show, .has-dropdown.show').forEach((dropdown) => dropdown.classList.remove('show'));
+                toggles.forEach((item) => item.setAttribute('aria-expanded', 'false'));
+            }
         });
     }
-    function show(CSSSelector, displayProperty = 'block') {
-        selectorAll(CSSSelector).forEach(DOMElement => DOMElement.style.display = displayProperty)
-    }
-    function hide(CSSSelector) {
-        selectorAll(CSSSelector).forEach(DOMElement => DOMElement.style.display = 'none')
-    }
-    function update() {
-        computePosition(selector('abbr'), tooltip, {
-            placement: 'top',
-            middleware: [
-                offset(6),
-                flip(),
-                shift({ padding: 5 }),
-                arrow({ element: arrowElement }),
-            ],
-        }).then(({x, y, placement, middlewareData}) => {
-            Object.assign(tooltip.style, {
-                left: `${x}px`,
-                top: `${y}px`,
-                display: 'block',
-            });
 
-            const { x: arrowX, y: arrowY } = middlewareData.arrow;
-
-            Object.assign(arrowElement.style, {
-                left: arrowX != null ? `${arrowX}px` : '',
-                top: arrowY != null ? `${arrowY}px` : '',
-                right: '',
-                bottom: '',
-            });
-        });
-    }
-    function showTooltip(event) {
-        event.preventDefault();
-        tooltip.style.display = 'block';
-        update();
-    }
-    function hideTooltip() {
-        tooltip.style.display = 'none';
-    }
-
-    app.component('medicine-table', MedicineTable)
-    app.mount('#medicine-table')
-    app.component('line-check-box', LineCheckBox)
-
-    selectorAll('.line-checkbox').forEach(e => e.addEventListener('click', lcb_checking))
-
-    const tooltip = selector('#tooltip');
-    const tooltipContent = selector('.tooltip-inner', tooltip);
-    const arrowElement = selector('#arrow');
-
-    [
-        ['mouseenter', showTooltip],
-        ['mouseleave', hideTooltip],
-        ['focus', showTooltip],
-        ['blur', hideTooltip],
-    ].forEach(([event, listener]) => {
-        const abbreviations = selectorAll('abbr');
-        abbreviations.forEach(e => {
-            e.addEventListener(event, listener)
-            tooltipContent.innerText = e.dataset.title
-        });
-    });
-    selectorAll('.images-container__with-overlay').forEach(e => {
-       e.addEventListener('mouseenter', event => {
-           event.target.querySelector('.images-container__overlay').classList.toggle('d-none')
-           event.target.querySelector('.images-container__overlay + picture img').classList.toggle('ic-slide');
-       })
-       e.addEventListener('mouseleave', event => {
-           event.target.querySelector('.images-container__overlay').classList.toggle('d-none')
-           event.target.querySelector('.images-container__overlay + picture img').classList.toggle('ic-slide');
-       })
-    });
+    initializeNavbarDropdowns();
+    window.addEventListener('load', initializeNavbarDropdowns, { once: true });
 });
