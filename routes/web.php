@@ -1,13 +1,14 @@
 <?php
 
 use App\Http\Controllers\Doctors\AnamnesisController;
+use App\Http\Controllers\Doctors\CabinetController;
 use App\Http\Controllers\Doctors\CardMedicalDocumentController;
 use App\Http\Controllers\Doctors\ConsiliumController;
 use App\Http\Controllers\Doctors\ContactController;
 use App\Http\Controllers\Doctors\DoctorDestinationController;
 use App\Http\Controllers\Doctors\DriverCommissionController;
 use App\Http\Controllers\Doctors\HospitalizationReferralController;
-use App\Http\Controllers\Doctors\MedicalCommissionController;
+use App\Http\Controllers\Doctors\MedicalComissionController;
 use App\Http\Controllers\Doctors\MilitaryCommissionDocumentController;
 use App\Http\Controllers\Doctors\MseReferralController;
 use App\Http\Controllers\Doctors\PatientTestingController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Doctors\EpicrisisController;
 use App\Http\Controllers\Doctors\InstrumentalResearchController;
 use App\Http\Controllers\Doctors\PrescriptionsController;
 use App\Http\Controllers\Doctors\ResearchController;
+use App\Http\Controllers\Doctors\SettingsController;
 use App\Http\Controllers\Doctors\TestsController;
 use App\Http\Controllers\Doctors\TestSessionController;
 use App\Http\Controllers\Doctors\MedicalCardController;
@@ -96,7 +98,7 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
         Route::post('/', [HospitalizationReferralController::class, 'store'])->name('store');
         Route::post('/analyze', [HospitalizationReferralController::class, 'analyze'])->middleware('throttle:6,1')->name('analyze');
     });
-Route::prefix('prescriptions')->as('prescriptions.')->group(function (): void {
+    Route::prefix('prescriptions')->as('prescriptions.')->group(function (): void {
         Route::get('/', [PrescriptionsController::class, 'index'])->name('index');
         Route::get('/create', [PrescriptionsController::class, 'create'])->name('new');
         Route::post('/store', [PrescriptionsController::class, 'store'])->name('store');
@@ -228,9 +230,9 @@ Route::prefix('prescriptions')->as('prescriptions.')->group(function (): void {
 
     // -------------------- Врачебная комиссия --------------------
     Route::prefix('commissions')->as('commissions.')->group(function (): void {
-        Route::get('/', [MedicalCommissionController::class, 'index'])->name('index');
-        Route::get('/create', [MedicalCommissionController::class, 'create'])->name('create');
-        Route::post('/', [MedicalCommissionController::class, 'store'])->name('store');
+        Route::get('/', [MedicalComissionController::class, 'index'])->name('index');
+        Route::get('/create', [MedicalComissionController::class, 'create'])->name('create');
+        Route::post('/', [MedicalComissionController::class, 'store'])->name('store');
 
         // -------------------- Военкомат / ВВК --------------------
         Route::prefix('military')->as('military.')->group(function (): void {
@@ -306,21 +308,30 @@ Route::prefix('prescriptions')->as('prescriptions.')->group(function (): void {
                 ->whereNumber('driverCommission')
                 ->name('print');
         });
+    });
 
-        Route::get('/{commission}', [MedicalCommissionController::class, 'show'])
-            ->whereNumber('commission')
-            ->name('show');
-        Route::get('/{commission}/edit', [MedicalCommissionController::class, 'edit'])
-            ->whereNumber('commission')
-            ->name('edit');
-        Route::put('/{commission}', [MedicalCommissionController::class, 'update'])
-            ->whereNumber('commission')
-            ->name('update');
-        Route::delete('/{commission}', [MedicalCommissionController::class, 'destroy'])
-            ->whereNumber('commission')
-            ->name('destroy');
-        Route::get('/{commission}/print', [MedicalCommissionController::class, 'print'])
-            ->whereNumber('commission')
-            ->name('print');
+    Route::prefix('settings')->as('settings.')->group(function (): void {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::post('/', [SettingsController::class, 'update'])->name('index.update');
+        Route::post('/employees/update', [SettingsController::class, 'updateEmployee'])->name('employees.update');
+
+        Route::prefix('/offices')->group(function (): void {
+            Route::get('/', [CabinetController::class, 'index'])->name('offices');
+            Route::post('/store', [CabinetController::class, 'store'])->name('offices.store');
+            Route::post('/update', [CabinetController::class, 'clinicDoctorUpdate'])->name('offices.update');
+            Route::post('/delete', [CabinetController::class, 'deleteCabinet'])->name('offices.delete');
+            Route::post('/buildings', [CabinetController::class, 'storeBuilding'])->name('offices.buildings.store');
+            Route::post('/buildings/update', [CabinetController::class, 'updateBuilding'])->name('offices.buildings.update');
+            Route::post('/buildings/delete', [CabinetController::class, 'deleteBuilding'])->name('offices.buildings.delete');
+        });
+
+        Route::get('/districts', [CabinetController::class, 'districts'])->name('districts');
+        Route::post('/districts', [CabinetController::class, 'storeDistrict'])->name('districts.store');
+        Route::post('/districts/{district}', [CabinetController::class, 'updateDistrict'])->name('districts.update');
+        Route::post('/districts/{district}/transfer', [CabinetController::class, 'transferDistrict'])->name('districts.transfer');
+        Route::post('/districts/{district}/separate', [CabinetController::class, 'separateDistrict'])->name('districts.separate');
+        Route::post('/districts/{district}/delete', [CabinetController::class, 'deleteDistrict'])->name('districts.delete');
+        Route::view('/clinic-schedule', 'doctors.settings.clinic_schedule')->name('clinic-schedule');
+        Route::view('/doctors-schedule', 'doctors.settings.doctors_schedule')->name('doctors-schedule');
     });
 });

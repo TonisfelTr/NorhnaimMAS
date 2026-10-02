@@ -13,21 +13,12 @@ class ContactController extends Controller
 {
     public function store(StorePatientContactRequest $request): RedirectResponse
     {
-        Contact::create($request->all());
-
         return redirect()->back()->with([
             'result' => 'success',
             'message' => 'Контакт успешно добавлен.'
         ], 200);
     }
 
-    public function destroy(Contact $contact): JsonResponse
-    {
-        $contact->delete();
 
-        return response()->json([
-            'result' => 'success',
-            'message' => 'Контакт успешно удалён.'
-        ]);
-    }
 }
+

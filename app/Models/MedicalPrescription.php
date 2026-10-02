@@ -71,4 +71,9 @@ class MedicalPrescription extends Model
     {
         return $this->belongsTo(Patient::class, 'patient_id', 'id');
     }
+
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id', 'id');
+    }
 }

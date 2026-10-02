@@ -33,7 +33,7 @@
             <li><a href="{{ route('doctors.tests.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-ui-checks-grid"></i> Тесты</a></li>
             <li><a href="{{ route('doctors.analyses.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-activity"></i> Лаборатория</a></li>
             <li><a href="{{ route('doctors.prescriptions.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-prescription"></i> Выписки</a></li>
-            <li><a href="#" class="nav-link link-body-emphasis"><i class="bi bi-gear"></i> Настройки</a></li>
+            <li><a href="{{ route('doctors.settings.index') }}" class="nav-link link-body-emphasis"><i class="bi bi-gear"></i> Настройки</a></li>
         </ul>
         <hr>
         <div class="dropdown">

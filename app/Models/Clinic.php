@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
@@ -25,10 +26,20 @@ class Clinic extends Model implements HasMedia
         return Carbon::parse($value)->format('d.m.Y H:i:s');
     }
 
+    public function doctor(): HasMany
+    {
+        return $this->HasMany(Doctor::class);
+    }
+
     // Отношение к отзывам
     public function feedbacks(): HasMany
     {
         return $this->hasMany(ClinicFeedback::class);
+    }
+
+    public function workSchedules(): HasMany
+    {
+        return $this->hasMany(ClinicWorkShedule::class);
     }
 
     // Средний рейтинг клиники
