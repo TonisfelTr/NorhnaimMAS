@@ -1,41 +1,66 @@
 <?php
 
+use App\Http\Controllers\Doctors\AnalysesPanelController;
 use App\Http\Controllers\Doctors\AnamnesisController;
 use App\Http\Controllers\Doctors\CabinetController;
 use App\Http\Controllers\Doctors\CardMedicalDocumentController;
+use App\Http\Controllers\Doctors\ClinicAffiliationController;
 use App\Http\Controllers\Doctors\ConsiliumController;
 use App\Http\Controllers\Doctors\ContactController;
 use App\Http\Controllers\Doctors\DoctorDestinationController;
+use App\Http\Controllers\Doctors\DocumentController;
 use App\Http\Controllers\Doctors\DriverCommissionController;
+use App\Http\Controllers\Doctors\EpicrisisController;
+use App\Http\Controllers\Doctors\HospitalDepartmentController;
+use App\Http\Controllers\Doctors\HospitalDischargeController;
+use App\Http\Controllers\Doctors\HospitalDutyController;
+use App\Http\Controllers\Doctors\HospitalImpersonationController;
+use App\Http\Controllers\Doctors\HospitalInpatientRoomController;
 use App\Http\Controllers\Doctors\HospitalizationReferralController;
+use App\Http\Controllers\Doctors\HospitalRoomController;
+use App\Http\Controllers\Doctors\IndexController as DoctorsIndexController;
+use App\Http\Controllers\Doctors\InpatientAdmissionController;
+use App\Http\Controllers\Doctors\InpatientSettingsWorkspaceController;
+use App\Http\Controllers\Doctors\InstrumentalResearchController;
+use App\Http\Controllers\Doctors\MedicalCardController;
 use App\Http\Controllers\Doctors\MedicalComissionController;
 use App\Http\Controllers\Doctors\MilitaryCommissionDocumentController;
 use App\Http\Controllers\Doctors\MseReferralController;
+use App\Http\Controllers\Doctors\NeuralNetworkController;
 use App\Http\Controllers\Doctors\PatientTestingController;
-use App\Http\Controllers\Doctors\DocumentController;
-use App\Http\Controllers\Doctors\EpicrisisController;
-use App\Http\Controllers\Doctors\InstrumentalResearchController;
 use App\Http\Controllers\Doctors\PrescriptionsController;
+use App\Http\Controllers\Doctors\ReceptionController;
 use App\Http\Controllers\Doctors\ResearchController;
 use App\Http\Controllers\Doctors\SettingsController;
+use App\Http\Controllers\Doctors\TestPanelController;
 use App\Http\Controllers\Doctors\TestsController;
 use App\Http\Controllers\Doctors\TestSessionController;
-use App\Http\Controllers\Doctors\MedicalCardController;
-use App\Http\Controllers\Doctors\AnalysesPanelController;
-use App\Http\Controllers\Doctors\IndexController as DoctorsIndexController;
-use App\Http\Controllers\Doctors\ReceptionController;
-use App\Http\Controllers\Doctors\TestPanelController;
+use App\Http\Controllers\Main\ArticleController;
+use App\Http\Controllers\Main\BlogController;
+use App\Http\Controllers\Main\ClinicController;
+use App\Http\Controllers\Main\DoctorController;
+use App\Http\Controllers\Main\FeedbackController;
 use App\Http\Controllers\Main\IndexController as MainIndexController;
+use App\Http\Controllers\Main\JurisprudenceController;
+use App\Http\Controllers\Main\MedicineController;
+use App\Http\Controllers\UserController;
+
 use App\Http\Middleware\CardDocumentPrivateResponse;
+use App\Http\Middleware\ClinicSettingsAccessMiddleware;
 use App\Http\Middleware\DoctorHardLockMiddleware;
+use App\Http\Middleware\DoctorOrHospitalAdmin;
+use App\Http\Middleware\HospitalRoomContextMiddleware;
+use App\Http\Middleware\LockClinicTypeMiddleware;
+
 use Illuminate\Support\Facades\Route;
+
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 
 Route::get('/', MainIndexController::class)->name('main.index');
-Route::get('/medicines', \App\Http\Controllers\Main\MedicineController::class)->name('main.medicines');
-Route::get('/privacy-policy', \App\Http\Controllers\Main\MedicineController::class)->name('main.policy');
-Route::get('/feedback', \App\Http\Controllers\Main\FeedbackController::class)->name('main.feedback');
+Route::get('/medicines', MedicineController::class)->name('main.medicines');
+Route::get('/privacy-policy', MedicineController::class)->name('main.policy');
+Route::get('/feedback', FeedbackController::class)->name('main.feedback');
 
 if (config('app.debug')) {
     Route::get('/test-user', fn () => dd(auth()->user()));
@@ -44,47 +69,63 @@ if (config('app.debug')) {
 Route::prefix('dictionary')->group(function (): void {
 
     Route::prefix('clinics')->group(function (): void {
-        Route::get('/', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics');
-        Route::get('/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'index'])->name('main.clinics.form');
-        Route::post('/feedback/{clinic_id}', [\App\Http\Controllers\Main\ClinicController::class, 'feedback'])->name('main.clinics.form.feedback-create');
-        Route::get('/filter/{city_name}', [\App\Http\Controllers\Main\ClinicController::class, 'list'])->name('main.clinics.filters.city');
+        Route::get('/', [ClinicController::class, 'list'])->name('main.clinics');
+        Route::get('/{clinic_id}', [ClinicController::class, 'index'])->name('main.clinics.form');
+        Route::post('/feedback/{clinic_id}', [ClinicController::class, 'feedback'])->name('main.clinics.form.feedback-create');
+        Route::get('/filter/{city_name}', [ClinicController::class, 'list'])->name('main.clinics.filters.city');
     });
 
     Route::prefix('doctors')->group(function (): void {
-        Route::get('/{clinic_id}', [\App\Http\Controllers\Main\DoctorController::class, 'index'])->where('clinic_id', '\d+')->name('main.doctors.form');
+        Route::get('/', [DoctorController::class, 'index'])->where('clinic_id', '\d+')->name('main.doctors.form');
     });
 });
 
 Route::prefix('blog')->group(function (): void {
-    Route::get('/', [\App\Http\Controllers\Main\BlogController::class, 'list'])->name('main.blog');
+    Route::get('/', [BlogController::class, 'list'])->name('main.blog');
     Route::prefix('category')->group(function (): void {
-        Route::get('/{category_id}', [\App\Http\Controllers\Main\BlogController::class, 'list'])->name('main.blog.category');
+        Route::get('/{category_id}', [BlogController::class, 'list'])->name('main.blog.category');
     });
 
-    Route::get('/{topic_id}', [\App\Http\Controllers\Main\BlogController::class, 'index'])->name('main.blog.topic');
+    Route::get('/{topic_id}', [BlogController::class, 'index'])->name('main.blog.topic');
 });
 
 Route::prefix('articles')->group(function (): void {
-    Route::get('/', [\App\Http\Controllers\Main\ArticleController::class, 'list'])->name('main.articles');
-    Route::get('/{article_id}', [\App\Http\Controllers\Main\ArticleController::class, 'index'])->name('main.articles.show');
+    Route::get('/', [ArticleController::class, 'list'])->name('main.articles');
+    Route::get('/{article_id}', [ArticleController::class, 'index'])->name('main.articles.show');
 });
 
 Route::prefix('jurisprudence')->group(function (): void {
-    Route::get('/', [\App\Http\Controllers\Main\JurisprudenceController::class, 'list'])->name('main.jurisprudence');
+    Route::get('/', [JurisprudenceController::class, 'list'])->name('main.jurisprudence');
 });
 
 Route::prefix('log')->group(function (): void {
-    Route::get('out', [\App\Http\Controllers\UserController::class, 'logout'])->name('actions.logout');
-    Route::post('in', [\App\Http\Controllers\UserController::class, 'login'])->name('actions.login');
+    Route::get('out', [UserController::class, 'logout'])->name('actions.logout');
+    Route::post('in', [UserController::class, 'login'])->name('actions.login');
 });
 
 Route::prefix('api')->group(function (): void {
     require __DIR__ . '/api.php';
 });
 
-Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|doctors' : ':doctors'), DoctorHardLockMiddleware::class])->prefix('doctors')->as('doctors.')->group(function (): void {
-
+// ONLY these 3 endpoints are shared between clinical users and authorized admins.
+// For doctors, DoctorOrHospitalAdmin invokes the existing DoctorHardLockMiddleware.
+// Admins must also have explicit permissions and authorized clinic records.
+Route::middleware(['auth', DoctorOrHospitalAdmin::class])->prefix('doctors')->as('doctors.')->group(function (): void {
     Route::get('/', [DoctorsIndexController::class, 'index'])->name('main');
+    Route::get('/patients/{patient:id}', [MedicalCardController::class, 'index'])->whereNumber('patient')->name('patients.medical_card');
+    Route::post('/workbench/assignments/{assignment}/attending', [DoctorsIndexController::class, 'updateAttendingDoctor'])->whereNumber('assignment')->name('workbench.attending.update');
+});
+
+Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class])->group(function (): void {
+    Route::get('doctors/settings/clinic-affiliations', [ClinicAffiliationController::class, 'index'])->name('doctors.settings.clinic-affiliations.index');
+
+    Route::post('doctors/settings/clinic-affiliations', [ClinicAffiliationController::class, 'update'])->name('doctors.settings.clinic-affiliations.update');
+
+    // Новый стационар: доступ проверяется в ClinicAffiliationController::store.
+    Route::post('doctors/settings/clinic-affiliations/create', [ClinicAffiliationController::class, 'store'])->name('doctors.settings.clinic-affiliations.store');
+});
+
+Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|doctors' : ':doctors'), DoctorHardLockMiddleware::class])->prefix('doctors')->as('doctors.')->group(function (): void {
 
     Route::prefix('referrals/hospital')->as('referrals.hospital.')->group(function (): void {
         Route::get('/', [HospitalizationReferralController::class, 'index'])->name('index');
@@ -127,10 +168,9 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
 
     Route::prefix('patients')->as('patients.')->group(function (): void {
 
-        Route::post('/analyze-anamnesis', [\App\Http\Controllers\Doctors\NeuralNetworkController::class, 'analyzeAnamnesis'])->name('analyze.anamnesis');
+        Route::post('/analyze-anamnesis', [NeuralNetworkController::class, 'analyzeAnamnesis'])->name('analyze.anamnesis');
 
         Route::prefix('{patient:id}')->where(['patient' => '\d+'])->group(function (): void {
-            Route::get('/', [MedicalCardController::class, 'index'])->name('medical_card');
             Route::post('/', [MedicalCardController::class, 'update'])->name('medical_card.update');
 
             Route::post('/anamneses/store', [AnamnesisController::class, 'store'])->name('anamneses.store');
@@ -239,21 +279,11 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
             Route::get('/', [MilitaryCommissionDocumentController::class, 'index'])->name('index');
             Route::get('/create', [MilitaryCommissionDocumentController::class, 'create'])->name('create');
             Route::post('/', [MilitaryCommissionDocumentController::class, 'store'])->name('store');
-            Route::get('/{militaryDocument}', [MilitaryCommissionDocumentController::class, 'show'])
-                ->whereNumber('militaryDocument')
-                ->name('show');
-            Route::get('/{militaryDocument}/edit', [MilitaryCommissionDocumentController::class, 'edit'])
-                ->whereNumber('militaryDocument')
-                ->name('edit');
-            Route::put('/{militaryDocument}', [MilitaryCommissionDocumentController::class, 'update'])
-                ->whereNumber('militaryDocument')
-                ->name('update');
-            Route::delete('/{militaryDocument}', [MilitaryCommissionDocumentController::class, 'destroy'])
-                ->whereNumber('militaryDocument')
-                ->name('destroy');
-            Route::get('/{militaryDocument}/print', [MilitaryCommissionDocumentController::class, 'print'])
-                ->whereNumber('militaryDocument')
-                ->name('print');
+            Route::get('/{militaryDocument}', [MilitaryCommissionDocumentController::class, 'show'])->whereNumber('militaryDocument')->name('show');
+            Route::get('/{militaryDocument}/edit', [MilitaryCommissionDocumentController::class, 'edit'])->whereNumber('militaryDocument')->name('edit');
+            Route::put('/{militaryDocument}', [MilitaryCommissionDocumentController::class, 'update'])->whereNumber('militaryDocument')->name('update');
+            Route::delete('/{militaryDocument}', [MilitaryCommissionDocumentController::class, 'destroy'])->whereNumber('militaryDocument')->name('destroy');
+            Route::get('/{militaryDocument}/print', [MilitaryCommissionDocumentController::class, 'print'])->whereNumber('militaryDocument')->name('print');
         });
 
         // -------------------- МСЭ / форма 088/у --------------------
@@ -262,29 +292,14 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
             Route::get('/create', [MseReferralController::class, 'create'])->name('create');
             Route::post('/', [MseReferralController::class, 'store'])->name('store');
             Route::post('/consent/preview', [MseReferralController::class, 'consentPreview'])->name('consent-preview');
-            Route::get('/{mseReferral}', [MseReferralController::class, 'show'])
-                ->whereNumber('mseReferral')
-                ->name('show');
-            Route::get('/{mseReferral}/edit', [MseReferralController::class, 'edit'])
-                ->whereNumber('mseReferral')
-                ->name('edit');
-            Route::put('/{mseReferral}', [MseReferralController::class, 'update'])
-                ->whereNumber('mseReferral')
-                ->name('update');
-            Route::delete('/{mseReferral}', [MseReferralController::class, 'destroy'])
-                ->whereNumber('mseReferral')
-                ->name('destroy');
-            Route::get('/{mseReferral}/print', [MseReferralController::class, 'print'])
-                ->whereNumber('mseReferral')
-                ->name('print');
-            Route::get('/{mseReferral}/consent/print', [MseReferralController::class, 'consentPrint'])
-                ->whereNumber('mseReferral')
-                ->name('consent-print');
-            Route::get('/{mseReferral}/consent-document', [MseReferralController::class, 'consentDocument'])
-                ->whereNumber('mseReferral')
-                ->name('consent-document');
+            Route::get('/{mseReferral}', [MseReferralController::class, 'show'])->whereNumber('mseReferral')->name('show');
+            Route::get('/{mseReferral}/edit', [MseReferralController::class, 'edit'])->whereNumber('mseReferral')->name('edit');
+            Route::put('/{mseReferral}', [MseReferralController::class, 'update'])->whereNumber('mseReferral')->name('update');
+            Route::delete('/{mseReferral}', [MseReferralController::class, 'destroy'])->whereNumber('mseReferral')->name('destroy');
+            Route::get('/{mseReferral}/print', [MseReferralController::class, 'print'])->whereNumber('mseReferral')->name('print');
+            Route::get('/{mseReferral}/consent/print', [MseReferralController::class, 'consentPrint'])->whereNumber('mseReferral')->name('consent-print');
+            Route::get('/{mseReferral}/consent-document', [MseReferralController::class, 'consentDocument'])->whereNumber('mseReferral')->name('consent-document');
         });
-
 
         // -------------------- Водительская комиссия / психиатр --------------------
         Route::prefix('driver')->as('driver.')->group(function (): void {
@@ -292,27 +307,61 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
             Route::get('/create', [DriverCommissionController::class, 'create'])->name('create');
             Route::post('/', [DriverCommissionController::class, 'store'])->name('store');
             Route::get('/print/blank', [DriverCommissionController::class, 'printBlank'])->name('print-blank');
-            Route::get('/{driverCommission}', [DriverCommissionController::class, 'show'])
-                ->whereNumber('driverCommission')
-                ->name('show');
-            Route::get('/{driverCommission}/edit', [DriverCommissionController::class, 'edit'])
-                ->whereNumber('driverCommission')
-                ->name('edit');
-            Route::put('/{driverCommission}', [DriverCommissionController::class, 'update'])
-                ->whereNumber('driverCommission')
-                ->name('update');
-            Route::delete('/{driverCommission}', [DriverCommissionController::class, 'destroy'])
-                ->whereNumber('driverCommission')
-                ->name('destroy');
-            Route::get('/{driverCommission}/print', [DriverCommissionController::class, 'print'])
-                ->whereNumber('driverCommission')
-                ->name('print');
+            Route::get('/{driverCommission}', [DriverCommissionController::class, 'show'])->whereNumber('driverCommission')->name('show');
+            Route::get('/{driverCommission}/edit', [DriverCommissionController::class, 'edit'])->whereNumber('driverCommission')->name('edit');
+            Route::put('/{driverCommission}', [DriverCommissionController::class, 'update'])->whereNumber('driverCommission')->name('update');
+            Route::delete('/{driverCommission}', [DriverCommissionController::class, 'destroy'])->whereNumber('driverCommission')->name('destroy');
+            Route::get('/{driverCommission}/print', [DriverCommissionController::class, 'print'])->whereNumber('driverCommission')->name('print');
         });
     });
 
+    // Госпитализация: список размещений, варианты и сохранение переноса пациента.
+    // Наследует middleware и префикс doctors. от родительской группы.
+    Route::prefix('inpatient/admissions')->as('inpatient.admissions.')->group(function (): void {
+        Route::get('/', [InpatientAdmissionController::class, 'index'])->name('index');
+        Route::get('/options', [InpatientAdmissionController::class, 'options'])->name('options');
+        Route::get('/patients/search', [InpatientAdmissionController::class, 'searchPatients'])->name('patients.search');
+        Route::post('/', [InpatientAdmissionController::class, 'store'])->name('store');
+    });
+
+    Route::get('/inpatient/discharges', [HospitalDischargeController::class, 'index'])->name('inpatient.discharges.index');
+
+    Route::get('/inpatient/rooms', [HospitalInpatientRoomController::class, 'index'])->name('inpatient.rooms.index');
+
+    Route::get('/inpatient/rooms/patients/search', [HospitalRoomController::class, 'patientSearch'])->name('inpatient.rooms.patients.search');
+
+    Route::post('/inpatient/rooms/beds/{bed}/assign', [HospitalRoomController::class, 'assignBed'])->whereNumber('bed')->name('inpatient.rooms.beds.assign');
+
+    Route::post('/inpatient/rooms/beds/{bed}/release', [HospitalRoomController::class, 'releaseBed'])->whereNumber('bed')->name('inpatient.rooms.beds.release');
+
+});
+
+// Временное администрирование стационара под текущим clinic_admin (v3).
+// Авторизация пользователя не переключается; контекст и права проверяют контроллер и web guard.
+Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class])->post('doctors/settings/clinic-affiliations/hospitals/{hospital}/login-as', [HospitalImpersonationController::class, 'enter'])->whereNumber('hospital')->name('doctors.hospital-impersonation.enter');
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('doctors/hospital-impersonation/bridge', [HospitalImpersonationController::class, 'bridge'])->name('doctors.hospital-impersonation.bridge');
+    Route::post('doctors/hospital-impersonation/leave', [HospitalImpersonationController::class, 'leave'])->name('doctors.hospital-impersonation.leave');
+    Route::get('doctors/hospital-impersonation/hospitals/{hospital}/settings', [InpatientSettingsWorkspaceController::class, 'show'])->whereNumber('hospital')->name('doctors.hospital-impersonation.workspace');
+    Route::post('doctors/hospital-impersonation/hospitals/{hospital}/settings', [InpatientSettingsWorkspaceController::class, 'save'])->whereNumber('hospital')->name('doctors.hospital-impersonation.workspace.save');
+});
+
+// ПОЛНЫЙ конструктор палат выбранного стационара, отдельно от настроек амбулатории.
+// Не требует второго администратора; каждый запрос заново проверяет госпитальный контекст.
+Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class, HospitalRoomContextMiddleware::class])->prefix('doctors/hospital-impersonation/hospitals/{hospital}/rooms')->as('doctors.hospital-impersonation.rooms.')->group(function (): void {
+    Route::get('/', [HospitalRoomController::class, 'index'])->name('index');
+    Route::get('/data', [HospitalRoomController::class, 'data'])->name('data');
+    Route::post('/', [HospitalRoomController::class, 'store'])->name('store');
+    Route::post('/{room}/layout', [HospitalRoomController::class, 'saveLayout'])->whereNumber('room')->name('layout');
+    Route::post('/{room}/delete', [HospitalRoomController::class, 'destroy'])->whereNumber('room')->name('delete');
+    Route::post('/{room}', [HospitalRoomController::class, 'update'])->whereNumber('room')->name('update');
+});
+
+Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class])->prefix('doctors')->as('doctors.')->group(function (): void {
     Route::prefix('settings')->as('settings.')->group(function (): void {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
-        Route::post('/', [SettingsController::class, 'update'])->name('index.update');
+        Route::post('/', [SettingsController::class, 'update'])->middleware(LockClinicTypeMiddleware::class)->name('index.update');
         Route::post('/employees/update', [SettingsController::class, 'updateEmployee'])->name('employees.update');
 
         Route::prefix('/offices')->group(function (): void {
@@ -327,11 +376,65 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
 
         Route::get('/districts', [CabinetController::class, 'districts'])->name('districts');
         Route::post('/districts', [CabinetController::class, 'storeDistrict'])->name('districts.store');
-        Route::post('/districts/{district}', [CabinetController::class, 'updateDistrict'])->name('districts.update');
-        Route::post('/districts/{district}/transfer', [CabinetController::class, 'transferDistrict'])->name('districts.transfer');
-        Route::post('/districts/{district}/separate', [CabinetController::class, 'separateDistrict'])->name('districts.separate');
-        Route::post('/districts/{district}/delete', [CabinetController::class, 'deleteDistrict'])->name('districts.delete');
-        Route::view('/clinic-schedule', 'doctors.settings.clinic_schedule')->name('clinic-schedule');
-        Route::view('/doctors-schedule', 'doctors.settings.doctors_schedule')->name('doctors-schedule');
+        Route::post('/districts/{district}', [CabinetController::class, 'updateDistrict'])->whereNumber('district')->name('districts.update');
+        Route::post('/districts/{district}/transfer', [CabinetController::class, 'transferDistrict'])->whereNumber('district')->name('districts.transfer');
+        Route::post('/districts/{district}/separate', [CabinetController::class, 'separateDistrict'])->whereNumber('district')->name('districts.separate');
+        Route::post('/districts/{district}/delete', [CabinetController::class, 'deleteDistrict'])->whereNumber('district')->name('districts.delete');
+        Route::get('/districts/clinic-schedule', [CabinetController::class, 'clinicSchedule'])->name('clinic-schedule');
+        Route::post('/districts/clinic-schedule/update', [CabinetController::class, 'clinicScheduleUpdate'])->name('clinic-schedule.update');
+
+        Route::post('/districts/clinic-schedule/exceptions', [CabinetController::class, 'clinicScheduleExceptionStore'])->name('clinic-schedule.exceptions.store');
+
+        Route::post('/districts/clinic-schedule/exceptions/{exception}', [CabinetController::class, 'clinicScheduleExceptionUpdate'])->whereNumber('exception')->name('clinic-schedule.exceptions.update');
+
+        Route::post('/districts/clinic-schedule/exceptions/{exception}/delete', [CabinetController::class, 'clinicScheduleExceptionDelete'])->whereNumber('exception')->name('clinic-schedule.exceptions.delete');
+
+        Route::get('/districts/doctors', [CabinetController::class, 'indexDoctorScheduleTable'])->name('doctors-schedule');
+
+        Route::get('/vacation-schedule', [CabinetController::class, 'vacationSchedule'])->name('vacation-schedule');
+        Route::post('/vacation-schedule', [CabinetController::class, 'vacationScheduleStore'])->name('vacation-schedule.store');
+        Route::post('/vacation-schedule/{vacation}', [CabinetController::class, 'vacationScheduleUpdate'])->whereNumber('vacation')->name('vacation-schedule.update');
+        Route::post('/vacation-schedule/{vacation}/delete', [CabinetController::class, 'vacationScheduleDelete'])->whereNumber('vacation')->name('vacation-schedule.delete');
+
+        Route::get('/duty-schedule', [HospitalDutyController::class, 'index'])->name('duty-schedule');
+        Route::post('/duty-schedule', [HospitalDutyController::class, 'store'])->name('duty-schedule.store');
+        Route::post('/duty-schedule/{duty}', [HospitalDutyController::class, 'update'])->whereNumber('duty')->name('duty-schedule.update');
+        Route::post('/duty-schedule/{duty}/delete', [HospitalDutyController::class, 'destroy'])->whereNumber('duty')->name('duty-schedule.delete');
+
+        Route::prefix('/departments')->group(function (): void {
+            Route::get('/', [HospitalDepartmentController::class, 'index'])->name('departments');
+
+            Route::post('/buildings', [HospitalDepartmentController::class, 'storeBuilding'])->name('departments.buildings.store');
+
+            Route::post('/buildings/update', [HospitalDepartmentController::class, 'updateBuilding'])->name('departments.buildings.update');
+
+            Route::post('/buildings/delete', [HospitalDepartmentController::class, 'deleteBuilding'])->name('departments.buildings.delete');
+
+            Route::post('/', [HospitalDepartmentController::class, 'store'])->name('departments.store');
+
+            Route::post('/{department}', [HospitalDepartmentController::class, 'update'])->whereNumber('department')->name('departments.update');
+
+            Route::post('/{department}/delete', [HospitalDepartmentController::class, 'destroy'])->whereNumber('department')->name('departments.delete');
+        });
+
+        Route::prefix('/rooms')->group(function (): void {
+            Route::get('/', [HospitalRoomController::class, 'index'])->name('rooms');
+
+            Route::get('/data', [HospitalRoomController::class, 'data'])->name('rooms.data');
+
+            Route::get('/patients/search', [HospitalRoomController::class, 'patientSearch'])->name('rooms.patients.search');
+
+            Route::post('/', [HospitalRoomController::class, 'store'])->name('rooms.store');
+
+            Route::post('/beds/{bed}/assign', [HospitalRoomController::class, 'assignBed'])->whereNumber('bed')->name('rooms.beds.assign');
+
+            Route::post('/beds/{bed}/release', [HospitalRoomController::class, 'releaseBed'])->whereNumber('bed')->name('rooms.beds.release');
+
+            Route::post('/{room}/layout', [HospitalRoomController::class, 'saveLayout'])->whereNumber('room')->name('rooms.layout');
+
+            Route::post('/{room}/delete', [HospitalRoomController::class, 'destroy'])->whereNumber('room')->name('rooms.delete');
+
+            Route::post('/{room}', [HospitalRoomController::class, 'update'])->whereNumber('room')->name('rooms.update');
+        });
     });
 });

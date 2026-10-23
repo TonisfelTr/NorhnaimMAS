@@ -14,6 +14,276 @@
             margin-bottom: 18px;
         }
 
+        .office-page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .office-building-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin: -4px 0 18px;
+        }
+
+        .office-building-chip {
+            display: inline-flex;
+            min-height: 38px;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 11px;
+            border: 1px solid #dce6ec;
+            border-radius: 12px;
+            background: #fff;
+            color: #405264;
+            box-shadow: 0 7px 20px rgba(15, 23, 42, .035);
+        }
+
+        .office-building-chip__icon {
+            display: grid;
+            width: 27px;
+            height: 27px;
+            place-items: center;
+            border-radius: 8px;
+            background: #edf8fa;
+            color: var(--settings-primary-dark);
+            font-size: 12px;
+        }
+
+        .office-building-chip__name {
+            display: block;
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .office-building-chip__meta {
+            display: block;
+            margin-top: 1px;
+            color: #8a96a5;
+            font-size: 9px;
+        }
+
+        .office-building-chip__edit {
+            display: grid;
+            width: 28px;
+            height: 28px;
+            flex: 0 0 28px;
+            margin-left: 2px;
+            place-items: center;
+            border: 1px solid #d8e2e9;
+            border-radius: 8px;
+            background: #fff;
+            color: #64748b;
+            cursor: pointer;
+            transition: .14s ease;
+        }
+
+        .office-building-chip__edit:hover {
+            border-color: #b9d4da;
+            background: #f4fbfc;
+            color: var(--settings-primary-dark);
+        }
+
+        .office-building-modal {
+            z-index: 1090 !important;
+        }
+
+        .office-building-modal .modal-dialog {
+            position: relative;
+            z-index: 1091;
+            width: min(620px, calc(100vw - 32px));
+            max-width: 620px;
+        }
+
+        .office-building-modal .modal-content {
+            background: #fff;
+        }
+
+        .office-building-form-modal .modal-content {
+            overflow: hidden;
+            border: 1px solid #dce7ed;
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: 0 28px 90px rgba(15, 23, 42, .24);
+        }
+
+        .office-building-form-modal__header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 22px;
+            border-bottom: 1px solid #e7eef2;
+            background:
+                radial-gradient(
+                    circle at 88% 12%,
+                    rgba(4, 134, 150, .12),
+                    transparent 34%
+                ),
+                linear-gradient(135deg, #f3fbfc 0%, #fff 72%);
+        }
+
+        .office-building-form-modal--edit
+        .office-building-form-modal__header {
+            background:
+                radial-gradient(
+                    circle at 88% 12%,
+                    rgba(37, 99, 235, .10),
+                    transparent 34%
+                ),
+                linear-gradient(135deg, #f5f9ff 0%, #fff 72%);
+        }
+
+        .office-building-form-modal__icon {
+            display: grid;
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            place-items: center;
+            border-radius: 15px;
+            background: linear-gradient(
+                135deg,
+                var(--settings-primary),
+                var(--settings-primary-light)
+            );
+            color: #fff;
+            font-size: 20px;
+            box-shadow: 0 10px 24px rgba(4, 134, 150, .18);
+        }
+
+        .office-building-form-modal--edit
+        .office-building-form-modal__icon {
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, .18);
+        }
+
+        .office-building-form-modal__eyebrow {
+            color: #7b8a99;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: .075em;
+            text-transform: uppercase;
+        }
+
+        .office-building-form-modal__title {
+            margin: 3px 0 0;
+            color: #24303d;
+            font-size: 19px;
+            font-weight: 880;
+            line-height: 1.2;
+        }
+
+        .office-building-form-modal__subtitle {
+            margin-top: 4px;
+            color: #7a8794;
+            font-size: 10px;
+            line-height: 1.45;
+        }
+
+        .office-building-form-modal__body {
+            padding: 20px 22px 22px;
+        }
+
+        .office-building-form-card {
+            padding: 16px;
+            border: 1px solid #e2eaf0;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #fbfdfe 0%, #fff 100%);
+        }
+
+        .office-building-form-grid {
+            display: grid;
+            grid-template-columns: minmax(145px, .38fr) minmax(0, 1fr);
+            gap: 15px;
+        }
+
+        .office-building-form-field--full {
+            grid-column: 1 / -1;
+        }
+
+        .office-building-form-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 7px;
+            color: #405264;
+            font-size: 10px;
+            font-weight: 850;
+        }
+
+        .office-building-form-label i {
+            color: var(--settings-primary-dark);
+            font-size: 11px;
+        }
+
+        .office-building-form-number {
+            position: relative;
+        }
+
+        .office-building-form-number__prefix {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            z-index: 2;
+            color: #8493a2;
+            font-size: 12px;
+            font-weight: 850;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .office-building-form-number .settings-control {
+            padding-left: 33px;
+        }
+
+        .office-building-form-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin-top: 14px;
+            padding: 11px 12px;
+            border: 1px solid #d8ecef;
+            border-radius: 12px;
+            background: #f3fbfc;
+            color: #55707a;
+            font-size: 9px;
+            line-height: 1.45;
+        }
+
+        .office-building-form-modal--edit
+        .office-building-form-note {
+            border-color: #d9e6fb;
+            background: #f5f9ff;
+            color: #607897;
+        }
+
+        .office-building-form-note i {
+            margin-top: 1px;
+            color: var(--settings-primary-dark);
+        }
+
+        .office-building-form-modal__footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            padding: 14px 22px;
+            border-top: 1px solid #e7eef2;
+            background: #fbfcfd;
+        }
+
+        @media (max-width: 640px) {
+            .office-building-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .office-building-form-field--full {
+                grid-column: auto;
+            }
+        }
+
         .office-toolbar__search {
             position: relative;
             width: min(520px, 100%);
@@ -79,6 +349,156 @@
             font-size: 11px;
         }
 
+        .office-building-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin: -4px 0 18px;
+        }
+
+        .office-building-filter {
+            display: inline-flex;
+            min-height: 40px;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 11px;
+            border: 1px solid #dce6ec;
+            border-radius: 12px;
+            background: #fff;
+            color: #526273;
+            font-size: 10px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 7px 20px rgba(15, 23, 42, .035);
+            transition: .15s ease;
+        }
+
+        .office-building-filter:hover {
+            border-color: #b9d9df;
+            background: #f7fcfd;
+            color: var(--settings-primary-dark);
+        }
+
+        .office-building-filter.is-active {
+            border-color: #8fcdd5;
+            background: linear-gradient(
+                135deg,
+                #eaf9fb,
+                #f8fdfe
+            );
+            color: var(--settings-primary-dark);
+            box-shadow:
+                inset 0 0 0 1px rgba(4, 134, 150, .05),
+                0 8px 22px rgba(4, 134, 150, .08);
+        }
+
+        .office-building-filter__icon {
+            display: grid;
+            width: 27px;
+            height: 27px;
+            flex: 0 0 27px;
+            place-items: center;
+            border-radius: 8px;
+            background: #edf8fa;
+            color: var(--settings-primary-dark);
+            font-size: 12px;
+        }
+
+        .office-building-filter.is-active
+        .office-building-filter__icon {
+            background: #d8f2f5;
+        }
+
+        .office-building-filter__main {
+            min-width: 0;
+        }
+
+        .office-building-filter__title {
+            display: block;
+            white-space: nowrap;
+        }
+
+        .office-building-filter__meta {
+            display: block;
+            margin-top: 1px;
+            color: #8a96a5;
+            font-size: 9px;
+            font-weight: 650;
+            white-space: nowrap;
+        }
+
+        .office-building-filter__count {
+            display: inline-flex;
+            min-width: 25px;
+            min-height: 22px;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 9px;
+            font-weight: 850;
+        }
+
+        .office-building-filter.is-active
+        .office-building-filter__count {
+            background: #dff4f6;
+            color: var(--settings-primary-dark);
+        }
+
+        .office-building-filter-wrap {
+            display: inline-flex;
+            align-items: stretch;
+            gap: 5px;
+        }
+
+        .office-building-filter-wrap
+        .office-building-filter {
+            flex: 1 1 auto;
+        }
+
+        .office-building-filter__edit {
+            display: grid;
+            width: 40px;
+            flex: 0 0 40px;
+            place-items: center;
+            border: 1px solid #dce6ec;
+            border-radius: 12px;
+            background: #fff;
+            color: #64748b;
+            cursor: pointer;
+            transition: .15s ease;
+        }
+
+        .office-building-filter__edit:hover {
+            border-color: #b9d9df;
+            background: #f7fcfd;
+            color: var(--settings-primary-dark);
+        }
+
+        .office-building-delete-button {
+            border-color: #fecaca !important;
+            background: #fff7f7 !important;
+            color: #b42318 !important;
+        }
+
+        .office-building-delete-button:hover:not(:disabled) {
+            border-color: #fca5a5 !important;
+            background: #fff0f0 !important;
+            color: #991b1b !important;
+        }
+
+        .office-building-form-modal__footer {
+            align-items: center;
+        }
+
+        .office-building-form-modal__footer-main {
+            display: flex;
+            gap: 9px;
+            margin-left: auto;
+        }
+
         .office-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -96,6 +516,23 @@
             border-radius: 20px;
             background: #fff;
             box-shadow: 0 14px 38px rgba(15, 23, 42, .05);
+        }
+
+        .office-card--temporarily-inactive {
+            border-color: #d7dee7;
+            background: #f8fafc;
+            box-shadow: none;
+        }
+
+        .office-card--temporarily-inactive .office-card__header,
+        .office-card--temporarily-inactive .office-card__body,
+        .office-card--temporarily-inactive .office-card__footer {
+            background: #f8fafc;
+        }
+
+        .office-card--temporarily-inactive .office-card__body,
+        .office-card--temporarily-inactive .office-card__footer {
+            opacity: .68;
         }
 
         .office-card--procedure {
@@ -589,6 +1026,11 @@
             color: #64748b;
         }
 
+        .office-status--temporarily-inactive {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
         .office-card__body {
             flex: 1 1 auto;
             padding: 18px 19px;
@@ -726,6 +1168,155 @@
             border-top-color: rgba(37, 99, 235, .14);
         }
 
+        .office-status--vacation {
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .office-vacation-state {
+            margin: 14px 18px 0;
+            padding: 14px;
+            border: 1px solid #fecdd3;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #fff5f6 0%, #fffafa 100%);
+            color: #881337;
+        }
+
+        .office-vacation-state--nurse {
+            border-color: #c9e5ee;
+            background: linear-gradient(135deg, #f1fbfd 0%, #fbfeff 100%);
+            color: #155e75;
+        }
+
+        .office-vacation-state--duty {
+            border-color: #b7e3d0;
+            background: linear-gradient(135deg, #f0fbf6 0%, #fbfffd 100%);
+            color: #166534;
+        }
+
+        .office-vacation-state__title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .office-vacation-state__employee {
+            margin-top: 8px;
+            color: #4c1d2f;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .office-vacation-state--nurse .office-vacation-state__employee {
+            color: #164e63;
+        }
+
+        .office-vacation-state--duty .office-vacation-state__employee {
+            color: #14532d;
+        }
+
+        .office-vacation-state__period {
+            margin-top: 3px;
+            font-size: 10px;
+            font-weight: 750;
+            opacity: .78;
+        }
+
+        .office-vacation-state__replacement {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(190, 18, 60, .12);
+        }
+
+        .office-vacation-state--nurse .office-vacation-state__replacement {
+            border-top-color: rgba(8, 145, 178, .15);
+        }
+
+        .office-vacation-state--duty .office-vacation-state__replacement {
+            border-top-color: rgba(22, 101, 52, .14);
+        }
+
+        .office-vacation-state__label {
+            color: #8f5b69;
+            font-size: 9px;
+            font-weight: 850;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+        }
+
+        .office-vacation-state--nurse .office-vacation-state__label {
+            color: #5b7f8d;
+        }
+
+        .office-vacation-state--duty .office-vacation-state__label {
+            color: #5f7e68;
+        }
+
+        .office-vacation-state__replacement-name {
+            margin-top: 3px;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .office-vacation-state__meta {
+            margin-top: 2px;
+            font-size: 9px;
+            line-height: 1.45;
+            opacity: .78;
+        }
+
+        .office-vacation-state__locations {
+            display: grid;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .office-vacation-state__location {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 7px 8px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .72);
+            font-size: 9px;
+            font-weight: 750;
+            line-height: 1.4;
+        }
+
+        .office-vacation-state__location i {
+            margin-top: 1px;
+            flex: 0 0 auto;
+        }
+
+        .office-vacation-state__warning {
+            margin-top: 8px;
+            color: #be123c;
+            font-size: 10px;
+            font-weight: 850;
+        }
+
+        .office-person__vacation {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+            padding: 4px 7px;
+            border-radius: 999px;
+            background: #fff1f2;
+            color: #be123c;
+            font-size: 9px;
+            font-weight: 850;
+        }
+
+        .office-person__vacation--nurse {
+            background: #ecf9fc;
+            color: #0e7490;
+        }
+
         .office-replacement-settings {
             padding: 14px;
             border: 1px solid #dbe7f0;
@@ -757,6 +1348,183 @@
 
         .office-replacement-settings .row > * {
             min-width: 0;
+        }
+
+        .office-replacement-picker {
+            position: relative;
+        }
+
+        .office-replacement-picker__input {
+            position: relative;
+        }
+
+        .office-replacement-picker__input > i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            z-index: 2;
+            color: #94a3b8;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .office-replacement-picker__input .settings-control {
+            padding-right: 40px;
+            padding-left: 40px;
+        }
+
+        .office-replacement-picker__clear {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            display: none;
+            width: 28px;
+            height: 28px;
+            place-items: center;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #94a3b8;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .office-replacement-picker__clear.is-visible {
+            display: grid;
+        }
+
+        .office-replacement-picker__clear:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .office-replacement-picker__dropdown {
+            position: absolute;
+            z-index: 100;
+            top: calc(100% + 7px);
+            right: 0;
+            left: 0;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 7px;
+            border: 1px solid #d8e2e9;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, .14);
+        }
+
+        .office-replacement-picker__dropdown.is-open {
+            display: grid;
+            gap: 6px;
+        }
+
+        .office-replacement-option {
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+            padding: 10px 11px;
+            border: 1px solid transparent;
+            border-radius: 11px;
+            background: #fff;
+            color: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: .14s ease;
+        }
+
+        .office-replacement-option:hover {
+            border-color: #d5e7ea;
+            background: #f7fcfd;
+        }
+
+        .office-replacement-option.is-selected {
+            border-color: #9fd6dc;
+            background: #eefafb;
+        }
+
+        .office-replacement-option.is-unavailable {
+            display: none;
+        }
+
+        .office-replacement-option__avatar {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            border-radius: 11px;
+            background: linear-gradient(
+                135deg,
+                var(--settings-primary),
+                var(--settings-primary-light)
+            );
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .office-replacement-option__content {
+            min-width: 0;
+        }
+
+        .office-replacement-option__name {
+            display: block;
+            overflow: hidden;
+            color: #24303d;
+            font-size: 12px;
+            font-weight: 850;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .office-replacement-option__meta {
+            display: block;
+            margin-top: 2px;
+            overflow: hidden;
+            color: #7a8794;
+            font-size: 10px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .office-replacement-option__badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #f2f4f7;
+            color: #667085;
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .office-replacement-picker__empty {
+            display: none;
+            padding: 18px 12px;
+            color: #8a96a5;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .office-replacement-picker__empty.is-visible {
+            display: block;
+        }
+
+        .office-replacement-selected {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            color: #32705a;
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .office-replacement-selected.is-visible {
+            display: flex;
         }
 
         .office-section + .office-section {
@@ -1037,6 +1805,20 @@
             color: #fff;
         }
 
+        .office-action:disabled {
+            border-color: #d8e0e5;
+            background: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            opacity: .75;
+        }
+
+        .office-action:disabled:hover {
+            border-color: #d8e0e5;
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+
         .office-empty-cards {
             padding: 14px 13px;
             border: 1px dashed #cbd5e1;
@@ -1074,6 +1856,117 @@
             border: 0;
             border-radius: 20px;
             box-shadow: 0 24px 80px rgba(15, 23, 42, .22);
+        }
+
+        .office-form-header {
+            position: relative;
+            display: flex;
+            align-items: center !important;
+            gap: 14px !important;
+        }
+
+        .office-form-header__icon {
+            display: grid;
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            place-items: center;
+            border-radius: 15px;
+            background: linear-gradient(
+                135deg,
+                var(--settings-primary),
+                var(--settings-primary-light)
+            );
+            color: #fff;
+            font-size: 20px;
+            box-shadow: 0 10px 24px rgba(4, 134, 150, .18);
+            transition: .18s ease;
+        }
+
+        .office-modal--edit .office-form-header__icon {
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #60a5fa
+            );
+            box-shadow: 0 10px 24px rgba(37, 99, 235, .18);
+        }
+
+        .office-form-header__content {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .office-form-header__eyebrow {
+            margin-bottom: 3px;
+            color: #718096;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: .075em;
+            text-transform: uppercase;
+        }
+
+        .office-modal--create .modal-header {
+            background:
+                radial-gradient(
+                    circle at 88% 12%,
+                    rgba(4, 134, 150, .12),
+                    transparent 34%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f2fbfc 0%,
+                    #fff 72%
+                );
+        }
+
+        .office-modal--edit .modal-header {
+            background:
+                radial-gradient(
+                    circle at 88% 12%,
+                    rgba(37, 99, 235, .10),
+                    transparent 34%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f5f9ff 0%,
+                    #fff 72%
+                );
+        }
+
+        .office-form--create .settings-form-grid,
+        .office-form--edit .settings-form-grid {
+            position: relative;
+        }
+
+        .office-form--edit #replacementStaffField {
+            border-color: #d7e5f5;
+            background: linear-gradient(
+                135deg,
+                #f6f9fd,
+                #fbfdff
+            );
+        }
+
+        .office-form--create #replacementStaffField {
+            display: none !important;
+        }
+
+        .office-delete-button {
+            margin-right: auto;
+            border: 1px solid #fecaca !important;
+            background: #fff7f7 !important;
+            color: #b42318 !important;
+        }
+
+        .office-delete-button:hover {
+            border-color: #fca5a5 !important;
+            background: #fff0f0 !important;
+            color: #991b1b !important;
+        }
+
+        .office-form--create .office-delete-button {
+            display: none !important;
         }
 
         .office-modal .modal-header {
@@ -1120,6 +2013,7 @@
              */
             .office-modal .settings-form-grid > :has(#officeName),
             .office-modal .settings-form-grid > :has(.office-cabinet-types),
+            .office-modal .settings-form-grid > :has(#officeBuilding),
             #replacementStaffField,
             #functionalMethodsField {
                 grid-column: 1 / 8;
@@ -1297,28 +2191,13 @@
             right: 0;
             left: 0;
             display: none;
-            max-height: 270px;
-            overflow-x: hidden;
+            max-height: 310px;
             overflow-y: auto;
-            overscroll-behavior: contain;
-            scrollbar-gutter: stable;
-            scrollbar-width: thin;
             padding: 7px;
             border: 1px solid #d8e2e9;
             border-radius: 14px;
             background: #fff;
             box-shadow: 0 18px 42px rgba(15, 23, 42, .14);
-        }
-
-        .office-doctor-picker__dropdown::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .office-doctor-picker__dropdown::-webkit-scrollbar-thumb {
-            border: 2px solid transparent;
-            border-radius: 999px;
-            background: #cbd5e1;
-            background-clip: padding-box;
         }
 
         .office-doctor-picker__dropdown.is-open {
@@ -1818,8 +2697,6 @@
 @endsection
 
 @section('sub-main')
-
-
     <main class="settings-page">
         <div class="settings-container">
             <div class="settings-page-header">
@@ -1832,17 +2709,28 @@
                     </p>
                 </div>
 
-                <button type="button"
-                        class="settings-button settings-button--primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#officeModal"
-                        data-office-mode="create">
-                    <i class="bi bi-plus-lg"></i>
-                    Добавить кабинет
-                </button>
+                <div class="office-page-actions">
+                    <button type="button"
+                            class="settings-button settings-button--secondary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#buildingCreateModal">
+                        <i class="bi bi-buildings"></i>
+                        Добавить корпус
+                    </button>
+
+                    <button type="button"
+                            class="settings-button settings-button--primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#officeModal"
+                            data-office-mode="create"
+                        @disabled($buildings->isEmpty())>
+                        <i class="bi bi-plus-lg"></i>
+                        Добавить кабинет
+                    </button>
+                </div>
             </div>
 
-            @if($errors->any())
+            @if($errors->getBag('default')->any())
                 <div class="office-flash office-flash--error" role="alert">
                     <div class="office-flash__icon">
                         <i class="bi bi-exclamation-triangle-fill"></i>
@@ -1857,10 +2745,66 @@
                         </div>
 
                         <ul class="office-flash__list">
-                            @foreach($errors->all() as $error)
+                            @foreach($errors->getBag('default')->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
+                    </div>
+                </div>
+            @endif
+
+            @if($errors->deleteBuilding->any())
+                <div class="office-flash office-flash--error" role="alert">
+                    <div class="office-flash__icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+
+                    <div class="office-flash__content">
+                        <div class="office-flash__title">
+                            Корпус не удалён
+                        </div>
+
+                        <ul class="office-flash__list">
+                            @foreach($errors->deleteBuilding->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            @if($errors->deleteOffice->any())
+                <div class="office-flash office-flash--error" role="alert">
+                    <div class="office-flash__icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+
+                    <div class="office-flash__content">
+                        <div class="office-flash__title">
+                            Кабинет не удалён
+                        </div>
+
+                        <ul class="office-flash__list">
+                            @foreach($errors->deleteOffice->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('building_success'))
+                <div class="office-flash office-flash--success" role="status">
+                    <div class="office-flash__icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="office-flash__content">
+                        <div class="office-flash__title">
+                            Корпус сохранён
+                        </div>
+                        <div class="office-flash__text">
+                            {{ session('building_success') }}
+                        </div>
                     </div>
                 </div>
             @endif
@@ -1886,7 +2830,17 @@
                 <article class="office-summary-card">
                     <div class="office-summary-card__label">Кабинетов</div>
                     <div class="office-summary-card__value">{{ $cabinets->total() }}</div>
-                    <div class="office-summary-card__hint">В текущей клинике</div>
+                    <div class="office-summary-card__hint">
+                        {{ $selectedBuilding
+                            ? 'В выбранном корпусе'
+                            : 'В текущей клинике' }}
+                    </div>
+                </article>
+
+                <article class="office-summary-card">
+                    <div class="office-summary-card__label">Корпусов</div>
+                    <div class="office-summary-card__value">{{ $buildings->count() }}</div>
+                    <div class="office-summary-card__hint">У текущей клиники</div>
                 </article>
 
                 <article class="office-summary-card">
@@ -1896,13 +2850,80 @@
                 </article>
             </section>
 
+            @if($buildings->isNotEmpty())
+                <div class="office-building-filters">
+                    <a href="{{ route('doctors.settings.offices') }}"
+                       class="office-building-filter {{ !$selectedBuildingId ? 'is-active' : '' }}">
+                        <span class="office-building-filter__icon">
+                            <i class="bi bi-grid"></i>
+                        </span>
+
+                        <span class="office-building-filter__main">
+                            <span class="office-building-filter__title">
+                                Все корпуса
+                            </span>
+                            <span class="office-building-filter__meta">
+                                Показать все кабинеты
+                            </span>
+                        </span>
+                    </a>
+
+                    @foreach($buildings as $building)
+                        <div class="office-building-filter-wrap">
+                            <a href="{{ route(
+                                    'doctors.settings.offices',
+                                    ['building_id' => $building->id]
+                                ) }}"
+                               class="office-building-filter {{ (int) $selectedBuildingId === (int) $building->id ? 'is-active' : '' }}">
+                                <span class="office-building-filter__icon">
+                                    <i class="bi bi-buildings"></i>
+                                </span>
+
+                                <span class="office-building-filter__main">
+                                    <span class="office-building-filter__title">
+                                        Корпус №{{ $building->number }}
+                                        — {{ $building->name }}
+                                    </span>
+
+                                    <span class="office-building-filter__meta">
+                                        @if($building->address)
+                                            {{ $building->address }}
+                                        @else
+                                            Кабинеты корпуса
+                                        @endif
+                                    </span>
+                                </span>
+
+                                <span class="office-building-filter__count">
+                                    {{ $building->cabinets_count }}
+                                </span>
+                            </a>
+
+                            <button type="button"
+                                    class="office-building-filter__edit"
+                                    title="Редактировать корпус"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#buildingEditModal"
+                                    data-building-edit
+                                    data-building-id="{{ $building->id }}"
+                                    data-building-number="{{ $building->number }}"
+                                    data-building-name="{{ $building->name }}"
+                                    data-building-address="{{ $building->address }}"
+                                    data-building-cabinets-count="{{ $building->cabinets_count }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
             <div class="office-toolbar">
                 <div class="office-toolbar__search">
                     <i class="bi bi-search"></i>
                     <input type="search"
                            id="officeSearch"
                            class="settings-control"
-                           placeholder="Поиск по кабинету, этажу, сотруднику, методу диагностики или карте...">
+                           placeholder="Поиск по корпусу, кабинету, этажу, сотруднику, методу диагностики или карте...">
                 </div>
 
                 <span class="settings-type-badge">
@@ -1911,10 +2932,17 @@
                 </span>
             </div>
 
-            <section class="office-grid" id="officeGrid">
+            <section class="office-grid"
+                     id="officeGrid">
                 @foreach($cabinets as $office)
-                    <article class="office-card office-card--{{ $office->cabinet_type }}"
+                    <article class="office-card office-card--{{ $office->cabinet_type }} {{ !empty($office->temporarily_inactive) ? 'office-card--temporarily-inactive' : '' }}"
                              data-office-card
+                             data-office-building="{{ mb_strtolower(
+                                 trim(
+                                     ($office->building?->number ? 'корпус ' . $office->building->number . ' ' : '')
+                                     . ($office->building?->name ?? '')
+                                 )
+                             ) }}"
                              data-office-number="{{ $office->cabinet }}"
                              data-office-stage="{{ $office->stage }}"
                              data-office-name="{{ mb_strtolower($office['name']) }}"
@@ -1932,9 +2960,14 @@
                                     <h2 class="office-card__name">{{ $office->name }}</h2>
                                     <div class="office-card__meta">
                                         <span>
+                                            <i class="bi bi-buildings"></i>
+                                            {{ $office->building?->name ?? 'корпус не указан' }}
+                                        </span>
+                                        <span>
                                             <i class="bi bi-door-closed"></i>
                                             кабинет №{{ $office->cabinet }}
                                         </span>
+
                                         <span>
                                             <i class="bi bi-layers"></i>
                                             {{ $office->stage !== null && $office->stage !== ''
@@ -1963,11 +2996,260 @@
                                 </div>
                             </div>
 
-                            <span class="office-status {{ $office->enabled ? '' : 'office-status--muted' }}">
-                                <i class="bi {{ $office->enabled ? 'bi-check-circle' : 'bi-dash-circle' }}"></i>
-                                {{ $office->enabled ? 'Используется' : 'Не используется' }}
-                            </span>
+                            @if(!empty($office->doctor_vacation))
+                                <span class="office-status office-status--vacation">
+                                    <i class="bi bi-airplane"></i>
+                                    Врач в отпуске
+                                </span>
+                            @elseif(
+                                $office->cabinet_type === 'procedure'
+                                && !empty($office->nurse_vacation)
+                            )
+                                <span class="office-status office-status--vacation">
+                                    <i class="bi bi-airplane"></i>
+                                    Медсестра в отпуске
+                                </span>
+                            @elseif(!empty($office->temporarily_inactive))
+                                <span class="office-status office-status--temporarily-inactive">
+                                    <i class="bi bi-pause-circle"></i>
+                                    Врач в другом кабинете
+                                </span>
+                            @else
+                                <span class="office-status {{ $office->enabled ? '' : 'office-status--muted' }}">
+                                    <i class="bi {{ $office->enabled ? 'bi-check-circle' : 'bi-dash-circle' }}"></i>
+                                    {{ $office->enabled ? 'Используется' : 'Не используется' }}
+                                </span>
+                            @endif
                         </header>
+
+
+                        @if(!empty($office->doctor_vacation))
+                            <div class="office-vacation-state">
+                                <div class="office-vacation-state__title">
+                                    <i class="bi bi-airplane"></i>
+                                    Основной врач в отпуске
+                                </div>
+
+                                <div class="office-vacation-state__employee">
+                                    {{ $office->mainDoctor?->full_name ?? 'Врач не найден' }}
+                                </div>
+
+                                <div class="office-vacation-state__period">
+                                    {{ $office->doctor_vacation['period'] }}
+                                </div>
+
+                                <div class="office-vacation-state__replacement">
+                                    <div class="office-vacation-state__label">
+                                        Исполняющий обязанности
+                                    </div>
+
+                                    @if(!empty($office->doctor_vacation['replace_name']))
+                                        <div class="office-vacation-state__replacement-name">
+                                            {{ $office->doctor_vacation['replace_name'] }}
+                                        </div>
+
+                                        @if(!empty($office->doctor_vacation['replace_role']))
+                                            <div class="office-vacation-state__meta">
+                                                {{ $office->doctor_vacation['replace_role'] }}
+                                            </div>
+                                        @endif
+
+                                        @if(!empty($office->doctor_vacation['replace_locations']))
+                                            <div class="office-vacation-state__locations">
+                                                @foreach($office->doctor_vacation['replace_locations'] as $location)
+                                                    <div class="office-vacation-state__location">
+                                                        <i class="bi bi-geo-alt"></i>
+                                                        <span>
+                                                            Основной кабинет И.О.:
+                                                            @if(!empty($location['building_number']))
+                                                                корпус №{{ $location['building_number'] }}
+                                                            @elseif(!empty($location['building_name']))
+                                                                {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['building_name']) && !empty($location['building_number']))
+                                                                — {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['cabinet']))
+                                                                · кабинет №{{ $location['cabinet'] }}
+                                                            @endif
+                                                            @if($location['stage'] !== null && $location['stage'] !== '')
+                                                                · {{ $location['stage'] }} этаж
+                                                            @endif
+                                                        </span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="office-vacation-state__meta">
+                                                У И.О. не найден активный основной кабинет.
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="office-vacation-state__warning">
+                                            И.О. на период отпуска не назначен.
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(!empty($office->nurse_vacation))
+                            <div class="office-vacation-state office-vacation-state--nurse">
+                                <div class="office-vacation-state__title">
+                                    <i class="bi bi-airplane"></i>
+                                    Медсестра в отпуске
+                                </div>
+
+                                <div class="office-vacation-state__employee">
+                                    {{ $office->mainNurse?->full_name ?? 'Медсестра не найдена' }}
+                                </div>
+
+                                <div class="office-vacation-state__period">
+                                    {{ $office->nurse_vacation['period'] }}
+                                </div>
+
+                                <div class="office-vacation-state__replacement">
+                                    <div class="office-vacation-state__label">
+                                        Исполняющая обязанности
+                                    </div>
+
+                                    @if(!empty($office->nurse_vacation['replace_name']))
+                                        <div class="office-vacation-state__replacement-name">
+                                            {{ $office->nurse_vacation['replace_name'] }}
+                                        </div>
+
+                                        @if(!empty($office->nurse_vacation['replace_role']))
+                                            <div class="office-vacation-state__meta">
+                                                {{ $office->nurse_vacation['replace_role'] }}
+                                            </div>
+                                        @endif
+
+                                        @if(!empty($office->nurse_vacation['replace_locations']))
+                                            <div class="office-vacation-state__locations">
+                                                @foreach($office->nurse_vacation['replace_locations'] as $location)
+                                                    <div class="office-vacation-state__location">
+                                                        <i class="bi bi-geo-alt"></i>
+                                                        <span>
+                                                            Основной кабинет И.О.:
+                                                            @if(!empty($location['building_number']))
+                                                                корпус №{{ $location['building_number'] }}
+                                                            @elseif(!empty($location['building_name']))
+                                                                {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['building_name']) && !empty($location['building_number']))
+                                                                — {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['cabinet']))
+                                                                · кабинет №{{ $location['cabinet'] }}
+                                                            @endif
+                                                            @if($location['stage'] !== null && $location['stage'] !== '')
+                                                                · {{ $location['stage'] }} этаж
+                                                            @endif
+                                                        </span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="office-vacation-state__meta">
+                                                У И.О. не найден активный основной кабинет.
+                                            </div>
+                                        @endif
+                                    @else
+                                        <div class="office-vacation-state__warning">
+                                            И.О. на период отпуска не назначена.
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(!empty($office->doctor_vacation_duties))
+                            <div class="office-vacation-state office-vacation-state--duty">
+                                <div class="office-vacation-state__title">
+                                    <i class="bi bi-person-check"></i>
+                                    Врач исполняет обязанности
+                                </div>
+
+                                @foreach($office->doctor_vacation_duties as $duty)
+                                    <div class="office-vacation-state__replacement">
+                                        <div class="office-vacation-state__replacement-name">
+                                            За {{ $duty['employee_name'] }}
+                                        </div>
+                                        <div class="office-vacation-state__period">
+                                            {{ $duty['period'] }}
+                                        </div>
+
+                                        @if(!empty($duty['employee_locations']))
+                                            <div class="office-vacation-state__locations">
+                                                @foreach($duty['employee_locations'] as $location)
+                                                    <div class="office-vacation-state__location">
+                                                        <i class="bi bi-door-open"></i>
+                                                        <span>
+                                                            Кабинет отсутствующего врача:
+                                                            @if(!empty($location['building_number']))
+                                                                корпус №{{ $location['building_number'] }}
+                                                            @elseif(!empty($location['building_name']))
+                                                                {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['building_name']) && !empty($location['building_number']))
+                                                                — {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['cabinet']))
+                                                                · кабинет №{{ $location['cabinet'] }}
+                                                            @endif
+                                                        </span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        @if(!empty($office->nurse_vacation_duties))
+                            <div class="office-vacation-state office-vacation-state--duty">
+                                <div class="office-vacation-state__title">
+                                    <i class="bi bi-person-check"></i>
+                                    Медсестра исполняет обязанности
+                                </div>
+
+                                @foreach($office->nurse_vacation_duties as $duty)
+                                    <div class="office-vacation-state__replacement">
+                                        <div class="office-vacation-state__replacement-name">
+                                            За {{ $duty['employee_name'] }}
+                                        </div>
+                                        <div class="office-vacation-state__period">
+                                            {{ $duty['period'] }}
+                                        </div>
+
+                                        @if(!empty($duty['employee_locations']))
+                                            <div class="office-vacation-state__locations">
+                                                @foreach($duty['employee_locations'] as $location)
+                                                    <div class="office-vacation-state__location">
+                                                        <i class="bi bi-door-open"></i>
+                                                        <span>
+                                                            Кабинет отсутствующей медсестры:
+                                                            @if(!empty($location['building_number']))
+                                                                корпус №{{ $location['building_number'] }}
+                                                            @elseif(!empty($location['building_name']))
+                                                                {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['building_name']) && !empty($location['building_number']))
+                                                                — {{ $location['building_name'] }}
+                                                            @endif
+                                                            @if(!empty($location['cabinet']))
+                                                                · кабинет №{{ $location['cabinet'] }}
+                                                            @endif
+                                                        </span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
 
 
                         @if(
@@ -2021,6 +3303,22 @@
                                                 — {{ $location['name'] }}
                                             @endif
                                         </div>
+
+                                        @if(
+                                            !empty($location['building_number'])
+                                            || !empty($location['building'])
+                                        )
+                                            <div class="office-doctor-away-today__meta">
+                                                <i class="bi bi-buildings"></i>
+                                                @if(!empty($location['building_number']))
+                                                    Корпус №{{ $location['building_number'] }}
+                                                @endif
+                                                @if(!empty($location['building']))
+                                                    {{ !empty($location['building_number']) ? '—' : '' }}
+                                                    {{ $location['building'] }}
+                                                @endif
+                                            </div>
+                                        @endif
 
                                         <div class="office-doctor-away-today__time">
                                             {{ $location['from'] }}
@@ -2078,6 +3376,13 @@
                                                 <div class="office-person__speciality">
                                                     {{ $office->mainDoctor->profession ?: 'Специальность не указана' }}
                                                 </div>
+
+                                                @if(!empty($office->doctor_vacation))
+                                                    <div class="office-person__vacation">
+                                                        <i class="bi bi-airplane"></i>
+                                                        В отпуске · {{ $office->doctor_vacation['period'] }}
+                                                    </div>
+                                                @endif
                                             @endif
                                         </div>
 
@@ -2100,6 +3405,13 @@
                                                         {{ $office->mainNurse->profession
                                                             ?: 'Медицинская сестра' }}
                                                     </div>
+
+                                                    @if(!empty($office->nurse_vacation))
+                                                        <div class="office-person__vacation office-person__vacation--nurse">
+                                                            <i class="bi bi-airplane"></i>
+                                                            В отпуске · {{ $office->nurse_vacation['period'] }}
+                                                        </div>
+                                                    @endif
                                                 @endif
                                             </div>
                                         @endif
@@ -2297,7 +3609,11 @@
                         <footer class="office-card__footer">
                             @if($office->cabinet_type === 'doctor')
                                 <div class="office-card__footer-hint">
-                                    Медкарта отображается здесь только пока физически находится в кабинете.
+                                    @if(!empty($office->temporarily_inactive))
+                                        На время замещения собственный кабинет врача временно не используется.
+                                    @else
+                                        Медкарта отображается здесь только пока физически находится в кабинете.
+                                    @endif
                                 </div>
                             @endif
 
@@ -2308,6 +3624,8 @@
                                         data-bs-target="#officeModal"
                                         data-office-mode="edit"
                                         data-office-id="{{ $office->id }}"
+                                        data-office-building-id="{{ $office->building_id }}"
+                                        data-office-patients-count="{{ $office->patients_count }}"
                                         data-office-type="{{ $office->cabinet_type }}"
                                         data-office-number="{{ $office->cabinet }}"
                                         data-office-stage="{{ $office->stage }}"
@@ -2327,7 +3645,12 @@
                                 </button>
 
                                 @if($office->cabinet_type === 'doctor')
-                                    <button type="button" class="office-action office-action--primary">
+                                    <button type="button"
+                                            class="office-action office-action--primary"
+                                            @disabled(!empty($office->temporarily_inactive))
+                                            title="{{ !empty($office->temporarily_inactive)
+                                                ? 'Врач принимает в другом кабинете'
+                                                : 'Медицинские карты кабинета' }}">
                                         <i class="bi bi-folder-symlink"></i>
                                         Карты
                                     </button>
@@ -2362,13 +3685,28 @@
                        name="mode"
                        value="{{ old('mode', 'create') }}">
 
-                <div class="modal-header">
-                    <div>
-                        <h2 class="modal-title" id="officeModalTitle">Добавить кабинет</h2>
+                <div class="modal-header office-form-header">
+                    <div class="office-form-header__icon">
+                        <i id="officeModalModeIcon"
+                           class="bi bi-door-open"></i>
+                    </div>
+
+                    <div class="office-form-header__content">
+                        <div class="office-form-header__eyebrow"
+                             id="officeModalEyebrow">
+                            Новый кабинет
+                        </div>
+
+                        <h2 class="modal-title"
+                            id="officeModalTitle">
+                            Добавить кабинет
+                        </h2>
+
                         <div class="settings-panel__subtitle">
-                            Укажите параметры кабинета и сохраните изменения.
+                            Корпус, персонал, расписание и параметры кабинета.
                         </div>
                     </div>
+
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
@@ -2376,7 +3714,7 @@
                 </div>
 
                 <div class="modal-body">
-                    @if($errors->any())
+                    @if($errors->getBag('default')->any())
                         <div class="office-flash office-flash--error" role="alert">
                             <div class="office-flash__icon">
                                 <i class="bi bi-exclamation-circle-fill"></i>
@@ -2388,7 +3726,7 @@
                                 </div>
 
                                 <ul class="office-flash__list">
-                                    @foreach($errors->all() as $error)
+                                    @foreach($errors->getBag('default')->all() as $error)
                                         <li>{{ $error }}</li>
                                     @endforeach
                                 </ul>
@@ -2463,6 +3801,34 @@
                                         <span>ЭЭГ, ЭКГ и другие исследования. За кабинетом закрепляется врач.</span>
                                     </span>
                                 </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-col-12">
+                            <label class="settings-label" for="officeBuilding">
+                                Корпус
+                            </label>
+                            <select id="officeBuilding"
+                                    name="building_id"
+                                    class="settings-control"
+                                    required>
+                                <option value="">Выберите корпус</option>
+                                @foreach($buildings as $building)
+                                    <option value="{{ $building->id }}"
+                                        @selected(
+                                            (string) old('building_id')
+                                            === (string) $building->id
+                                        )>
+                                        Корпус №{{ $building->number }}
+                                        — {{ $building->name }}
+                                        @if($building->address)
+                                            · {{ $building->address }}
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="settings-field-hint">
+                                Нумерация кабинетов ведётся отдельно в каждом корпусе.
                             </div>
                         </div>
 
@@ -2627,6 +3993,7 @@
                                                data-nurse-id="{{ $clinicNurse->id }}"
                                                data-nurse-name="{{ trim($clinicNurse->surname . ' ' . $clinicNurse->name . ' ' . ($clinicNurse->patronym ?? '')) }}"
                                                data-nurse-profession="{{ $clinicNurse->profession }}"
+                                               data-nurse-doctor-id="{{ $nurseDoctorMap[$clinicNurse->id] ?? '' }}"
                                                data-assigned-office-id="{{ $nurseAssignments[$clinicNurse->id]['id'] ?? '' }}"
                                                data-assigned-office-number="{{ $nurseAssignments[$clinicNurse->id]['number'] ?? '' }}">
                                             <input type="radio"
@@ -2690,64 +4057,158 @@
                                 <div class="col-md-6"
                                      id="replaceDoctorField">
                                     <label class="settings-label"
-                                           for="officeReplaceDoctor">
+                                           for="officeReplaceDoctorSearch">
                                         Замещающий врач
                                     </label>
 
-                                    <select id="officeReplaceDoctor"
-                                            name="replace_doctor_id"
-                                            class="settings-control">
-                                        <option value="">Не назначен</option>
+                                    <div class="office-replacement-picker"
+                                         id="officeReplaceDoctorPicker">
+                                        <input type="hidden"
+                                               id="officeReplaceDoctor"
+                                               name="replace_doctor_id"
+                                               value="{{ old('replace_doctor_id') }}">
 
-                                        @foreach($replacementDoctors as $replacementDoctor)
-                                            <option value="{{ $replacementDoctor->id }}"
-                                                @selected(
-                                                    (string) old('replace_doctor_id')
-                                                    === (string) $replacementDoctor->id
-                                                )>
-                                                {{ $replacementDoctor->full_name }}
-                                                @if($replacementDoctor->status)
-                                                    — {{ $replacementDoctor->status }}
-                                                @elseif($replacementDoctor->profession)
-                                                    — {{ $replacementDoctor->profession }}
-                                                @endif
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                        <div class="office-replacement-picker__input">
+                                            <i class="bi bi-search"></i>
+                                            <input type="text"
+                                                   id="officeReplaceDoctorSearch"
+                                                   class="settings-control"
+                                                   autocomplete="off"
+                                                   placeholder="Начните вводить ФИО врача...">
+
+                                            <button type="button"
+                                                    class="office-replacement-picker__clear"
+                                                    id="officeReplaceDoctorClear"
+                                                    title="Убрать замещающего врача">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="office-replacement-picker__dropdown"
+                                             id="officeReplaceDoctorDropdown">
+                                            @foreach($replacementDoctors as $replacementDoctor)
+                                                <button type="button"
+                                                        class="office-replacement-option"
+                                                        data-replace-doctor-id="{{ $replacementDoctor->id }}"
+                                                        data-replace-doctor-name="{{ $replacementDoctor->full_name }}"
+                                                        data-replace-doctor-meta="{{ $replacementDoctor->status ?: ($replacementDoctor->profession ?: 'Врач') }}"
+                                                        data-assigned-replacement-office-id="{{ $replacementDoctorAssignments[$replacementDoctor->id]['id'] ?? '' }}"
+                                                        data-assigned-replacement-office-number="{{ $replacementDoctorAssignments[$replacementDoctor->id]['number'] ?? '' }}">
+                                                    <span class="office-replacement-option__avatar">
+                                                        {{ mb_substr($replacementDoctor->name, 0, 1) }}{{ mb_substr($replacementDoctor->surname, 0, 1) }}
+                                                    </span>
+
+                                                    <span class="office-replacement-option__content">
+                                                        <span class="office-replacement-option__name">
+                                                            {{ $replacementDoctor->full_name }}
+                                                        </span>
+                                                        <span class="office-replacement-option__meta">
+                                                            {{ $replacementDoctor->status ?: ($replacementDoctor->profession ?: 'Врач') }}
+                                                        </span>
+                                                    </span>
+
+                                                    <span class="office-replacement-option__badge">
+                                                        @if(!empty($doctorAssignments[$replacementDoctor->id]))
+                                                            основной №{{ $doctorAssignments[$replacementDoctor->id]['number'] }}
+                                                        @else
+                                                            врач
+                                                        @endif
+                                                    </span>
+                                                </button>
+                                            @endforeach
+
+                                            <div class="office-replacement-picker__empty"
+                                                 id="officeReplaceDoctorEmpty">
+                                                Свободный замещающий врач не найден
+                                            </div>
+                                        </div>
+
+                                        <div class="office-replacement-selected"
+                                             id="officeReplaceDoctorSelected">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            <span id="officeReplaceDoctorSelectedText"></span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6"
                                      id="replaceNurseField">
                                     <label class="settings-label"
-                                           for="officeReplaceNurse">
+                                           for="officeReplaceNurseSearch">
                                         Замещающая медсестра
                                     </label>
 
-                                    <select id="officeReplaceNurse"
-                                            name="replace_nurse_id"
-                                            class="settings-control">
-                                        <option value="">Не назначена</option>
+                                    <div class="office-replacement-picker"
+                                         id="officeReplaceNursePicker">
+                                        <input type="hidden"
+                                               id="officeReplaceNurse"
+                                               name="replace_nurse_id"
+                                               value="{{ old('replace_nurse_id') }}">
 
-                                        @foreach($replacementNurses as $replacementNurse)
-                                            <option value="{{ $replacementNurse->id }}"
-                                                @selected(
-                                                    (string) old('replace_nurse_id')
-                                                    === (string) $replacementNurse->id
-                                                )>
-                                                {{ $replacementNurse->full_name }}
-                                                @if($replacementNurse->profession)
-                                                    — {{ $replacementNurse->profession }}
-                                                @endif
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                        <div class="office-replacement-picker__input">
+                                            <i class="bi bi-search"></i>
+                                            <input type="text"
+                                                   id="officeReplaceNurseSearch"
+                                                   class="settings-control"
+                                                   autocomplete="off"
+                                                   placeholder="Начните вводить ФИО медсестры...">
+
+                                            <button type="button"
+                                                    class="office-replacement-picker__clear"
+                                                    id="officeReplaceNurseClear"
+                                                    title="Убрать замещающую медсестру">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="office-replacement-picker__dropdown"
+                                             id="officeReplaceNurseDropdown">
+                                            @foreach($replacementNurses as $replacementNurse)
+                                                <button type="button"
+                                                        class="office-replacement-option"
+                                                        data-replace-nurse-id="{{ $replacementNurse->id }}"
+                                                        data-replace-nurse-name="{{ $replacementNurse->full_name }}"
+                                                        data-replace-nurse-meta="{{ $replacementNurse->profession ?: 'Медицинская сестра' }}"
+                                                        data-assigned-replacement-office-id="{{ $replacementNurseAssignments[$replacementNurse->id]['id'] ?? '' }}"
+                                                        data-assigned-replacement-office-number="{{ $replacementNurseAssignments[$replacementNurse->id]['number'] ?? '' }}">
+                                                    <span class="office-replacement-option__avatar">
+                                                        {{ mb_substr($replacementNurse->name, 0, 1) }}{{ mb_substr($replacementNurse->surname, 0, 1) }}
+                                                    </span>
+
+                                                    <span class="office-replacement-option__content">
+                                                        <span class="office-replacement-option__name">
+                                                            {{ $replacementNurse->full_name }}
+                                                        </span>
+                                                        <span class="office-replacement-option__meta">
+                                                            {{ $replacementNurse->profession ?: 'Медицинская сестра' }}
+                                                        </span>
+                                                    </span>
+
+                                                    <span class="office-replacement-option__badge">
+                                                        медсестра
+                                                    </span>
+                                                </button>
+                                            @endforeach
+
+                                            <div class="office-replacement-picker__empty"
+                                                 id="officeReplaceNurseEmpty">
+                                                Свободная замещающая медсестра не найдена
+                                            </div>
+                                        </div>
+
+                                        <div class="office-replacement-selected"
+                                             id="officeReplaceNurseSelected">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            <span id="officeReplaceNurseSelectedText"></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="office-replacement-settings__hint">
-                                Замещение настраивается только при редактировании кабинета.
-                                Для процедурного кабинета используется только замещающая медсестра,
-                                для функциональной диагностики — только замещающий врач.
+                                Поиск работает среди сотрудников текущей клиники.
+                                Один сотрудник может быть замещающим только в одном кабинете.
+                                Его собственный основной кабинет замещению не мешает.
                             </div>
                         </div>
 
@@ -2939,6 +4400,13 @@
 
                     <div class="modal-footer">
                         <button type="button"
+                                class="settings-button office-delete-button"
+                                id="deleteOfficeButton">
+                            <i class="bi bi-trash3"></i>
+                            Удалить кабинет
+                        </button>
+
+                        <button type="button"
                                 class="settings-button settings-button--secondary"
                                 data-bs-dismiss="modal">
                             Отмена
@@ -2953,13 +4421,336 @@
             </form>
         </div>
     </div>
+
+    <form id="officeDeleteForm"
+          method="POST"
+          action="{{ route('doctors.settings.offices.delete') }}"
+          class="d-none">
+        @csrf
+
+        <input type="hidden"
+               id="deleteOfficeId"
+               name="delete_office_id"
+               value="">
+
+        @if($selectedBuildingId)
+            <input type="hidden"
+                   name="building_id"
+                   value="{{ $selectedBuildingId }}">
+        @endif
+    </form>
+
+    <div class="modal fade office-modal office-building-modal office-building-form-modal"
+         id="buildingCreateModal"
+         tabindex="-1"
+         aria-labelledby="buildingCreateModalTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <form class="modal-content"
+                  id="buildingCreateForm"
+                  method="POST"
+                  action="{{ route('doctors.settings.offices.buildings.store') }}">
+                @csrf
+
+                <div class="office-building-form-modal__header">
+                    <div class="office-building-form-modal__icon">
+                        <i class="bi bi-buildings"></i>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <div class="office-building-form-modal__eyebrow">
+                            Новый корпус
+                        </div>
+                        <h2 class="office-building-form-modal__title"
+                            id="buildingCreateModalTitle">
+                            Добавить корпус
+                        </h2>
+                        <div class="office-building-form-modal__subtitle">
+                            Создайте отдельный корпус больницы и затем добавляйте в него кабинеты.
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"></button>
+                </div>
+
+                <div class="office-building-form-modal__body">
+                    @if($errors->createBuilding->any())
+                        <div class="office-flash office-flash--error" role="alert">
+                            <div class="office-flash__icon">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                            </div>
+                            <div class="office-flash__content">
+                                <div class="office-flash__title">
+                                    Исправьте данные корпуса
+                                </div>
+                                <ul class="office-flash__list">
+                                    @foreach($errors->createBuilding->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="office-building-form-card">
+                        <div class="office-building-form-grid">
+                            <div>
+                                <label class="office-building-form-label"
+                                       for="createBuildingNumber">
+                                    <i class="bi bi-hash"></i>
+                                    Номер корпуса
+                                </label>
+
+                                <div class="office-building-form-number">
+                                    <span class="office-building-form-number__prefix">№</span>
+                                    <input id="createBuildingNumber"
+                                           name="building_number"
+                                           type="text"
+                                           class="settings-control"
+                                           maxlength="50"
+                                           placeholder="1"
+                                           value="{{ old('building_number') }}"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="office-building-form-label"
+                                       for="createBuildingName">
+                                    <i class="bi bi-building"></i>
+                                    Название
+                                </label>
+
+                                <input id="createBuildingName"
+                                       name="building_name"
+                                       type="text"
+                                       class="settings-control"
+                                       maxlength="255"
+                                       placeholder="Например: Главный корпус"
+                                       value="{{ old('building_name') }}"
+                                       required>
+                            </div>
+
+                            <div class="office-building-form-field--full">
+                                <label class="office-building-form-label"
+                                       for="createBuildingAddress">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Адрес корпуса
+                                </label>
+
+                                <input id="createBuildingAddress"
+                                       name="building_address"
+                                       type="text"
+                                       class="settings-control"
+                                       maxlength="255"
+                                       placeholder="Если отличается от основного адреса клиники"
+                                       value="{{ old('building_address') }}">
+                            </div>
+                        </div>
+
+                        <div class="office-building-form-note">
+                            <i class="bi bi-info-circle"></i>
+                            <div>
+                                У каждого корпуса своя нумерация кабинетов:
+                                кабинет №203 может существовать одновременно
+                                в корпусе №1 и корпусе №2.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="office-building-form-modal__footer">
+                    <button type="button"
+                            class="settings-button settings-button--secondary"
+                            data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+
+                    <button type="submit"
+                            class="settings-button settings-button--primary">
+                        <i class="bi bi-plus-circle"></i>
+                        Создать корпус
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade office-modal office-building-modal office-building-form-modal office-building-form-modal--edit"
+         id="buildingEditModal"
+         tabindex="-1"
+         aria-labelledby="buildingEditModalTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <form class="modal-content"
+                  id="buildingEditForm"
+                  method="POST"
+                  action="{{ route('doctors.settings.offices.buildings.update') }}">
+                @csrf
+
+                <input type="hidden"
+                       id="editBuildingId"
+                       name="edit_building_id"
+                       value="{{ old('edit_building_id') }}">
+
+                <input type="hidden"
+                       id="deleteBuildingId"
+                       name="delete_building_id"
+                       value="{{ old('delete_building_id') }}">
+
+                <div class="office-building-form-modal__header">
+                    <div class="office-building-form-modal__icon">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <div class="office-building-form-modal__eyebrow">
+                            Редактирование корпуса
+                        </div>
+                        <h2 class="office-building-form-modal__title"
+                            id="buildingEditModalTitle">
+                            Изменить корпус
+                        </h2>
+                        <div class="office-building-form-modal__subtitle">
+                            Номер, название и адрес корпуса можно изменить без переноса кабинетов.
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"></button>
+                </div>
+
+                <div class="office-building-form-modal__body">
+                    @if($errors->editBuilding->any())
+                        <div class="office-flash office-flash--error" role="alert">
+                            <div class="office-flash__icon">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                            </div>
+                            <div class="office-flash__content">
+                                <div class="office-flash__title">
+                                    Не удалось сохранить корпус
+                                </div>
+                                <ul class="office-flash__list">
+                                    @foreach($errors->editBuilding->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="office-building-form-card">
+                        <div class="office-building-form-grid">
+                            <div>
+                                <label class="office-building-form-label"
+                                       for="editBuildingNumber">
+                                    <i class="bi bi-hash"></i>
+                                    Номер корпуса
+                                </label>
+
+                                <div class="office-building-form-number">
+                                    <span class="office-building-form-number__prefix">№</span>
+                                    <input id="editBuildingNumber"
+                                           name="edit_building_number"
+                                           type="text"
+                                           class="settings-control"
+                                           maxlength="50"
+                                           placeholder="1"
+                                           value="{{ old('edit_building_number') }}"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="office-building-form-label"
+                                       for="editBuildingName">
+                                    <i class="bi bi-building"></i>
+                                    Название
+                                </label>
+
+                                <input id="editBuildingName"
+                                       name="edit_building_name"
+                                       type="text"
+                                       class="settings-control"
+                                       maxlength="255"
+                                       placeholder="Название корпуса"
+                                       value="{{ old('edit_building_name') }}"
+                                       required>
+                            </div>
+
+                            <div class="office-building-form-field--full">
+                                <label class="office-building-form-label"
+                                       for="editBuildingAddress">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Адрес корпуса
+                                </label>
+
+                                <input id="editBuildingAddress"
+                                       name="edit_building_address"
+                                       type="text"
+                                       class="settings-control"
+                                       maxlength="255"
+                                       placeholder="Адрес корпуса"
+                                       value="{{ old('edit_building_address') }}">
+                            </div>
+                        </div>
+
+                        <div class="office-building-form-note">
+                            <i class="bi bi-door-open"></i>
+                            <div>
+                                В этом корпусе сейчас
+                                <strong id="editBuildingCabinetsCount">0</strong>
+                                кабинет(ов). Изменение данных корпуса
+                                не меняет номера и настройки кабинетов.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="office-building-form-modal__footer">
+                    <button type="submit"
+                            class="settings-button office-building-delete-button"
+                            id="deleteBuildingButton"
+                            form="buildingEditForm"
+                            formaction="{{ route('doctors.settings.offices.buildings.delete') }}"
+                            formmethod="POST"
+                            formnovalidate>
+                        <i class="bi bi-trash3"></i>
+                        Удалить корпус
+                    </button>
+
+                    <div class="office-building-form-modal__footer-main">
+                        <button type="button"
+                                class="settings-button settings-button--secondary"
+                                data-bs-dismiss="modal">
+                            Отмена
+                        </button>
+
+                        <button type="submit"
+                                class="settings-button settings-button--primary">
+                            <i class="bi bi-check2-circle"></i>
+                            Сохранить изменения
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
     <script>
         (() => {
             const search = document.getElementById('officeSearch');
-            const cards = Array.from(document.querySelectorAll('[data-office-card]'));
+            const cards = Array.from(
+                document.querySelectorAll('[data-office-card]')
+            );
 
             if (search) {
                 search.addEventListener('input', () => {
@@ -2967,6 +4758,7 @@
 
                     cards.forEach((card) => {
                         const haystack = [
+                            card.dataset.officeBuilding,
                             card.dataset.officeNumber,
                             card.dataset.officeStage,
                             card.dataset.officeName,
@@ -2976,19 +4768,281 @@
                             card.dataset.officeCards,
                         ].join(' ').toLowerCase();
 
-                        card.style.display = haystack.includes(query) ? '' : 'none';
+                        card.style.display =
+                            haystack.includes(query)
+                                ? ''
+                                : 'none';
                     });
                 });
             }
+
+            const buildingCreateModal =
+                document.getElementById('buildingCreateModal');
+            const buildingEditModal =
+                document.getElementById('buildingEditModal');
+
+            [buildingCreateModal, buildingEditModal]
+                .filter(Boolean)
+                .forEach(buildingModal => {
+                    if (
+                        buildingModal.parentElement
+                        !== document.body
+                    ) {
+                        document.body.appendChild(
+                            buildingModal
+                        );
+                    }
+                });
+
+            const buildingCreateForm =
+                document.getElementById('buildingCreateForm');
+            const createBuildingNumber =
+                document.getElementById('createBuildingNumber');
+            const createBuildingName =
+                document.getElementById('createBuildingName');
+            const createBuildingAddress =
+                document.getElementById('createBuildingAddress');
+
+            buildingCreateModal?.addEventListener(
+                'show.bs.modal',
+                event => {
+                    /*
+                     * При обычном открытии форма создания всегда чистая.
+                     * После серверной ошибки event.relatedTarget отсутствует,
+                     * поэтому old() значения сохраняются.
+                     */
+                    if (event.relatedTarget) {
+                        buildingCreateForm?.reset();
+
+                        if (createBuildingNumber) {
+                            createBuildingNumber.value = '';
+                        }
+
+                        if (createBuildingName) {
+                            createBuildingName.value = '';
+                        }
+
+                        if (createBuildingAddress) {
+                            createBuildingAddress.value = '';
+                        }
+                    }
+                }
+            );
+
+            const buildingEditForm =
+                document.getElementById('buildingEditForm');
+            const editBuildingId =
+                document.getElementById('editBuildingId');
+            const editBuildingNumber =
+                document.getElementById('editBuildingNumber');
+            const editBuildingName =
+                document.getElementById('editBuildingName');
+            const editBuildingAddress =
+                document.getElementById('editBuildingAddress');
+            const editBuildingModalTitle =
+                document.getElementById('buildingEditModalTitle');
+            const editBuildingCabinetsCount =
+                document.getElementById('editBuildingCabinetsCount');
+            const deleteBuildingButton =
+                document.getElementById('deleteBuildingButton');
+            const deleteBuildingId =
+                document.getElementById('deleteBuildingId');
+
+            function prepareBuildingEditModal(
+                trigger,
+                preserveInput = false
+            ) {
+                if (!trigger) {
+                    return false;
+                }
+
+                if (editBuildingId) {
+                    editBuildingId.value =
+                        trigger.dataset.buildingId
+                        || '';
+                }
+
+                if (!preserveInput) {
+                    if (editBuildingNumber) {
+                        editBuildingNumber.value =
+                            trigger.dataset.buildingNumber
+                            || '';
+                    }
+
+                    if (editBuildingName) {
+                        editBuildingName.value =
+                            trigger.dataset.buildingName
+                            || '';
+                    }
+
+                    if (editBuildingAddress) {
+                        editBuildingAddress.value =
+                            trigger.dataset.buildingAddress
+                            || '';
+                    }
+                }
+
+                if (editBuildingModalTitle) {
+                    editBuildingModalTitle.textContent =
+                        `Корпус №${
+                            editBuildingNumber?.value
+                            || trigger.dataset.buildingNumber
+                            || ''
+                        }`;
+                }
+
+                const cabinetCount = Number(
+                    trigger.dataset.buildingCabinetsCount
+                    || 0
+                );
+
+                if (editBuildingCabinetsCount) {
+                    editBuildingCabinetsCount.textContent =
+                        String(cabinetCount);
+                }
+
+                if (deleteBuildingId) {
+                    deleteBuildingId.value =
+                        trigger.dataset.buildingId
+                        || '';
+                }
+
+                if (deleteBuildingButton) {
+                    deleteBuildingButton.dataset.buildingName =
+                        trigger.dataset.buildingName
+                        || '';
+
+                    deleteBuildingButton.dataset.buildingNumber =
+                        trigger.dataset.buildingNumber
+                        || '';
+
+                    deleteBuildingButton.dataset.cabinetsCount =
+                        String(cabinetCount);
+
+                    deleteBuildingButton.title =
+                        'Удалить корпус';
+                }
+
+                return true;
+            }
+
+            buildingEditModal?.addEventListener(
+                'show.bs.modal',
+                event => {
+                    prepareBuildingEditModal(
+                        event.relatedTarget,
+                        false
+                    );
+                }
+            );
+
+            deleteBuildingButton?.addEventListener(
+                'click',
+                event => {
+                    if (!deleteBuildingId?.value) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    const number =
+                        deleteBuildingButton.dataset
+                            .buildingNumber
+                        || '';
+
+                    const name =
+                        deleteBuildingButton.dataset
+                            .buildingName
+                        || '';
+
+                    const cabinetsCount = Number(
+                        deleteBuildingButton.dataset
+                            .cabinetsCount
+                        || 0
+                    );
+
+                    let message =
+                        `Удалить корпус №${number}`
+                        + (
+                            name
+                                ? ` — ${name}`
+                                : ''
+                        )
+                        + '?';
+
+                    if (cabinetsCount > 0) {
+                        message +=
+                            `\n\nВ корпусе сейчас ${cabinetsCount} кабинет(ов). `
+                            + 'Если сервер запрещает удаление непустого корпуса, '
+                            + 'будет показано соответствующее сообщение.';
+                    }
+
+                    if (!window.confirm(message)) {
+                        event.preventDefault();
+                    }
+                }
+            );
+
+            @if($errors->createBuilding->any())
+            bootstrap.Modal
+                .getOrCreateInstance(buildingCreateModal)
+                .show();
+            @endif
+
+            @if($errors->editBuilding->any())
+            const editBuildingErrorId =
+                String(editBuildingId?.value || '');
+
+            const editBuildingErrorTrigger =
+                Array.from(
+                    document.querySelectorAll(
+                        '[data-building-edit]'
+                    )
+                ).find(button => {
+                    return String(
+                        button.dataset.buildingId || ''
+                    ) === editBuildingErrorId;
+                });
+
+            if (
+                prepareBuildingEditModal(
+                    editBuildingErrorTrigger,
+                    true
+                )
+            ) {
+                bootstrap.Modal
+                    .getOrCreateInstance(buildingEditModal)
+                    .show();
+            }
+            @endif
 
             const modal = document.getElementById('officeModal');
             if (!modal) return;
 
             const officeForm = document.getElementById('officeForm');
+            const officeStoreUrl =
+                @json(route('doctors.settings.offices.store'));
+
+            const officeUpdateUrl =
+                @json(action([
+                    \App\Http\Controllers\Doctors\CabinetController::class,
+                    'clinicDoctorUpdate'
+                ]));
+
             const title = document.getElementById('officeModalTitle');
+            const officeModalEyebrow =
+                document.getElementById('officeModalEyebrow');
+            const officeModalModeIcon =
+                document.getElementById('officeModalModeIcon');
             const officeId = document.getElementById('officeId');
             const officeMode = document.getElementById('officeMode');
+            const deleteOfficeId =
+                document.getElementById('deleteOfficeId');
+            const deleteOfficeButton =
+                document.getElementById('deleteOfficeButton');
+            const officeDeleteForm =
+                document.getElementById('officeDeleteForm');
             const name = document.getElementById('officeName');
+            const building = document.getElementById('officeBuilding');
             const number = document.getElementById('officeNumber');
             const stage = document.getElementById('officeStage');
             const phone = document.getElementById('officePhone');
@@ -3029,8 +5083,47 @@
                 document.getElementById('replaceNurseField');
             const replaceDoctor =
                 document.getElementById('officeReplaceDoctor');
+            const replaceDoctorPicker =
+                document.getElementById('officeReplaceDoctorPicker');
+            const replaceDoctorSearch =
+                document.getElementById('officeReplaceDoctorSearch');
+            const replaceDoctorDropdown =
+                document.getElementById('officeReplaceDoctorDropdown');
+            const replaceDoctorClear =
+                document.getElementById('officeReplaceDoctorClear');
+            const replaceDoctorEmpty =
+                document.getElementById('officeReplaceDoctorEmpty');
+            const replaceDoctorSelected =
+                document.getElementById('officeReplaceDoctorSelected');
+            const replaceDoctorSelectedText =
+                document.getElementById('officeReplaceDoctorSelectedText');
+            const replaceDoctorOptions = Array.from(
+                document.querySelectorAll(
+                    '[data-replace-doctor-id]'
+                )
+            );
+
             const replaceNurse =
                 document.getElementById('officeReplaceNurse');
+            const replaceNursePicker =
+                document.getElementById('officeReplaceNursePicker');
+            const replaceNurseSearch =
+                document.getElementById('officeReplaceNurseSearch');
+            const replaceNurseDropdown =
+                document.getElementById('officeReplaceNurseDropdown');
+            const replaceNurseClear =
+                document.getElementById('officeReplaceNurseClear');
+            const replaceNurseEmpty =
+                document.getElementById('officeReplaceNurseEmpty');
+            const replaceNurseSelected =
+                document.getElementById('officeReplaceNurseSelected');
+            const replaceNurseSelectedText =
+                document.getElementById('officeReplaceNurseSelectedText');
+            const replaceNurseOptions = Array.from(
+                document.querySelectorAll(
+                    '[data-replace-nurse-id]'
+                )
+            );
 
             let currentEditingOfficeId = '';
 
@@ -3045,16 +5138,293 @@
             const doctorScheduleRows = Array.from(document.querySelectorAll('[data-doctor-day]'));
             const procedureScheduleField = document.getElementById('procedureScheduleField');
             const procedureScheduleRows = Array.from(document.querySelectorAll('[data-procedure-day]'));
-            const hasOfficeErrors = @json($errors->any());
+            const hasOfficeErrors = @json($errors->getBag('default')->any());
 
-            function resetReplacementStaff() {
+            function replacementOptionUnavailable(
+                option,
+                ownEmployeeId
+            ) {
+                const assignedOfficeId = String(
+                    option?.dataset?.assignedReplacementOfficeId
+                    || ''
+                );
+
+                const optionEmployeeId = String(
+                    option?.dataset?.replaceDoctorId
+                    || option?.dataset?.replaceNurseId
+                    || ''
+                );
+
+                const assignedElsewhere =
+                    assignedOfficeId
+                    && assignedOfficeId
+                    !== String(currentEditingOfficeId || '');
+
+                const sameAsPrimary =
+                    ownEmployeeId
+                    && optionEmployeeId === String(ownEmployeeId);
+
+                return Boolean(
+                    assignedElsewhere || sameAsPrimary
+                );
+            }
+
+            function primaryNurseDoctorId() {
+                const selectedNurse = nurseOptions.find(option => {
+                    return String(option.dataset.nurseId || '')
+                        === String(nurseId?.value || '');
+                });
+
+                return String(
+                    selectedNurse?.dataset?.nurseDoctorId
+                    || ''
+                );
+            }
+
+            function filterReplacementPicker(
+                searchInput,
+                options,
+                emptyNode,
+                ownEmployeeId
+            ) {
+                const query = String(
+                    searchInput?.value || ''
+                )
+                    .trim()
+                    .toLowerCase();
+
+                let visibleCount = 0;
+
+                options.forEach(option => {
+                    const unavailable =
+                        replacementOptionUnavailable(
+                            option,
+                            ownEmployeeId
+                        );
+
+                    option.classList.toggle(
+                        'is-unavailable',
+                        unavailable
+                    );
+
+                    const haystack = [
+                        option.dataset.replaceDoctorName,
+                        option.dataset.replaceDoctorMeta,
+                        option.dataset.replaceNurseName,
+                        option.dataset.replaceNurseMeta,
+                    ]
+                        .filter(Boolean)
+                        .join(' ')
+                        .toLowerCase();
+
+                    const visible =
+                        !unavailable
+                        && (
+                            !query
+                            || haystack.includes(query)
+                        );
+
+                    option.classList.toggle(
+                        'd-none',
+                        !visible
+                    );
+
+                    if (visible) {
+                        visibleCount++;
+                    }
+                });
+
+                emptyNode?.classList.toggle(
+                    'is-visible',
+                    visibleCount === 0
+                );
+            }
+
+            function openReplacementDropdown(dropdown) {
+                dropdown?.classList.add('is-open');
+            }
+
+            function closeReplacementDropdown(dropdown) {
+                dropdown?.classList.remove('is-open');
+            }
+
+            function clearReplacementDoctor() {
                 if (replaceDoctor) {
                     replaceDoctor.value = '';
                 }
 
+                if (replaceDoctorSearch) {
+                    replaceDoctorSearch.value = '';
+                }
+
+                replaceDoctorOptions.forEach(option => {
+                    option.classList.remove('is-selected');
+                });
+
+                replaceDoctorSelected?.classList.remove(
+                    'is-visible'
+                );
+                replaceDoctorClear?.classList.remove(
+                    'is-visible'
+                );
+
+                filterReplacementPicker(
+                    replaceDoctorSearch,
+                    replaceDoctorOptions,
+                    replaceDoctorEmpty,
+                    doctorId?.value || ''
+                );
+            }
+
+            function clearReplacementNurse() {
                 if (replaceNurse) {
                     replaceNurse.value = '';
                 }
+
+                if (replaceNurseSearch) {
+                    replaceNurseSearch.value = '';
+                }
+
+                replaceNurseOptions.forEach(option => {
+                    option.classList.remove('is-selected');
+                });
+
+                replaceNurseSelected?.classList.remove(
+                    'is-visible'
+                );
+                replaceNurseClear?.classList.remove(
+                    'is-visible'
+                );
+
+                filterReplacementPicker(
+                    replaceNurseSearch,
+                    replaceNurseOptions,
+                    replaceNurseEmpty,
+                    primaryNurseDoctorId()
+                );
+            }
+
+            function selectReplacementDoctor(value) {
+                const normalized = String(value || '');
+
+                if (!normalized) {
+                    clearReplacementDoctor();
+                    return false;
+                }
+
+                const option = replaceDoctorOptions.find(item => {
+                    return String(
+                        item.dataset.replaceDoctorId || ''
+                    ) === normalized;
+                });
+
+                if (
+                    !option
+                    || replacementOptionUnavailable(
+                        option,
+                        doctorId?.value || ''
+                    )
+                ) {
+                    clearReplacementDoctor();
+                    return false;
+                }
+
+                replaceDoctor.value = normalized;
+                replaceDoctorSearch.value =
+                    option.dataset.replaceDoctorName || '';
+
+                replaceDoctorOptions.forEach(item => {
+                    item.classList.toggle(
+                        'is-selected',
+                        item === option
+                    );
+                });
+
+                if (replaceDoctorSelectedText) {
+                    replaceDoctorSelectedText.textContent =
+                        [
+                            option.dataset.replaceDoctorName,
+                            option.dataset.replaceDoctorMeta,
+                        ]
+                            .filter(Boolean)
+                            .join(' · ');
+                }
+
+                replaceDoctorSelected?.classList.add(
+                    'is-visible'
+                );
+                replaceDoctorClear?.classList.add(
+                    'is-visible'
+                );
+                closeReplacementDropdown(
+                    replaceDoctorDropdown
+                );
+
+                return true;
+            }
+
+            function selectReplacementNurse(value) {
+                const normalized = String(value || '');
+
+                if (!normalized) {
+                    clearReplacementNurse();
+                    return false;
+                }
+
+                const option = replaceNurseOptions.find(item => {
+                    return String(
+                        item.dataset.replaceNurseId || ''
+                    ) === normalized;
+                });
+
+                if (
+                    !option
+                    || replacementOptionUnavailable(
+                        option,
+                        primaryNurseDoctorId()
+                    )
+                ) {
+                    clearReplacementNurse();
+                    return false;
+                }
+
+                replaceNurse.value = normalized;
+                replaceNurseSearch.value =
+                    option.dataset.replaceNurseName || '';
+
+                replaceNurseOptions.forEach(item => {
+                    item.classList.toggle(
+                        'is-selected',
+                        item === option
+                    );
+                });
+
+                if (replaceNurseSelectedText) {
+                    replaceNurseSelectedText.textContent =
+                        [
+                            option.dataset.replaceNurseName,
+                            option.dataset.replaceNurseMeta,
+                        ]
+                            .filter(Boolean)
+                            .join(' · ');
+                }
+
+                replaceNurseSelected?.classList.add(
+                    'is-visible'
+                );
+                replaceNurseClear?.classList.add(
+                    'is-visible'
+                );
+                closeReplacementDropdown(
+                    replaceNurseDropdown
+                );
+
+                return true;
+            }
+
+            function resetReplacementStaff() {
+                clearReplacementDoctor();
+                clearReplacementNurse();
             }
 
             function updateReplacementStaffFields() {
@@ -3062,8 +5432,6 @@
                 const cabinetType = currentCabinetType();
                 const isProcedure =
                     cabinetType === 'procedure';
-                const isFunctional =
-                    cabinetType === 'functional';
 
                 replacementStaffField?.classList.toggle(
                     'd-none',
@@ -3075,46 +5443,247 @@
                     isProcedure
                 );
 
-                replaceNurseField?.classList.toggle(
-                    'd-none',
-                    isFunctional
+                /*
+                 * Замещающая медсестра доступна для doctor,
+                 * procedure и functional — если у кабинета
+                 * назначена основная медсестра.
+                 */
+                replaceNurseField?.classList.remove('d-none');
+
+                if (isProcedure) {
+                    clearReplacementDoctor();
+                }
+
+                if (!nurseId?.value) {
+                    clearReplacementNurse();
+                }
+
+                filterReplacementPicker(
+                    replaceDoctorSearch,
+                    replaceDoctorOptions,
+                    replaceDoctorEmpty,
+                    doctorId?.value || ''
                 );
 
-                if (isProcedure && replaceDoctor) {
-                    replaceDoctor.value = '';
-                }
+                filterReplacementPicker(
+                    replaceNurseSearch,
+                    replaceNurseOptions,
+                    replaceNurseEmpty,
+                    primaryNurseDoctorId()
+                );
+            }
 
-                if (isFunctional && replaceNurse) {
-                    replaceNurse.value = '';
-                }
-
-                if (replaceDoctor) {
-                    const primaryDoctorId = String(
+            replaceDoctorSearch?.addEventListener(
+                'focus',
+                () => {
+                    filterReplacementPicker(
+                        replaceDoctorSearch,
+                        replaceDoctorOptions,
+                        replaceDoctorEmpty,
                         doctorId?.value || ''
                     );
+                    openReplacementDropdown(
+                        replaceDoctorDropdown
+                    );
+                }
+            );
 
-                    Array.from(replaceDoctor.options)
-                        .forEach(option => {
-                            if (!option.value) {
-                                option.disabled = false;
-                                option.hidden = false;
-                                return;
-                            }
+            replaceDoctorSearch?.addEventListener(
+                'input',
+                () => {
+                    if (
+                        replaceDoctor?.value
+                        && replaceDoctorSearch.value.trim()
+                    ) {
+                        replaceDoctor.value = '';
+                        replaceDoctorSelected?.classList.remove(
+                            'is-visible'
+                        );
+                    }
 
-                            const sameDoctor =
-                                String(option.value)
-                                === primaryDoctorId;
+                    filterReplacementPicker(
+                        replaceDoctorSearch,
+                        replaceDoctorOptions,
+                        replaceDoctorEmpty,
+                        doctorId?.value || ''
+                    );
+                    openReplacementDropdown(
+                        replaceDoctorDropdown
+                    );
+                }
+            );
 
-                            option.disabled = sameDoctor;
-                            option.hidden = sameDoctor;
+            replaceNurseSearch?.addEventListener(
+                'focus',
+                () => {
+                    filterReplacementPicker(
+                        replaceNurseSearch,
+                        replaceNurseOptions,
+                        replaceNurseEmpty,
+                        primaryNurseDoctorId()
+                    );
+                    openReplacementDropdown(
+                        replaceNurseDropdown
+                    );
+                }
+            );
 
-                            if (
-                                sameDoctor
-                                && option.selected
-                            ) {
-                                replaceDoctor.value = '';
-                            }
-                        });
+            replaceNurseSearch?.addEventListener(
+                'input',
+                () => {
+                    if (
+                        replaceNurse?.value
+                        && replaceNurseSearch.value.trim()
+                    ) {
+                        replaceNurse.value = '';
+                        replaceNurseSelected?.classList.remove(
+                            'is-visible'
+                        );
+                    }
+
+                    filterReplacementPicker(
+                        replaceNurseSearch,
+                        replaceNurseOptions,
+                        replaceNurseEmpty,
+                        primaryNurseDoctorId()
+                    );
+                    openReplacementDropdown(
+                        replaceNurseDropdown
+                    );
+                }
+            );
+
+            replaceDoctorOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    selectReplacementDoctor(
+                        option.dataset.replaceDoctorId
+                    );
+                });
+            });
+
+            replaceNurseOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    selectReplacementNurse(
+                        option.dataset.replaceNurseId
+                    );
+                });
+            });
+
+            replaceDoctorClear?.addEventListener(
+                'click',
+                () => {
+                    clearReplacementDoctor();
+                    replaceDoctorSearch?.focus();
+                    openReplacementDropdown(
+                        replaceDoctorDropdown
+                    );
+                }
+            );
+
+            replaceNurseClear?.addEventListener(
+                'click',
+                () => {
+                    clearReplacementNurse();
+                    replaceNurseSearch?.focus();
+                    openReplacementDropdown(
+                        replaceNurseDropdown
+                    );
+                }
+            );
+
+            document.addEventListener('click', event => {
+                if (
+                    !event.target.closest(
+                        '#officeReplaceDoctorPicker'
+                    )
+                ) {
+                    closeReplacementDropdown(
+                        replaceDoctorDropdown
+                    );
+                }
+
+                if (
+                    !event.target.closest(
+                        '#officeReplaceNursePicker'
+                    )
+                ) {
+                    closeReplacementDropdown(
+                        replaceNurseDropdown
+                    );
+                }
+            });
+
+            function applyOfficeMode(mode) {
+                const isEdit = mode === 'edit';
+                const actionUrl = isEdit
+                    ? officeUpdateUrl
+                    : officeStoreUrl;
+
+                if (officeMode) {
+                    officeMode.value = isEdit
+                        ? 'edit'
+                        : 'create';
+                }
+
+                if (officeForm) {
+                    /*
+                     * setAttribute() меняет именно HTML-атрибут action,
+                     * поэтому в инспекторе и при submit всегда будет
+                     * актуальный endpoint.
+                     */
+                    officeForm.setAttribute(
+                        'action',
+                        actionUrl
+                    );
+
+                    officeForm.action = actionUrl;
+
+                    officeForm.classList.toggle(
+                        'office-form--edit',
+                        isEdit
+                    );
+
+                    officeForm.classList.toggle(
+                        'office-form--create',
+                        !isEdit
+                    );
+                }
+
+                modal.classList.toggle(
+                    'office-modal--edit',
+                    isEdit
+                );
+
+                modal.classList.toggle(
+                    'office-modal--create',
+                    !isEdit
+                );
+
+                if (officeModalEyebrow) {
+                    officeModalEyebrow.textContent =
+                        isEdit
+                            ? 'Редактирование кабинета'
+                            : 'Новый кабинет';
+                }
+
+                if (officeModalModeIcon) {
+                    officeModalModeIcon.className =
+                        isEdit
+                            ? 'bi bi-pencil-square'
+                            : 'bi bi-door-open';
+                }
+
+                if (!isEdit && deleteOfficeId) {
+                    deleteOfficeId.value = '';
+                }
+
+                if (deleteOfficeButton) {
+                    deleteOfficeButton.dataset.patientsCount =
+                        '0';
+                    deleteOfficeButton.dataset.officeNumber =
+                        '';
+                    deleteOfficeButton.dataset.officeName =
+                        '';
                 }
             }
 
@@ -3572,24 +6141,10 @@
                         unavailable
                     );
 
-                    /*
-                     * Не скрываем занятого врача: он остаётся в списке,
-                     * но выбрать его нельзя. Так видно всех врачей клиники.
-                     */
-                    option.classList.remove('d-none');
-
-                    const badge = option.querySelector('.office-doctor-option__badge');
-                    if (badge) {
-                        if (!badge.dataset.originalText) {
-                            badge.dataset.originalText = badge.textContent.trim();
-                        }
-
-                        badge.textContent = unavailable
-                            ? (option.dataset.assignedOfficeNumber
-                                ? `Занят · каб. ${option.dataset.assignedOfficeNumber}`
-                                : 'Занят')
-                            : badge.dataset.originalText;
-                    }
+                    option.classList.toggle(
+                        'd-none',
+                        unavailable
+                    );
 
                     if (radio) {
                         radio.disabled = unavailable;
@@ -3751,11 +6306,11 @@
                         .join(' ')
                         .toLowerCase();
 
-                    /*
-                     * Занятые врачи участвуют в отображении и поиске,
-                     * но остаются disabled и не выбираются.
-                     */
-                    const visible = !query || haystack.includes(query);
+                    const unavailable =
+                        option.classList.contains('is-unavailable');
+
+                    const visible = !unavailable
+                        && (!query || haystack.includes(query));
 
                     option.classList.toggle('d-none', !visible);
 
@@ -3875,6 +6430,7 @@
                 });
 
                 nurseEmpty?.classList.remove('is-visible');
+                updateReplacementStaffFields();
             }
 
             function selectNurse(value) {
@@ -3925,6 +6481,7 @@
                 nursePicker?.classList.remove('has-error');
 
                 closeNurseDropdown();
+                updateReplacementStaffFields();
 
                 return true;
             }
@@ -4034,7 +6591,73 @@
                 selectNurse(nurseId.value);
             }
 
+            deleteOfficeButton?.addEventListener(
+                'click',
+                () => {
+                    if (
+                        !officeDeleteForm
+                        || !deleteOfficeId?.value
+                    ) {
+                        return;
+                    }
+
+                    const number =
+                        deleteOfficeButton.dataset.officeNumber
+                        || '';
+
+                    const officeName =
+                        deleteOfficeButton.dataset.officeName
+                        || '';
+
+                    const patientsCount = Number(
+                        deleteOfficeButton.dataset.patientsCount
+                        || 0
+                    );
+
+                    let message =
+                        `Удалить кабинет №${number}`
+                        + (
+                            officeName
+                                ? ` — ${officeName}`
+                                : ''
+                        )
+                        + '?';
+
+                    if (patientsCount > 0) {
+                        message +=
+                            `\n\nВ кабинете находится ${patientsCount} медкарт(ы). `
+                            + 'Они будут отвязаны от кабинета.';
+                    }
+
+                    if (!window.confirm(message)) {
+                        return;
+                    }
+
+                    /*
+                     * ВАЖНО:
+                     * удаление отправляется отдельной формой и не проходит
+                     * через officeForm, ClinicOfficeStoreRequest и JS-валидацию
+                     * создания/редактирования кабинета.
+                     */
+                    officeDeleteForm.submit();
+                }
+            );
+
             officeForm?.addEventListener('submit', event => {
+                /*
+                 * Последняя страховка:
+                 * существующий кабинет всегда идёт в update,
+                 * новый кабинет — только в store.
+                 */
+                const isEditSubmit =
+                    String(officeId?.value || '').trim() !== '';
+
+                applyOfficeMode(
+                    isEditSubmit
+                        ? 'edit'
+                        : 'create'
+                );
+
                 const selected = selectedDoctorRadio();
 
                 if (selected) {
@@ -4115,6 +6738,16 @@
             });
 
             officeForm?.addEventListener('formdata', event => {
+                const isEditSubmit =
+                    String(officeId?.value || '').trim() !== '';
+
+                event.formData.set(
+                    'mode',
+                    isEditSubmit
+                        ? 'edit'
+                        : 'create'
+                );
+
                 if (doctorId.value) {
                     event.formData.set('doctor', doctorId.value);
                 } else {
@@ -4132,6 +6765,12 @@
                 const button = event.relatedTarget;
 
                 if (!button && hasOfficeErrors) {
+                    applyOfficeMode(
+                        officeMode.value === 'edit'
+                            ? 'edit'
+                            : 'create'
+                    );
+
                     title.textContent = officeMode.value === 'edit'
                         ? `Кабинет №${number.value}`
                         : 'Добавить кабинет';
@@ -4143,7 +6782,14 @@
                     );
 
                     updateCabinetType();
-                        updateReplacementStaffFields();
+                    updateReplacementStaffFields();
+
+                    selectReplacementDoctor(
+                        replaceDoctor?.value || ''
+                    );
+                    selectReplacementNurse(
+                        replaceNurse?.value || ''
+                    );
 
                     if (currentCabinetType() !== 'procedure' && doctorId.value) {
                         selectDoctor(doctorId.value);
@@ -4159,30 +6805,51 @@
                 const mode = button?.dataset.officeMode || 'create';
 
                 if (mode === 'edit') {
+                    applyOfficeMode('edit');
                     title.textContent = `Кабинет №${button.dataset.officeNumber}`;
-                    officeMode.value = 'edit';
                     officeId.value = button.dataset.officeId || '';
+
+                    if (deleteOfficeId) {
+                        deleteOfficeId.value =
+                            button.dataset.officeId
+                            || '';
+                    }
+
+                    if (deleteOfficeButton) {
+                        deleteOfficeButton.dataset.patientsCount =
+                            button.dataset.officePatientsCount
+                            || '0';
+
+                        deleteOfficeButton.dataset.officeNumber =
+                            button.dataset.officeNumber
+                            || '';
+
+                        deleteOfficeButton.dataset.officeName =
+                            button.dataset.officeName
+                            || '';
+                    }
+
                     updateStaffAvailability(officeId.value);
                     name.value = button.dataset.officeName || '';
+                    building.value =
+                        button.dataset.officeBuildingId || '';
                     number.value = button.dataset.officeNumber || '';
                     stage.value = button.dataset.officeStage || '';
                     phone.value = button.dataset.officePhone || '';
                     status.value = button.dataset.officeStatus || 'active';
                     setCabinetType(button.dataset.officeType || 'doctor');
 
-                    if (replaceDoctor) {
-                        replaceDoctor.value =
-                            button.dataset.officeReplaceDoctor
-                            || '';
-                    }
-
-                    if (replaceNurse) {
-                        replaceNurse.value =
-                            button.dataset.officeReplaceNurse
-                            || '';
-                    }
-
                     updateReplacementStaffFields();
+
+                    selectReplacementDoctor(
+                        button.dataset.officeReplaceDoctor
+                        || ''
+                    );
+
+                    selectReplacementNurse(
+                        button.dataset.officeReplaceNurse
+                        || ''
+                    );
 
                     fillFunctionalMethod(
                         button.getAttribute(
@@ -4217,11 +6884,15 @@
                     return;
                 }
 
+                applyOfficeMode('create');
                 title.textContent = 'Добавить кабинет';
-                officeMode.value = 'create';
                 officeId.value = '';
                 updateStaffAvailability('');
                 name.value = '';
+                building.value =
+                    building.options.length > 1
+                        ? building.options[1].value
+                        : '';
                 number.value = '';
                 stage.value = '';
                 phone.value = '';
@@ -4245,6 +6916,11 @@
             );
 
             updateReplacementStaffFields();
+            applyOfficeMode(
+                officeMode.value === 'edit'
+                    ? 'edit'
+                    : 'create'
+            );
 
             if (hasOfficeErrors) {
                 bootstrap.Modal.getOrCreateInstance(modal).show();

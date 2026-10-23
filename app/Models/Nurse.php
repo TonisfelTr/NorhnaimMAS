@@ -12,11 +12,6 @@ class Nurse extends Model
 
     protected $guarded = [];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function getFullNameAttribute(): string
     {
         return trim(
@@ -24,5 +19,15 @@ class Nurse extends Model
             . $this->name . ' '
             . ($this->patronym ?? '')
         );
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function clinic(): BelongsTo
+    {
+        return $this->belongsTo(Clinic::class);
     }
 }

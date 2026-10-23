@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Models\ClinicBuildingWorkSchedule;
 use App\Models\ClinicCabinet;
 use App\Models\ClinicWorkShedule;
 use App\Models\Doctor;
 use App\Models\Nurse;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
@@ -61,18 +61,10 @@ class ClinicOfficeStoreRequest extends FormRequest
             'replace_nurse_id'
         )->where('clinic_id', $clinicId);
 
-        /*
-         * Принадлежность медсестры клинике определяется nurses.clinic_id.
-         * user_id не используем: в старых данных он может совпадать.
-         */
-        $employedNurseIds = Nurse::query()
-            ->where('clinic_id', $clinicId)
-            ->pluck('id')
-            ->map(static fn ($id): int => (int) $id)
-            ->all();
-
-        $replacementNurseIds = Doctor::query()
-            ->where('clinic_id', $clinicId)
+        $clinicNurseUserIds = Doctor::where(
+            'clinic_id',
+            $clinicId
+        )
             ->whereIn(
                 'profession',
                 [
@@ -81,53 +73,31 @@ class ClinicOfficeStoreRequest extends FormRequest
                     'Процедурная медицинская сестра',
                 ]
             )
+            ->whereNotNull('user_id')
+            ->pluck('user_id');
+
+        $employedNurseIds = Nurse::where(
+            'clinic_id',
+            $clinicId
+        )
+            ->whereIn('user_id', $clinicNurseUserIds)
+            ->pluck('id')
+            ->all();
+
+        $replacementNurseIds = Doctor::where(
+            'clinic_id',
+            $clinicId
+        )
+            ->whereIn('user_id', $clinicNurseUserIds)
             ->pluck('id')
             ->map(static fn ($id): int => (int) $id)
             ->all();
 
-        $homeVisitDoctorIds = [];
-
-        if (
-            Schema::hasTable('clinic_districts')
-            && Schema::hasColumn('clinic_districts', 'clinic_id')
-            && Schema::hasColumn(
-                'clinic_districts',
-                'home_visit_doctor_id'
-            )
-        ) {
-            $homeVisitDoctorIds = DB::table('clinic_districts')
-                ->where('clinic_id', $clinicId)
-                ->whereNotNull('home_visit_doctor_id')
-                ->pluck('home_visit_doctor_id')
-                ->map(static fn ($id): int => (int) $id)
-                ->unique()
-                ->values()
-                ->all();
-        }
-
-        $replacementDoctorIds = Doctor::query()
-            ->where('clinic_id', $clinicId)
-            ->where(
-                static function ($query): void {
-                    $query
-                        ->whereNull('profession')
-                        ->orWhereNotIn(
-                            'profession',
-                            [
-                                'Старшая медицинская сестра',
-                                'Медицинская сестра',
-                                'Процедурная медицинская сестра',
-                                'Санитар',
-                                'Медицинский регистратор',
-                            ]
-                        );
-                }
-            )
-            ->when(
-                !empty($homeVisitDoctorIds),
-                static fn ($query) =>
-                    $query->whereNotIn('id', $homeVisitDoctorIds)
-            )
+        $replacementDoctorIds = Doctor::where(
+            'clinic_id',
+            $clinicId
+        )
+            ->whereNotIn('id', $replacementNurseIds)
             ->pluck('id')
             ->map(static fn ($id): int => (int) $id)
             ->all();
@@ -179,6 +149,13 @@ class ClinicOfficeStoreRequest extends FormRequest
                 'integer',
             ],
 
+            'building_id' => [
+                'required',
+                'integer',
+                Rule::exists('clinic_buildings', 'id')
+                    ->where('clinic_id', $clinicId),
+            ],
+
             'cabinet_type' => [
                 'required',
                 Rule::in([
@@ -215,8 +192,6 @@ class ClinicOfficeStoreRequest extends FormRequest
                 'integer',
                 Rule::exists('doctors', 'id')
                     ->where('clinic_id', $clinicId),
-                Rule::in($replacementDoctorIds),
-                Rule::notIn($homeVisitDoctorIds),
                 $doctorRule,
             ],
 
@@ -326,6 +301,10 @@ class ClinicOfficeStoreRequest extends FormRequest
             'number.unique' => 'Кабинет с таким номером уже существует в этой клинике.',
 
             'stage.integer' => 'Этаж должен быть указан целым числом.',
+
+            'building_id.required' => 'Выберите корпус кабинета.',
+            'building_id.integer' => 'Указан некорректный корпус.',
+            'building_id.exists' => 'Выбранный корпус не относится к текущей клинике.',
 
             'cabinet_type.required' => 'Выберите тип кабинета.',
             'cabinet_type.in' => 'Указан некорректный тип кабинета.',
@@ -498,6 +477,23 @@ class ClinicOfficeStoreRequest extends FormRequest
                 ->get()
                 ->keyBy('day_number');
 
+            $buildingId = $this->integer('building_id');
+
+            if (
+                $buildingId > 0
+                && Schema::hasTable('clinic_building_work_schedules')
+            ) {
+                $buildingSchedule = ClinicBuildingWorkSchedule::query()
+                    ->where('clinic_id', $clinicId)
+                    ->where('building_id', $buildingId)
+                    ->get()
+                    ->keyBy('day_number');
+
+                foreach ($buildingSchedule as $dayNumber => $row) {
+                    $clinicSchedule->put($dayNumber, $row);
+                }
+            }
+
             if (
                 in_array(
                     $this->input('cabinet_type'),
@@ -556,7 +552,7 @@ class ClinicOfficeStoreRequest extends FormRequest
                         if (!$clinicDay || !$clinicDay->enabled) {
                             $validator->errors()->add(
                                 "doctor_schedule.{$day}.enabled",
-                                "Нельзя назначить работу врача в {$label}: клиника в этот день не работает."
+                                "Нельзя назначить работу врача в {$label}: корпус в этот день не работает."
                             );
                             continue;
                         }
@@ -567,14 +563,14 @@ class ClinicOfficeStoreRequest extends FormRequest
                         if ($from < $clinicFrom) {
                             $validator->errors()->add(
                                 "doctor_schedule.{$day}.from",
-                                "В {$label} врач не может начинать работу раньше клиники. Клиника работает с {$clinicFrom}."
+                                "В {$label} врач не может начинать работу раньше корпуса. Корпус работает с {$clinicFrom}."
                             );
                         }
 
                         if ($to > $clinicTo) {
                             $validator->errors()->add(
                                 "doctor_schedule.{$day}.to",
-                                "В {$label} врач не может работать после закрытия клиники. Клиника работает до {$clinicTo}."
+                                "В {$label} врач не может работать после закрытия корпуса. Корпус работает до {$clinicTo}."
                             );
                         }
                     }
@@ -652,7 +648,7 @@ class ClinicOfficeStoreRequest extends FormRequest
                 if (!$clinicDay || !$clinicDay->enabled) {
                     $validator->errors()->add(
                         "procedure_schedule.{$day}.enabled",
-                        "Нельзя включить работу процедурного кабинета в {$dayLabel}: клиника в этот день не работает."
+                        "Нельзя включить работу процедурного кабинета в {$dayLabel}: корпус в этот день не работает."
                     );
 
                     continue;
@@ -664,14 +660,14 @@ class ClinicOfficeStoreRequest extends FormRequest
                 if ($from < $clinicFrom) {
                     $validator->errors()->add(
                         "procedure_schedule.{$day}.from",
-                        "В {$dayLabel} процедурный кабинет не может начинать работу раньше клиники. Клиника работает с {$clinicFrom}."
+                        "В {$dayLabel} процедурный кабинет не может начинать работу раньше корпуса. Корпус работает с {$clinicFrom}."
                     );
                 }
 
                 if ($to > $clinicTo) {
                     $validator->errors()->add(
                         "procedure_schedule.{$day}.to",
-                        "В {$dayLabel} процедурный кабинет не может работать после закрытия клиники. Клиника работает до {$clinicTo}."
+                        "В {$dayLabel} процедурный кабинет не может работать после закрытия корпуса. Корпус работает до {$clinicTo}."
                     );
                 }
             }

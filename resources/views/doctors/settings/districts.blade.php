@@ -316,6 +316,76 @@
             border: 1px solid #d4ecef;
         }
 
+        .district-doctor-vacation {
+            min-width: 210px;
+            margin-left: auto;
+            padding: 9px 11px;
+            border: 1px solid #f0d7a5;
+            border-radius: 11px;
+            background: #fff9ec;
+        }
+
+        .district-doctor-vacation.is-active {
+            border-color: #fecaca;
+            background: #fff4f4;
+        }
+
+        .district-doctor-vacation.is-planned {
+            border-color: #d9e4ea;
+            background: #f7fafc;
+        }
+
+        .district-doctor-vacation__status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #9a5d09;
+            font-size: 10px;
+            font-weight: 850;
+        }
+
+        .district-doctor-vacation.is-active .district-doctor-vacation__status {
+            color: #b42318;
+        }
+
+        .district-doctor-vacation.is-planned .district-doctor-vacation__status {
+            color: #64748b;
+        }
+
+        .district-doctor-vacation__dates {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .district-doctor-vacation__replacement {
+            margin-top: 5px;
+            color: #334155;
+            font-size: 10px;
+            line-height: 1.35;
+        }
+
+        .district-doctor-vacation__replacement strong {
+            color: var(--settings-primary-dark);
+            font-weight: 850;
+        }
+
+        .district-doctor-vacation__replacement.is-missing strong {
+            color: #b42318;
+        }
+
+        @media (max-width: 720px) {
+            .district-doctor {
+                flex-wrap: wrap;
+            }
+
+            .district-doctor-vacation {
+                width: 100%;
+                margin-left: 52px;
+            }
+        }
+
         .district-picker-hint {
             margin-top: 5px;
             color: #8a98a9;
@@ -1724,6 +1794,22 @@
                                         <div class="district-doctor__name">{{ $district['doctor'] }}</div>
                                         <div class="district-doctor__speciality">{{ $district['speciality'] }}</div>
                                     </div>
+
+                                    @if(!empty($district['doctor_vacation']))
+                                        <div class="district-doctor-vacation {{ !empty($district['doctor_vacation']['active']) ? 'is-active' : (!empty($district['doctor_vacation']['approved']) ? 'is-approved' : 'is-planned') }}">
+                                            <div class="district-doctor-vacation__status">
+                                                <i class="bi bi-suitcase2"></i>
+                                                {{ $district['doctor_vacation']['label'] ?? 'Отпуск' }}
+                                            </div>
+                                            <div class="district-doctor-vacation__dates">
+                                                {{ $district['doctor_vacation']['dates'] ?? '' }}
+                                            </div>
+                                            <div class="district-doctor-vacation__replacement {{ !empty($district['doctor_vacation']['replacement_doctor']) ? '' : 'is-missing' }}">
+                                                И.О.:
+                                                <strong>{{ ($district['doctor_vacation']['replacement_doctor'] ?? '') ?: 'не назначен' }}</strong>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <div class="district-doctor district-doctor--home">
@@ -1733,6 +1819,22 @@
                                         <div class="district-doctor__name">{{ $district['home_visit_doctor'] }}</div>
                                         <div class="district-doctor__speciality">{{ $district['home_visit_speciality'] }}</div>
                                     </div>
+
+                                    @if(!empty($district['home_visit_vacation']))
+                                        <div class="district-doctor-vacation {{ !empty($district['home_visit_vacation']['active']) ? 'is-active' : (!empty($district['home_visit_vacation']['approved']) ? 'is-approved' : 'is-planned') }}">
+                                            <div class="district-doctor-vacation__status">
+                                                <i class="bi bi-suitcase2"></i>
+                                                {{ $district['home_visit_vacation']['label'] ?? 'Отпуск' }}
+                                            </div>
+                                            <div class="district-doctor-vacation__dates">
+                                                {{ $district['home_visit_vacation']['dates'] ?? '' }}
+                                            </div>
+                                            <div class="district-doctor-vacation__replacement {{ !empty($district['home_visit_vacation']['replacement_doctor']) ? '' : 'is-missing' }}">
+                                                И.О.:
+                                                <strong>{{ ($district['home_visit_vacation']['replacement_doctor'] ?? '') ?: 'не назначен' }}</strong>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 @if(!empty($district['additional_doctors']))

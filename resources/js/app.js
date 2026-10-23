@@ -38,6 +38,30 @@ document.addEventListener('DOMContentLoaded', function () {
         app.mount(medicineTableRoot);
     }
 
+    const hospitalRoomsRoot = selector('#hospital-rooms-root');
+    if (hospitalRoomsRoot) {
+        import('./vue/doctors/HospitalRoomsMap.vue')
+            .then(({ default: HospitalRoomsMap }) => {
+                createApp(HospitalRoomsMap, {
+                    bootstrapUrl: hospitalRoomsRoot.dataset.bootstrapUrl || '',
+                    roomStoreUrl: hospitalRoomsRoot.dataset.roomStoreUrl || '',
+                    roomUpdateUrlTemplate: hospitalRoomsRoot.dataset.roomUpdateUrlTemplate || '',
+                    roomDeleteUrlTemplate: hospitalRoomsRoot.dataset.roomDeleteUrlTemplate || '',
+                    roomLayoutUrlTemplate: hospitalRoomsRoot.dataset.roomLayoutUrlTemplate || '',
+                    bedAssignUrlTemplate: hospitalRoomsRoot.dataset.bedAssignUrlTemplate || '',
+                    bedReleaseUrlTemplate: hospitalRoomsRoot.dataset.bedReleaseUrlTemplate || '',
+                    patientSearchUrl: hospitalRoomsRoot.dataset.patientSearchUrl || '',
+                    patientCardUrlTemplate: hospitalRoomsRoot.dataset.patientCardUrlTemplate || '',
+                    clinicName: hospitalRoomsRoot.dataset.clinicName || '',
+                }).mount(hospitalRoomsRoot);
+            })
+            .catch((error) => {
+                console.error('Не удалось загрузить карту палат:', error);
+                hospitalRoomsRoot.innerHTML =
+                    '<div class="alert alert-danger">Не удалось загрузить интерфейс палат и коек.</div>';
+            });
+    }
+
     selectorAll('.line-checkbox').forEach(e => e.addEventListener('click', lcb_checking));
 
     const tooltip = selector('#tooltip');

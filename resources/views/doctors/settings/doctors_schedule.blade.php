@@ -174,7 +174,7 @@
         .doctor-schedule-grid-header,
         .doctor-schedule-grid-body {
             display: grid;
-            grid-template-columns: 76px repeat(7, minmax(0, 1fr));
+            grid-template-columns: 76px;
         }
 
         @media (max-width: 1199px) {
@@ -241,6 +241,18 @@
             color: var(--settings-primary-dark);
         }
 
+        .doctor-schedule-day-hours {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 9px;
+            font-weight: 750;
+            line-height: 1.2;
+        }
+
+        .doctor-schedule-day-hours.is-closed {
+            color: #b45309;
+        }
+
         .doctor-schedule-grid-body {
             height: 720px;
         }
@@ -248,16 +260,45 @@
         .doctor-schedule-time-column {
             position: relative;
             border-right: 1px solid var(--settings-border);
-            background: linear-gradient(180deg, rgba(4, 134, 150, .08) 0%, rgba(4, 134, 150, .03) 16%, #fbfcfd 40%);
+            background:
+                linear-gradient(180deg, rgba(4, 134, 150, .08) 0%, rgba(4, 134, 150, .03) 16%, rgba(251, 252, 253, .96) 40%),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(203, 213, 225, .42) 0,
+                    rgba(203, 213, 225, .42) 1px,
+                    transparent 1px,
+                    transparent 15px
+                ),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(148, 163, 184, .45) 0,
+                    rgba(148, 163, 184, .45) 1px,
+                    transparent 1px,
+                    transparent 60px
+                );
         }
 
         .doctor-schedule-time-label {
             position: absolute;
-            right: 11px;
-            color: #7a8695;
-            font-size: 11px;
-            font-weight: 700;
+            right: 9px;
+            color: #9aa5b3;
+            font-size: 9px;
+            font-weight: 650;
+            line-height: 1;
             transform: translateY(-50%);
+        }
+
+        .doctor-schedule-time-label--hour {
+            right: 8px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .doctor-schedule-time-label--quarter {
+            color: #a8b2bf;
+            font-size: 8px;
+            font-weight: 650;
         }
 
         .doctor-schedule-day-column {
@@ -266,14 +307,56 @@
             border-right: 1px solid var(--settings-border);
             background:
                 linear-gradient(180deg, rgba(4, 134, 150, .08) 0%, rgba(4, 134, 150, .025) 14%, rgba(255, 255, 255, .98) 32%),
-                linear-gradient(to bottom,
-                    rgba(226, 232, 240, .92) 1px,
-                    transparent 1px),
-                linear-gradient(to bottom,
-                    rgba(226, 232, 240, .44) 1px,
-                    transparent 1px);
-            background-position: 0 0, 0 0, 0 30px;
-            background-size: 100% 100%, 100% 60px, 100% 60px;
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(226, 232, 240, .58) 0,
+                    rgba(226, 232, 240, .58) 1px,
+                    transparent 1px,
+                    transparent 15px
+                ),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(148, 163, 184, .38) 0,
+                    rgba(148, 163, 184, .38) 1px,
+                    transparent 1px,
+                    transparent 60px
+                );
+        }
+
+        .doctor-schedule-day-column::before,
+        .doctor-schedule-day-column::after {
+            position: absolute;
+            z-index: 2;
+            right: 0;
+            left: 0;
+            background:
+                repeating-linear-gradient(
+                    -45deg,
+                    rgba(148, 163, 184, .10) 0,
+                    rgba(148, 163, 184, .10) 6px,
+                    rgba(148, 163, 184, .03) 6px,
+                    rgba(148, 163, 184, .03) 12px
+                ),
+                rgba(248, 250, 252, .76);
+            content: '';
+            pointer-events: none;
+        }
+
+        .doctor-schedule-day-column::before {
+            top: 0;
+            height: var(--clinic-closed-top, 0px);
+            border-bottom: var(--clinic-closed-top-border, 0) solid #d7dee7;
+        }
+
+        .doctor-schedule-day-column::after {
+            bottom: 0;
+            height: var(--clinic-closed-bottom, 0px);
+            border-top: var(--clinic-closed-bottom-border, 0) solid #d7dee7;
+        }
+
+        .doctor-schedule-day-column.is-clinic-closed::before {
+            height: 100%;
+            border-bottom: 0;
         }
 
         .doctor-schedule-day-column:last-child {
@@ -283,27 +366,39 @@
         .doctor-schedule-day-column.is-today {
             background:
                 linear-gradient(180deg, rgba(4, 134, 150, .14) 0%, rgba(4, 134, 150, .05) 15%, rgba(252, 255, 255, .98) 34%),
-                linear-gradient(to bottom,
-                    rgba(226, 232, 240, .92) 1px,
-                    transparent 1px),
-                linear-gradient(to bottom,
-                    rgba(226, 232, 240, .44) 1px,
-                    transparent 1px);
-            background-position: 0 0, 0 0, 0 30px;
-            background-size: 100% 100%, 100% 60px, 100% 60px;
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(199, 221, 225, .64) 0,
+                    rgba(199, 221, 225, .64) 1px,
+                    transparent 1px,
+                    transparent 15px
+                ),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(86, 155, 164, .35) 0,
+                    rgba(86, 155, 164, .35) 1px,
+                    transparent 1px,
+                    transparent 60px
+                );
         }
 
         .doctor-schedule-day-column.is-drop-target {
             background:
                 linear-gradient(180deg, rgba(4, 134, 150, .18) 0%, rgba(4, 134, 150, .08) 16%, rgba(238, 250, 251, .98) 36%),
-                linear-gradient(to bottom,
-                    rgba(226, 232, 240, .92) 1px,
-                    transparent 1px),
-                linear-gradient(to bottom,
-                    rgba(226, 232, 240, .44) 1px,
-                    transparent 1px);
-            background-position: 0 0, 0 0, 0 30px;
-            background-size: 100% 100%, 100% 60px, 100% 60px;
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(173, 216, 221, .72) 0,
+                    rgba(173, 216, 221, .72) 1px,
+                    transparent 1px,
+                    transparent 15px
+                ),
+                repeating-linear-gradient(
+                    to bottom,
+                    rgba(4, 134, 150, .34) 0,
+                    rgba(4, 134, 150, .34) 1px,
+                    transparent 1px,
+                    transparent 60px
+                );
         }
 
         .doctor-shift-card {
@@ -462,9 +557,8 @@
         }
 
         .doctor-shift-card.is-active {
-            z-index: 18 !important;
-            box-shadow: 0 16px 34px rgba(15, 23, 42, .16);
-            transform: translateY(-1px);
+            z-index: 100 !important;
+            box-shadow: 0 18px 38px rgba(15, 23, 42, .22);
         }
 
         .doctor-shift-card__doctor--compact {
@@ -804,6 +898,31 @@
             pointer-events: none;
         }
 
+        .doctor-schedule-notice {
+            display: none;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 0 0 14px;
+            padding: 11px 13px;
+            border: 1px solid #b9e6d0;
+            border-radius: 13px;
+            background: #f2fbf7;
+            color: #216447;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.45;
+        }
+
+        .doctor-schedule-notice.is-visible {
+            display: flex;
+        }
+
+        .doctor-schedule-notice.is-error {
+            border-color: #fecaca;
+            background: #fff6f6;
+            color: #9f2424;
+        }
+
         @media (max-width: 1100px) {
             .doctor-schedule-summary {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -856,6 +975,14 @@
                         Добавить смену
                     </button>
                 </div>
+            </div>
+
+            <div class="doctor-schedule-notice"
+                 id="doctorScheduleNotice"
+                 role="status"
+                 aria-live="polite">
+                <i class="bi bi-check2-circle"></i>
+                <span id="doctorScheduleNoticeText"></span>
             </div>
 
             <section class="doctor-schedule-summary" aria-label="Сводка по расписанию">
@@ -930,9 +1057,9 @@
 
                     <div class="doctor-schedule-legend" aria-label="Цвета смен">
                         <span class="doctor-schedule-legend-item"><span class="doctor-schedule-legend-dot"></span> Психиатр</span>
+                        <span class="doctor-schedule-legend-item"><span class="doctor-schedule-legend-dot amber"></span> Психиатр-нарколог</span>
                         <span class="doctor-schedule-legend-item"><span class="doctor-schedule-legend-dot blue"></span> Психотерапевт</span>
                         <span class="doctor-schedule-legend-item"><span class="doctor-schedule-legend-dot violet"></span> Психолог</span>
-                        <span class="doctor-schedule-legend-item"><span class="doctor-schedule-legend-dot amber"></span> Невролог</span>
                         <span class="doctor-schedule-legend-item"><span class="doctor-schedule-legend-dot green"></span> Другое</span>
                     </div>
                 </div>
@@ -952,7 +1079,7 @@
                 <div class="doctor-schedule-help">
                     <i class="bi bi-info-circle-fill"></i>
                     <span>
-                        Если несколько сотрудников работают одновременно, их карточки накладываются каскадом со сдвигом вправо. Нажмите на карточку, чтобы поднять её наверх, а на «+N» — чтобы увидеть скрытые смены. Изменения пока не записываются в БД.
+                        Если несколько сотрудников работают одновременно, их карточки накладываются каскадом со сдвигом вправо. Нажмите на карточку, чтобы поднять её наверх, а на «+N» — чтобы увидеть скрытые смены. Исходные смены загружаются из расписания сотрудников, заданного в кабинетах. Локальные изменения на этой странице пока не записываются в БД.
                     </span>
                 </div>
             </section>
@@ -980,35 +1107,41 @@
                         <div class="col-12">
                             <label class="form-label" for="doctorShiftDoctor">Врач</label>
                             <select class="form-select" id="doctorShiftDoctor">
-                                <option value="Иванов Иван Иванович">Иванов Иван Иванович</option>
-                                <option value="Петрова Анна Сергеевна">Петрова Анна Сергеевна</option>
-                                <option value="Сидоров Алексей Николаевич">Сидоров Алексей Николаевич</option>
-                                <option value="Кузнецова Мария Андреевна">Кузнецова Мария Андреевна</option>
-                                <option value="Орлова Елена Викторовна">Орлова Елена Викторовна</option>
-                                <option value="Николаев Дмитрий Олегович">Николаев Дмитрий Олегович</option>
+                                @forelse(($doctorOptions ?? []) as $doctorOption)
+                                    <option value="{{ $doctorOption['name'] }}"
+                                            data-doctor-id="{{ $doctorOption['id'] }}"
+                                            data-speciality="{{ $doctorOption['speciality'] }}"
+                                            data-specialities='@json($doctorOption['allowed_specialities'] ?? [])'
+                                            data-office="{{ $doctorOption['office'] }}">
+                                        {{ $doctorOption['name'] }}
+                                    </option>
+                                @empty
+                                    <option value="">Нет врачей с заданным расписанием</option>
+                                @endforelse
                             </select>
                         </div>
 
                         <div class="col-md-7">
                             <label class="form-label" for="doctorShiftSpeciality">Специальность</label>
                             <select class="form-select" id="doctorShiftSpeciality">
-                                <option value="Врач-психиатр">Врач-психиатр</option>
-                                <option value="Врач-психотерапевт">Врач-психотерапевт</option>
-                                <option value="Медицинский психолог">Медицинский психолог</option>
-                                <option value="Врач-невролог">Врач-невролог</option>
-                                <option value="Врач функциональной диагностики">Врач функциональной диагностики</option>
+                                <option value="">Выберите врача</option>
                             </select>
+                            <div class="form-text">
+                                Доступны только специальности, подтверждённые
+                                в карточке сотрудника.
+                            </div>
                         </div>
 
                         <div class="col-md-5">
                             <label class="form-label" for="doctorShiftOffice">Кабинет</label>
                             <select class="form-select" id="doctorShiftOffice">
-                                <option value="201">№ 201</option>
-                                <option value="202">№ 202</option>
-                                <option value="204">№ 204</option>
-                                <option value="207">№ 207</option>
-                                <option value="214">№ 214</option>
-                                <option value="216">№ 216</option>
+                                @forelse(($officeOptions ?? []) as $officeOption)
+                                    <option value="{{ $officeOption['number'] }}">
+                                        № {{ $officeOption['number'] }}
+                                    </option>
+                                @empty
+                                    <option value="">Нет кабинетов с заданным расписанием</option>
+                                @endforelse
                             </select>
                         </div>
 
@@ -1083,15 +1216,81 @@
 @push('scripts')
     <script>
         (() => {
-            const START_HOUR = 8;
-            const END_HOUR = 20;
             const MINUTES_PER_PIXEL = 1;
             const SNAP_MINUTES = 15;
             const DAY_HORIZONTAL_PADDING = 7;
-            const STACK_OFFSET = 18;
-            const MAX_STACK_LAYERS = 5;
-            const DAY_STACK_RIGHT_GUTTER = 8;
-            const DAY_HEIGHT = (END_HOUR - START_HOUR) * 60 / MINUTES_PER_PIXEL;
+
+            const RAW_CLINIC_SCHEDULE = @json($clinicSchedule ?? []);
+            const DOCTOR_SCHEDULE_SAVE_URL =
+                @json(route('doctors.settings.vacation-schedule'));
+            const CSRF_TOKEN =
+                document.querySelector('meta[name="csrf-token"]')
+                    ?.getAttribute('content')
+                || '';
+
+            function parseClinicTime(value, fallback) {
+                if (!value || !String(value).includes(':')) {
+                    return fallback;
+                }
+
+                const [hours, minutes] = String(value).split(':').map(Number);
+
+                if (
+                    Number.isNaN(hours)
+                    || Number.isNaN(minutes)
+                ) {
+                    return fallback;
+                }
+
+                return hours * 60 + minutes;
+            }
+
+            const clinicSchedule = Array.from(
+                { length: 7 },
+                (_, day) => {
+                    const row =
+                        RAW_CLINIC_SCHEDULE?.[day]
+                        ?? RAW_CLINIC_SCHEDULE?.[String(day)]
+                        ?? null;
+
+                    const enabled = row
+                        ? Boolean(row.enabled)
+                        : true;
+
+                    const from = parseClinicTime(
+                        row?.from,
+                        8 * 60
+                    );
+
+                    const to = parseClinicTime(
+                        row?.to,
+                        20 * 60
+                    );
+
+                    return {
+                        enabled: enabled && to > from,
+                        from,
+                        to
+                    };
+                }
+            );
+
+            const enabledClinicDays =
+                clinicSchedule.filter(day => day.enabled);
+
+            const TIMELINE_START_MINUTES =
+                enabledClinicDays.length
+                    ? Math.min(...enabledClinicDays.map(day => day.from))
+                    : 8 * 60;
+
+            const TIMELINE_END_MINUTES =
+                enabledClinicDays.length
+                    ? Math.max(...enabledClinicDays.map(day => day.to))
+                    : 20 * 60;
+
+            const DAY_HEIGHT =
+                (TIMELINE_END_MINUTES - TIMELINE_START_MINUTES)
+                / MINUTES_PER_PIXEL;
             const WEEK_DAYS = [
                 'Понедельник',
                 'Вторник',
@@ -1107,28 +1306,15 @@
                 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
             ];
 
-            let currentWeekStart = startOfWeek(new Date(2026, 8, 21));
-            let nextId = 20;
+            let currentWeekStart = startOfWeek(new Date());
+            let shifts = @json($doctorShifts ?? []);
+            let nextId = Math.max(
+                0,
+                ...shifts.map(item => Number(item.id) || 0)
+            ) + 1;
             let dragging = null;
             let resizing = null;
-
-            let shifts = [
-                { id: 1, day: 0, doctor: 'Иванов Иван Иванович', speciality: 'Врач-психиатр', office: '201', start: '08:00', end: '14:00' },
-                { id: 14, day: 0, doctor: 'Сидоров Алексей Николаевич', speciality: 'Врач-психиатр', office: '214', start: '09:00', end: '13:00' },
-                { id: 15, day: 0, doctor: 'Кузнецова Мария Андреевна', speciality: 'Медицинский психолог', office: '207', start: '10:30', end: '12:30' },
-                { id: 2, day: 0, doctor: 'Петрова Анна Сергеевна', speciality: 'Врач-психотерапевт', office: '204', start: '14:15', end: '19:00' },
-                { id: 3, day: 1, doctor: 'Кузнецова Мария Андреевна', speciality: 'Медицинский психолог', office: '207', start: '09:00', end: '15:00' },
-                { id: 4, day: 1, doctor: 'Сидоров Алексей Николаевич', speciality: 'Врач-психиатр', office: '214', start: '15:15', end: '20:00' },
-                { id: 5, day: 2, doctor: 'Иванов Иван Иванович', speciality: 'Врач-психиатр', office: '201', start: '08:00', end: '16:00' },
-                { id: 6, day: 2, doctor: 'Орлова Елена Викторовна', speciality: 'Врач-невролог', office: '216', start: '16:15', end: '19:45' },
-                { id: 7, day: 3, doctor: 'Петрова Анна Сергеевна', speciality: 'Врач-психотерапевт', office: '204', start: '08:30', end: '13:30' },
-                { id: 8, day: 3, doctor: 'Николаев Дмитрий Олегович', speciality: 'Врач функциональной диагностики', office: '202', start: '14:00', end: '18:00' },
-                { id: 9, day: 4, doctor: 'Сидоров Алексей Николаевич', speciality: 'Врач-психиатр', office: '214', start: '08:00', end: '14:00' },
-                { id: 10, day: 4, doctor: 'Кузнецова Мария Андреевна', speciality: 'Медицинский психолог', office: '207', start: '14:15', end: '19:00' },
-                { id: 11, day: 5, doctor: 'Иванов Иван Иванович', speciality: 'Врач-психиатр', office: '201', start: '09:00', end: '14:00' },
-                { id: 12, day: 5, doctor: 'Орлова Елена Викторовна', speciality: 'Врач-невролог', office: '216', start: '14:15', end: '18:00' },
-                { id: 13, day: 6, doctor: 'Петрова Анна Сергеевна', speciality: 'Врач-психотерапевт', office: '204', start: '10:00', end: '15:00' }
-            ];
+            let activeShiftId = null;
 
             const scheduleBoard = document.querySelector('.doctor-schedule-board');
             const scheduleHeader = document.getElementById('scheduleHeader');
@@ -1156,6 +1342,118 @@
             const overlapModal = overlapModalElement ? bootstrap.Modal.getOrCreateInstance(overlapModalElement) : null;
             const overlapModalTitle = document.getElementById('doctorOverlapModalTitle');
             const overlapList = document.getElementById('doctorOverlapList');
+            const scheduleNotice =
+                document.getElementById('doctorScheduleNotice');
+            const scheduleNoticeText =
+                document.getElementById('doctorScheduleNoticeText');
+
+            function doctorAllowedSpecialities() {
+                const option =
+                    doctorInput?.selectedOptions?.[0];
+
+                if (!option) {
+                    return [];
+                }
+
+                try {
+                    const values = JSON.parse(
+                        option.dataset.specialities
+                        || '[]'
+                    );
+
+                    return Array.isArray(values)
+                        ? values
+                            .map(value =>
+                                String(value || '').trim()
+                            )
+                            .filter(Boolean)
+                        : [];
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            function syncSpecialityOptions(
+                preferred = ''
+            ) {
+                if (!specialityInput) {
+                    return;
+                }
+
+                const specialities =
+                    doctorAllowedSpecialities();
+
+                specialityInput.innerHTML = '';
+
+                if (!specialities.length) {
+                    const option =
+                        document.createElement(
+                            'option'
+                        );
+
+                    option.value = '';
+                    option.textContent =
+                        'Нет подтверждённых специальностей';
+
+                    specialityInput.appendChild(
+                        option
+                    );
+
+                    specialityInput.disabled =
+                        true;
+
+                    return;
+                }
+
+                specialityInput.disabled =
+                    false;
+
+                specialities.forEach(value => {
+                    const option =
+                        document.createElement(
+                            'option'
+                        );
+
+                    option.value = value;
+                    option.textContent = value;
+
+                    specialityInput.appendChild(
+                        option
+                    );
+                });
+
+                specialityInput.value =
+                    specialities.includes(preferred)
+                        ? preferred
+                        : specialities[0];
+            }
+
+            doctorInput?.addEventListener(
+                'change',
+                () => {
+                    const option =
+                        doctorInput
+                            .selectedOptions?.[0];
+
+                    if (!option) {
+                        syncSpecialityOptions();
+                        return;
+                    }
+
+                    syncSpecialityOptions(
+                        option.dataset.speciality
+                        || ''
+                    );
+
+                    if (
+                        option.dataset.office
+                        && officeInput
+                    ) {
+                        officeInput.value =
+                            option.dataset.office;
+                    }
+                }
+            );
 
             function startOfWeek(date) {
                 const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -1179,19 +1477,64 @@
             }
 
             function formatWeekRange(start) {
-                const end = addDays(start, 6);
-                const sameMonth = start.getMonth() === end.getMonth();
-                const sameYear = start.getFullYear() === end.getFullYear();
+                const workingDayIndexes = clinicSchedule
+                    .map((work, day) => work.enabled ? day : null)
+                    .filter(day => day !== null);
+
+                /*
+                 * Диапазон недели показываем только по реально
+                 * отображаемым рабочим дням клиники.
+                 *
+                 * Например, при графике ПН–ПТ:
+                 * 28 сентября – 2 октября 2026
+                 *
+                 * СБ/ВС в подпись не попадают, если клиника закрыта.
+                 */
+                const firstDayIndex = workingDayIndexes.length
+                    ? Math.min(...workingDayIndexes)
+                    : 0;
+
+                const lastDayIndex = workingDayIndexes.length
+                    ? Math.max(...workingDayIndexes)
+                    : 6;
+
+                const rangeStart = addDays(
+                    start,
+                    firstDayIndex
+                );
+
+                const rangeEnd = addDays(
+                    start,
+                    lastDayIndex
+                );
+
+                const sameDate =
+                    isSameDate(
+                        rangeStart,
+                        rangeEnd
+                    );
+
+                if (sameDate) {
+                    return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} ${rangeStart.getFullYear()}`;
+                }
+
+                const sameMonth =
+                    rangeStart.getMonth()
+                    === rangeEnd.getMonth();
+
+                const sameYear =
+                    rangeStart.getFullYear()
+                    === rangeEnd.getFullYear();
 
                 if (sameMonth && sameYear) {
-                    return `${start.getDate()}–${end.getDate()} ${MONTHS_GENITIVE[end.getMonth()]} ${end.getFullYear()}`;
+                    return `${rangeStart.getDate()}–${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;
                 }
 
                 if (sameYear) {
-                    return `${start.getDate()} ${MONTHS_GENITIVE[start.getMonth()]} – ${end.getDate()} ${MONTHS_GENITIVE[end.getMonth()]} ${end.getFullYear()}`;
+                    return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} – ${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;
                 }
 
-                return `${start.getDate()} ${MONTHS_GENITIVE[start.getMonth()]} ${start.getFullYear()} – ${end.getDate()} ${MONTHS_GENITIVE[end.getMonth()]} ${end.getFullYear()}`;
+                return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} ${rangeStart.getFullYear()} – ${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;
             }
 
             function timeToMinutes(value) {
@@ -1214,11 +1557,122 @@
                 return Math.max(min, Math.min(max, value));
             }
 
+            function clinicDaySchedule(day) {
+                return clinicSchedule[Number(day)] ?? {
+                    enabled: false,
+                    from: TIMELINE_START_MINUTES,
+                    to: TIMELINE_END_MINUTES
+                };
+            }
+
+            function firstEnabledClinicDay() {
+                const day = clinicSchedule.findIndex(item => item.enabled);
+                return day >= 0 ? day : 0;
+            }
+
+            function syncDaySelectAvailability() {
+                if (!dayInput) {
+                    return;
+                }
+
+                Array.from(dayInput.options).forEach(
+                    option => {
+                        const day = Number(option.value);
+                        const work =
+                            clinicDaySchedule(day);
+
+                        option.disabled =
+                            !work.enabled;
+
+                        option.hidden =
+                            !work.enabled;
+                    }
+                );
+
+                const selectedDay =
+                    Number(dayInput.value);
+
+                if (
+                    !clinicDaySchedule(
+                        selectedDay
+                    ).enabled
+                ) {
+                    dayInput.value =
+                        String(
+                            firstEnabledClinicDay()
+                        );
+                }
+            }
+
+            function syncModalClinicBounds(adjustValues = false) {
+                syncDaySelectAvailability();
+
+                const day = Number(dayInput?.value ?? 0);
+                const schedule = clinicDaySchedule(day);
+
+                if (!startInput || !endInput) {
+                    return;
+                }
+
+                if (!schedule.enabled) {
+                    startInput.disabled = true;
+                    endInput.disabled = true;
+
+                    if (adjustValues) {
+                        startInput.value = '';
+                        endInput.value = '';
+                    }
+
+                    return;
+                }
+
+                startInput.disabled = false;
+                endInput.disabled = false;
+
+                const minTime = minutesToTime(schedule.from);
+                const maxTime = minutesToTime(schedule.to);
+
+                startInput.min = minTime;
+                startInput.max = maxTime;
+                endInput.min = minTime;
+                endInput.max = maxTime;
+
+                if (!adjustValues) {
+                    return;
+                }
+
+                let start = timeToMinutes(startInput.value || minTime);
+                start = snap(clamp(
+                    start,
+                    schedule.from,
+                    schedule.to - SNAP_MINUTES
+                ));
+
+                let end = timeToMinutes(endInput.value || '');
+                if (!Number.isFinite(end) || end <= start) {
+                    end = Math.min(start + 6 * 60, schedule.to);
+                }
+
+                end = snap(clamp(
+                    end,
+                    start + SNAP_MINUTES,
+                    schedule.to
+                ));
+
+                startInput.value = minutesToTime(start);
+                endInput.value = minutesToTime(end);
+            }
+
             function getTone(speciality) {
-                if (speciality.includes('психотерапевт')) return 'blue';
-                if (speciality.includes('психолог')) return 'violet';
-                if (speciality.includes('невролог')) return 'amber';
-                if (speciality.includes('психиатр')) return 'teal';
+                const normalized = String(
+                    speciality || ''
+                ).toLocaleLowerCase('ru-RU');
+
+                if (normalized.includes('психотерапевт')) return 'blue';
+                if (normalized.includes('психолог')) return 'violet';
+                if (normalized.includes('психиатр-нарколог')) return 'amber';
+                if (normalized.includes('психиатр')) return 'teal';
+
                 return 'green';
             }
 
@@ -1226,46 +1680,174 @@
                 scheduleTimeColumn.innerHTML = '';
                 scheduleTimeColumn.style.height = `${DAY_HEIGHT}px`;
 
-                for (let hour = START_HOUR; hour <= END_HOUR; hour++) {
+                const startMinutes = TIMELINE_START_MINUTES;
+                const endMinutes = TIMELINE_END_MINUTES;
+
+                for (
+                    let minute = startMinutes;
+                    minute <= endMinutes;
+                    minute += SNAP_MINUTES
+                ) {
                     const label = document.createElement('div');
-                    label.className = 'doctor-schedule-time-label';
-                    label.style.top = `${(hour - START_HOUR) * 60 / MINUTES_PER_PIXEL}px`;
-                    label.textContent = `${String(hour).padStart(2, '0')}:00`;
+                    const isHour = minute % 60 === 0;
+
+                    label.className = [
+                        'doctor-schedule-time-label',
+                        isHour
+                            ? 'doctor-schedule-time-label--hour'
+                            : 'doctor-schedule-time-label--quarter'
+                    ].join(' ');
+
+                    label.style.top =
+                        `${(minute - startMinutes) / MINUTES_PER_PIXEL}px`;
+                    label.textContent = minutesToTime(minute);
+
                     scheduleTimeColumn.appendChild(label);
                 }
             }
 
             function renderHeaderAndDays() {
-                scheduleHeader.querySelectorAll('.doctor-schedule-day-head').forEach(node => node.remove());
-                scheduleBody.querySelectorAll('.doctor-schedule-day-column').forEach(node => node.remove());
+                scheduleHeader
+                    .querySelectorAll('.doctor-schedule-day-head')
+                    .forEach(node => node.remove());
+
+                scheduleBody
+                    .querySelectorAll('.doctor-schedule-day-column')
+                    .forEach(node => node.remove());
 
                 const today = new Date();
 
-                for (let day = 0; day < 7; day++) {
-                    const date = addDays(currentWeekStart, day);
-                    const isToday = isSameDate(date, today);
+                /*
+                 * Закрытые дни вообще не участвуют в сетке:
+                 * нет ни заголовка, ни столбца, ни пустого места.
+                 */
+                const visibleDays = clinicSchedule
+                    .map((work, day) => ({
+                        day,
+                        work
+                    }))
+                    .filter(item => item.work.enabled);
 
-                    const head = document.createElement('div');
-                    head.className = `doctor-schedule-day-head${isToday ? ' is-today' : ''}`;
+                const dayColumns = visibleDays.length > 0
+                    ? ` repeat(${visibleDays.length}, minmax(0, 1fr))`
+                    : '';
+
+                const gridTemplate = `76px${dayColumns}`;
+
+                scheduleHeader.style.gridTemplateColumns =
+                    gridTemplate;
+
+                scheduleBody.style.gridTemplateColumns =
+                    gridTemplate;
+
+                visibleDays.forEach(({ day, work }) => {
+                    const date = addDays(
+                        currentWeekStart,
+                        day
+                    );
+
+                    const isToday = isSameDate(
+                        date,
+                        today
+                    );
+
+                    const head =
+                        document.createElement('div');
+
+                    head.className =
+                        `doctor-schedule-day-head${isToday ? ' is-today' : ''}`;
+
                     head.innerHTML = `
                         <div>
-                            <div class="doctor-schedule-day-name">${WEEK_DAYS_SHORT[day]}</div>
-                            <div class="doctor-schedule-day-date">${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]}</div>
+                            <div class="doctor-schedule-day-name">
+                                ${WEEK_DAYS_SHORT[day]}
+                            </div>
+
+                            <div class="doctor-schedule-day-date">
+                                ${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]}
+                            </div>
+
+                            <div class="doctor-schedule-day-hours">
+                                ${minutesToTime(work.from)}–${minutesToTime(work.to)}
+                            </div>
                         </div>
                     `;
+
                     scheduleHeader.appendChild(head);
 
-                    const column = document.createElement('div');
-                    column.className = `doctor-schedule-day-column${isToday ? ' is-today' : ''}`;
-                    column.dataset.day = String(day);
-                    column.style.height = `${DAY_HEIGHT}px`;
-                    scheduleBody.appendChild(column);
-                }
+                    const column =
+                        document.createElement('div');
 
-                weekRangeLabel.textContent = formatWeekRange(currentWeekStart);
+                    column.className = [
+                        'doctor-schedule-day-column',
+                        isToday ? 'is-today' : ''
+                    ]
+                        .filter(Boolean)
+                        .join(' ');
+
+                    column.dataset.day =
+                        String(day);
+
+                    column.dataset.clinicEnabled =
+                        '1';
+
+                    column.dataset.clinicFrom =
+                        String(work.from);
+
+                    column.dataset.clinicTo =
+                        String(work.to);
+
+                    column.style.height =
+                        `${DAY_HEIGHT}px`;
+
+                    const closedTop =
+                        Math.max(
+                            0,
+                            work.from
+                                - TIMELINE_START_MINUTES
+                        )
+                        / MINUTES_PER_PIXEL;
+
+                    const closedBottom =
+                        Math.max(
+                            0,
+                            TIMELINE_END_MINUTES
+                                - work.to
+                        )
+                        / MINUTES_PER_PIXEL;
+
+                    column.style.setProperty(
+                        '--clinic-closed-top',
+                        `${closedTop}px`
+                    );
+
+                    column.style.setProperty(
+                        '--clinic-closed-bottom',
+                        `${closedBottom}px`
+                    );
+
+                    column.style.setProperty(
+                        '--clinic-closed-top-border',
+                        closedTop > 0 ? '1px' : '0'
+                    );
+
+                    column.style.setProperty(
+                        '--clinic-closed-bottom-border',
+                        closedBottom > 0 ? '1px' : '0'
+                    );
+
+                    scheduleBody.appendChild(column);
+                });
+
+                weekRangeLabel.textContent =
+                    formatWeekRange(currentWeekStart);
             }
 
             function matchesFilters(shift) {
+                if (!clinicDaySchedule(shift.day).enabled) {
+                    return false;
+                }
+
                 const query = searchInput.value.trim().toLowerCase();
                 const speciality = specialityFilter.value;
                 const office = officeFilter.value;
@@ -1293,7 +1875,7 @@
 
 
             function createCard(shift, layout = null) {
-                const dayStartMinutes = START_HOUR * 60;
+                const dayStartMinutes = TIMELINE_START_MINUTES;
                 const top = (timeToMinutes(shift.start) - dayStartMinutes) / MINUTES_PER_PIXEL;
                 const height = (timeToMinutes(shift.end) - timeToMinutes(shift.start)) / MINUTES_PER_PIXEL;
                 const hasLayout = !!layout;
@@ -1312,6 +1894,14 @@
                 card.style.height = `${Math.max(height, 30)}px`;
                 if (hasLayout && Number.isFinite(layout.zIndex)) {
                     card.style.zIndex = String(layout.zIndex);
+                }
+
+                if (
+                    hasLayout
+                    && activeShiftId === Number(shift.id)
+                ) {
+                    card.classList.add('is-active');
+                    card.style.zIndex = '100';
                 }
 
                 const widthValue = typeof widthPx === 'number' ? widthPx : 220;
@@ -1342,6 +1932,12 @@
 
                 card.querySelector('.doctor-shift-card__edit').addEventListener('click', event => {
                     event.stopPropagation();
+
+                    if (hasLayout) {
+                        activeShiftId = Number(shift.id);
+                        elevateStackCard(card);
+                    }
+
                     openEditModal(shift.id);
                 });
 
@@ -1353,7 +1949,9 @@
 
                 card.addEventListener('click', event => {
                     event.stopPropagation();
+
                     if (hasLayout) {
+                        activeShiftId = Number(shift.id);
                         elevateStackCard(card);
                     }
                 });
@@ -1447,7 +2045,7 @@
             }
 
             function createMoreCard(group, day, layout) {
-                const dayStartMinutes = START_HOUR * 60;
+                const dayStartMinutes = TIMELINE_START_MINUTES;
                 const top = (group.start - dayStartMinutes) / MINUTES_PER_PIXEL;
                 const height = Math.max((group.end - group.start) / MINUTES_PER_PIXEL, 44);
                 const visibleCount = Math.max(0, Math.min(MAX_STACK_LAYERS - 1, group.shifts.length));
@@ -1475,54 +2073,99 @@
             }
 
             function elevateStackCard(card) {
-                const column = card.closest('.doctor-schedule-day-column');
-                if (!column) return;
-                column.querySelectorAll('.doctor-shift-card.is-stacked').forEach(node => {
-                    if (node.classList.contains('doctor-shift-card--more')) return;
-                    node.classList.remove('is-active');
-                    if (node.dataset.baseZ) {
-                        node.style.zIndex = node.dataset.baseZ;
-                    }
-                });
-                if (!card.classList.contains('doctor-shift-card--more')) {
-                    card.classList.add('is-active');
-                    card.style.zIndex = '18';
+                if (
+                    !card
+                    || !card.classList.contains('is-stacked')
+                    || card.classList.contains('doctor-shift-card--more')
+                ) {
+                    return;
                 }
+
+                /*
+                 * Активной держим только одну карточку во всём расписании.
+                 * Остальные возвращаем на их исходный слой.
+                 */
+                document
+                    .querySelectorAll(
+                        '.doctor-shift-card.is-stacked:not(.doctor-shift-card--more)'
+                    )
+                    .forEach(node => {
+                        node.classList.remove('is-active');
+
+                        if (node.dataset.baseZ) {
+                            node.style.zIndex =
+                                node.dataset.baseZ;
+                        }
+                    });
+
+                activeShiftId =
+                    Number(card.dataset.id);
+
+                card.classList.add('is-active');
+                card.style.zIndex = '100';
             }
 
             function appendCascadeGroup(column, group, day) {
                 const ordered = group.shifts
                     .slice()
-                    .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start) || timeToMinutes(a.end) - timeToMinutes(b.end));
+                    .sort(
+                        (a, b) =>
+                            timeToMinutes(a.start)
+                            - timeToMinutes(b.start)
+                            || timeToMinutes(a.end)
+                            - timeToMinutes(b.end)
+                    );
 
-                const needsMoreCard = ordered.length > MAX_STACK_LAYERS;
-                const visibleShiftCount = needsMoreCard ? MAX_STACK_LAYERS - 1 : ordered.length;
-                const renderedLayers = visibleShiftCount + (needsMoreCard ? 1 : 0);
-                const availableWidth = column.clientWidth - DAY_HORIZONTAL_PADDING * 2 - DAY_STACK_RIGHT_GUTTER - STACK_OFFSET * Math.max(renderedLayers - 1, 0);
-                const cardWidth = Math.max(availableWidth, 74);
+                /*
+                 * ВАЖНО:
+                 * пересечение смен больше не меняет геометрию карточек.
+                 *
+                 * Раньше при появлении overlap мы добавляли STACK_OFFSET
+                 * и уменьшали width, из-за чего после resize карточки
+                 * визуально "прыгали" в сторону.
+                 *
+                 * Теперь у всех карточек одного дня всегда одинаковые:
+                 * - left
+                 * - width
+                 *
+                 * Меняется только z-index.
+                 */
+                const cardWidth =
+                    column.clientWidth
+                    - DAY_HORIZONTAL_PADDING * 2;
 
-                ordered.slice(0, visibleShiftCount).forEach((shift, index) => {
+                ordered.forEach((shift, index) => {
                     const layout = {
-                        left: DAY_HORIZONTAL_PADDING + index * STACK_OFFSET,
-                        width: cardWidth,
+                        left: DAY_HORIZONTAL_PADDING,
+                        width: Math.max(cardWidth, 74),
                         zIndex: 4 + index
                     };
-                    const card = createCard(shift, layout);
-                    card.dataset.baseZ = String(4 + index);
+
+                    const card =
+                        createCard(
+                            shift,
+                            layout
+                        );
+
+                    card.dataset.baseZ =
+                        String(4 + index);
+
+                    if (
+                        activeShiftId
+                        === Number(shift.id)
+                    ) {
+                        card.classList.add(
+                            'is-active'
+                        );
+
+                        card.style.zIndex =
+                            '100';
+                    }
+
                     column.appendChild(card);
                 });
-
-                if (needsMoreCard) {
-                    const layout = {
-                        left: DAY_HORIZONTAL_PADDING + visibleShiftCount * STACK_OFFSET,
-                        width: cardWidth,
-                        zIndex: 4 + visibleShiftCount
-                    };
-                    const moreCard = createMoreCard(group, day, layout);
-                    moreCard.dataset.baseZ = String(4 + visibleShiftCount);
-                    column.appendChild(moreCard);
-                }
             }
+
             function escapeHtml(value) {
                 const div = document.createElement('div');
                 div.textContent = String(value ?? '');
@@ -1558,6 +2201,7 @@
                     if (!column) return;
                     const empty = document.createElement('div');
                     empty.className = 'doctor-schedule-empty-day';
+
                     empty.textContent = 'Нет смен';
                     column.appendChild(empty);
                 });
@@ -1577,16 +2221,22 @@
                 day = day === 0 ? 6 : day - 1;
 
                 const minutes = now.getHours() * 60 + now.getMinutes();
-                const min = START_HOUR * 60;
-                const max = END_HOUR * 60;
-                if (minutes < min || minutes > max) return;
+                const work = clinicDaySchedule(day);
+
+                if (
+                    !work.enabled
+                    || minutes < work.from
+                    || minutes > work.to
+                ) {
+                    return;
+                }
 
                 const column = scheduleBody.querySelector(`.doctor-schedule-day-column[data-day="${day}"]`);
                 if (!column) return;
 
                 const line = document.createElement('div');
                 line.className = 'doctor-schedule-now-line';
-                line.style.top = `${(minutes - min) / MINUTES_PER_PIXEL}px`;
+                line.style.top = `${(minutes - TIMELINE_START_MINUTES) / MINUTES_PER_PIXEL}px`;
                 column.appendChild(line);
             }
 
@@ -1603,8 +2253,27 @@
             }
 
             function populateFilters() {
-                const specialities = [...new Set(shifts.map(item => item.speciality))].sort();
-                const offices = [...new Set(shifts.map(item => item.office))].sort((a, b) => Number(a) - Number(b));
+                const workingDayShifts = shifts.filter(
+                    item => clinicDaySchedule(item.day).enabled
+                );
+
+                const specialities = [
+                    ...new Set(
+                        workingDayShifts.map(
+                            item => item.speciality
+                        )
+                    )
+                ].sort();
+
+                const offices = [
+                    ...new Set(
+                        workingDayShifts.map(
+                            item => item.office
+                        )
+                    )
+                ].sort(
+                    (a, b) => Number(a) - Number(b)
+                );
                 const currentSpeciality = specialityFilter.value;
                 const currentOffice = officeFilter.value;
 
@@ -1628,21 +2297,184 @@
                 officeFilter.value = offices.includes(currentOffice) ? currentOffice : '';
             }
 
-            function openCreateModal(day = 0, start = '08:00') {
+            let scheduleNoticeTimer = null;
+
+            function showScheduleNotice(
+                message,
+                type = 'success'
+            ) {
+                if (
+                    !scheduleNotice
+                    || !scheduleNoticeText
+                ) {
+                    return;
+                }
+
+                clearTimeout(scheduleNoticeTimer);
+
+                scheduleNoticeText.textContent =
+                    String(message || '');
+
+                scheduleNotice.classList.toggle(
+                    'is-error',
+                    type === 'error'
+                );
+
+                scheduleNotice.classList.add(
+                    'is-visible'
+                );
+
+                scheduleNoticeTimer = setTimeout(
+                    () => {
+                        scheduleNotice.classList.remove(
+                            'is-visible'
+                        );
+                    },
+                    3500
+                );
+            }
+
+            function scheduleErrorMessage(payload) {
+                const errors =
+                    payload
+                    && typeof payload.errors === 'object'
+                        ? payload.errors
+                        : null;
+
+                if (errors) {
+                    for (
+                        const messages
+                        of Object.values(errors)
+                    ) {
+                        if (
+                            Array.isArray(messages)
+                            && messages.length
+                        ) {
+                            return String(
+                                messages[0]
+                            );
+                        }
+                    }
+                }
+
+                return String(
+                    payload?.message
+                    || 'Не удалось сохранить расписание.'
+                );
+            }
+
+            async function persistScheduleShift(
+                shift,
+                action = 'save'
+            ) {
+                const response = await fetch(
+                    DOCTOR_SCHEDULE_SAVE_URL,
+                    {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': CSRF_TOKEN
+                        },
+                        body: JSON.stringify({
+                            action,
+                            schedule_id:
+                                shift?.schedule_id
+                                || null,
+                            doctor_id:
+                                shift?.doctor_id
+                                || null,
+                            speciality:
+                                shift?.speciality
+                                || null,
+                            day:
+                                shift?.day
+                                ?? null,
+                            start:
+                                shift?.start
+                                || null,
+                            end:
+                                shift?.end
+                                || null
+                        })
+                    }
+                );
+
+                const payload = await response
+                    .json()
+                    .catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(
+                        scheduleErrorMessage(payload)
+                    );
+                }
+
+                return payload;
+            }
+
+            function openCreateModal(day = null, start = null) {
                 shiftIdInput.value = '';
                 modalTitle.textContent = 'Новая смена';
                 deleteButton.classList.add('d-none');
                 modalError.classList.add('d-none');
                 modalError.textContent = '';
 
-                doctorInput.value = doctorInput.options[0]?.value ?? '';
-                specialityInput.value = specialityInput.options[0]?.value ?? '';
-                officeInput.value = officeInput.options[0]?.value ?? '';
-                dayInput.value = String(day);
-                startInput.value = start;
+                doctorInput.value =
+                    doctorInput.options[0]?.value
+                    ?? '';
 
-                const startMinutes = timeToMinutes(start);
-                endInput.value = minutesToTime(Math.min(startMinutes + 360, END_HOUR * 60));
+                syncSpecialityOptions(
+                    doctorInput
+                        .selectedOptions?.[0]
+                        ?.dataset
+                        ?.speciality
+                    || ''
+                );
+
+                officeInput.value =
+                    doctorInput
+                        .selectedOptions?.[0]
+                        ?.dataset
+                        ?.office
+                    || officeInput.options[0]?.value
+                    || '';
+
+                let selectedDay =
+                    day === null
+                        ? firstEnabledClinicDay()
+                        : Number(day);
+
+                if (!clinicDaySchedule(selectedDay).enabled) {
+                    selectedDay = firstEnabledClinicDay();
+                }
+
+                const work = clinicDaySchedule(selectedDay);
+
+                dayInput.value = String(selectedDay);
+
+                const requestedStart =
+                    start
+                        ? timeToMinutes(start)
+                        : work.from;
+
+                const safeStart = snap(clamp(
+                    requestedStart,
+                    work.from,
+                    work.to - SNAP_MINUTES
+                ));
+
+                startInput.value = minutesToTime(safeStart);
+                endInput.value = minutesToTime(
+                    Math.min(
+                        safeStart + 6 * 60,
+                        work.to
+                    )
+                );
+
+                syncModalClinicBounds(true);
                 modal?.show();
             }
 
@@ -1657,61 +2489,260 @@
                 modalError.textContent = '';
 
                 doctorInput.value = shift.doctor;
-                specialityInput.value = shift.speciality;
+
+                syncSpecialityOptions(
+                    shift.speciality
+                );
+
                 officeInput.value = shift.office;
                 dayInput.value = String(shift.day);
                 startInput.value = shift.start;
                 endInput.value = shift.end;
+                syncModalClinicBounds(false);
                 modal?.show();
             }
 
-            function saveModalShift() {
-                const id = Number(shiftIdInput.value || 0);
+            async function saveModalShift() {
+                const id = Number(
+                    shiftIdInput.value
+                    || 0
+                );
+
                 const start = startInput.value;
                 const end = endInput.value;
-                const startMinutes = timeToMinutes(start);
-                const endMinutes = timeToMinutes(end);
+                const startMinutes =
+                    timeToMinutes(start);
+                const endMinutes =
+                    timeToMinutes(end);
 
-                if (!start || !end || endMinutes <= startMinutes) {
-                    modalError.textContent = 'Время окончания должно быть позже времени начала.';
-                    modalError.classList.remove('d-none');
+                if (
+                    !start
+                    || !end
+                    || endMinutes <= startMinutes
+                ) {
+                    modalError.textContent =
+                        'Время окончания должно быть позже времени начала.';
+                    modalError.classList.remove(
+                        'd-none'
+                    );
                     return;
                 }
 
-                if (startMinutes < START_HOUR * 60 || endMinutes > END_HOUR * 60) {
-                    modalError.textContent = `Смена должна находиться в пределах временной шкалы ${String(START_HOUR).padStart(2, '0')}:00–${END_HOUR}:00.`;
-                    modalError.classList.remove('d-none');
+                if (
+                    startMinutes % SNAP_MINUTES !== 0
+                    || endMinutes % SNAP_MINUTES !== 0
+                ) {
+                    modalError.textContent =
+                        'Время начала и окончания должно быть кратно 15 минутам.';
+                    modalError.classList.remove(
+                        'd-none'
+                    );
                     return;
                 }
+
+                const selectedDay =
+                    Number(dayInput.value);
+
+                const work =
+                    clinicDaySchedule(selectedDay);
+
+                if (!work.enabled) {
+                    modalError.textContent =
+                        'В этот день клиника не работает.';
+                    modalError.classList.remove(
+                        'd-none'
+                    );
+                    return;
+                }
+
+                if (
+                    startMinutes < work.from
+                    || endMinutes > work.to
+                ) {
+                    modalError.textContent =
+                        `В этот день клиника работает ${minutesToTime(work.from)}–${minutesToTime(work.to)}.`;
+
+                    modalError.classList.remove(
+                        'd-none'
+                    );
+                    return;
+                }
+
+                if (
+                    !specialityInput.value
+                    || specialityInput.disabled
+                ) {
+                    modalError.textContent =
+                        'У выбранного сотрудника нет подтверждённой специальности. Сначала укажите её в карточке сотрудника.';
+
+                    modalError.classList.remove(
+                        'd-none'
+                    );
+
+                    return;
+                }
+
+                const current = id
+                    ? shifts.find(
+                        item => item.id === id
+                    )
+                    : null;
+
+                const doctorOption =
+                    doctorInput.selectedOptions?.[0];
 
                 const payload = {
+                    ...(current || {}),
                     id: id || nextId++,
+                    schedule_id:
+                        current?.schedule_id
+                        || null,
+                    doctor_id:
+                        current?.doctor_id
+                        || Number(
+                            doctorOption
+                                ?.dataset
+                                ?.doctorId
+                            || 0
+                        ),
                     doctor: doctorInput.value,
-                    speciality: specialityInput.value,
-                    office: officeInput.value,
-                    day: Number(dayInput.value),
+                    speciality:
+                        specialityInput.value,
+                    office:
+                        officeInput.value,
+                    day: selectedDay,
                     start,
                     end
                 };
 
-                if (id) {
-                    shifts = shifts.map(item => item.id === id ? payload : item);
-                } else {
-                    shifts.push(payload);
+                modalError.classList.add(
+                    'd-none'
+                );
+                modalError.textContent = '';
+
+                const saveButton =
+                    document.getElementById(
+                        'saveDoctorShiftButton'
+                    );
+
+                if (saveButton) {
+                    saveButton.disabled = true;
                 }
 
-                modal?.hide();
-                populateFilters();
-                renderShifts();
+                try {
+                    const result =
+                        await persistScheduleShift(
+                            payload
+                        );
+
+                    payload.schedule_id =
+                        Number(
+                            result.schedule_id
+                            || payload.schedule_id
+                            || 0
+                        );
+
+                    payload.day =
+                        Number(
+                            result.day
+                            ?? payload.day
+                        );
+
+                    payload.start =
+                        result.start
+                        || payload.start;
+
+                    payload.end =
+                        result.end
+                        || payload.end;
+
+                    payload.speciality =
+                        result.speciality
+                        || payload.speciality;
+
+                    if (id) {
+                        shifts = shifts.map(
+                            item =>
+                                item.id === id
+                                    ? payload
+                                    : item
+                        );
+                    } else {
+                        shifts.push(payload);
+                    }
+
+                    modal?.hide();
+                    populateFilters();
+                    renderShifts();
+
+                    showScheduleNotice(
+                        'Расписание кабинета сохранено.'
+                    );
+                } catch (error) {
+                    modalError.textContent =
+                        error.message
+                        || 'Не удалось сохранить расписание.';
+
+                    modalError.classList.remove(
+                        'd-none'
+                    );
+                } finally {
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                    }
+                }
             }
 
-            function deleteModalShift() {
-                const id = Number(shiftIdInput.value || 0);
-                if (!id) return;
-                shifts = shifts.filter(item => item.id !== id);
-                modal?.hide();
-                populateFilters();
-                renderShifts();
+            async function deleteModalShift() {
+                const id = Number(
+                    shiftIdInput.value
+                    || 0
+                );
+
+                if (!id) {
+                    return;
+                }
+
+                const shift = shifts.find(
+                    item => item.id === id
+                );
+
+                if (!shift) {
+                    return;
+                }
+
+                try {
+                    if (shift.schedule_id) {
+                        await persistScheduleShift(
+                            shift,
+                            'delete'
+                        );
+                    }
+
+                    if (activeShiftId === id) {
+                        activeShiftId = null;
+                    }
+
+                    shifts = shifts.filter(
+                        item => item.id !== id
+                    );
+
+                    modal?.hide();
+                    populateFilters();
+                    renderShifts();
+
+                    showScheduleNotice(
+                        'Смена удалена из расписания кабинета.'
+                    );
+                } catch (error) {
+                    modalError.textContent =
+                        error.message
+                        || 'Не удалось удалить смену.';
+
+                    modalError.classList.remove(
+                        'd-none'
+                    );
+                }
             }
 
             function startDrag(event) {
@@ -1723,6 +2754,11 @@
                 const shift = shifts.find(item => item.id === id);
                 if (!shift) return;
 
+                if (card.classList.contains('is-stacked')) {
+                    activeShiftId = id;
+                    elevateStackCard(card);
+                }
+
                 event.preventDefault();
                 card.setPointerCapture?.(event.pointerId);
                 card.classList.add('is-dragging');
@@ -1732,7 +2768,9 @@
                     card,
                     shift,
                     startY: event.clientY,
+                    originalDay: shift.day,
                     originalStart: timeToMinutes(shift.start),
+                    originalEnd: timeToMinutes(shift.end),
                     duration: timeToMinutes(shift.end) - timeToMinutes(shift.start),
                     targetDay: shift.day
                 };
@@ -1745,39 +2783,184 @@
             function onDragMove(event) {
                 if (!dragging || event.pointerId !== dragging.pointerId) return;
 
-                const dyMinutes = snap((event.clientY - dragging.startY) * MINUTES_PER_PIXEL);
-                const minStart = START_HOUR * 60;
-                const maxStart = END_HOUR * 60 - dragging.duration;
-                const newStart = clamp(dragging.originalStart + dyMinutes, minStart, maxStart);
+                document
+                    .querySelectorAll('.doctor-schedule-day-column')
+                    .forEach(column =>
+                        column.classList.remove('is-drop-target')
+                    );
 
-                dragging.card.style.top = `${(newStart - minStart) / MINUTES_PER_PIXEL}px`;
-                dragging.previewStart = newStart;
+                const element = document.elementFromPoint(
+                    event.clientX,
+                    event.clientY
+                );
 
-                document.querySelectorAll('.doctor-schedule-day-column').forEach(column => column.classList.remove('is-drop-target'));
-                const element = document.elementFromPoint(event.clientX, event.clientY);
-                const targetColumn = element?.closest?.('.doctor-schedule-day-column');
+                const targetColumn =
+                    element?.closest?.('.doctor-schedule-day-column');
+
+                let targetDay = dragging.targetDay;
 
                 if (targetColumn) {
-                    dragging.targetDay = Number(targetColumn.dataset.day);
-                    targetColumn.classList.add('is-drop-target');
+                    const candidateDay =
+                        Number(targetColumn.dataset.day);
+
+                    const candidateSchedule =
+                        clinicDaySchedule(candidateDay);
+
+                    if (
+                        candidateSchedule.enabled
+                        && dragging.duration
+                            <= candidateSchedule.to - candidateSchedule.from
+                    ) {
+                        targetDay = candidateDay;
+                        dragging.targetDay = candidateDay;
+                        targetColumn.classList.add('is-drop-target');
+                    }
                 }
+
+                const work = clinicDaySchedule(targetDay);
+
+                if (!work.enabled) {
+                    return;
+                }
+
+                const dyMinutes = snap(
+                    (event.clientY - dragging.startY)
+                    * MINUTES_PER_PIXEL
+                );
+
+                const minStart = work.from;
+                const maxStart =
+                    work.to - dragging.duration;
+
+                const newStart = clamp(
+                    dragging.originalStart + dyMinutes,
+                    minStart,
+                    maxStart
+                );
+
+                dragging.card.style.top =
+                    `${(newStart - TIMELINE_START_MINUTES) / MINUTES_PER_PIXEL}px`;
+
+                dragging.previewStart = newStart;
             }
 
-            function endDrag(event) {
-                if (!dragging) return;
+            async function endDrag(event) {
+                if (!dragging) {
+                    return;
+                }
 
-                document.querySelectorAll('.doctor-schedule-day-column').forEach(column => column.classList.remove('is-drop-target'));
+                const state = dragging;
 
-                const startMinutes = dragging.previewStart ?? dragging.originalStart;
-                const shift = dragging.shift;
-                shift.day = dragging.targetDay;
-                shift.start = minutesToTime(startMinutes);
-                shift.end = minutesToTime(startMinutes + dragging.duration);
-                dragging.card.classList.remove('is-dragging');
+                document
+                    .querySelectorAll(
+                        '.doctor-schedule-day-column'
+                    )
+                    .forEach(column =>
+                        column.classList.remove(
+                            'is-drop-target'
+                        )
+                    );
+
+                const startMinutes =
+                    state.previewStart
+                    ?? state.originalStart;
+
+                const shift = state.shift;
+
+                const previous = {
+                    day: state.originalDay,
+                    start: minutesToTime(
+                        state.originalStart
+                    ),
+                    end: minutesToTime(
+                        state.originalEnd
+                    ),
+                    schedule_id:
+                        shift.schedule_id
+                };
+
+                shift.day = state.targetDay;
+                shift.start =
+                    minutesToTime(startMinutes);
+                shift.end =
+                    minutesToTime(
+                        startMinutes
+                        + state.duration
+                    );
+
+                state.card.classList.remove(
+                    'is-dragging'
+                );
 
                 dragging = null;
-                window.removeEventListener('pointermove', onDragMove);
+
+                window.removeEventListener(
+                    'pointermove',
+                    onDragMove
+                );
+
                 renderShifts();
+
+                const changed =
+                    shift.day !== previous.day
+                    || shift.start !== previous.start
+                    || shift.end !== previous.end;
+
+                if (!changed) {
+                    return;
+                }
+
+                try {
+                    const result =
+                        await persistScheduleShift(
+                            shift
+                        );
+
+                    shift.schedule_id =
+                        Number(
+                            result.schedule_id
+                            || shift.schedule_id
+                            || 0
+                        );
+
+                    shift.day =
+                        Number(
+                            result.day
+                            ?? shift.day
+                        );
+
+                    shift.start =
+                        result.start
+                        || shift.start;
+
+                    shift.end =
+                        result.end
+                        || shift.end;
+
+                    shift.speciality =
+                        result.speciality
+                        || shift.speciality;
+
+                    renderShifts();
+
+                    showScheduleNotice(
+                        'День и время работы кабинета сохранены.'
+                    );
+                } catch (error) {
+                    shift.day = previous.day;
+                    shift.start = previous.start;
+                    shift.end = previous.end;
+                    shift.schedule_id =
+                        previous.schedule_id;
+
+                    renderShifts();
+
+                    showScheduleNotice(
+                        error.message
+                        || 'Не удалось сохранить перенос.',
+                        'error'
+                    );
+                }
             }
 
             function startResize(event) {
@@ -1811,9 +2994,21 @@
                 if (!resizing || event.pointerId !== resizing.pointerId) return;
 
                 const dyMinutes = snap((event.clientY - resizing.startY) * MINUTES_PER_PIXEL);
-                const minEnd = resizing.startMinutes + 30;
-                const maxEnd = END_HOUR * 60;
-                const newEnd = clamp(resizing.originalEnd + dyMinutes, minEnd, maxEnd);
+                const minEnd = resizing.startMinutes + SNAP_MINUTES;
+
+                const work = clinicDaySchedule(
+                    resizing.shift.day
+                );
+
+                const maxEnd = work.enabled
+                    ? work.to
+                    : resizing.originalEnd;
+
+                const newEnd = clamp(
+                    resizing.originalEnd + dyMinutes,
+                    minEnd,
+                    maxEnd
+                );
                 const height = (newEnd - resizing.startMinutes) / MINUTES_PER_PIXEL;
 
                 resizing.card.style.height = `${height}px`;
@@ -1825,23 +3020,112 @@
                 }
             }
 
-            function endResize() {
-                if (!resizing) return;
-                resizing.shift.end = minutesToTime(resizing.previewEnd ?? resizing.originalEnd);
-                resizing.card.classList.remove('is-resizing');
+            async function endResize() {
+                if (!resizing) {
+                    return;
+                }
+
+                const state = resizing;
+                const shift = state.shift;
+
+                const previousEnd =
+                    minutesToTime(
+                        state.originalEnd
+                    );
+
+                shift.end = minutesToTime(
+                    state.previewEnd
+                    ?? state.originalEnd
+                );
+
+                state.card.classList.remove(
+                    'is-resizing'
+                );
+
                 resizing = null;
-                window.removeEventListener('pointermove', onResizeMove);
+
+                window.removeEventListener(
+                    'pointermove',
+                    onResizeMove
+                );
+
                 renderShifts();
+
+                if (shift.end === previousEnd) {
+                    return;
+                }
+
+                try {
+                    const result =
+                        await persistScheduleShift(
+                            shift
+                        );
+
+                    shift.schedule_id =
+                        Number(
+                            result.schedule_id
+                            || shift.schedule_id
+                            || 0
+                        );
+
+                    shift.end =
+                        result.end
+                        || shift.end;
+
+                    shift.speciality =
+                        result.speciality
+                        || shift.speciality;
+
+                    renderShifts();
+
+                    showScheduleNotice(
+                        'Время окончания смены сохранено.'
+                    );
+                } catch (error) {
+                    shift.end = previousEnd;
+                    renderShifts();
+
+                    showScheduleNotice(
+                        error.message
+                        || 'Не удалось сохранить длительность смены.',
+                        'error'
+                    );
+                }
             }
 
             function createShiftFromEmptySpace(event) {
                 if (event.target.closest('.doctor-shift-card')) return;
+
                 const column = event.currentTarget;
+                const day = Number(column.dataset.day);
+                const work = clinicDaySchedule(day);
+
+                if (!work.enabled) {
+                    return;
+                }
+
                 const rect = column.getBoundingClientRect();
-                const y = clamp(event.clientY - rect.top, 0, DAY_HEIGHT);
-                const minutes = snap(START_HOUR * 60 + y * MINUTES_PER_PIXEL);
-                const safeMinutes = clamp(minutes, START_HOUR * 60, END_HOUR * 60 - 30);
-                openCreateModal(Number(column.dataset.day), minutesToTime(safeMinutes));
+                const y = clamp(
+                    event.clientY - rect.top,
+                    0,
+                    DAY_HEIGHT
+                );
+
+                const minutes = snap(
+                    TIMELINE_START_MINUTES
+                    + y * MINUTES_PER_PIXEL
+                );
+
+                const safeMinutes = clamp(
+                    minutes,
+                    work.from,
+                    work.to - SNAP_MINUTES
+                );
+
+                openCreateModal(
+                    day,
+                    minutesToTime(safeMinutes)
+                );
             }
 
             function bindDayDoubleClicks() {
@@ -1860,6 +3144,11 @@
             document.getElementById('addDoctorShiftButton')?.addEventListener('click', () => openCreateModal());
             document.getElementById('saveDoctorShiftButton')?.addEventListener('click', saveModalShift);
             deleteButton?.addEventListener('click', deleteModalShift);
+
+            dayInput?.addEventListener(
+                'change',
+                () => syncModalClinicBounds(true)
+            );
 
             document.getElementById('previousWeekButton')?.addEventListener('click', () => {
                 currentWeekStart = addDays(currentWeekStart, -7);
@@ -1880,6 +3169,7 @@
             specialityFilter?.addEventListener('change', renderShifts);
             officeFilter?.addEventListener('change', renderShifts);
 
+            syncDaySelectAvailability();
             populateFilters();
             renderAll();
         })();

@@ -67,6 +67,8 @@ class User extends Authenticatable implements HasMedia, FilamentUser, HasAvatar
     {
         Cache::set("users.{$this->id}.balance", $value);
         $this->attributes['balance'] = $value;
+
+        return $value;
     }
 
     public function getNameAttribute(): string

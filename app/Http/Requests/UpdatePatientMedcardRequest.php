@@ -3,25 +3,22 @@
 namespace App\Http\Requests;
 
 use App\Models\Patient;
+use App\Support\HospitalPatientAccess;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdatePatientMedcardRequest extends FormRequest
 {
-    private Patient $patient;
-
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $this->patient = $this->route('patient');
+        $patient = $this->route('patient');
+        $user = $this->user();
 
-        /** @todo необходимо будет продумать систему доступов к медкартам и,
-         *        лучше их делать в мидлваре, а не тут.
-         */
-
-        return !app()->hasDebugModeEnabled() ? $this->patient->doctor_id == auth()->user()->doctor->id : true;
+        return $patient instanceof Patient && $user !== null
+            && app(HospitalPatientAccess::class)->canEdit($user, $patient);
     }
 
     /**

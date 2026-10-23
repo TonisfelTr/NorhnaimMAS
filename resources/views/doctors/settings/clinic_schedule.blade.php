@@ -38,6 +38,10 @@
             margin-bottom: 18px;
         }
 
+        .clinic-schedule-overview--all {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
         .clinic-schedule-stat {
             position: relative;
             overflow: hidden;
@@ -88,16 +92,25 @@
 
         .clinic-week {
             display: grid;
+            grid-template-columns:
+                repeat(
+                    7,
+                    minmax(150px, 1fr)
+                );
             gap: 10px;
+            overflow-x: auto;
+            padding: 2px 2px 7px;
+            scrollbar-width: thin;
         }
 
         .clinic-day {
-            display: grid;
-            grid-template-columns: minmax(180px, .9fr) minmax(360px, 1.45fr) minmax(140px, .55fr);
-            align-items: center;
-            gap: 16px;
-            min-height: 78px;
-            padding: 14px 16px;
+            display: flex;
+            min-width: 150px;
+            min-height: 220px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+            padding: 14px;
             border: 1px solid #e4eaf0;
             border-radius: 16px;
             background: #fff;
@@ -117,7 +130,7 @@
             display: flex;
             min-width: 0;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .clinic-day__number {
@@ -152,20 +165,22 @@
         }
 
         .clinic-day__hours {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 7px;
+            margin-top: auto;
         }
 
         .clinic-day__hours-label {
-            flex: 0 0 auto;
             color: #8792a2;
-            font-size: 11px;
-            font-weight: 750;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .035em;
         }
 
         .clinic-time {
-            width: 118px;
+            width: 100%;
             min-height: 40px;
             padding: 7px 10px;
             border: 1px solid #d8e0e5;
@@ -189,24 +204,24 @@
         }
 
         .clinic-time-divider {
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 700;
+            display: none;
         }
 
         .clinic-day__switch-wrap {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: space-between;
             gap: 9px;
+            padding-top: 11px;
+            border-top: 1px solid #edf2f5;
         }
 
         .clinic-day__switch-label {
-            min-width: 68px;
+            min-width: 0;
             color: #475569;
             font-size: 11px;
             font-weight: 760;
-            text-align: right;
+            text-align: left;
         }
 
         .clinic-switch {
@@ -282,6 +297,10 @@
 
         .clinic-exception--info {
             border-left: 4px solid var(--schedule-blue);
+        }
+
+        .clinic-exception--success {
+            border-left: 4px solid var(--schedule-success);
         }
 
         .clinic-exception__period {
@@ -424,6 +443,11 @@
             font-size: 14px;
         }
 
+        .clinic-modal .modal-dialog {
+            width: min(1480px, calc(100vw - 34px));
+            max-width: 1480px;
+        }
+
         .clinic-modal .modal-content {
             overflow: hidden;
             border: 0;
@@ -454,17 +478,159 @@
 
         .clinic-modal-grid {
             display: grid;
-            grid-template-columns: repeat(12, minmax(0, 1fr));
-            gap: 15px;
+            grid-template-columns:
+                minmax(0, .95fr)
+                minmax(0, 1.15fr)
+                minmax(0, 1fr);
+            gap: 14px;
+            align-items: stretch;
         }
 
-        .clinic-modal-col-12 { grid-column: span 12; }
-        .clinic-modal-col-8 { grid-column: span 8; }
-        .clinic-modal-col-6 { grid-column: span 6; }
-        .clinic-modal-col-4 { grid-column: span 4; }
+        .clinic-modal-panel {
+            min-width: 0;
+            padding: 15px;
+            border: 1px solid #e1e8ed;
+            border-radius: 16px;
+            background: #fbfcfd;
+        }
+
+        .clinic-modal-panel--targets {
+            grid-column: span 2;
+        }
+
+        .clinic-modal-panel--comment {
+            grid-column: span 1;
+        }
+
+        .clinic-modal-panel__title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 12px;
+            color: #667085;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .clinic-modal-panel__title i {
+            color: var(--settings-primary);
+            font-size: 13px;
+        }
+
+        .clinic-modal-panel__body {
+            display: grid;
+            gap: 12px;
+        }
+
+        .clinic-modal-fields-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .clinic-modal-fields-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .clinic-modal-target-layout {
+            display: grid;
+            grid-template-columns: minmax(190px, .35fr) minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+        }
+
+        .clinic-modal-building-filter {
+            display: grid;
+            gap: 9px;
+            margin-bottom: 10px;
+        }
+
+        .clinic-modal-building-tabs {
+            display: flex;
+            gap: 7px;
+            overflow-x: auto;
+            padding: 1px 1px 5px;
+            scrollbar-width: thin;
+        }
+
+        .clinic-modal-building-tab {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 7px;
+            min-height: 35px;
+            padding: 7px 11px;
+            border: 1px solid #d8e3e8;
+            border-radius: 10px;
+            background: #fff;
+            color: #5d6c7b;
+            font-size: 10px;
+            font-weight: 850;
+            cursor: pointer;
+            transition: .16s ease;
+        }
+
+        .clinic-modal-building-tab:hover {
+            border-color: #a9dce2;
+            background: #f4fbfc;
+            color: #087f8e;
+        }
+
+        .clinic-modal-building-tab.is-active {
+            border-color: #52c4d0;
+            background: #eaf9fb;
+            color: #007d8c;
+            box-shadow:
+                0 0 0 2px
+                rgba(8, 145, 158, .05);
+        }
+
+        .clinic-modal-building-tab__count {
+            display: inline-grid;
+            min-width: 19px;
+            height: 19px;
+            place-items: center;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: #eef3f6;
+            color: #748392;
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        .clinic-modal-building-tab.is-active
+        .clinic-modal-building-tab__count {
+            background: #d3f0f3;
+            color: #087f8e;
+        }
+
+        .clinic-modal-building-filter__hint {
+            color: #8794a2;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .clinic-modal-building-filter.d-none {
+            display: none !important;
+        }
+
+        .clinic-modal-panel--comment textarea {
+            min-height: 132px;
+            resize: vertical;
+        }
+
+        .clinic-modal-col-12,
+        .clinic-modal-col-8,
+        .clinic-modal-col-6,
+        .clinic-modal-col-4 {
+            grid-column: auto;
+        }
 
         .clinic-modal-section-title {
-            grid-column: span 12;
             margin-top: 2px;
             padding-top: 4px;
             color: #667085;
@@ -476,14 +642,14 @@
 
         .clinic-radio-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 9px;
+            grid-template-columns: 1fr;
+            gap: 8px;
         }
 
         .clinic-radio-card {
             position: relative;
             display: block;
-            min-height: 86px;
+            min-height: 72px;
             padding: 13px;
             border: 1px solid #dce4ea;
             border-radius: 14px;
@@ -506,6 +672,27 @@
             border-color: var(--settings-primary);
             background: #f2fbfc;
             box-shadow: 0 0 0 2px rgba(4, 134, 150, .08);
+        }
+
+        .clinic-radio-card.is-disabled {
+            opacity: .46;
+            background: #f7f8fa;
+            cursor: not-allowed;
+        }
+
+        .clinic-radio-card.is-disabled:hover {
+            border-color: #dce4ea;
+        }
+
+        .clinic-mode-hint {
+            margin-top: 10px;
+            padding: 10px 11px;
+            border: 1px solid #dce9ed;
+            border-radius: 11px;
+            background: #f7fcfd;
+            color: #647586;
+            font-size: 10px;
+            line-height: 1.5;
         }
 
         .clinic-radio-card__title {
@@ -537,8 +724,8 @@
 
         .clinic-target-list {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px 12px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
         }
 
         .clinic-target-item {
@@ -569,22 +756,114 @@
             text-align: center;
         }
 
+
+        .clinic-building-filter {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .clinic-building-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 2px 2px 5px;
+            scrollbar-width: thin;
+        }
+
+        .clinic-building-tab {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 8px 13px;
+            border: 1px solid #d7e4e8;
+            border-radius: 12px;
+            background: #fff;
+            color: #536273;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .16s ease;
+        }
+
+        .clinic-building-tab:hover {
+            border-color: #a8dbe1;
+            background: #f4fbfc;
+            color: #087f8e;
+        }
+
+        .clinic-building-tab.is-active {
+            border-color: #55c6d2;
+            background: #eaf9fb;
+            color: #007d8c;
+        }
+
+        .clinic-building-tab__count {
+            display: inline-grid;
+            min-width: 22px;
+            height: 22px;
+            place-items: center;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #eef3f6;
+            color: #657585;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .clinic-building-tab.is-active .clinic-building-tab__count {
+            background: #d5f1f4;
+            color: #087f8e;
+        }
+
+        .clinic-building-filter__context {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #778595;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .clinic-building-filter__context i {
+            color: var(--settings-primary);
+        }
+
+        .clinic-target-item__meta {
+            display: block;
+            margin-top: 2px;
+            color: #8a98a8;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .clinic-target-empty {
+            grid-column: 1 / -1;
+            padding: 14px;
+            border: 1px dashed #d7e4e8;
+            border-radius: 12px;
+            color: #8090a0;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .clinic-exception.is-building-hidden {
+            display: none;
+        }
+
         @media (max-width: 1100px) {
             .clinic-schedule-overview {
                 grid-template-columns: 1fr;
             }
 
-            .clinic-day {
-                grid-template-columns: 1fr;
-            }
-
-            .clinic-day__switch-wrap {
-                justify-content: flex-start;
-            }
-
-            .clinic-day__switch-label {
-                min-width: 0;
-                text-align: left;
+            .clinic-week {
+                grid-template-columns:
+                    repeat(
+                        7,
+                        minmax(175px, 175px)
+                    );
             }
 
             .clinic-exception {
@@ -593,6 +872,27 @@
 
             .clinic-exception__actions {
                 justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 1180px) {
+            .clinic-modal .modal-dialog {
+                width: min(1080px, calc(100vw - 28px));
+            }
+
+            .clinic-modal-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .clinic-modal-panel--targets,
+            .clinic-modal-panel--comment {
+                grid-column: span 2;
+            }
+
+            .clinic-target-list {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
             }
         }
 
@@ -610,16 +910,38 @@
                 flex: 1 1 180px;
             }
 
-            .clinic-day__hours {
-                flex-wrap: wrap;
+            .clinic-week {
+                grid-template-columns:
+                    repeat(
+                        7,
+                        minmax(170px, 170px)
+                    );
+            }
+
+            .clinic-day {
+                min-width: 170px;
             }
 
             .clinic-time {
-                flex: 1 1 120px;
-                width: auto;
+                width: 100%;
             }
 
             .clinic-exception {
+                grid-template-columns: 1fr;
+            }
+
+            .clinic-modal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .clinic-modal-panel--targets,
+            .clinic-modal-panel--comment {
+                grid-column: span 1;
+            }
+
+            .clinic-modal-target-layout,
+            .clinic-modal-fields-2,
+            .clinic-modal-fields-3 {
                 grid-template-columns: 1fr;
             }
 
@@ -627,98 +949,133 @@
             .clinic-target-list {
                 grid-template-columns: 1fr;
             }
-
-            .clinic-modal-col-8,
-            .clinic-modal-col-6,
-            .clinic-modal-col-4 {
-                grid-column: span 12;
-            }
         }
     </style>
 @endsection
 
 @section('sub-main')
-    @php
-        $weekDays = [
-            ['key' => 'monday', 'short' => 'ПН', 'name' => 'Понедельник', 'enabled' => true, 'from' => '08:00', 'to' => '20:00'],
-            ['key' => 'tuesday', 'short' => 'ВТ', 'name' => 'Вторник', 'enabled' => true, 'from' => '08:00', 'to' => '20:00'],
-            ['key' => 'wednesday', 'short' => 'СР', 'name' => 'Среда', 'enabled' => true, 'from' => '08:00', 'to' => '20:00'],
-            ['key' => 'thursday', 'short' => 'ЧТ', 'name' => 'Четверг', 'enabled' => true, 'from' => '08:00', 'to' => '20:00'],
-            ['key' => 'friday', 'short' => 'ПТ', 'name' => 'Пятница', 'enabled' => true, 'from' => '08:00', 'to' => '20:00'],
-            ['key' => 'saturday', 'short' => 'СБ', 'name' => 'Суббота', 'enabled' => true, 'from' => '09:00', 'to' => '15:00'],
-            ['key' => 'sunday', 'short' => 'ВС', 'name' => 'Воскресенье', 'enabled' => false, 'from' => '09:00', 'to' => '15:00'],
-        ];
-
-        $demoDoctors = [
-            'Иванов Иван Иванович — врач-психиатр',
-            'Петров Пётр Сергеевич — врач-психиатр участковый',
-            'Сидорова Анна Викторовна — врач-психотерапевт',
-            'Кузнецов Алексей Олегович — врач-психиатр',
-        ];
-
-        $demoOffices = [
-            'Кабинет №201',
-            'Кабинет №207',
-            'Кабинет №214',
-            'Процедурный кабинет №118',
-        ];
-    @endphp
-
     <main class="settings-page clinic-schedule-page">
         <div class="settings-container">
             <div class="settings-page-header clinic-schedule-toolbar">
                 <div>
                     <h1 class="settings-page-title">График клиники</h1>
                     <p class="settings-page-description">
-                        Настройте обычное рабочее время организации и отдельные периоды, когда работа клиники,
-                        кабинетов или отдельных врачей ограничивается.
+                        Настройте отдельный рабочий график каждого корпуса и особые периоды, когда работа клиники,
+                        корпуса, кабинетов или отдельных врачей ограничивается.
                     </p>
                 </div>
 
                 <div class="clinic-schedule-toolbar__actions">
-                    <button type="button"
-                            class="settings-button settings-button--secondary"
-                            id="copyWeekScheduleBtn">
-                        <i class="bi bi-copy"></i>
-                        Скопировать будни
-                    </button>
+                    @if($selectedBuildingId)
+                        <button type="button"
+                                class="settings-button settings-button--secondary"
+                                id="copyWeekScheduleBtn">
+                            <i class="bi bi-copy"></i>
+                            Скопировать будни
+                        </button>
+                    @endif
 
                     <button type="button"
                             class="settings-button settings-button--primary"
                             data-bs-toggle="modal"
                             data-bs-target="#clinicExceptionModal">
                         <i class="bi bi-plus-lg"></i>
-                        Добавить ограничение
+                        Добавить правило
                     </button>
                 </div>
             </div>
 
-            <section class="clinic-schedule-overview">
-                <article class="clinic-schedule-stat">
-                    <div class="clinic-schedule-stat__label">Обычный режим</div>
-                    <div class="clinic-schedule-stat__value">6 рабочих дней</div>
-                    <div class="clinic-schedule-stat__hint">Пн–Пт 08:00–20:00 · Сб 09:00–15:00</div>
-                </article>
+
+            <div class="clinic-building-filter">
+                <div class="clinic-building-tabs"
+                     id="clinicBuildingTabs"
+                     aria-label="Корпуса и отделения">
+                    <button type="button"
+                            class="clinic-building-tab {{ $selectedBuildingKey === 'all' ? 'is-active' : '' }}"
+                            data-building-tab="all"
+                            data-building-url="{{ route('doctors.settings.clinic-schedule') }}">
+                        <i class="bi bi-buildings"></i>
+                        Все корпуса
+                        <span class="clinic-building-tab__count">
+                            {{ count($clinicOffices) }}
+                        </span>
+                    </button>
+
+                    @foreach($buildingTabs as $buildingTab)
+                        <button type="button"
+                                class="clinic-building-tab {{ $selectedBuildingKey === $buildingTab['key'] ? 'is-active' : '' }}"
+                                data-building-tab="{{ $buildingTab['key'] }}"
+                                data-building-label="{{ $buildingTab['label'] }}"
+                                data-building-url="{{ route('doctors.settings.clinic-schedule', ['building_id' => $buildingTab['id']]) }}">
+                            <i class="bi bi-building"></i>
+                            {{ $buildingTab['label'] }}
+                            <span class="clinic-building-tab__count">
+                                {{ $buildingTab['offices_count'] }}
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="clinic-building-filter__context">
+                    <i class="bi bi-info-circle"></i>
+                    <span id="clinicBuildingFilterContext">
+                        @if($selectedBuildingId)
+                            Настраивается отдельный график: {{ $selectedBuildingLabel }}.
+                            Особые правила ниже также показывают, к каким корпусам они относятся.
+                        @else
+                            Выбраны все корпуса. Недельные тайминги скрыты — выберите конкретный корпус для настройки его графика.
+                            Особые периоды показаны по всей клинике с указанием корпуса.
+                        @endif
+                    </span>
+                </div>
+            </div>
+
+            <section class="clinic-schedule-overview {{ $selectedBuildingId ? '' : 'clinic-schedule-overview--all' }}">
+                @if($selectedBuildingId)
+                    <article class="clinic-schedule-stat">
+                        <div class="clinic-schedule-stat__label">Обычный режим · {{ $selectedBuildingLabel }}</div>
+                        <div class="clinic-schedule-stat__value">{{ $workingDaysCount }} рабочих дней</div>
+                        <div class="clinic-schedule-stat__hint">{{ $weekSummary ?: 'Рабочие дни не заданы' }}</div>
+                    </article>
+                @endif
 
                 <article class="clinic-schedule-stat clinic-schedule-stat--warning">
-                    <div class="clinic-schedule-stat__label">Ближайшее ограничение</div>
-                    <div class="clinic-schedule-stat__value">24 сентября</div>
-                    <div class="clinic-schedule-stat__hint">Санитарные мероприятия · 14:00–17:00</div>
+                    <div class="clinic-schedule-stat__label">Ближайшее особое правило</div>
+                    <div class="clinic-schedule-stat__value">
+                        @if($nearestException)
+                            {{ $nearestException['date_text'] }}
+                        @else
+                            Нет
+                        @endif
+                    </div>
+                    <div class="clinic-schedule-stat__hint">
+                        @if($nearestException)
+                            {{ $nearestException['title'] }} · {{ $nearestException['time_text'] }}
+                        @else
+                            Особых правил пока нет
+                        @endif
+                    </div>
                 </article>
 
                 <article class="clinic-schedule-stat clinic-schedule-stat--neutral">
-                    <div class="clinic-schedule-stat__label">Активные правила</div>
-                    <div class="clinic-schedule-stat__value"><span id="exceptionCounter">3</span> ограничения</div>
-                    <div class="clinic-schedule-stat__hint">Включая карантин, сокращённый режим и ограничения врачей</div>
+                    <div class="clinic-schedule-stat__label">Правила</div>
+                    <div class="clinic-schedule-stat__value">
+                        <span id="exceptionCounter">{{ $clinicExceptions->count() }}</span>
+                        правил
+                    </div>
+                    <div class="clinic-schedule-stat__hint">
+                        Правила могут действовать на всю клинику, корпуса, кабинеты или отдельных врачей
+                    </div>
                 </article>
             </section>
 
-            <section class="settings-panel">
+            @if($selectedBuildingId)
+                <section class="settings-panel">
                 <div class="settings-panel__header">
                     <div class="settings-panel__title-wrap">
-                        <h2 class="settings-panel__title">Обычная рабочая неделя</h2>
+                        <h2 class="settings-panel__title">Обычная рабочая неделя · {{ $selectedBuildingLabel }}</h2>
                         <div class="settings-panel__subtitle">
-                            Базовый график применяется всегда, если на конкретную дату не задано отдельное ограничение.
+                            Этот базовый график действует только для выбранного корпуса, если на конкретную дату не задано особое правило.
                         </div>
                     </div>
 
@@ -774,8 +1131,8 @@
                     <div class="clinic-schedule-note">
                         <i class="bi bi-info-circle"></i>
                         <div>
-                            Сейчас это интерфейс-прототип: изменения рабочей недели остаются только на странице.
-                            После подключения backend здесь будет сохраняться постоянный график конкретной клиники.
+                            Рабочая неделя задаётся отдельно для каждого корпуса.
+                            Кабинеты и врачи этого корпуса не могут работать за пределами указанного времени.
                         </div>
                     </div>
 
@@ -793,15 +1150,16 @@
                         </button>
                     </div>
                 </div>
-            </section>
+                </section>
+            @endif
 
             <section class="settings-panel">
                 <div class="settings-panel__header">
                     <div class="settings-panel__title-wrap">
-                        <h2 class="settings-panel__title">Особые периоды и ограничения</h2>
+                        <h2 class="settings-panel__title">Особые периоды и режимы работы</h2>
                         <div class="settings-panel__subtitle">
                             Исключения перекрывают обычный график на указанные даты и могут действовать на всю клинику,
-                            отдельные кабинеты или конкретных врачей.
+                            отдельный корпус, кабинеты или конкретных врачей.
                         </div>
                     </div>
 
@@ -816,103 +1174,69 @@
 
                 <div class="settings-panel__body">
                     <div class="clinic-special-list" id="clinicExceptionList">
-                        <article class="clinic-exception clinic-exception--danger">
-                            <div class="clinic-exception__period">
-                                <div class="clinic-exception__date">01.10.2026 — 07.10.2026</div>
-                                <div class="clinic-exception__time">Круглосуточно</div>
-                            </div>
-
-                            <div class="clinic-exception__main">
-                                <div class="clinic-exception__title">
-                                    Карантин
-                                    <span class="clinic-badge clinic-badge--danger">Приём закрыт</span>
+                        @foreach($clinicExceptions as $exception)
+                            <article class="clinic-exception {{ $exception['card_class'] }}"
+                                     data-exception-id="{{ $exception['id'] }}"
+                                     data-building-keys="{{ implode(',', $exception['building_keys']) }}">
+                                <div class="clinic-exception__period">
+                                    <div class="clinic-exception__date">
+                                        {{ $exception['date_text'] }}
+                                    </div>
+                                    <div class="clinic-exception__time">
+                                        {{ $exception['time_text'] }}
+                                    </div>
                                 </div>
-                                <div class="clinic-exception__description">
-                                    Плановый приём пациентов временно не проводится. Правило действует на организацию целиком.
+
+                                <div class="clinic-exception__main">
+                                    <div class="clinic-exception__title">
+                                        {{ $exception['title'] }}
+                                        <span class="clinic-badge {{ $exception['badge_class'] }}">
+                                            {{ $exception['badge'] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="clinic-exception__description">
+                                        {{ $exception['description'] }}
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="clinic-exception__scope">
-                                <span class="clinic-exception__scope-label">Действует на</span>
-                                <span class="clinic-exception__scope-value">Всю клинику</span>
-                            </div>
-
-                            <div class="clinic-exception__actions">
-                                <button type="button" class="clinic-icon-button js-edit-exception" title="Изменить">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button type="button" class="clinic-icon-button clinic-icon-button--danger js-delete-exception" title="Удалить">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                            </div>
-                        </article>
-
-                        <article class="clinic-exception clinic-exception--warning">
-                            <div class="clinic-exception__period">
-                                <div class="clinic-exception__date">24.09.2026</div>
-                                <div class="clinic-exception__time">14:00 — 17:00</div>
-                            </div>
-
-                            <div class="clinic-exception__main">
-                                <div class="clinic-exception__title">
-                                    Санитарные мероприятия
-                                    <span class="clinic-badge clinic-badge--warning">Ограничен приём</span>
+                                <div class="clinic-exception__scope">
+                                    <span class="clinic-exception__scope-label">
+                                        Корпус
+                                    </span>
+                                    <span class="clinic-exception__scope-value">
+                                        {{ $exception['building_text'] }}
+                                    </span>
+                                    <span class="clinic-exception__scope-label mt-1">
+                                        Действует на
+                                    </span>
+                                    <span class="clinic-exception__scope-value">
+                                        {{ $exception['scope_text'] }}
+                                    </span>
                                 </div>
-                                <div class="clinic-exception__description">
-                                    В выбранных кабинетах приём пациентов приостанавливается на время проведения обработки помещений.
+
+                                <div class="clinic-exception__actions">
+                                    <button type="button"
+                                            class="clinic-icon-button js-edit-exception"
+                                            title="Изменить"
+                                            data-exception-id="{{ $exception['id'] }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <button type="button"
+                                            class="clinic-icon-button clinic-icon-button--danger js-delete-exception"
+                                            title="Удалить"
+                                            data-exception-id="{{ $exception['id'] }}">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
                                 </div>
-                            </div>
-
-                            <div class="clinic-exception__scope">
-                                <span class="clinic-exception__scope-label">Действует на</span>
-                                <span class="clinic-exception__scope-value">Кабинеты №201, №214</span>
-                            </div>
-
-                            <div class="clinic-exception__actions">
-                                <button type="button" class="clinic-icon-button js-edit-exception" title="Изменить">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button type="button" class="clinic-icon-button clinic-icon-button--danger js-delete-exception" title="Удалить">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                            </div>
-                        </article>
-
-                        <article class="clinic-exception clinic-exception--info">
-                            <div class="clinic-exception__period">
-                                <div class="clinic-exception__date">28.09.2026</div>
-                                <div class="clinic-exception__time">08:00 — 13:00</div>
-                            </div>
-
-                            <div class="clinic-exception__main">
-                                <div class="clinic-exception__title">
-                                    Организационное мероприятие
-                                    <span class="clinic-badge clinic-badge--info">Сокращённый режим</span>
-                                </div>
-                                <div class="clinic-exception__description">
-                                    Для выбранных специалистов установлен отдельный интервал работы на указанную дату.
-                                </div>
-                            </div>
-
-                            <div class="clinic-exception__scope">
-                                <span class="clinic-exception__scope-label">Действует на</span>
-                                <span class="clinic-exception__scope-value">Иванов И.И., Сидорова А.В.</span>
-                            </div>
-
-                            <div class="clinic-exception__actions">
-                                <button type="button" class="clinic-icon-button js-edit-exception" title="Изменить">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button type="button" class="clinic-icon-button clinic-icon-button--danger js-delete-exception" title="Удалить">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                            </div>
-                        </article>
+                            </article>
+                        @endforeach
                     </div>
 
-                    <div class="clinic-empty-inline d-none" id="clinicExceptionsEmpty">
+                    <div class="clinic-empty-inline {{ $clinicExceptions->isEmpty() ? '' : 'd-none' }}" id="clinicExceptionsEmpty">
                         Особых периодов пока нет. Добавьте правило, если нужно временно изменить работу клиники,
-                        кабинета или отдельных врачей.
+                        корпуса, кабинета или отдельных врачей.
                     </div>
                 </div>
             </section>
@@ -924,166 +1248,425 @@
          tabindex="-1"
          aria-labelledby="clinicExceptionModalLabel"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <h2 class="modal-title" id="clinicExceptionModalLabel">Новое ограничение работы</h2>
+                        <h2 class="modal-title"
+                            id="clinicExceptionModalLabel">
+                            Новое правило графика
+                        </h2>
+
                         <div class="settings-panel__subtitle">
-                            Укажите период, режим ограничения и кого оно затрагивает.
+                            Укажите причину, период, как изменится приём и на кого действует правило.
                         </div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
                     <form id="clinicExceptionForm">
                         <div class="clinic-modal-grid">
-                            <div class="clinic-modal-section-title">Причина</div>
-
-                            <div class="clinic-modal-col-6">
-                                <label class="settings-label" for="exceptionType">Тип мероприятия</label>
-                                <select class="settings-control" id="exceptionType" required>
-                                    <option value="quarantine">Карантин</option>
-                                    <option value="sanitary" selected>Санитарные мероприятия</option>
-                                    <option value="technical">Технические работы</option>
-                                    <option value="organizational">Организационное мероприятие</option>
-                                    <option value="other">Другое</option>
-                                </select>
-                            </div>
-
-                            <div class="clinic-modal-col-6">
-                                <label class="settings-label" for="exceptionTitle">Название / пояснение</label>
-                                <input type="text"
-                                       class="settings-control"
-                                       id="exceptionTitle"
-                                       value="Санитарные мероприятия"
-                                       placeholder="Например: генеральная уборка">
-                            </div>
-
-                            <div class="clinic-modal-section-title">Период</div>
-
-                            <div class="clinic-modal-col-4">
-                                <label class="settings-label" for="exceptionDateFrom">Дата с</label>
-                                <input type="date" class="settings-control" id="exceptionDateFrom" value="2026-09-24" required>
-                            </div>
-
-                            <div class="clinic-modal-col-4">
-                                <label class="settings-label" for="exceptionDateTo">Дата по</label>
-                                <input type="date" class="settings-control" id="exceptionDateTo" value="2026-09-24" required>
-                            </div>
-
-                            <div class="clinic-modal-col-4">
-                                <label class="settings-label" for="exceptionAllDay">Период дня</label>
-                                <select class="settings-control" id="exceptionAllDay">
-                                    <option value="time" selected>По времени</option>
-                                    <option value="all_day">Весь день</option>
-                                </select>
-                            </div>
-
-                            <div class="clinic-modal-col-6 js-exception-time-field">
-                                <label class="settings-label" for="exceptionTimeFrom">Время с</label>
-                                <input type="time" class="settings-control" id="exceptionTimeFrom" value="14:00">
-                            </div>
-
-                            <div class="clinic-modal-col-6 js-exception-time-field">
-                                <label class="settings-label" for="exceptionTimeTo">Время по</label>
-                                <input type="time" class="settings-control" id="exceptionTimeTo" value="17:00">
-                            </div>
-
-                            <div class="clinic-modal-section-title">Что меняется</div>
-
-                            <div class="clinic-modal-col-12">
-                                <div class="clinic-radio-grid">
-                                    <label class="clinic-radio-card">
-                                        <input type="radio" name="restriction_mode" value="closed" checked>
-                                        <span class="clinic-radio-card__title">
-                                            <i class="bi bi-slash-circle"></i>
-                                            Приём прекращён
-                                        </span>
-                                        <span class="clinic-radio-card__text">
-                                            В выбранный период пациентов не принимают.
-                                        </span>
-                                    </label>
-
-                                    <label class="clinic-radio-card">
-                                        <input type="radio" name="restriction_mode" value="shortened">
-                                        <span class="clinic-radio-card__title">
-                                            <i class="bi bi-clock-history"></i>
-                                            Изменено время
-                                        </span>
-                                        <span class="clinic-radio-card__text">
-                                            Применяется отдельный рабочий интервал.
-                                        </span>
-                                    </label>
-
-                                    <label class="clinic-radio-card">
-                                        <input type="radio" name="restriction_mode" value="limited">
-                                        <span class="clinic-radio-card__title">
-                                            <i class="bi bi-person-x"></i>
-                                            Ограничен приём
-                                        </span>
-                                        <span class="clinic-radio-card__text">
-                                            Организация работает, но приём ограничен.
-                                        </span>
-                                    </label>
+                            <section class="clinic-modal-panel">
+                                <div class="clinic-modal-panel__title">
+                                    <i class="bi bi-card-text"></i>
+                                    Причина
                                 </div>
-                            </div>
 
-                            <div class="clinic-modal-section-title">На кого действует</div>
+                                <div class="clinic-modal-panel__body">
+                                    <div>
+                                        <label class="settings-label"
+                                               for="exceptionType">
+                                            Тип мероприятия
+                                        </label>
 
-                            <div class="clinic-modal-col-4">
-                                <label class="settings-label" for="exceptionScope">Область действия</label>
-                                <select class="settings-control" id="exceptionScope">
-                                    <option value="clinic">Вся клиника</option>
-                                    <option value="offices" selected>Отдельные кабинеты</option>
-                                    <option value="doctors">Отдельные врачи</option>
-                                </select>
-                            </div>
+                                        <select class="settings-control"
+                                                id="exceptionType"
+                                                required>
+                                            <option value="quarantine">
+                                                Карантин
+                                            </option>
+                                            <option value="sanitary">
+                                                Санитарные мероприятия
+                                            </option>
+                                            <option value="technical">
+                                                Технические работы
+                                            </option>
+                                            <option value="organizational">
+                                                Организационное мероприятие
+                                            </option>
+                                            <option value="other">
+                                                Другое
+                                            </option>
+                                        </select>
+                                    </div>
 
-                            <div class="clinic-modal-col-8">
-                                <div class="clinic-target-box js-target-box is-hidden" data-target="clinic">
-                                    <div class="settings-info-box">
-                                        <span class="settings-info-box__icon"><i class="bi bi-hospital"></i></span>
+                                    <div>
+                                        <label class="settings-label"
+                                               for="exceptionTitle">
+                                            Название / пояснение
+                                        </label>
+
+                                        <input type="text"
+                                               class="settings-control"
+                                               id="exceptionTitle"
+                                               value="Карантин"
+                                               placeholder="Например: генеральная уборка">
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="clinic-modal-panel">
+                                <div class="clinic-modal-panel__title">
+                                    <i class="bi bi-calendar-range"></i>
+                                    Период
+                                </div>
+
+                                <div class="clinic-modal-panel__body">
+                                    <div class="clinic-modal-fields-2">
                                         <div>
-                                            Ограничение будет действовать на всю организацию независимо от кабинета
-                                            или расписания конкретного врача.
+                                            <label class="settings-label"
+                                                   for="exceptionDateFrom">
+                                                Дата с
+                                            </label>
+
+                                            <input type="date"
+                                                   class="settings-control"
+                                                   id="exceptionDateFrom"
+                                                   value="{{ now()->format('Y-m-d') }}"
+                                                   required>
+                                        </div>
+
+                                        <div>
+                                            <label class="settings-label"
+                                                   for="exceptionDateTo">
+                                                Дата по
+                                            </label>
+
+                                            <input type="date"
+                                                   class="settings-control"
+                                                   id="exceptionDateTo"
+                                                   value="{{ now()->format('Y-m-d') }}"
+                                                   required>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="settings-label"
+                                               for="exceptionAllDay">
+                                            Период дня
+                                        </label>
+
+                                        <select class="settings-control"
+                                                id="exceptionAllDay">
+                                            <option value="time">
+                                                По времени
+                                            </option>
+                                            <option value="all_day"
+                                                    selected>
+                                                Весь день
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="clinic-modal-fields-2">
+                                        <div class="js-exception-time-field">
+                                            <label class="settings-label"
+                                                   for="exceptionTimeFrom">
+                                                Время с
+                                            </label>
+
+                                            <input type="time"
+                                                   class="settings-control"
+                                                   id="exceptionTimeFrom"
+                                                   value="14:00">
+                                        </div>
+
+                                        <div class="js-exception-time-field">
+                                            <label class="settings-label"
+                                                   for="exceptionTimeTo">
+                                                Время по
+                                            </label>
+
+                                            <input type="time"
+                                                   class="settings-control"
+                                                   id="exceptionTimeTo"
+                                                   value="17:00">
                                         </div>
                                     </div>
                                 </div>
+                            </section>
 
-                                <div class="clinic-target-box js-target-box" data-target="offices">
-                                    <div class="clinic-target-list">
-                                        @foreach($demoOffices as $index => $office)
-                                            <label class="clinic-target-item">
-                                                <input type="checkbox" value="{{ $office }}" {{ $index < 2 ? 'checked' : '' }}>
-                                                <span>{{ $office }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
+                            <section class="clinic-modal-panel">
+                                <div class="clinic-modal-panel__title">
+                                    <i class="bi bi-sliders"></i>
+                                    Как изменится приём
                                 </div>
 
-                                <div class="clinic-target-box js-target-box is-hidden" data-target="doctors">
-                                    <div class="clinic-target-list">
-                                        @foreach($demoDoctors as $index => $doctor)
-                                            <label class="clinic-target-item">
-                                                <input type="checkbox" value="{{ $doctor }}" {{ $index < 2 ? 'checked' : '' }}>
-                                                <span>{{ $doctor }}</span>
-                                            </label>
-                                        @endforeach
+                                <div class="clinic-radio-grid"
+                                     id="exceptionModeGrid">
+                                    <label class="clinic-radio-card"
+                                           data-mode-card="closed">
+                                        <input type="radio"
+                                               name="restriction_mode"
+                                               value="closed"
+                                               checked>
+
+                                        <span class="clinic-radio-card__title">
+                                            <i class="bi bi-slash-circle"></i>
+                                            Приём закрыт
+                                        </span>
+
+                                        <span class="clinic-radio-card__text">
+                                            Пациентов нельзя записывать в течение выбранного периода.
+                                        </span>
+                                    </label>
+
+                                    <label class="clinic-radio-card"
+                                           data-mode-card="blocked">
+                                        <input type="radio"
+                                               name="restriction_mode"
+                                               value="blocked">
+
+                                        <span class="clinic-radio-card__title">
+                                            <i class="bi bi-pause-circle"></i>
+                                            Приём приостановлен
+                                        </span>
+
+                                        <span class="clinic-radio-card__text">
+                                            Указанный интервал исключается из обычного рабочего дня.
+                                        </span>
+                                    </label>
+
+                                    <label class="clinic-radio-card"
+                                           data-mode-card="override">
+                                        <input type="radio"
+                                               name="restriction_mode"
+                                               value="override">
+
+                                        <span class="clinic-radio-card__title">
+                                            <i class="bi bi-clock-history"></i>
+                                            Особый график
+                                        </span>
+
+                                        <span class="clinic-radio-card__text">
+                                            Обычный график на эти даты заменяется указанным интервалом.
+                                        </span>
+                                    </label>
+
+                                    <label class="clinic-radio-card"
+                                           data-mode-card="extra">
+                                        <input type="radio"
+                                               name="restriction_mode"
+                                               value="extra">
+
+                                        <span class="clinic-radio-card__title">
+                                            <i class="bi bi-calendar-plus"></i>
+                                            Дополнительный приём
+                                        </span>
+
+                                        <span class="clinic-radio-card__text">
+                                            Добавляет рабочее время поверх обычного графика, в том числе в выходной.
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="clinic-mode-hint"
+                                     id="exceptionModeHint">
+                                    Режим определяет, как правило изменит доступное время в регистратуре.
+                                </div>
+                            </section>
+
+                            <section class="clinic-modal-panel clinic-modal-panel--targets">
+                                <div class="clinic-modal-panel__title">
+                                    <i class="bi bi-diagram-3"></i>
+                                    На кого действует
+                                </div>
+
+                                <div class="clinic-modal-target-layout">
+                                    <div>
+                                        <label class="settings-label"
+                                               for="exceptionScope">
+                                            Область действия
+                                        </label>
+
+                                        <select class="settings-control"
+                                                id="exceptionScope">
+                                            <option value="clinic"
+                                                    selected>
+                                                Вся клиника
+                                            </option>
+                                            <option value="buildings">
+                                                Корпус целиком
+                                            </option>
+                                            <option value="offices">
+                                                Отдельные кабинеты
+                                            </option>
+                                            <option value="doctors">
+                                                Отдельные врачи
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <div class="clinic-modal-building-filter"
+                                             id="exceptionBuildingFilter">
+                                            <div class="clinic-modal-building-tabs"
+                                                 id="exceptionBuildingTabs"
+                                                 aria-label="Корпуса и отделения для правила">
+                                                <button type="button"
+                                                        class="clinic-modal-building-tab is-active"
+                                                        data-modal-building-tab="all">
+                                                    <i class="bi bi-buildings"></i>
+                                                    Все корпуса
+                                                    <span class="clinic-modal-building-tab__count">
+                                                        {{ count($clinicOffices) }}
+                                                    </span>
+                                                </button>
+
+                                                @foreach($buildingTabs as $buildingTab)
+                                                    <button type="button"
+                                                            class="clinic-modal-building-tab"
+                                                            data-modal-building-tab="{{ $buildingTab['key'] }}"
+                                                            data-modal-building-label="{{ $buildingTab['label'] }}">
+                                                        <i class="bi bi-building"></i>
+                                                        {{ $buildingTab['label'] }}
+                                                        <span class="clinic-modal-building-tab__count">
+                                                            {{ $buildingTab['offices_count'] }}
+                                                        </span>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+
+                                            <div class="clinic-modal-building-filter__hint"
+                                                 id="exceptionBuildingFilterHint">
+                                                Переключайте корпуса — уже выбранные кабинеты и врачи сохраняются.
+                                            </div>
+                                        </div>
+
+                                        <div class="clinic-target-box js-target-box is-hidden"
+                                             data-target="clinic">
+                                            <div class="settings-info-box">
+                                                <span class="settings-info-box__icon">
+                                                    <i class="bi bi-hospital"></i>
+                                                </span>
+
+                                                <div>
+                                                    Ограничение будет действовать на всю организацию независимо от кабинета
+                                                    или расписания конкретного врача.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="clinic-target-box js-target-box is-hidden"
+                                             data-target="buildings">
+                                            <div class="clinic-target-list"
+                                                 id="exceptionBuildingTargets">
+                                                @forelse($buildingTabs as $buildingTab)
+                                                    <label class="clinic-target-item">
+                                                        <input type="checkbox"
+                                                               value="{{ $buildingTab['id'] }}"
+                                                               data-label="{{ $buildingTab['label'] }}">
+                                                        <span>
+                                                            {{ $buildingTab['label'] }}
+                                                            <small class="clinic-target-item__meta">
+                                                                {{ $buildingTab['offices_count'] }} кабинетов
+                                                            </small>
+                                                        </span>
+                                                    </label>
+                                                @empty
+                                                    <div class="clinic-target-empty">
+                                                        В клинике нет активных корпусов.
+                                                    </div>
+                                                @endforelse
+                                            </div>
+                                        </div>
+
+                                        <div class="clinic-target-box js-target-box"
+                                             data-target="offices">
+                                            <div class="clinic-target-list"
+                                                 id="exceptionOfficeTargets">
+                                                @forelse($clinicOffices as $office)
+                                                    <label class="clinic-target-item"
+                                                           data-building-key="{{ $office['building_key'] }}">
+                                                        <input type="checkbox"
+                                                               value="{{ $office['id'] }}"
+                                                               data-label="{{ $office['label'] }}"
+                                                               data-building-key="{{ $office['building_key'] }}">
+
+                                                        <span>
+                                                            {{ $office['label'] }}
+
+                                                            <small class="clinic-target-item__meta">
+                                                                {{ $office['building_label'] }}
+                                                            </small>
+                                                        </span>
+                                                    </label>
+                                                @empty
+                                                    <div class="clinic-target-empty">
+                                                        В клинике нет активных кабинетов.
+                                                    </div>
+                                                @endforelse
+
+                                                <div class="clinic-target-empty d-none"
+                                                     id="exceptionOfficeTargetsEmpty">
+                                                    В выбранном корпусе нет активных кабинетов.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="clinic-target-box js-target-box is-hidden"
+                                             data-target="doctors">
+                                            <div class="clinic-target-list"
+                                                 id="exceptionDoctorTargets">
+                                                @forelse($clinicDoctors as $doctor)
+                                                    <label class="clinic-target-item"
+                                                           data-building-keys='@json($doctor['building_keys'])'>
+                                                        <input type="checkbox"
+                                                               value="{{ $doctor['id'] }}"
+                                                               data-label="{{ $doctor['label'] }}"
+                                                               data-building-keys='@json($doctor['building_keys'])'>
+
+                                                        <span>
+                                                            {{ $doctor['label'] }}
+                                                        </span>
+                                                    </label>
+                                                @empty
+                                                    <div class="clinic-target-empty">
+                                                        В клинике нет доступных врачей.
+                                                    </div>
+                                                @endforelse
+
+                                                <div class="clinic-target-empty d-none"
+                                                     id="exceptionDoctorTargetsEmpty">
+                                                    В выбранном корпусе нет врачей, закреплённых за кабинетами.
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
-                            <div class="clinic-modal-section-title">Комментарий</div>
+                            <section class="clinic-modal-panel clinic-modal-panel--comment">
+                                <div class="clinic-modal-panel__title">
+                                    <i class="bi bi-chat-left-text"></i>
+                                    Комментарий
+                                </div>
 
-                            <div class="clinic-modal-col-12">
-                                <label class="settings-label" for="exceptionComment">Описание ограничения</label>
+                                <label class="settings-label"
+                                       for="exceptionComment">
+                                    Комментарий / пояснение
+                                </label>
+
                                 <textarea class="settings-control"
                                           id="exceptionComment"
-                                          rows="3"
-                                          placeholder="Что происходит и как меняется работа подразделения">Приём пациентов временно приостанавливается на время проведения мероприятия.</textarea>
-                            </div>
+                                          rows="5"
+                                          placeholder="Что происходит и как меняется работа подразделения"></textarea>
+                            </section>
                         </div>
                     </form>
                 </div>
@@ -1094,6 +1677,7 @@
                             data-bs-dismiss="modal">
                         Отмена
                     </button>
+
                     <button type="button"
                             class="settings-button settings-button--primary"
                             id="saveExceptionBtn">
@@ -1114,111 +1698,123 @@
             const resetWeekBtn = document.getElementById('resetWeekBtn');
             const saveWeekBtn = document.getElementById('saveWeekBtn');
 
-            const initialWeekState = weekEditor
-                ? Array.from(weekEditor.querySelectorAll('.clinic-day')).map((day) => ({
-                    key: day.dataset.day,
-                    enabled: day.querySelector('.js-day-toggle')?.checked ?? false,
-                    from: day.querySelector('.js-time-from')?.value ?? '',
-                    to: day.querySelector('.js-time-to')?.value ?? '',
-                }))
-                : [];
+            const buildingTabs = Array.from(
+                document.querySelectorAll('[data-building-tab]')
+            );
 
-            function syncDayState(day) {
-                if (!day) return;
+            const buildingFilterContext =
+                document.getElementById('clinicBuildingFilterContext');
 
-                const toggle = day.querySelector('.js-day-toggle');
-                const from = day.querySelector('.js-time-from');
-                const to = day.querySelector('.js-time-to');
-                const status = day.querySelector('.js-day-status');
-                const switchLabel = day.querySelector('.js-switch-label');
-                const enabled = Boolean(toggle?.checked);
+            const exceptionList =
+                document.getElementById('clinicExceptionList');
 
-                day.classList.toggle('is-closed', !enabled);
+            const exceptionCounter =
+                document.getElementById('exceptionCounter');
 
-                if (from) from.disabled = !enabled;
-                if (to) to.disabled = !enabled;
-                if (status) status.textContent = enabled ? 'Рабочий день' : 'Выходной';
-                if (switchLabel) switchLabel.textContent = enabled ? 'Открыто' : 'Закрыто';
-            }
+            const exceptionsEmpty =
+                document.getElementById('clinicExceptionsEmpty');
 
-            if (weekEditor) {
-                weekEditor.querySelectorAll('.clinic-day').forEach((day) => {
-                    day.querySelector('.js-day-toggle')?.addEventListener('change', () => syncDayState(day));
-                });
-            }
+            const exceptionModalEl =
+                document.getElementById('clinicExceptionModal');
 
-            copyWeekScheduleBtn?.addEventListener('click', () => {
-                if (!weekEditor) return;
+            const exceptionModalTitle =
+                document.getElementById('clinicExceptionModalLabel');
 
-                const monday = weekEditor.querySelector('[data-day="monday"]');
-                const mondayFrom = monday?.querySelector('.js-time-from')?.value;
-                const mondayTo = monday?.querySelector('.js-time-to')?.value;
+            const exceptionForm =
+                document.getElementById('clinicExceptionForm');
 
-                ['tuesday', 'wednesday', 'thursday', 'friday'].forEach((dayKey) => {
-                    const day = weekEditor.querySelector(`[data-day="${dayKey}"]`);
-                    const toggle = day?.querySelector('.js-day-toggle');
-                    const from = day?.querySelector('.js-time-from');
-                    const to = day?.querySelector('.js-time-to');
+            const exceptionType =
+                document.getElementById('exceptionType');
 
-                    if (toggle) toggle.checked = true;
-                    if (from && mondayFrom) from.value = mondayFrom;
-                    if (to && mondayTo) to.value = mondayTo;
-                    syncDayState(day);
-                });
-            });
+            const exceptionTitle =
+                document.getElementById('exceptionTitle');
 
-            resetWeekBtn?.addEventListener('click', () => {
-                initialWeekState.forEach((state) => {
-                    const day = weekEditor?.querySelector(`[data-day="${state.key}"]`);
-                    const toggle = day?.querySelector('.js-day-toggle');
-                    const from = day?.querySelector('.js-time-from');
-                    const to = day?.querySelector('.js-time-to');
+            const exceptionDateFrom =
+                document.getElementById('exceptionDateFrom');
 
-                    if (toggle) toggle.checked = state.enabled;
-                    if (from) from.value = state.from;
-                    if (to) to.value = state.to;
-                    syncDayState(day);
-                });
-            });
+            const exceptionDateTo =
+                document.getElementById('exceptionDateTo');
 
-            saveWeekBtn?.addEventListener('click', () => {
-                const originalText = saveWeekBtn.innerHTML;
-                saveWeekBtn.innerHTML = '<i class="bi bi-check-circle"></i> Сохранено на странице';
-                saveWeekBtn.disabled = true;
+            const exceptionAllDay =
+                document.getElementById('exceptionAllDay');
 
-                window.setTimeout(() => {
-                    saveWeekBtn.innerHTML = originalText;
-                    saveWeekBtn.disabled = false;
-                }, 1600);
-            });
+            const exceptionTimeFrom =
+                document.getElementById('exceptionTimeFrom');
 
-            const exceptionScope = document.getElementById('exceptionScope');
-            const exceptionAllDay = document.getElementById('exceptionAllDay');
-            const exceptionType = document.getElementById('exceptionType');
-            const exceptionTitle = document.getElementById('exceptionTitle');
-            const exceptionList = document.getElementById('clinicExceptionList');
-            const exceptionCounter = document.getElementById('exceptionCounter');
-            const exceptionsEmpty = document.getElementById('clinicExceptionsEmpty');
-            const saveExceptionBtn = document.getElementById('saveExceptionBtn');
-            const exceptionModalEl = document.getElementById('clinicExceptionModal');
-            const exceptionModalTitle = document.getElementById('clinicExceptionModalLabel');
+            const exceptionTimeTo =
+                document.getElementById('exceptionTimeTo');
 
-            let editingException = null;
+            const exceptionScope =
+                document.getElementById('exceptionScope');
 
-            function syncScope() {
-                const selected = exceptionScope?.value || 'clinic';
+            const exceptionComment =
+                document.getElementById('exceptionComment');
 
-                document.querySelectorAll('.js-target-box').forEach((box) => {
-                    box.classList.toggle('is-hidden', box.dataset.target !== selected);
-                });
-            }
+            const saveExceptionBtn =
+                document.getElementById('saveExceptionBtn');
 
-            function syncAllDay() {
-                const allDay = exceptionAllDay?.value === 'all_day';
-                document.querySelectorAll('.js-exception-time-field').forEach((field) => {
-                    field.classList.toggle('d-none', allDay);
-                });
-            }
+            const exceptionModeHint =
+                document.getElementById('exceptionModeHint');
+
+            const exceptionModeInputs = Array.from(
+                document.querySelectorAll(
+                    'input[name="restriction_mode"]'
+                )
+            );
+
+            const exceptionModeCards = Array.from(
+                document.querySelectorAll(
+                    '[data-mode-card]'
+                )
+            );
+
+            const exceptionBuildingFilter =
+                document.getElementById('exceptionBuildingFilter');
+
+            const exceptionBuildingFilterHint =
+                document.getElementById('exceptionBuildingFilterHint');
+
+            const exceptionBuildingTabs = Array.from(
+                document.querySelectorAll('[data-modal-building-tab]')
+            );
+
+            const officeTargetsEmpty =
+                document.getElementById('exceptionOfficeTargetsEmpty');
+
+            const doctorTargetsEmpty =
+                document.getElementById('exceptionDoctorTargetsEmpty');
+
+            const csrfToken =
+                document.querySelector('meta[name="csrf-token"]')?.content
+                || @json(csrf_token());
+
+            const weekUpdateUrl =
+                @json(route('doctors.settings.clinic-schedule.update'));
+
+            const exceptionBaseUrl =
+                @json(route('doctors.settings.clinic-schedule.exceptions.store'));
+
+            const exceptionData =
+                @json($clinicExceptionsForJs);
+
+            const todayValue =
+                @json(now()->format('Y-m-d'));
+
+            const selectedBuildingId =
+                @json($selectedBuildingId);
+
+            let activeBuildingKey =
+                document.querySelector(
+                    '[data-building-tab].is-active'
+                )?.dataset.buildingTab
+                || 'all';
+
+            let modalBuildingKey =
+                activeBuildingKey !== 'all'
+                    ? activeBuildingKey
+                    : 'all';
+
+            let editingExceptionId = null;
 
             const typeLabels = {
                 quarantine: 'Карантин',
@@ -1228,168 +1824,1555 @@
                 other: 'Другое мероприятие',
             };
 
-            exceptionType?.addEventListener('change', () => {
-                if (!exceptionTitle) return;
-                exceptionTitle.value = typeLabels[exceptionType.value] || 'Ограничение работы';
-            });
+            const typeModeConfig = {
+                quarantine: {
+                    defaultMode: 'closed',
+                    allowed: ['closed'],
+                    hint: 'Карантин всегда действует на всю клинику и полностью блокирует создание новых записей через регистратуру.',
+                },
+                sanitary: {
+                    defaultMode: 'blocked',
+                    allowed: ['blocked', 'override'],
+                    hint: 'Обычно санитарные мероприятия временно исключают часть рабочего дня. При необходимости можно задать отдельный рабочий интервал.',
+                },
+                technical: {
+                    defaultMode: 'blocked',
+                    allowed: ['blocked', 'closed', 'override'],
+                    hint: 'Технические работы могут остановить приём на время, полностью закрыть его либо заменить обычный график.',
+                },
+                organizational: {
+                    defaultMode: 'override',
+                    allowed: ['override', 'blocked', 'extra'],
+                    hint: 'Для собраний, обучения и других мероприятий можно изменить график, исключить интервал или добавить дополнительное время.',
+                },
+                other: {
+                    defaultMode: 'closed',
+                    allowed: ['closed', 'blocked', 'override', 'extra'],
+                    hint: 'Выберите, как это событие должно изменить доступное время в регистратуре.',
+                },
+            };
 
-            exceptionScope?.addEventListener('change', syncScope);
-            exceptionAllDay?.addEventListener('change', syncAllDay);
-            syncScope();
-            syncAllDay();
+            const modeHints = {
+                closed: 'Приём полностью недоступен в выбранный период. Можно закрыть весь день или отдельный интервал.',
+                blocked: 'Указанный интервал станет недоступен, а остальная часть обычного графика сохранится.',
+                override: 'На выбранные даты обычный недельный график заменяется указанным рабочим интервалом.',
+                extra: 'Указанный интервал добавляется к обычному графику и может открыть приём даже в выходной день.',
+            };
 
-            function formatDate(dateValue) {
-                if (!dateValue) return 'Дата не указана';
+            const initialWeekState = Array.from(
+                weekEditor?.querySelectorAll('.clinic-day')
+                || []
+            ).map(day => ({
+                key: day.dataset.day,
+                enabled:
+                    day.querySelector('.js-day-toggle')
+                        ?.checked
+                    || false,
+                from:
+                    day.querySelector('.js-time-from')
+                        ?.value
+                    || '',
+                to:
+                    day.querySelector('.js-time-to')
+                        ?.value
+                    || '',
+            }));
 
-                const [year, month, day] = dateValue.split('-');
-                return `${day}.${month}.${year}`;
+            function syncDayState(day) {
+                if (!day) {
+                    return;
+                }
+
+                const toggle =
+                    day.querySelector('.js-day-toggle');
+
+                const from =
+                    day.querySelector('.js-time-from');
+
+                const to =
+                    day.querySelector('.js-time-to');
+
+                const status =
+                    day.querySelector('.js-day-status');
+
+                const switchLabel =
+                    day.querySelector('.js-switch-label');
+
+                const enabled = Boolean(
+                    toggle?.checked
+                );
+
+                day.classList.toggle(
+                    'is-closed',
+                    !enabled
+                );
+
+                if (from) {
+                    from.disabled = !enabled;
+                }
+
+                if (to) {
+                    to.disabled = !enabled;
+                }
+
+                if (status) {
+                    status.textContent = enabled
+                        ? 'Рабочий день'
+                        : 'Выходной';
+                }
+
+                if (switchLabel) {
+                    switchLabel.textContent = enabled
+                        ? 'Открыто'
+                        : 'Закрыто';
+                }
             }
 
-            function collectTargets(scope) {
-                if (scope === 'clinic') return ['Вся клиника'];
+            weekEditor
+                ?.querySelectorAll('.clinic-day')
+                .forEach(day => {
+                    syncDayState(day);
 
-                const box = document.querySelector(`.js-target-box[data-target="${scope}"]`);
-                const checked = Array.from(box?.querySelectorAll('input[type="checkbox"]:checked') || []);
-
-                return checked.map((input) => {
-                    const value = String(input.value || '');
-                    return value.replace(/ — .*$/, '');
+                    day.querySelector('.js-day-toggle')
+                        ?.addEventListener(
+                            'change',
+                            () => syncDayState(day)
+                        );
                 });
+
+            copyWeekScheduleBtn?.addEventListener(
+                'click',
+                () => {
+                    const monday =
+                        weekEditor?.querySelector(
+                            '[data-day="mon"]'
+                        );
+
+                    if (!monday) {
+                        return;
+                    }
+
+                    const enabled =
+                        monday.querySelector(
+                            '.js-day-toggle'
+                        )?.checked
+                        || false;
+
+                    const from =
+                        monday.querySelector(
+                            '.js-time-from'
+                        )?.value
+                        || '';
+
+                    const to =
+                        monday.querySelector(
+                            '.js-time-to'
+                        )?.value
+                        || '';
+
+                    ['tue', 'wed', 'thu', 'fri']
+                        .forEach(key => {
+                            const day =
+                                weekEditor?.querySelector(
+                                    `[data-day="${key}"]`
+                                );
+
+                            if (!day) {
+                                return;
+                            }
+
+                            const toggle =
+                                day.querySelector(
+                                    '.js-day-toggle'
+                                );
+
+                            const dayFrom =
+                                day.querySelector(
+                                    '.js-time-from'
+                                );
+
+                            const dayTo =
+                                day.querySelector(
+                                    '.js-time-to'
+                                );
+
+                            if (toggle) {
+                                toggle.checked =
+                                    enabled;
+                            }
+
+                            if (dayFrom) {
+                                dayFrom.value =
+                                    from;
+                            }
+
+                            if (dayTo) {
+                                dayTo.value =
+                                    to;
+                            }
+
+                            syncDayState(day);
+                        });
+                }
+            );
+
+            resetWeekBtn?.addEventListener(
+                'click',
+                () => {
+                    initialWeekState.forEach(
+                        state => {
+                            const day =
+                                weekEditor?.querySelector(
+                                    `[data-day="${state.key}"]`
+                                );
+
+                            const toggle =
+                                day?.querySelector(
+                                    '.js-day-toggle'
+                                );
+
+                            const from =
+                                day?.querySelector(
+                                    '.js-time-from'
+                                );
+
+                            const to =
+                                day?.querySelector(
+                                    '.js-time-to'
+                                );
+
+                            if (toggle) {
+                                toggle.checked =
+                                    state.enabled;
+                            }
+
+                            if (from) {
+                                from.value =
+                                    state.from;
+                            }
+
+                            if (to) {
+                                to.value =
+                                    state.to;
+                            }
+
+                            syncDayState(day);
+                        }
+                    );
+                }
+            );
+
+            async function parseResponse(response) {
+                let data = null;
+
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    data = null;
+                }
+
+                if (response.ok) {
+                    return data;
+                }
+
+                const validationErrors =
+                    data?.errors
+                        ? Object.values(
+                            data.errors
+                        ).flat()
+                        : [];
+
+                const message =
+                    validationErrors[0]
+                    || data?.message
+                    || 'Не удалось сохранить изменения.';
+
+                throw new Error(message);
             }
 
-            function getModeMeta(mode) {
-                if (mode === 'shortened') {
-                    return {
-                        badge: 'Сокращённый режим',
-                        badgeClass: 'clinic-badge--info',
-                        cardClass: 'clinic-exception--info',
-                    };
+            saveWeekBtn?.addEventListener(
+                'click',
+                async () => {
+                    const schedule = {};
+
+                    weekEditor
+                        ?.querySelectorAll('.clinic-day')
+                        .forEach(day => {
+                            const key =
+                                day.dataset.day;
+
+                            schedule[key] = {
+                                enabled: Boolean(
+                                    day.querySelector(
+                                        '.js-day-toggle'
+                                    )?.checked
+                                ),
+                                from:
+                                    day.querySelector(
+                                        '.js-time-from'
+                                    )?.value
+                                    || '',
+                                to:
+                                    day.querySelector(
+                                        '.js-time-to'
+                                    )?.value
+                                    || '',
+                            };
+                        });
+
+                    const originalHtml =
+                        saveWeekBtn.innerHTML;
+
+                    saveWeekBtn.disabled = true;
+                    saveWeekBtn.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-1"></span> Сохранение';
+
+                    try {
+                        const response = await fetch(
+                            weekUpdateUrl,
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Accept':
+                                        'application/json',
+                                    'Content-Type':
+                                        'application/json',
+                                    'X-CSRF-TOKEN':
+                                        csrfToken,
+                                },
+                                body: JSON.stringify({
+                                    building_id: selectedBuildingId,
+                                    schedule,
+                                }),
+                            }
+                        );
+
+                        if (
+                            !response.ok
+                        ) {
+                            await parseResponse(
+                                response
+                            );
+                        }
+
+                        saveWeekBtn.innerHTML =
+                            '<i class="bi bi-check-circle"></i> Сохранено';
+
+                        window.setTimeout(
+                            () => {
+                                window.location.reload();
+                            },
+                            500
+                        );
+                    } catch (error) {
+                        window.alert(
+                            error.message
+                            || 'Не удалось сохранить график.'
+                        );
+
+                        saveWeekBtn.disabled =
+                            false;
+
+                        saveWeekBtn.innerHTML =
+                            originalHtml;
+                    }
+                }
+            );
+
+            function parseBuildingKeys(value) {
+                const raw =
+                    String(value || '')
+                        .trim();
+
+                if (!raw) {
+                    return [];
                 }
 
-                if (mode === 'limited') {
-                    return {
-                        badge: 'Ограничен приём',
-                        badgeClass: 'clinic-badge--warning',
-                        cardClass: 'clinic-exception--warning',
-                    };
+                if (
+                    raw.startsWith('[')
+                ) {
+                    try {
+                        const parsed =
+                            JSON.parse(raw);
+
+                        return Array.isArray(
+                            parsed
+                        )
+                            ? parsed.map(String)
+                            : [];
+                    } catch (error) {
+                        return [];
+                    }
                 }
 
-                return {
-                    badge: 'Приём закрыт',
-                    badgeClass: 'clinic-badge--danger',
-                    cardClass: 'clinic-exception--danger',
-                };
+                return raw
+                    .split(',')
+                    .map(
+                        item =>
+                            item.trim()
+                    )
+                    .filter(Boolean);
+            }
+
+            function filterExceptionsByBuilding() {
+                exceptionList
+                    ?.querySelectorAll(
+                        '.clinic-exception'
+                    )
+                    .forEach(card => {
+                        const keys =
+                            parseBuildingKeys(
+                                card.dataset
+                                    .buildingKeys
+                            );
+
+                        const visible =
+                            activeBuildingKey
+                                === 'all'
+                            || keys.includes(
+                                'all'
+                            )
+                            || keys.includes(
+                                activeBuildingKey
+                            );
+
+                        card.classList.toggle(
+                            'is-building-hidden',
+                            !visible
+                        );
+                    });
             }
 
             function updateCounter() {
-                const count = exceptionList?.querySelectorAll('.clinic-exception').length || 0;
-                if (exceptionCounter) exceptionCounter.textContent = count;
-                exceptionsEmpty?.classList.toggle('d-none', count > 0);
+                const count = Array.from(
+                    exceptionList
+                        ?.querySelectorAll(
+                            '.clinic-exception'
+                        )
+                    || []
+                )
+                    .filter(
+                        card =>
+                            !card.classList.contains(
+                                'is-building-hidden'
+                            )
+                    )
+                    .length;
+
+                if (exceptionCounter) {
+                    exceptionCounter
+                        .textContent = count;
+                }
+
+                exceptionsEmpty
+                    ?.classList.toggle(
+                        'd-none',
+                        count > 0
+                    );
             }
 
-            function bindExceptionButtons(root = document) {
-                root.querySelectorAll('.js-delete-exception').forEach((button) => {
-                    if (button.dataset.bound === '1') return;
-                    button.dataset.bound = '1';
+            function syncBuildingFilter() {
+                buildingTabs.forEach(
+                    button => {
+                        button.classList.toggle(
+                            'is-active',
+                            button.dataset
+                                .buildingTab
+                                === activeBuildingKey
+                        );
+                    }
+                );
 
-                    button.addEventListener('click', () => {
-                        button.closest('.clinic-exception')?.remove();
-                        updateCounter();
-                    });
-                });
-
-                root.querySelectorAll('.js-edit-exception').forEach((button) => {
-                    if (button.dataset.bound === '1') return;
-                    button.dataset.bound = '1';
-
-                    button.addEventListener('click', () => {
-                        editingException = button.closest('.clinic-exception');
-                        if (exceptionModalTitle) exceptionModalTitle.textContent = 'Изменить ограничение работы';
-                        if (saveExceptionBtn) saveExceptionBtn.innerHTML = '<i class="bi bi-check2"></i> Сохранить изменения';
-                        bootstrap.Modal.getOrCreateInstance(exceptionModalEl).show();
-                    });
-                });
-            }
-
-            bindExceptionButtons();
-            updateCounter();
-
-            exceptionModalEl?.addEventListener('hidden.bs.modal', () => {
-                editingException = null;
-                if (exceptionModalTitle) exceptionModalTitle.textContent = 'Новое ограничение работы';
-                if (saveExceptionBtn) saveExceptionBtn.innerHTML = '<i class="bi bi-check2"></i> Добавить правило';
-            });
-
-            saveExceptionBtn?.addEventListener('click', () => {
-                const dateFrom = document.getElementById('exceptionDateFrom')?.value || '';
-                const dateTo = document.getElementById('exceptionDateTo')?.value || '';
-                const allDay = exceptionAllDay?.value === 'all_day';
-                const timeFrom = document.getElementById('exceptionTimeFrom')?.value || '';
-                const timeTo = document.getElementById('exceptionTimeTo')?.value || '';
-                const mode = document.querySelector('input[name="restriction_mode"]:checked')?.value || 'closed';
-                const scope = exceptionScope?.value || 'clinic';
-                const targets = collectTargets(scope);
-                const comment = document.getElementById('exceptionComment')?.value?.trim() || 'Временное изменение режима работы.';
-                const title = exceptionTitle?.value?.trim() || typeLabels[exceptionType?.value] || 'Ограничение работы';
-                const modeMeta = getModeMeta(mode);
-
-                if (!dateFrom || !dateTo) {
-                    window.alert('Укажите дату начала и окончания ограничения.');
-                    return;
-                }
-
-                if (scope !== 'clinic' && targets.length === 0) {
-                    window.alert('Выберите хотя бы один кабинет или одного врача.');
-                    return;
-                }
-
-                const period = dateFrom === dateTo
-                    ? formatDate(dateFrom)
-                    : `${formatDate(dateFrom)} — ${formatDate(dateTo)}`;
-
-                const time = allDay
-                    ? 'Весь день'
-                    : `${timeFrom || '00:00'} — ${timeTo || '23:59'}`;
-
-                const scopeText = targets.join(', ');
-
-                const cardHtml = `
-                    <div class="clinic-exception__period">
-                        <div class="clinic-exception__date">${period}</div>
-                        <div class="clinic-exception__time">${time}</div>
-                    </div>
-                    <div class="clinic-exception__main">
-                        <div class="clinic-exception__title">
-                            ${title}
-                            <span class="clinic-badge ${modeMeta.badgeClass}">${modeMeta.badge}</span>
-                        </div>
-                        <div class="clinic-exception__description">${comment}</div>
-                    </div>
-                    <div class="clinic-exception__scope">
-                        <span class="clinic-exception__scope-label">Действует на</span>
-                        <span class="clinic-exception__scope-value">${scopeText}</span>
-                    </div>
-                    <div class="clinic-exception__actions">
-                        <button type="button" class="clinic-icon-button js-edit-exception" title="Изменить"><i class="bi bi-pencil"></i></button>
-                        <button type="button" class="clinic-icon-button clinic-icon-button--danger js-delete-exception" title="Удалить"><i class="bi bi-trash3"></i></button>
-                    </div>
-                `;
-
-                if (editingException) {
-                    editingException.className = `clinic-exception ${modeMeta.cardClass}`;
-                    editingException.innerHTML = cardHtml;
-                    bindExceptionButtons(editingException);
-                } else if (exceptionList) {
-                    const article = document.createElement('article');
-                    article.className = `clinic-exception ${modeMeta.cardClass}`;
-                    article.innerHTML = cardHtml;
-                    exceptionList.prepend(article);
-                    bindExceptionButtons(article);
-                }
-
+                filterExceptionsByBuilding();
                 updateCounter();
-                bootstrap.Modal.getOrCreateInstance(exceptionModalEl).hide();
-            });
+
+                const activeButton =
+                    buildingTabs.find(
+                        button =>
+                            button.dataset
+                                .buildingTab
+                                === activeBuildingKey
+                    );
+
+                if (
+                    buildingFilterContext
+                ) {
+                    buildingFilterContext
+                        .textContent =
+                        activeBuildingKey === 'all'
+                            ? 'Выбраны все корпуса. Недельные тайминги скрыты; особые правила показаны по всей клинике.'
+                            : `Настраивается отдельный график: ${
+                                activeButton
+                                    ?.dataset
+                                    .buildingLabel
+                                || activeButton
+                                    ?.textContent
+                                    ?.trim()
+                                || 'выбранный корпус'
+                            }.`;
+                }
+
+                const url =
+                    new URL(
+                        window.location.href
+                    );
+
+                if (
+                    activeBuildingKey
+                    === 'all'
+                ) {
+                    url.searchParams.delete(
+                        'building_id'
+                    );
+                } else {
+                    url.searchParams.set(
+                        'building_id',
+                        activeBuildingKey
+                    );
+                }
+
+                window.history
+                    .replaceState(
+                        {},
+                        '',
+                        url
+                    );
+            }
+
+            buildingTabs.forEach(
+                button => {
+                    button.addEventListener(
+                        'click',
+                        () => {
+                            const url =
+                                button.dataset.buildingUrl;
+
+                            if (url) {
+                                window.location.href = url;
+                            }
+                        }
+                    );
+                }
+            );
+
+            function itemMatchesModalBuilding(
+                item
+            ) {
+                if (
+                    modalBuildingKey
+                    === 'all'
+                ) {
+                    return true;
+                }
+
+                const single =
+                    item.dataset
+                        .buildingKey;
+
+                if (
+                    single
+                    && single
+                        === modalBuildingKey
+                ) {
+                    return true;
+                }
+
+                return parseBuildingKeys(
+                    item.dataset
+                        .buildingKeys
+                )
+                    .includes(
+                        modalBuildingKey
+                    );
+            }
+
+            function syncModalBuildingFilter() {
+                exceptionBuildingTabs
+                    .forEach(
+                        button => {
+                            button.classList.toggle(
+                                'is-active',
+                                button.dataset
+                                    .modalBuildingTab
+                                    === modalBuildingKey
+                            );
+                        }
+                    );
+
+                [
+                    {
+                        box: document.getElementById(
+                            'exceptionOfficeTargets'
+                        ),
+                        empty:
+                            officeTargetsEmpty,
+                    },
+                    {
+                        box: document.getElementById(
+                            'exceptionDoctorTargets'
+                        ),
+                        empty:
+                            doctorTargetsEmpty,
+                    },
+                ].forEach(
+                    ({box, empty}) => {
+                        if (!box) {
+                            return;
+                        }
+
+                        let visibleCount = 0;
+
+                        box.querySelectorAll(
+                            '.clinic-target-item'
+                        )
+                            .forEach(item => {
+                                const visible =
+                                    itemMatchesModalBuilding(
+                                        item
+                                    );
+
+                                item.classList.toggle(
+                                    'd-none',
+                                    !visible
+                                );
+
+                                if (visible) {
+                                    visibleCount++;
+                                }
+                            });
+
+                        empty?.classList.toggle(
+                            'd-none',
+                            visibleCount > 0
+                        );
+                    }
+                );
+
+                if (
+                    exceptionBuildingFilterHint
+                ) {
+                    const button =
+                        exceptionBuildingTabs
+                            .find(
+                                item =>
+                                    item.dataset
+                                        .modalBuildingTab
+                                    === modalBuildingKey
+                            );
+
+                    exceptionBuildingFilterHint
+                        .textContent =
+                        modalBuildingKey === 'all'
+                            ? 'Показаны все корпуса. Уже выбранные кабинеты и врачи сохраняются при переключении фильтра.'
+                            : `Показан ${
+                                button
+                                    ?.dataset
+                                    .modalBuildingLabel
+                                || button
+                                    ?.textContent
+                                    ?.trim()
+                                || 'выбранный корпус'
+                            }. Выбор в других корпусах сохраняется.`;
+                }
+            }
+
+            exceptionBuildingTabs
+                .forEach(
+                    button => {
+                        button.addEventListener(
+                            'click',
+                            () => {
+                                modalBuildingKey =
+                                    button.dataset
+                                        .modalBuildingTab
+                                    || 'all';
+
+                                syncModalBuildingFilter();
+                            }
+                        );
+                    }
+                );
+
+            function syncScope() {
+                const selected =
+                    exceptionScope?.value
+                    || 'clinic';
+
+                document
+                    .querySelectorAll(
+                        '.js-target-box'
+                    )
+                    .forEach(
+                        box => {
+                            box.classList.toggle(
+                                'is-hidden',
+                                box.dataset
+                                    .target
+                                    !== selected
+                            );
+                        }
+                    );
+
+                const usesBuildingFilter = [
+                    'offices',
+                    'doctors',
+                ].includes(selected);
+
+                exceptionBuildingFilter
+                    ?.classList.toggle(
+                        'd-none',
+                        !usesBuildingFilter
+                    );
+
+                if (usesBuildingFilter) {
+                    syncModalBuildingFilter();
+                }
+            }
+
+            function selectedExceptionMode() {
+                return exceptionModeInputs
+                    .find(input => input.checked)
+                    ?.value
+                    || 'closed';
+            }
+
+            function syncAllDay() {
+                const allDay =
+                    exceptionAllDay?.value
+                    === 'all_day';
+
+                document
+                    .querySelectorAll(
+                        '.js-exception-time-field'
+                    )
+                    .forEach(
+                        field => {
+                            field.classList.toggle(
+                                'd-none',
+                                allDay
+                            );
+                        }
+                    );
+            }
+
+            function syncModeTimeBehavior() {
+                const mode = selectedExceptionMode();
+                const requiresInterval = [
+                    'blocked',
+                    'override',
+                    'extra',
+                ].includes(mode);
+
+                const allDayOption =
+                    exceptionAllDay
+                        ?.querySelector(
+                            'option[value="all_day"]'
+                        );
+
+                if (allDayOption) {
+                    allDayOption.disabled =
+                        requiresInterval;
+                }
+
+                if (
+                    requiresInterval
+                    && exceptionAllDay
+                    && exceptionAllDay.value
+                        === 'all_day'
+                ) {
+                    exceptionAllDay.value =
+                        'time';
+                }
+
+                if (exceptionModeHint) {
+                    exceptionModeHint.textContent =
+                        modeHints[mode]
+                        || modeHints.closed;
+                }
+
+                syncAllDay();
+            }
+
+            function applyTypeModeRules(
+                selectDefault = false
+            ) {
+                const type = exceptionType?.value
+                    || 'other';
+                const config = typeModeConfig[type]
+                    || typeModeConfig.other;
+
+                exceptionModeInputs.forEach(
+                    input => {
+                        const allowed =
+                            config.allowed.includes(
+                                input.value
+                            );
+
+                        input.disabled = !allowed;
+                    }
+                );
+
+                exceptionModeCards.forEach(
+                    card => {
+                        card.classList.toggle(
+                            'is-disabled',
+                            !config.allowed.includes(
+                                card.dataset.modeCard
+                            )
+                        );
+                    }
+                );
+
+                const selected =
+                    selectedExceptionMode();
+
+                if (
+                    selectDefault
+                    || !config.allowed.includes(
+                        selected
+                    )
+                ) {
+                    const fallback =
+                        exceptionModeInputs.find(
+                            input =>
+                                input.value
+                                === config.defaultMode
+                        );
+
+                    if (fallback) {
+                        fallback.checked = true;
+                    }
+                }
+
+                if (
+                    exceptionModeHint
+                    && !modeHints[
+                        selectedExceptionMode()
+                    ]
+                ) {
+                    exceptionModeHint.textContent =
+                        config.hint;
+                }
+
+                syncModeTimeBehavior();
+            }
+
+            function clearTargetSelection() {
+                document
+                    .querySelectorAll(
+                        '.js-target-box input[type="checkbox"]'
+                    )
+                    .forEach(
+                        input => {
+                            input.checked =
+                                false;
+                        }
+                    );
+            }
+
+            function applyQuarantineRules() {
+                const isQuarantine =
+                    exceptionType?.value
+                    === 'quarantine';
+
+                if (exceptionScope) {
+                    if (isQuarantine) {
+                        exceptionScope.value =
+                            'clinic';
+                    }
+
+                    exceptionScope.disabled =
+                        isQuarantine;
+                }
+
+                if (exceptionAllDay) {
+                    if (isQuarantine) {
+                        exceptionAllDay.value =
+                            'all_day';
+                    }
+
+                    exceptionAllDay.disabled =
+                        isQuarantine;
+                }
+
+                if (isQuarantine) {
+                    clearTargetSelection();
+                }
+
+                syncScope();
+                syncModeTimeBehavior();
+            }
+
+            function resetExceptionForm() {
+                editingExceptionId = null;
+
+                exceptionForm?.reset();
+
+                if (exceptionType) {
+                    exceptionType.value =
+                        'quarantine';
+                }
+
+                if (exceptionTitle) {
+                    exceptionTitle.value =
+                        typeLabels.quarantine;
+                }
+
+                if (exceptionDateFrom) {
+                    exceptionDateFrom.value =
+                        todayValue;
+                }
+
+                if (exceptionDateTo) {
+                    exceptionDateTo.value =
+                        todayValue;
+                }
+
+                if (exceptionAllDay) {
+                    exceptionAllDay.value =
+                        'all_day';
+                }
+
+                if (exceptionTimeFrom) {
+                    exceptionTimeFrom.value =
+                        '09:00';
+                }
+
+                if (exceptionTimeTo) {
+                    exceptionTimeTo.value =
+                        '18:00';
+                }
+
+                const closedMode =
+                    exceptionModeInputs.find(
+                        input =>
+                            input.value === 'closed'
+                    );
+
+                if (closedMode) {
+                    closedMode.checked = true;
+                }
+
+                if (exceptionScope) {
+                    exceptionScope.value =
+                        'clinic';
+                }
+
+                if (exceptionComment) {
+                    exceptionComment.value =
+                        '';
+                }
+
+                clearTargetSelection();
+
+                if (selectedBuildingId) {
+                    const selectedBuildingTarget = document.querySelector(
+                        `.js-target-box[data-target="buildings"] input[value="${selectedBuildingId}"]`
+                    );
+
+                    if (selectedBuildingTarget) {
+                        selectedBuildingTarget.checked = true;
+                    }
+                }
+
+                if (
+                    exceptionModalTitle
+                ) {
+                    exceptionModalTitle
+                        .textContent =
+                        'Новое правило графика';
+                }
+
+                if (
+                    saveExceptionBtn
+                ) {
+                    saveExceptionBtn
+                        .innerHTML =
+                        '<i class="bi bi-check2"></i> Добавить правило';
+                }
+
+                syncScope();
+                applyTypeModeRules(true);
+                applyQuarantineRules();
+            }
+
+            function fillExceptionForm(
+                data
+            ) {
+                editingExceptionId =
+                    Number(data.id);
+
+                if (exceptionType) {
+                    exceptionType.value =
+                        data.type
+                        || 'other';
+                }
+
+                if (exceptionTitle) {
+                    exceptionTitle.value =
+                        data.title
+                        || '';
+                }
+
+                if (exceptionDateFrom) {
+                    exceptionDateFrom.value =
+                        data.date_from
+                        || todayValue;
+                }
+
+                if (exceptionDateTo) {
+                    exceptionDateTo.value =
+                        data.date_to
+                        || data.date_from
+                        || todayValue;
+                }
+
+                if (exceptionAllDay) {
+                    exceptionAllDay.value =
+                        data.all_day
+                            ? 'all_day'
+                            : 'time';
+                }
+
+                if (exceptionTimeFrom) {
+                    exceptionTimeFrom.value =
+                        data.time_from
+                        || '09:00';
+                }
+
+                if (exceptionTimeTo) {
+                    exceptionTimeTo.value =
+                        data.time_to
+                        || '18:00';
+                }
+
+                const incomingMode =
+                    data.mode === 'shortened'
+                        ? 'override'
+                        : data.mode === 'limited'
+                            ? 'blocked'
+                            : data.mode || 'closed';
+
+                const modeInput =
+                    exceptionModeInputs.find(
+                        input =>
+                            input.value
+                            === incomingMode
+                    );
+
+                if (modeInput) {
+                    modeInput.checked = true;
+                }
+
+                if (exceptionScope) {
+                    exceptionScope.value =
+                        data.scope
+                        || 'clinic';
+                }
+
+                if (exceptionComment) {
+                    exceptionComment.value =
+                        data.comment
+                        || '';
+                }
+
+                clearTargetSelection();
+
+                const targetIds =
+                    new Set(
+                        (
+                            data.target_ids
+                            || []
+                        ).map(
+                            id =>
+                                String(id)
+                        )
+                    );
+
+                document
+                    .querySelectorAll(
+                        '.js-target-box input[type="checkbox"]'
+                    )
+                    .forEach(
+                        input => {
+                            input.checked =
+                                targetIds.has(
+                                    String(
+                                        input.value
+                                    )
+                                );
+                        }
+                    );
+
+                if (
+                    exceptionModalTitle
+                ) {
+                    exceptionModalTitle
+                        .textContent =
+                        'Изменить правило графика';
+                }
+
+                if (
+                    saveExceptionBtn
+                ) {
+                    saveExceptionBtn
+                        .innerHTML =
+                        '<i class="bi bi-check2"></i> Сохранить изменения';
+                }
+
+                syncScope();
+                applyTypeModeRules(false);
+                applyQuarantineRules();
+            }
+
+            function selectedTargetIds(
+                scope
+            ) {
+                if (
+                    scope === 'clinic'
+                ) {
+                    return [];
+                }
+
+                const box =
+                    document.querySelector(
+                        `.js-target-box[data-target="${scope}"]`
+                    );
+
+                return Array.from(
+                    box?.querySelectorAll(
+                        'input[type="checkbox"]:checked'
+                    )
+                    || []
+                )
+                    .map(
+                        input =>
+                            Number(
+                                input.value
+                            )
+                    )
+                    .filter(
+                        id =>
+                            Number.isInteger(
+                                id
+                            )
+                            && id > 0
+                    );
+            }
+
+            exceptionType
+                ?.addEventListener(
+                    'change',
+                    () => {
+                        if (exceptionTitle) {
+                            exceptionTitle.value =
+                                typeLabels[
+                                    exceptionType.value
+                                ]
+                                || 'Ограничение работы';
+                        }
+
+                        if (
+                            exceptionType.value === 'quarantine'
+                            && exceptionAllDay
+                        ) {
+                            exceptionAllDay.value = 'all_day';
+                        }
+
+                        applyTypeModeRules(true);
+                        applyQuarantineRules();
+                    }
+                );
+
+            exceptionScope
+                ?.addEventListener(
+                    'change',
+                    syncScope
+                );
+
+            exceptionAllDay
+                ?.addEventListener(
+                    'change',
+                    syncModeTimeBehavior
+                );
+
+            exceptionModeInputs.forEach(
+                input => {
+                    input.addEventListener(
+                        'change',
+                        () => {
+                            if (input.checked) {
+                                syncModeTimeBehavior();
+                            }
+                        }
+                    );
+                }
+            );
+
+            document
+                .querySelectorAll(
+                    '[data-bs-target="#clinicExceptionModal"]'
+                )
+                .forEach(
+                    button => {
+                        if (
+                            button.classList
+                                .contains(
+                                    'js-edit-exception'
+                                )
+                        ) {
+                            return;
+                        }
+
+                        button.addEventListener(
+                            'click',
+                            () => {
+                                resetExceptionForm();
+                            }
+                        );
+                    }
+                );
+
+            document
+                .querySelectorAll(
+                    '.js-edit-exception'
+                )
+                .forEach(
+                    button => {
+                        button.addEventListener(
+                            'click',
+                            () => {
+                                const id =
+                                    String(
+                                        button.dataset
+                                            .exceptionId
+                                        || ''
+                                    );
+
+                                const data =
+                                    exceptionData[id];
+
+                                if (!data) {
+                                    window.alert(
+                                        'Не удалось получить данные правила.'
+                                    );
+
+                                    return;
+                                }
+
+                                fillExceptionForm(
+                                    data
+                                );
+
+                                const pageBuildingExists =
+                                    exceptionBuildingTabs
+                                        .some(
+                                            tab =>
+                                                tab.dataset
+                                                    .modalBuildingTab
+                                                === activeBuildingKey
+                                        );
+
+                                modalBuildingKey =
+                                    pageBuildingExists
+                                    && activeBuildingKey
+                                        !== 'all'
+                                        ? activeBuildingKey
+                                        : 'all';
+
+                                syncModalBuildingFilter();
+
+                                bootstrap.Modal
+                                    .getOrCreateInstance(
+                                        exceptionModalEl
+                                    )
+                                    .show();
+                            }
+                        );
+                    }
+                );
+
+            document
+                .querySelectorAll(
+                    '.js-delete-exception'
+                )
+                .forEach(
+                    button => {
+                        button.addEventListener(
+                            'click',
+                            async () => {
+                                const id =
+                                    Number(
+                                        button.dataset
+                                            .exceptionId
+                                    );
+
+                                if (
+                                    !id
+                                    || !window.confirm(
+                                        'Удалить это правило?'
+                                    )
+                                ) {
+                                    return;
+                                }
+
+                                button.disabled =
+                                    true;
+
+                                try {
+                                    const response =
+                                        await fetch(
+                                            `${exceptionBaseUrl}/${id}/delete`,
+                                            {
+                                                method:
+                                                    'POST',
+                                                headers: {
+                                                    'Accept':
+                                                        'application/json',
+                                                    'X-CSRF-TOKEN':
+                                                        csrfToken,
+                                                },
+                                            }
+                                        );
+
+                                    await parseResponse(
+                                        response
+                                    );
+
+                                    window.location.reload();
+                                } catch (error) {
+                                    button.disabled =
+                                        false;
+
+                                    window.alert(
+                                        error.message
+                                        || 'Не удалось удалить правило.'
+                                    );
+                                }
+                            }
+                        );
+                    }
+                );
+
+            exceptionModalEl
+                ?.addEventListener(
+                    'show.bs.modal',
+                    () => {
+                        const pageBuildingExists =
+                            exceptionBuildingTabs
+                                .some(
+                                    button =>
+                                        button.dataset
+                                            .modalBuildingTab
+                                        === activeBuildingKey
+                                );
+
+                        modalBuildingKey =
+                            pageBuildingExists
+                            && activeBuildingKey
+                                !== 'all'
+                                ? activeBuildingKey
+                                : 'all';
+
+                        syncModalBuildingFilter();
+                        syncScope();
+                        syncAllDay();
+                        applyQuarantineRules();
+                    }
+                );
+
+            exceptionModalEl
+                ?.addEventListener(
+                    'hidden.bs.modal',
+                    () => {
+                        editingExceptionId =
+                            null;
+                    }
+                );
+
+            saveExceptionBtn
+                ?.addEventListener(
+                    'click',
+                    async () => {
+                        const isQuarantine =
+                            exceptionType?.value
+                            === 'quarantine';
+
+                        const scope =
+                            isQuarantine
+                                ? 'clinic'
+                                : exceptionScope?.value
+                                    || 'clinic';
+
+                        const allDay =
+                            isQuarantine
+                            || exceptionAllDay?.value
+                                === 'all_day';
+
+                        const targetIds =
+                            isQuarantine
+                                ? []
+                                : selectedTargetIds(
+                                    scope
+                                );
+
+                        if (
+                            !exceptionDateFrom
+                                ?.value
+                            || !exceptionDateTo
+                                ?.value
+                        ) {
+                            window.alert(
+                                'Укажите дату начала и окончания правила.'
+                            );
+
+                            return;
+                        }
+
+                        if (
+                            scope !== 'clinic'
+                            && targetIds.length
+                                === 0
+                        ) {
+                            window.alert(
+                                'Выберите хотя бы один корпус, кабинет или одного врача.'
+                            );
+
+                            return;
+                        }
+
+                        if (
+                            !allDay
+                            && (
+                                !exceptionTimeFrom
+                                    ?.value
+                                || !exceptionTimeTo
+                                    ?.value
+                            )
+                        ) {
+                            window.alert(
+                                'Укажите время начала и окончания правила.'
+                            );
+
+                            return;
+                        }
+
+                        const payload = {
+                            type:
+                                exceptionType
+                                    ?.value
+                                || 'other',
+                            title:
+                                exceptionTitle
+                                    ?.value
+                                    ?.trim()
+                                || 'Ограничение работы',
+                            date_from:
+                                exceptionDateFrom
+                                    .value,
+                            date_to:
+                                exceptionDateTo
+                                    .value,
+                            all_day:
+                                allDay,
+                            time_from:
+                                allDay
+                                    ? null
+                                    : exceptionTimeFrom
+                                        ?.value
+                                        || null,
+                            time_to:
+                                allDay
+                                    ? null
+                                    : exceptionTimeTo
+                                        ?.value
+                                        || null,
+                            mode:
+                                isQuarantine
+                                    ? 'closed'
+                                    : document
+                                        .querySelector(
+                                            'input[name="restriction_mode"]:checked'
+                                        )
+                                        ?.value
+                                        || 'closed',
+                            scope,
+                            target_ids:
+                                targetIds,
+                            comment:
+                                exceptionComment
+                                    ?.value
+                                    ?.trim()
+                                || null,
+                        };
+
+                        const url =
+                            editingExceptionId
+                                ? `${exceptionBaseUrl}/${editingExceptionId}`
+                                : exceptionBaseUrl;
+
+                        const originalHtml =
+                            saveExceptionBtn
+                                .innerHTML;
+
+                        saveExceptionBtn.disabled =
+                            true;
+
+                        saveExceptionBtn.innerHTML =
+                            '<span class="spinner-border spinner-border-sm me-1"></span> Сохранение';
+
+                        try {
+                            const response =
+                                await fetch(
+                                    url,
+                                    {
+                                        method:
+                                            'POST',
+                                        headers: {
+                                            'Accept':
+                                                'application/json',
+                                            'Content-Type':
+                                                'application/json',
+                                            'X-CSRF-TOKEN':
+                                                csrfToken,
+                                        },
+                                        body:
+                                            JSON.stringify(
+                                                payload
+                                            ),
+                                    }
+                                );
+
+                            await parseResponse(
+                                response
+                            );
+
+                            bootstrap.Modal
+                                .getOrCreateInstance(
+                                    exceptionModalEl
+                                )
+                                .hide();
+
+                            window.location.reload();
+                        } catch (error) {
+                            saveExceptionBtn.disabled =
+                                false;
+
+                            saveExceptionBtn.innerHTML =
+                                originalHtml;
+
+                            window.alert(
+                                error.message
+                                || 'Не удалось сохранить правило.'
+                            );
+                        }
+                    }
+                );
+
+            syncBuildingFilter();
+            syncModalBuildingFilter();
+            syncScope();
+            syncAllDay();
         })();
     </script>
 @endpush

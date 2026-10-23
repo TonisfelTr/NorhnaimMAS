@@ -11,7 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->web(append: [\App\Http\Middleware\HospitalImpersonationGuard::class]);
+        $middleware->alias([
+            'ClinicSettingsAccessMiddleware' =>
+                \App\Http\Middleware\ClinicSettingsAccessMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

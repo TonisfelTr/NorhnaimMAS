@@ -43,6 +43,145 @@
             gap: 12px;
         }
 
+        .clinic-type-option {
+            position: relative;
+            display: block;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .clinic-type-option > input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .clinic-type-card {
+            display: flex;
+            min-height: 104px;
+            align-items: flex-start;
+            gap: 13px;
+            padding: 16px;
+            border: 1px solid #dce6eb;
+            border-radius: 16px;
+            background: #fff;
+            transition:
+                border-color .18s ease,
+                background .18s ease,
+                box-shadow .18s ease,
+                transform .18s ease;
+        }
+
+        .clinic-type-card__icon {
+            display: grid;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            place-items: center;
+            border-radius: 13px;
+            background: #f2f7f9;
+            color: #667085;
+            font-size: 18px;
+            transition: background .18s ease, color .18s ease;
+        }
+
+        .clinic-type-card strong {
+            display: block;
+            color: #172033;
+            font-size: 14px;
+            line-height: 1.25;
+        }
+
+        .clinic-type-card p {
+            margin: 5px 0 0;
+            color: #7b8794;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .clinic-type-option:hover .clinic-type-card {
+            border-color: #b7dfe4;
+            background: #fbfeff;
+            transform: translateY(-1px);
+        }
+
+        .clinic-type-option > input:checked + .clinic-type-card {
+            border-color: var(--settings-primary);
+            background: linear-gradient(135deg, #effbfc, #ffffff);
+            box-shadow: 0 0 0 3px rgba(16, 183, 198, .10);
+        }
+
+        .clinic-type-option > input:checked + .clinic-type-card .clinic-type-card__icon {
+            background: linear-gradient(135deg, #dff7f9, #effcfd);
+            color: var(--settings-primary-dark);
+        }
+
+        .clinic-type-option > input:focus-visible + .clinic-type-card {
+            outline: 3px solid rgba(16, 183, 198, .18);
+            outline-offset: 2px;
+        }
+
+        .clinic-inpatient-mode-options {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .clinic-type-card--compact {
+            min-height: 92px;
+            padding: 14px;
+        }
+
+        .clinic-type-card--compact .clinic-type-card__icon {
+            width: 38px;
+            height: 38px;
+            flex-basis: 38px;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        .clinic-inpatient-schedule-block {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid #edf1f4;
+        }
+
+        .clinic-inpatient-schedule-title {
+            margin-bottom: 5px;
+            color: #293544;
+            font-size: 13px;
+            font-weight: 850;
+        }
+
+        .clinic-inpatient-schedule-hint {
+            margin-bottom: 12px;
+            color: #7a8794;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .clinic-round-clock-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 18px;
+            padding: 13px 14px;
+            border: 1px solid #d9eef1;
+            border-radius: 13px;
+            background: #f4fbfc;
+            color: #49606a;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .clinic-round-clock-note i {
+            margin-top: 1px;
+            color: var(--settings-primary-dark);
+            font-size: 15px;
+        }
+
         .clinic-settings-address {
             position: relative;
         }
@@ -172,6 +311,27 @@
             display: none;
         }
 
+        .clinic-map-placeholder.is-clickable {
+            cursor: pointer;
+            transition: background .18s ease, box-shadow .18s ease;
+        }
+
+        .clinic-map-placeholder.is-clickable:hover {
+            background:
+                radial-gradient(circle at 70% 22%, rgba(16, 183, 198, .22), transparent 30%),
+                linear-gradient(135deg, rgba(234, 249, 251, .99), rgba(255, 255, 255, .99));
+            box-shadow: inset 0 0 0 2px rgba(4, 134, 150, .08);
+        }
+
+        .clinic-map-placeholder.is-loading {
+            cursor: progress;
+        }
+
+        .clinic-map-placeholder.is-error .clinic-map-placeholder__icon {
+            background: #fff1f0;
+            color: #b42318;
+        }
+
         .clinic-map-placeholder__icon {
             display: grid;
             width: 58px;
@@ -219,6 +379,51 @@
         .clinic-staff-list {
             display: grid;
             gap: 10px;
+        }
+
+        .clinic-staff-pagination {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 14px;
+        }
+
+        .clinic-staff-pagination.is-visible {
+            display: flex;
+        }
+
+        .clinic-staff-pagination__button {
+            display: inline-flex;
+            min-width: 34px;
+            height: 34px;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            border: 1px solid #d7e1e7;
+            border-radius: 10px;
+            background: #fff;
+            color: #556274;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .18s ease;
+        }
+
+        .clinic-staff-pagination__button:hover:not(:disabled),
+        .clinic-staff-pagination__button.is-active {
+            border-color: #8ed5de;
+            background: #eef9fb;
+            color: #087e8e;
+        }
+
+        .clinic-staff-pagination__button:disabled {
+            opacity: .42;
+            cursor: default;
+        }
+
+        .clinic-staff-card.is-pagination-hidden {
+            display: none !important;
         }
 
         .clinic-phone-row {
@@ -373,6 +578,21 @@
         .clinic-working-day.is-closed .settings-control {
             pointer-events: none;
             background: #f2f4f7;
+        }
+
+        /*
+         * Для графика посещений родственниками время можно вводить
+         * сразу, даже если день ещё не отмечен. При фокусе на поле
+         * день автоматически включается JavaScript ниже.
+         */
+        .clinic-working-day[data-inpatient-visiting-day].is-closed {
+            opacity: 1;
+        }
+
+        .clinic-working-day[data-inpatient-visiting-day].is-closed
+        .settings-control {
+            pointer-events: auto;
+            background: #fff;
         }
 
         .clinic-working-day__separator {
@@ -689,37 +909,6 @@
         .clinic-employee-form .clinic-speciality-tag:has(input:checked) {
             border-color: #9ed6dc;
             background: #eefafb;
-            color: var(--settings-primary-dark);
-        }
-
-        .clinic-employee-form .clinic-speciality-tag.is-disabled {
-            border-color: #e7ebef;
-            background: #f7f8fa;
-            color: #a0a9b5;
-            cursor: not-allowed;
-            opacity: .58;
-        }
-
-        .clinic-employee-form .clinic-speciality-tag.is-disabled input {
-            cursor: not-allowed;
-        }
-
-        .clinic-speciality-group-hint {
-            display: flex;
-            align-items: flex-start;
-            gap: 7px;
-            margin-top: 10px;
-            padding: 9px 11px;
-            border: 1px solid #dbe9ec;
-            border-radius: 11px;
-            background: #f5fbfc;
-            color: #607482;
-            font-size: 10px;
-            line-height: 1.45;
-        }
-
-        .clinic-speciality-group-hint i {
-            margin-top: 1px;
             color: var(--settings-primary-dark);
         }
 
@@ -1130,6 +1319,11 @@
                 flex-direction: column;
             }
         }
+        @media (max-width: 680px) {
+            .clinic-inpatient-mode-options {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 @endsection
 
@@ -1141,14 +1335,21 @@
                 <div>
                     <h1 class="settings-page-title">Настройки клиники</h1>
                     <p class="settings-page-description">
-                        Основные данные медицинской организации, контакты регистратуры, форматы приёма,
-                        стандартный режим работы и сотрудники клиники. Пока это визуальный прототип — сохранение подключим позже.
+                        @if(!$isPrivatePractice && $clinicType === \App\Models\Clinic::TYPE_INPATIENT)
+                            Основные данные стационара, режим работы, время посещения родственниками
+                            и сотрудники медицинской организации.
+                        @else
+                            Основные данные медицинской организации, контакты регистратуры, форматы приёма,
+                            стандартный режим работы и сотрудники клиники.
+                        @endif
                     </p>
                 </div>
                 @if($doctor)
                     <span class="settings-type-badge">
-                        <i class="bi {{ $isPrivatePractice ? 'bi-person-badge' : 'bi-hospital' }}"></i>
-                        {{ $isPrivatePractice ? 'Частная практика' : 'Медицинская организация' }}
+                        <i class="bi {{ $isPrivatePractice ? 'bi-person-badge' : ($clinicType === \App\Models\Clinic::TYPE_INPATIENT ? 'bi-building' : 'bi-hospital') }}"></i>
+                        {{ $isPrivatePractice
+                            ? 'Частная практика'
+                            : ($clinicType === \App\Models\Clinic::TYPE_INPATIENT ? 'Стационар' : 'Амбулатория') }}
                     </span>
                 @endif
             </div>
@@ -1287,12 +1488,12 @@
                     <input type="hidden"
                            name="latitude"
                            id="clinicLatitude"
-                           value="{{ old('latitude') }}">
+                           value="{{ old('latitude', $clinic->latitude ?? '') }}">
 
                     <input type="hidden"
                            name="longitude"
                            id="clinicLongitude"
-                           value="{{ old('longitude') }}">
+                           value="{{ old('longitude', $clinic->longitude ?? '') }}">
 
                     <div class="clinic-settings-grid">
                         <div class="clinic-settings-stack">
@@ -1353,16 +1554,22 @@
                                         </div>
 
                                         <div class="settings-col-12">
-                                            <div class="clinic-map-shell">
+                                            <div class="clinic-map-shell"
+                                                 id="clinicMapShell">
                                                 <div class="clinic-map" id="clinicMap"></div>
 
-                                                <div class="clinic-map-placeholder" id="clinicMapPlaceholder">
+                                                <div class="clinic-map-placeholder"
+                                                     id="clinicMapPlaceholder">
                                                     <div>
                                                         <div class="clinic-map-placeholder__icon">
                                                             <i class="bi bi-map"></i>
                                                         </div>
-                                                        <strong>Карта появится после подтверждения адреса</strong>
-                                                        <p>
+
+                                                        <strong id="clinicMapPlaceholderTitle">
+                                                            Карта появится после подтверждения адреса
+                                                        </strong>
+
+                                                        <p id="clinicMapPlaceholderText">
                                                             Выберите один из предложенных адресов — карта автоматически
                                                             приблизится к зданию и поставит метку.
                                                         </p>
@@ -1398,7 +1605,12 @@
                                 <div class="settings-panel__body">
                                     <div class="clinic-staff-toolbar">
                                         <div class="clinic-staff-toolbar__summary">
-                                            Врачи: {{ $staffSummary['doctors'] }} · Медсёстры: {{ $staffSummary['nurses'] }}
+                                            Здесь перечислен весь персонал клиники, имеющий доступ к системе.
+                                            <span class="ms-2">
+                                                Врачи: {{ $staffSummary['doctors'] ?? $doctors->count() }}
+                                                · Медсёстры: {{ $staffSummary['nurses'] ?? $clinicNurses->count() }}
+                                                · Регистраторы: {{ $staffSummary['registrars'] ?? $clinicRegistrars->count() }}
+                                            </span>
                                         </div>
 
                                         <button type="button"
@@ -1412,10 +1624,9 @@
                                     <div class="clinic-staff-list" id="clinicStaffList">
                                         @foreach($doctors as $employee)
                                             <article class="clinic-staff-card"
+                                                     data-staff-kind="doctor"
                                                      data-employee-index="{{ $loop->index }}"
-                                                     data-employee-source="doctor"
                                                      data-doctor-id="{{ $employee->id }}"
-                                                     data-nurse-id=""
                                                      data-position="{{ $employee->id == $clinic->headmaster_id ? 'Главный врач' : ($employee->profession ?: 'Врач') }}"
                                                      data-speciality="{{ $employee->status ?: '' }}"
                                                      data-phone="{{ $employee->phone ?: '' }}"
@@ -1498,13 +1709,6 @@
                                                         )
                                                             ->map(fn ($value) => trim($value))
                                                             ->filter()
-                                                            ->reject(
-                                                                fn ($value) => in_array(
-                                                                    mb_strtolower(trim((string) $value)),
-                                                                    ['невролог', 'неврология'],
-                                                                    true
-                                                                )
-                                                            )
                                                             ->unique()
                                                             ->values();
                                                     @endphp
@@ -1518,13 +1722,6 @@
                                                             Специальность не указана
                                                         </span>
                                                     @endforelse
-
-                                                    @if($employee->home_visit_district_name ?? null)
-                                                        <span class="clinic-staff-position"
-                                                              title="Этот врач закреплён только за выездами на дом и недоступен в других назначениях">
-                                                            Выезды · {{ $employee->home_visit_district_name }}
-                                                        </span>
-                                                    @endif
                                                 </div>
 
                                                 <div class="clinic-staff-card__contact">
@@ -1545,67 +1742,146 @@
                                             </article>
                                         @endforeach
 
-                                        @foreach($clinicNurses as $clinicNurse)
+                                        @foreach($clinicRegistrars as $registrar)
                                             <article class="clinic-staff-card"
-                                                     data-employee-index="nurse-{{ $clinicNurse->id }}"
-                                                     data-employee-source="nurse"
-                                                     data-doctor-id=""
-                                                     data-nurse-id="{{ $clinicNurse->id }}"
-                                                     data-position="{{ $clinicNurse->profession ?: 'Медицинская сестра' }}"
-                                                     data-speciality="Сестринское дело"
-                                                     data-phone="{{ $clinicNurse->phone ?? '' }}"
-                                                     data-email="{{ $clinicNurse->email ?? '' }}"
+                                                     data-staff-kind="registrar"
+                                                     data-employee-index="{{ $doctors->count() + $loop->index }}"
+                                                     data-doctor-id="{{ $registrar->id }}"
+                                                     data-position="Медицинский регистратор"
+                                                     data-speciality=""
+                                                     data-phone="{{ $registrar->phone ?: '' }}"
+                                                     data-email="{{ $registrar->email ?: '' }}"
                                                      data-is-headmaster="0">
                                                 <input type="hidden"
-                                                       class="employee-nurse-id"
-                                                       value="{{ $clinicNurse->id }}">
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][id]"
+                                                       class="employee-id"
+                                                       value="{{ $registrar->id }}">
 
                                                 <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][surname]"
                                                        class="employee-surname"
-                                                       value="{{ $clinicNurse->surname }}">
+                                                       value="{{ $registrar->surname }}">
 
                                                 <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][name]"
                                                        class="employee-name"
-                                                       value="{{ $clinicNurse->name }}">
+                                                       value="{{ $registrar->name }}">
 
                                                 <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][patronym]"
                                                        class="employee-patronym"
-                                                       value="{{ $clinicNurse->patronym }}">
+                                                       value="{{ $registrar->patronym }}">
 
                                                 <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][position]"
                                                        class="employee-position"
-                                                       value="{{ $clinicNurse->profession ?: 'Медицинская сестра' }}">
+                                                       value="Медицинский регистратор">
 
                                                 <input type="hidden"
-                                                       class="employee-speciality-value"
-                                                       value="Сестринское дело">
-
-                                                <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][employment_status]"
                                                        class="employee-status-value"
-                                                       value="{{ $clinicNurse->employment_status ?? 'active' }}">
+                                                       value="{{ $registrar->employment_status ?? 'active' }}">
 
                                                 <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][dismissed_at]"
                                                        class="employee-dismissed-at"
-                                                       value="{{ $clinicNurse->dismissed_at ?? '' }}">
+                                                       value="{{ $registrar->dismissed_at ?? '' }}">
 
                                                 <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][phone]"
                                                        class="employee-phone"
-                                                       value="{{ $clinicNurse->phone ?? '' }}">
+                                                       value="{{ $registrar->phone ?? '' }}">
 
                                                 <input type="hidden"
+                                                       name="employees[{{ $doctors->count() + $loop->index }}][email]"
                                                        class="employee-email"
-                                                       value="{{ $clinicNurse->email ?? '' }}">
+                                                       value="{{ $registrar->email ?? '' }}">
 
                                                 <div class="clinic-staff-avatar">
-                                                    {{ ucfirst(mb_substr($clinicNurse->name, 0, 1)) . ucfirst(mb_substr($clinicNurse->surname, 0, 1)) }}
+                                                    {{ mb_strtoupper(
+                                                        mb_substr((string) $registrar->name, 0, 1)
+                                                        . mb_substr((string) $registrar->surname, 0, 1)
+                                                    ) }}
                                                 </div>
 
                                                 <div>
                                                     <div class="clinic-staff-name">
-                                                        {{ trim($clinicNurse->surname . ' ' . $clinicNurse->name . ' ' . ($clinicNurse->patronym ?? '')) }}
+                                                        {{ $registrar->full_name }}
                                                     </div>
                                                     <div class="clinic-staff-speciality">
-                                                        {{ $clinicNurse->profession ?: 'Медицинская сестра' }}
+                                                        Медицинский регистратор
+                                                    </div>
+                                                </div>
+
+                                                <div class="clinic-staff-card__position">
+                                                    <span class="clinic-staff-position">
+                                                        Регистратура
+                                                    </span>
+                                                </div>
+
+                                                <div class="clinic-staff-card__contact">
+                                                    <div class="clinic-staff-status">
+                                                        Работает
+                                                    </div>
+                                                    <div class="clinic-staff-contact">
+                                                        {{ $registrar->phone }}
+                                                    </div>
+                                                    <div class="clinic-staff-contact">
+                                                        {{ $registrar->email }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="clinic-staff-actions">
+                                                    <button type="button"
+                                                            class="clinic-icon-button clinic-edit-employee"
+                                                            title="Редактировать сотрудника">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                </div>
+                                            </article>
+                                        @endforeach
+
+                                        @foreach($clinicNurses as $clinicNurse)
+                                            @php
+                                                $nurseFullName = trim(
+                                                    ($clinicNurse->surname ?? '')
+                                                    . ' '
+                                                    . ($clinicNurse->name ?? '')
+                                                    . ' '
+                                                    . ($clinicNurse->patronym ?? '')
+                                                );
+
+                                                $nurseProfession = trim(
+                                                    (string) (
+                                                        $clinicNurse->profession
+                                                        ?? 'Медицинская сестра'
+                                                    )
+                                                );
+
+                                                if ($nurseProfession === '') {
+                                                    $nurseProfession = 'Медицинская сестра';
+                                                }
+
+                                                $nursePhone = (string) ($clinicNurse->phone ?? '');
+                                                $nurseEmail = (string) ($clinicNurse->email ?? '');
+                                            @endphp
+
+                                            <article class="clinic-staff-card"
+                                                     data-staff-kind="nurse"
+                                                     data-nurse-id="{{ $clinicNurse->id }}">
+                                                <div class="clinic-staff-avatar">
+                                                    {{ mb_strtoupper(
+                                                        mb_substr((string) ($clinicNurse->name ?? ''), 0, 1)
+                                                        . mb_substr((string) ($clinicNurse->surname ?? ''), 0, 1)
+                                                    ) }}
+                                                </div>
+
+                                                <div>
+                                                    <div class="clinic-staff-name">
+                                                        {{ $nurseFullName !== '' ? $nurseFullName : 'Медицинская сестра #' . $clinicNurse->id }}
+                                                    </div>
+                                                    <div class="clinic-staff-speciality">
+                                                        {{ $nurseProfession }}
                                                     </div>
                                                 </div>
 
@@ -1619,20 +1895,33 @@
                                                     <div class="clinic-staff-status">
                                                         Работает
                                                     </div>
-                                                    <div class="clinic-staff-contact">{{ $clinicNurse->phone ?? '' }}</div>
-                                                    <div class="clinic-staff-contact">{{ $clinicNurse->email ?? '' }}</div>
+
+                                                    @if($nursePhone !== '')
+                                                        <div class="clinic-staff-contact">
+                                                            {{ $nursePhone }}
+                                                        </div>
+                                                    @endif
+
+                                                    @if($nurseEmail !== '')
+                                                        <div class="clinic-staff-contact">
+                                                            {{ $nurseEmail }}
+                                                        </div>
+                                                    @endif
                                                 </div>
 
                                                 <div class="clinic-staff-actions">
-                                                    <button type="button"
-                                                            class="clinic-icon-button clinic-edit-employee"
-                                                            title="Редактировать сотрудника">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </button>
+                                                    <span class="clinic-staff-position"
+                                                          title="Медицинская сестра">
+                                                        Медсестра
+                                                    </span>
                                                 </div>
                                             </article>
                                         @endforeach
                                     </div>
+
+                                    <div class="clinic-staff-pagination"
+                                         id="clinicStaffPagination"
+                                         aria-label="Страницы сотрудников"></div>
                                 </div>
                             </section>
                         </div>
@@ -1683,7 +1972,9 @@
                                 </div>
                             </section>
 
-                            <section class="settings-panel">
+                            <section class="settings-panel"
+                                     id="clinicCareFormatsPanel"
+                                     @if($clinicType === \App\Models\Clinic::TYPE_INPATIENT) hidden @endif>
                                 <div class="settings-panel__header">
                                     <div class="clinic-settings-panel-head">
                                         <div class="clinic-settings-section-icon"><i class="bi bi-camera-video"></i></div>
@@ -1731,14 +2022,16 @@
                                 </div>
                             </section>
 
-                            <section class="settings-panel">
+                            <section class="settings-panel"
+                                     id="clinicOutpatientSchedulePanel"
+                                     @if($clinicType === \App\Models\Clinic::TYPE_INPATIENT) hidden @endif>
                                 <div class="settings-panel__header">
                                     <div class="clinic-settings-panel-head">
                                         <div class="clinic-settings-section-icon"><i class="bi bi-clock-history"></i></div>
                                         <div class="settings-panel__title-wrap">
                                             <h2 class="settings-panel__title">Стандартный режим работы</h2>
                                             <div class="settings-panel__subtitle">
-                                                Обычная рабочая неделя клиники. Карантины и временные ограничения остаются во вкладке «График клиники».
+                                                Обычная рабочая неделя амбулатории. Карантины и временные ограничения остаются во вкладке «График клиники».
                                             </div>
                                         </div>
                                     </div>
@@ -1760,7 +2053,6 @@
                                                            type="checkbox"
                                                            name="working_hours[{{ $day['code'] }}][enabled]"
                                                            value="1"
-                                                           data-p="{{ $day['open'] }}"
                                                         {{ ($day['open'] === true) ? 'checked' : '' }}>
                                                 </div>
 
@@ -1785,6 +2077,202 @@
                                     </button>
                                 </div>
                             </section>
+
+                            <section class="settings-panel"
+                                     id="clinicInpatientSchedulePanel"
+                                     @if($clinicType !== \App\Models\Clinic::TYPE_INPATIENT) hidden @endif>
+                                <div class="settings-panel__header">
+                                    <div class="clinic-settings-panel-head">
+                                        <div class="clinic-settings-section-icon"><i class="bi bi-moon-stars"></i></div>
+                                        <div class="settings-panel__title-wrap">
+                                            <h2 class="settings-panel__title">Режим работы стационара</h2>
+                                            <div class="settings-panel__subtitle">
+                                                Укажите, является стационар дневным, ночным или круглосуточным.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="settings-panel__body">
+                                    <label class="settings-label">Формат стационара</label>
+
+                                    <div class="clinic-inpatient-mode-options">
+                                        <label class="clinic-type-option">
+                                            <input type="radio"
+                                                   name="inpatient_mode"
+                                                   value="{{ \App\Models\Clinic::INPATIENT_MODE_DAY }}"
+                                                @checked($inpatientMode === \App\Models\Clinic::INPATIENT_MODE_DAY)>
+
+                                            <span class="clinic-type-card clinic-type-card--compact">
+                                                <span class="clinic-type-card__icon">
+                                                    <i class="bi bi-sun"></i>
+                                                </span>
+                                                <span>
+                                                    <strong>Дневной</strong>
+                                                    <p>Пациенты находятся в стационаре в дневные часы.</p>
+                                                </span>
+                                            </span>
+                                        </label>
+
+                                        <label class="clinic-type-option">
+                                            <input type="radio"
+                                                   name="inpatient_mode"
+                                                   value="{{ \App\Models\Clinic::INPATIENT_MODE_NIGHT }}"
+                                                @checked($inpatientMode === \App\Models\Clinic::INPATIENT_MODE_NIGHT)>
+
+                                            <span class="clinic-type-card clinic-type-card--compact">
+                                                <span class="clinic-type-card__icon">
+                                                    <i class="bi bi-moon"></i>
+                                                </span>
+                                                <span>
+                                                    <strong>Ночной</strong>
+                                                    <p>Рабочий интервал может переходить через полночь.</p>
+                                                </span>
+                                            </span>
+                                        </label>
+
+                                        <label class="clinic-type-option">
+                                            <input type="radio"
+                                                   name="inpatient_mode"
+                                                   value="{{ \App\Models\Clinic::INPATIENT_MODE_ROUND_THE_CLOCK }}"
+                                                @checked($inpatientMode === \App\Models\Clinic::INPATIENT_MODE_ROUND_THE_CLOCK)>
+
+                                            <span class="clinic-type-card clinic-type-card--compact">
+                                                <span class="clinic-type-card__icon">
+                                                    <i class="bi bi-24-circle"></i>
+                                                </span>
+                                                <span>
+                                                    <strong>Круглосуточный</strong>
+                                                    <p>Стационар работает 24 часа в сутки, 7 дней в неделю.</p>
+                                                </span>
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <div class="clinic-inpatient-schedule-block"
+                                         id="inpatientWorkingScheduleBlock"
+                                         @if($inpatientMode === \App\Models\Clinic::INPATIENT_MODE_ROUND_THE_CLOCK) hidden @endif>
+                                        <div class="clinic-inpatient-schedule-title">
+                                            Часы работы стационара
+                                        </div>
+                                        <div class="clinic-inpatient-schedule-hint">
+                                            Для ночного режима допустим переход через полночь, например 20:00 — 08:00 следующего дня.
+                                        </div>
+
+                                        <div class="clinic-working-hours" id="inpatientWorkingHours">
+                                            @foreach($inpatientWeekDays as $day)
+                                                <div class="clinic-working-day {{ !$day['open'] ? 'is-closed' : '' }}"
+                                                     data-inpatient-working-day="{{ $day['code'] }}">
+                                                    <div class="clinic-working-day__name">{{ $day['label'] }}</div>
+
+                                                    <div>
+                                                        <input type="hidden"
+                                                               name="inpatient_working_hours[{{ $day['code'] }}][enabled]"
+                                                               value="0">
+
+                                                        <input class="form-check-input inpatient-working-day-toggle"
+                                                               type="checkbox"
+                                                               name="inpatient_working_hours[{{ $day['code'] }}][enabled]"
+                                                               value="1"
+                                                            {{ $day['open'] ? 'checked' : '' }}>
+                                                    </div>
+
+                                                    <input type="time"
+                                                           name="inpatient_working_hours[{{ $day['code'] }}][from]"
+                                                           class="settings-control inpatient-working-from"
+                                                           value="{{ $day['from'] }}">
+
+                                                    <div class="clinic-working-day__separator">—</div>
+
+                                                    <input type="time"
+                                                           name="inpatient_working_hours[{{ $day['code'] }}][to]"
+                                                           class="settings-control inpatient-working-to"
+                                                           value="{{ $day['to'] }}">
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                        <button type="button"
+                                                class="clinic-inline-action"
+                                                id="copyInpatientMondayButton">
+                                            <i class="bi bi-copy"></i>
+                                            Скопировать понедельник на всю неделю
+                                        </button>
+                                    </div>
+
+                                    <div class="clinic-round-clock-note"
+                                         id="inpatientRoundClockNotice"
+                                         @if($inpatientMode !== \App\Models\Clinic::INPATIENT_MODE_ROUND_THE_CLOCK) hidden @endif>
+                                        <i class="bi bi-clock-fill"></i>
+                                        <span>
+                                            Для круглосуточного стационара отдельные часы работы не требуются:
+                                            режим считается 24/7. Смены сотрудников будут настраиваться отдельно.
+                                        </span>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="settings-panel"
+                                     id="clinicInpatientVisitingPanel"
+                                     @if($clinicType !== \App\Models\Clinic::TYPE_INPATIENT) hidden @endif>
+                                <div class="settings-panel__header">
+                                    <div class="clinic-settings-panel-head">
+                                        <div class="clinic-settings-section-icon"><i class="bi bi-people"></i></div>
+                                        <div class="settings-panel__title-wrap">
+                                            <h2 class="settings-panel__title">Посещение родственниками</h2>
+                                            <div class="settings-panel__subtitle">
+                                                Базовое время посещений для стационара. У каждого отделения можно будет задать своё расписание вместо базового.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="settings-panel__body">
+                                    <div class="clinic-inpatient-schedule-hint">
+                                        Отметьте дни, когда посещения разрешены, и укажите интервал. Можно сразу нажать на поле времени — соответствующий день включится автоматически. После добавления отделений этот график будет использоваться как общий по умолчанию.
+                                    </div>
+
+                                    <div class="clinic-working-hours" id="inpatientVisitingHours">
+                                        @foreach($inpatientVisitingWeekDays as $day)
+                                            <div class="clinic-working-day {{ !$day['open'] ? 'is-closed' : '' }}"
+                                                 data-inpatient-visiting-day="{{ $day['code'] }}">
+                                                <div class="clinic-working-day__name">{{ $day['label'] }}</div>
+
+                                                <div>
+                                                    <input type="hidden"
+                                                           name="inpatient_visiting_hours[{{ $day['code'] }}][enabled]"
+                                                           value="0">
+
+                                                    <input class="form-check-input inpatient-visiting-day-toggle"
+                                                           type="checkbox"
+                                                           name="inpatient_visiting_hours[{{ $day['code'] }}][enabled]"
+                                                           value="1"
+                                                        {{ $day['open'] ? 'checked' : '' }}>
+                                                </div>
+
+                                                <input type="time"
+                                                       name="inpatient_visiting_hours[{{ $day['code'] }}][from]"
+                                                       class="settings-control inpatient-visiting-from"
+                                                       value="{{ $day['from'] }}">
+
+                                                <div class="clinic-working-day__separator">—</div>
+
+                                                <input type="time"
+                                                       name="inpatient_visiting_hours[{{ $day['code'] }}][to]"
+                                                       class="settings-control inpatient-visiting-to"
+                                                       value="{{ $day['to'] }}">
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <button type="button"
+                                            class="clinic-inline-action"
+                                            id="copyVisitingMondayButton">
+                                        <i class="bi bi-copy"></i>
+                                        Скопировать понедельник на всю неделю
+                                    </button>
+                                </div>
+                            </section>
                         </div>
                     </div>
 
@@ -1792,7 +2280,7 @@
                         <div class="clinic-save-bar__status">
                             <i class="bi bi-cloud-check"></i>
                             <span>
-                            Пока прототип: изменения работают только на странице и не записываются в базу данных.
+                            Изменения сохраняются в настройках клиники после нажатия «Сохранить настройки».
                         </span>
                         </div>
 
@@ -1834,107 +2322,50 @@
                                class="settings-control"
                                type="text"
                                autocomplete="off"
-                               placeholder="ФИО, специальность, должность, телефон...">
+                               placeholder="ФИО, должность, специальность, телефон...">
                     </div>
 
                     <div class="settings-field-hint">
-                        В списке показаны врачи и медицинские сёстры, которые сейчас не привязаны к другой клинике.
+                        В списке показаны сотрудники из базы, которые сейчас не привязаны к другой клинике.
                     </div>
 
                     <div class="clinic-doctor-results" id="clinicDoctorResults">
-                        @if($availableDoctors->isEmpty() && $availableNurses->isEmpty())
+                        @forelse($availableDoctors as $availableDoctor)
+                            <button type="button"
+                                    class="clinic-doctor-option"
+                                    data-doctor-id="{{ $availableDoctor->id }}"
+                                    data-surname="{{ $availableDoctor->surname }}"
+                                    data-name="{{ $availableDoctor->name }}"
+                                    data-patronym="{{ $availableDoctor->patronym }}"
+                                    data-position="{{ $availableDoctor->profession ?: 'Врач' }}"
+                                    data-speciality="{{ $availableDoctor->status }}"
+                                    data-phone="{{ $availableDoctor->phone }}"
+                                    data-email="{{ $availableDoctor->email }}">
+                                <span class="clinic-doctor-option__icon">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+
+                                <span>
+                                    <span class="clinic-doctor-option__name">
+                                        {{ $availableDoctor->full_name }}
+                                    </span>
+                                    <span class="clinic-doctor-option__meta">
+                                        {{ $availableDoctor->status ?: 'Специальность не указана' }}
+                                        @if($availableDoctor->phone)
+                                            · {{ $availableDoctor->phone }}
+                                        @endif
+                                    </span>
+                                </span>
+
+                                <span class="clinic-doctor-option__status">
+                                    {{ $availableDoctor->profession ?: 'Врач' }}
+                                </span>
+                            </button>
+                        @empty
                             <div class="clinic-doctor-empty">
-                                Нет сотрудников, доступных для добавления в клинику.
+                                Нет врачей, доступных для добавления в клинику.
                             </div>
-                        @else
-                            @foreach($availableDoctors as $availableDoctor)
-                                @php
-                                    $availableDoctorIsNurse = in_array(
-                                        $availableDoctor->profession,
-                                        [
-                                            'Старшая медицинская сестра',
-                                            'Медицинская сестра',
-                                            'Процедурная медицинская сестра',
-                                        ],
-                                        true
-                                    );
-                                @endphp
-
-                                <button type="button"
-                                        class="clinic-doctor-option"
-                                        data-employee-source="doctor"
-                                        data-doctor-id="{{ $availableDoctor->id }}"
-                                        data-nurse-id=""
-                                        data-surname="{{ $availableDoctor->surname }}"
-                                        data-name="{{ $availableDoctor->name }}"
-                                        data-patronym="{{ $availableDoctor->patronym }}"
-                                        data-position="{{ $availableDoctor->profession ?: 'Врач' }}"
-                                        data-speciality="{{ $availableDoctor->status }}"
-                                        data-phone="{{ $availableDoctor->phone }}"
-                                        data-email="{{ $availableDoctor->email }}">
-                                    <span class="clinic-doctor-option__icon">
-                                        <i class="bi {{ $availableDoctorIsNurse ? 'bi-person-heart' : 'bi-person-badge' }}"></i>
-                                    </span>
-
-                                    <span>
-                                        <span class="clinic-doctor-option__name">
-                                            {{ $availableDoctor->full_name }}
-                                        </span>
-                                        <span class="clinic-doctor-option__meta">
-                                            {{ $availableDoctor->status ?: ($availableDoctorIsNurse ? 'Сестринское дело' : 'Специальность не указана') }}
-                                            @if($availableDoctor->phone)
-                                                · {{ $availableDoctor->phone }}
-                                            @endif
-                                        </span>
-                                    </span>
-
-                                    <span class="clinic-doctor-option__status">
-                                        {{ $availableDoctor->profession ?: 'Врач' }}
-                                    </span>
-                                </button>
-                            @endforeach
-
-                            @foreach($availableNurses as $availableNurse)
-                                <button type="button"
-                                        class="clinic-doctor-option"
-                                        data-employee-source="nurse"
-                                        data-doctor-id=""
-                                        data-nurse-id="{{ $availableNurse->id }}"
-                                        data-surname="{{ $availableNurse->surname }}"
-                                        data-name="{{ $availableNurse->name }}"
-                                        data-patronym="{{ $availableNurse->patronym }}"
-                                        data-position="{{ $availableNurse->profession ?: 'Медицинская сестра' }}"
-                                        data-speciality="Сестринское дело"
-                                        data-phone="{{ $availableNurse->phone ?? '' }}"
-                                        data-email="{{ $availableNurse->email ?? '' }}">
-                                    <span class="clinic-doctor-option__icon">
-                                        <i class="bi bi-person-heart"></i>
-                                    </span>
-
-                                    <span>
-                                        <span class="clinic-doctor-option__name">
-                                            {{ trim(
-                                                $availableNurse->surname
-                                                . ' '
-                                                . $availableNurse->name
-                                                . ' '
-                                                . ($availableNurse->patronym ?? '')
-                                            ) }}
-                                        </span>
-                                        <span class="clinic-doctor-option__meta">
-                                            Сестринское дело
-                                            @if($availableNurse->phone ?? null)
-                                                · {{ $availableNurse->phone }}
-                                            @endif
-                                        </span>
-                                    </span>
-
-                                    <span class="clinic-doctor-option__status">
-                                        {{ $availableNurse->profession ?: 'Медицинская сестра' }}
-                                    </span>
-                                </button>
-                            @endforeach
-                        @endif
+                        @endforelse
                     </div>
 
                     <div class="clinic-doctor-selected" id="clinicDoctorSelected">
@@ -1942,6 +2373,27 @@
                         <div>
                             <strong id="clinicDoctorSelectedName"></strong>
                             <span id="clinicDoctorSelectedMeta"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 d-none"
+                         id="clinicNewEmployeePositionWrap">
+                        <label class="settings-label"
+                               for="clinicNewEmployeePosition">
+                            Должность в клинике
+                        </label>
+
+                        <select id="clinicNewEmployeePosition"
+                                class="settings-control">
+                            <option value="Врач">Врач</option>
+                            <option value="Детский психиатр">Детский психиатр</option>
+                            <option value="Медицинский психолог">Медицинский психолог</option>
+                            <option value="Медицинский регистратор">Медицинский регистратор</option>
+                            <option value="Санитар">Санитар</option>
+                        </select>
+
+                        <div class="settings-field-hint">
+                            Для регистратора медицинские специальности не назначаются.
                         </div>
                     </div>
                 </div>
@@ -1989,17 +2441,9 @@
                 <div class="modal-body">
                     <input type="hidden" id="employeeEditIndex" value="">
                     <input type="hidden"
-                           id="employeeSource"
-                           name="employee_source"
-                           value="{{ old('employee_source', 'doctor') }}">
-                    <input type="hidden"
                            id="employeeDoctorId"
                            name="doctor_id"
                            value="{{ old('doctor_id') }}">
-                    <input type="hidden"
-                           id="employeeNurseId"
-                           name="nurse_id"
-                           value="{{ old('nurse_id') }}">
 
                     @if($errors->employee->any())
                         <div class="clinic-employee-feedback clinic-employee-feedback--error"
@@ -2081,7 +2525,6 @@
                                     <option value="Детский психиатр">Детский психиатр</option>
                                     <option value="Старшая медицинская сестра">Старшая медицинская сестра</option>
                                     <option value="Медицинская сестра">Медицинская сестра</option>
-                                    <option value="Процедурная медицинская сестра">Процедурная медицинская сестра</option>
                                     <option value="Санитар">Санитар</option>
                                     <option value="Медицинский психолог">Медицинский психолог</option>
                                     <option value="Медицинский регистратор">Медицинский регистратор</option>
@@ -2139,7 +2582,7 @@
                                 class="settings-control">
                             <option value="">Выберите врача</option>
 
-                            @foreach($clinicDoctors as $headmasterCandidate)
+                            @foreach($doctors as $headmasterCandidate)
                                 <option value="{{ $headmasterCandidate->id }}">
                                     {{ $headmasterCandidate->full_name }}
                                     — {{ $headmasterCandidate->status ?: 'Специальность не указана' }}
@@ -2152,7 +2595,8 @@
                         </div>
                     </div>
 
-                    <div class="clinic-employee-form-section">
+                    <div class="clinic-employee-form-section"
+                         id="employeeSpecialitySection">
                         <div class="clinic-employee-form-section__head">
                             <i class="bi bi-award"></i>
                             Специальности / профиль
@@ -2163,7 +2607,6 @@
                                 <input type="checkbox"
                                        name="specialties[]"
                                        class="form-check-input employee-speciality-option"
-                                       data-speciality-group="senior"
                                        value="Психиатрия">
                                 Психиатрия
                             </label>
@@ -2172,7 +2615,14 @@
                                 <input type="checkbox"
                                        name="specialties[]"
                                        class="form-check-input employee-speciality-option"
-                                       data-speciality-group="senior"
+                                       value="Психиатр-нарколог">
+                                Психиатр-нарколог
+                            </label>
+
+                            <label class="clinic-speciality-tag">
+                                <input type="checkbox"
+                                       name="specialties[]"
+                                       class="form-check-input employee-speciality-option"
                                        value="Психотерапия">
                                 Психотерапия
                             </label>
@@ -2181,7 +2631,6 @@
                                 <input type="checkbox"
                                        name="specialties[]"
                                        class="form-check-input employee-speciality-option"
-                                       data-speciality-group="senior"
                                        value="Детская психиатрия">
                                 Детская психиатрия
                             </label>
@@ -2190,7 +2639,6 @@
                                 <input type="checkbox"
                                        name="specialties[]"
                                        class="form-check-input employee-speciality-option"
-                                       data-speciality-group="senior"
                                        value="Клиническая психология">
                                 Клиническая психология
                             </label>
@@ -2199,18 +2647,9 @@
                                 <input type="checkbox"
                                        name="specialties[]"
                                        class="form-check-input employee-speciality-option"
-                                       data-speciality-group="nursing"
                                        value="Сестринское дело">
                                 Сестринское дело
                             </label>
-                        </div>
-
-                        <div class="clinic-speciality-group-hint" id="employeeSpecialityGroupHint">
-                            <i class="bi bi-info-circle"></i>
-                            <span>
-                                Специальности врачебного профиля и «Сестринское дело» нельзя выбирать одновременно.
-                                После выбора одной группы другая временно блокируется.
-                            </span>
                         </div>
                     </div>
 
@@ -2280,11 +2719,35 @@
             const addressState = document.getElementById('clinicAddressState');
             const confirmedBox = document.getElementById('clinicAddressConfirmed');
             const confirmedText = document.getElementById('clinicAddressConfirmedText');
+            const mapShell = document.getElementById('clinicMapShell');
             const mapPlaceholder = document.getElementById('clinicMapPlaceholder');
+            const mapPlaceholderTitle = document.getElementById('clinicMapPlaceholderTitle');
+            const mapPlaceholderText = document.getElementById('clinicMapPlaceholderText');
             const addressConfirmedInput = document.getElementById('clinicAddressConfirmedInput');
             const cityInput = document.getElementById('clinicCity');
             const latitudeInput = document.getElementById('clinicLatitude');
             const longitudeInput = document.getElementById('clinicLongitude');
+            const clinicCareFormatsPanel = document.getElementById(
+                'clinicCareFormatsPanel'
+            );
+            const clinicOutpatientSchedulePanel = document.getElementById(
+                'clinicOutpatientSchedulePanel'
+            );
+            const clinicInpatientSchedulePanel = document.getElementById(
+                'clinicInpatientSchedulePanel'
+            );
+            const clinicInpatientVisitingPanel = document.getElementById(
+                'clinicInpatientVisitingPanel'
+            );
+            const inpatientModeInputs = Array.from(
+                document.querySelectorAll('input[name="inpatient_mode"]')
+            );
+            const inpatientWorkingScheduleBlock = document.getElementById(
+                'inpatientWorkingScheduleBlock'
+            );
+            const inpatientRoundClockNotice = document.getElementById(
+                'inpatientRoundClockNotice'
+            );
 
             let yandexMap = null;
             let yandexPlacemark = null;
@@ -2294,6 +2757,152 @@
             let addressSuggestions = [];
 
             const ADDRESS_SEARCH_URL = @json(route('api-search-address'));
+            const IS_INPATIENT_CLINIC = @json($clinicType === \App\Models\Clinic::TYPE_INPATIENT);
+            const INPATIENT_MODE_DAY = @json(\App\Models\Clinic::INPATIENT_MODE_DAY);
+            const INPATIENT_MODE_NIGHT = @json(\App\Models\Clinic::INPATIENT_MODE_NIGHT);
+            const INPATIENT_MODE_ROUND_THE_CLOCK = @json(\App\Models\Clinic::INPATIENT_MODE_ROUND_THE_CLOCK);
+
+            function setPanelState(panel, visible) {
+                if (!panel) {
+                    return;
+                }
+
+                panel.hidden = !visible;
+
+                panel
+                    .querySelectorAll('input, select, textarea, button')
+                    .forEach(control => {
+                        control.disabled = !visible;
+                    });
+            }
+
+            function selectedInpatientMode() {
+                return inpatientModeInputs.find(
+                    input => input.checked
+                )?.value || '';
+            }
+
+            function syncInpatientModePanels(
+                isInpatient = IS_INPATIENT_CLINIC
+            ) {
+                const mode = selectedInpatientMode();
+                const isRoundTheClock =
+                    mode === INPATIENT_MODE_ROUND_THE_CLOCK;
+
+                if (inpatientWorkingScheduleBlock) {
+                    inpatientWorkingScheduleBlock.hidden =
+                        isRoundTheClock;
+
+                    inpatientWorkingScheduleBlock
+                        .querySelectorAll(
+                            'input, select, textarea, button'
+                        )
+                        .forEach(control => {
+                            control.disabled =
+                                !isInpatient
+                                || isRoundTheClock;
+                        });
+                }
+
+                if (inpatientRoundClockNotice) {
+                    inpatientRoundClockNotice.hidden =
+                        !isInpatient
+                        || !isRoundTheClock;
+                }
+            }
+
+            // Тип учреждения задаётся при регистрации; в этой форме он не переключается.
+            function syncPanelsForSavedClinicType() {
+                const isInpatient = IS_INPATIENT_CLINIC;
+
+                setPanelState(
+                    clinicCareFormatsPanel,
+                    !isInpatient
+                );
+
+                setPanelState(
+                    clinicOutpatientSchedulePanel,
+                    !isInpatient
+                );
+
+                setPanelState(
+                    clinicInpatientSchedulePanel,
+                    isInpatient
+                );
+
+                setPanelState(
+                    clinicInpatientVisitingPanel,
+                    isInpatient
+                );
+
+                syncInpatientModePanels(isInpatient);
+            }
+
+            function applySuggestedInpatientHours(mode) {
+                if (
+                    mode !== INPATIENT_MODE_DAY
+                    && mode !== INPATIENT_MODE_NIGHT
+                ) {
+                    return;
+                }
+
+                const suggestedFrom =
+                    mode === INPATIENT_MODE_NIGHT
+                        ? '20:00'
+                        : '08:00';
+
+                const suggestedTo =
+                    mode === INPATIENT_MODE_NIGHT
+                        ? '08:00'
+                        : '20:00';
+
+                document
+                    .querySelectorAll(
+                        '[data-inpatient-working-day]'
+                    )
+                    .forEach(row => {
+                        const from = row.querySelector(
+                            '.inpatient-working-from'
+                        );
+                        const to = row.querySelector(
+                            '.inpatient-working-to'
+                        );
+
+                        if (!from || !to) {
+                            return;
+                        }
+
+                        const pair =
+                            `${from.value}-${to.value}`;
+
+                        const usesStandardPair = [
+                            '08:00-20:00',
+                            '20:00-08:00',
+                            '-'
+                        ].includes(pair);
+
+                        if (!usesStandardPair) {
+                            return;
+                        }
+
+                        from.value = suggestedFrom;
+                        to.value = suggestedTo;
+                    });
+            }
+
+            inpatientModeInputs.forEach(input => {
+                input.addEventListener(
+                    'change',
+                    () => {
+                        applySuggestedInpatientHours(
+                            input.value
+                        );
+                        syncInpatientModePanels(IS_INPATIENT_CLINIC);
+                    }
+                );
+            });
+
+            syncPanelsForSavedClinicType();
 
             function escapeHtml(value) {
                 const div = document.createElement('div');
@@ -2485,42 +3094,486 @@
                 }, 300);
             }
 
-            function initYandexMap(coords, address) {
-                if (!window.ymaps || !document.getElementById('clinicMap')) {
-                    mapPlaceholder?.classList.remove('is-hidden');
+            function setMapPlaceholderState(
+                state,
+                title,
+                message
+            ) {
+                if (!mapPlaceholder) {
                     return;
                 }
 
-                ymaps.ready(() => {
-                    if (!yandexMap) {
-                        yandexMap = new ymaps.Map('clinicMap', {
+                mapPlaceholder.classList.toggle(
+                    'is-clickable',
+                    state === 'ready'
+                    || state === 'error'
+                );
+
+                mapPlaceholder.classList.toggle(
+                    'is-loading',
+                    state === 'loading'
+                );
+
+                mapPlaceholder.classList.toggle(
+                    'is-error',
+                    state === 'error'
+                );
+
+                if (
+                    state === 'ready'
+                    || state === 'error'
+                ) {
+                    mapPlaceholder.setAttribute(
+                        'role',
+                        'button'
+                    );
+
+                    mapPlaceholder.setAttribute(
+                        'tabindex',
+                        '0'
+                    );
+                } else {
+                    mapPlaceholder.removeAttribute(
+                        'role'
+                    );
+
+                    mapPlaceholder.removeAttribute(
+                        'tabindex'
+                    );
+                }
+
+                if (mapPlaceholderTitle && title) {
+                    mapPlaceholderTitle.textContent =
+                        title;
+                }
+
+                if (mapPlaceholderText && message) {
+                    mapPlaceholderText.textContent =
+                        message;
+                }
+            }
+
+            function storedClinicCoordinates() {
+                const latitude = Number.parseFloat(
+                    latitudeInput?.value || ''
+                );
+
+                const longitude = Number.parseFloat(
+                    longitudeInput?.value || ''
+                );
+
+                if (
+                    !Number.isFinite(latitude)
+                    || !Number.isFinite(longitude)
+                ) {
+                    return null;
+                }
+
+                return [
+                    latitude,
+                    longitude
+                ];
+            }
+
+            function yandexMapsReady() {
+                return new Promise(
+                    (resolve, reject) => {
+                        if (
+                            !window.ymaps
+                            || typeof window.ymaps.ready
+                                !== 'function'
+                        ) {
+                            reject(
+                                new Error(
+                                    'API Яндекс.Карт ещё не загружен.'
+                                )
+                            );
+
+                            return;
+                        }
+
+                        window.ymaps.ready(
+                            () => resolve()
+                        );
+                    }
+                );
+            }
+
+            async function initYandexMap(
+                coords,
+                address
+            ) {
+                const mapElement =
+                    document.getElementById(
+                        'clinicMap'
+                    );
+
+                if (!mapElement) {
+                    return;
+                }
+
+                await yandexMapsReady();
+
+                if (!yandexMap) {
+                    yandexMap = new ymaps.Map(
+                        'clinicMap',
+                        {
                             center: coords,
                             zoom: 16,
-                            controls: ['zoomControl']
-                        }, {
-                            suppressMapOpenBlock: true
-                        });
-                    } else {
-                        yandexMap.setCenter(coords, 16, {
+                            controls: [
+                                'zoomControl'
+                            ]
+                        },
+                        {
+                            suppressMapOpenBlock:
+                                true
+                        }
+                    );
+                } else {
+                    yandexMap.setCenter(
+                        coords,
+                        16,
+                        {
                             checkZoomRange: true
-                        });
-                    }
+                        }
+                    );
+                }
 
-                    if (yandexPlacemark) {
-                        yandexMap.geoObjects.remove(yandexPlacemark);
-                    }
+                if (yandexPlacemark) {
+                    yandexMap.geoObjects.remove(
+                        yandexPlacemark
+                    );
+                }
 
-                    yandexPlacemark = new ymaps.Placemark(coords, {
-                        hintContent: address,
-                        balloonContent: address
-                    }, {
-                        preset: 'islands#tealMedicalIcon'
-                    });
+                yandexPlacemark =
+                    new ymaps.Placemark(
+                        coords,
+                        {
+                            hintContent: address,
+                            balloonContent: address
+                        },
+                        {
+                            preset:
+                                'islands#tealMedicalIcon'
+                        }
+                    );
 
-                    yandexMap.geoObjects.add(yandexPlacemark);
-                    mapPlaceholder?.classList.add('is-hidden');
-                });
+                yandexMap.geoObjects.add(
+                    yandexPlacemark
+                );
+
+                mapPlaceholder?.classList.add(
+                    'is-hidden'
+                );
             }
+
+            async function geocodeAddressViaBrowserOsm(
+                address
+            ) {
+                const url = new URL(
+                    'https://nominatim.openstreetmap.org/search'
+                );
+
+                url.searchParams.set(
+                    'q',
+                    address
+                );
+
+                url.searchParams.set(
+                    'format',
+                    'jsonv2'
+                );
+
+                url.searchParams.set(
+                    'addressdetails',
+                    '1'
+                );
+
+                url.searchParams.set(
+                    'limit',
+                    '1'
+                );
+
+                url.searchParams.set(
+                    'countrycodes',
+                    'ru'
+                );
+
+                url.searchParams.set(
+                    'accept-language',
+                    'ru'
+                );
+
+                const response = await fetch(
+                    url.toString(),
+                    {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            Accept: 'application/json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `OSM geocoding failed: HTTP ${response.status}`
+                    );
+                }
+
+                const items =
+                    await response.json();
+
+                const first =
+                    Array.isArray(items)
+                        ? items[0]
+                        : null;
+
+                const latitude =
+                    Number.parseFloat(
+                        first?.lat
+                    );
+
+                const longitude =
+                    Number.parseFloat(
+                        first?.lon
+                    );
+
+                if (
+                    !Number.isFinite(latitude)
+                    || !Number.isFinite(longitude)
+                ) {
+                    throw new Error(
+                        'OpenStreetMap не вернул координаты адреса.'
+                    );
+                }
+
+                return [
+                    latitude,
+                    longitude
+                ];
+            }
+
+            function storeResolvedCoordinates(
+                coords
+            ) {
+                if (
+                    !Array.isArray(coords)
+                    || coords.length < 2
+                ) {
+                    return;
+                }
+
+                if (latitudeInput) {
+                    latitudeInput.value =
+                        String(coords[0]);
+                }
+
+                if (longitudeInput) {
+                    longitudeInput.value =
+                        String(coords[1]);
+                }
+            }
+
+            async function geocodeConfirmedAddress(
+                address
+            ) {
+                /*
+                 * Сначала используем наш Laravel endpoint.
+                 * Если сервер не имеет выхода к DaData/OSM и отвечает
+                 * 5xx, пробуем OSM непосредственно из браузера.
+                 *
+                 * Это нужно только для старых записей, где адрес уже
+                 * подтверждён, но latitude/longitude ранее не сохранялись.
+                 */
+                try {
+                    const url = new URL(
+                        ADDRESS_SEARCH_URL,
+                        window.location.origin
+                    );
+
+                    url.searchParams.set(
+                        'query',
+                        address
+                    );
+
+                    const response = await fetch(
+                        url.toString(),
+                        {
+                            method: 'GET',
+                            credentials: 'same-origin',
+                            headers: {
+                                Accept: 'application/json',
+                                'X-Requested-With':
+                                    'XMLHttpRequest'
+                            }
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(
+                            `Address API HTTP ${response.status}`
+                        );
+                    }
+
+                    const data =
+                        await response.json();
+
+                    const suggestions =
+                        Array.isArray(
+                            data?.suggestions
+                        )
+                            ? data.suggestions
+                            : [];
+
+                    const suggestion =
+                        suggestions.find(item => {
+                            const latitude =
+                                Number.parseFloat(
+                                    item?.geo_lat
+                                );
+
+                            const longitude =
+                                Number.parseFloat(
+                                    item?.geo_lon
+                                );
+
+                            return Number.isFinite(
+                                latitude
+                            )
+                                && Number.isFinite(
+                                    longitude
+                                );
+                        });
+
+                    if (suggestion) {
+                        const coords = [
+                            Number.parseFloat(
+                                suggestion.geo_lat
+                            ),
+                            Number.parseFloat(
+                                suggestion.geo_lon
+                            )
+                        ];
+
+                        storeResolvedCoordinates(
+                            coords
+                        );
+
+                        return coords;
+                    }
+                } catch (error) {
+                    console.warn(
+                        '[clinic-settings] server geocoder unavailable, using browser OSM fallback',
+                        error
+                    );
+                }
+
+                const coords =
+                    await geocodeAddressViaBrowserOsm(
+                        address
+                    );
+
+                storeResolvedCoordinates(
+                    coords
+                );
+
+                return coords;
+            }
+
+            async function loadConfirmedAddressMap() {
+                if (yandexMap) {
+                    return;
+                }
+
+                const address = String(
+                    addressInput?.value || ''
+                ).trim();
+
+                const isConfirmed =
+                    addressConfirmed
+                    || addressConfirmedInput
+                        ?.value === '1';
+
+                if (
+                    !isConfirmed
+                    || address === ''
+                ) {
+                    return;
+                }
+
+                setMapPlaceholderState(
+                    'loading',
+                    'Загружаем карту…',
+                    'Получаем координаты через серверный поиск адресов.'
+                );
+
+                try {
+                    let coords =
+                        storedClinicCoordinates();
+
+                    if (!coords) {
+                        coords =
+                            await geocodeConfirmedAddress(
+                                address
+                            );
+                    }
+
+                    await initYandexMap(
+                        coords,
+                        address
+                    );
+
+                    /*
+                     * Для старой записи координаты могли появиться
+                     * только сейчас. Они уже находятся в hidden-полях
+                     * формы и сохранятся вместе с настройками клиники.
+                     */
+                    if (
+                        mapPlaceholderText
+                        && latitudeInput?.value
+                        && longitudeInput?.value
+                    ) {
+                        mapPlaceholderText.textContent =
+                            'Координаты определены. Нажмите «Сохранить настройки», чтобы больше не запрашивать их повторно.';
+                    }
+                } catch (error) {
+                    console.error(
+                        '[clinic-settings] lazy map load failed',
+                        error
+                    );
+
+                    setMapPlaceholderState(
+                        'error',
+                        'Не удалось загрузить карту',
+                        'Нажмите ещё раз, чтобы повторить попытку.'
+                    );
+                }
+            }
+
+            mapShell?.addEventListener(
+                'click',
+                () => {
+                    if (!yandexMap) {
+                        loadConfirmedAddressMap();
+                    }
+                }
+            );
+
+            mapPlaceholder?.addEventListener(
+                'keydown',
+                event => {
+                    if (
+                        event.key !== 'Enter'
+                        && event.key !== ' '
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    loadConfirmedAddressMap();
+                }
+            );
 
             function confirmAddress(item) {
                 if (!addressInput) return;
@@ -2565,11 +3618,37 @@
 
                 if (hasCoordinates) {
                     initYandexMap(
-                        [latitude, longitude],
+                        [
+                            latitude,
+                            longitude
+                        ],
                         item.value || ''
-                    );
+                    ).catch(error => {
+                        console.error(
+                            '[clinic-settings] map init failed',
+                            error
+                        );
+
+                        mapPlaceholder?.classList.remove(
+                            'is-hidden'
+                        );
+
+                        setMapPlaceholderState(
+                            'ready',
+                            'Адрес подтверждён',
+                            'Нажмите, чтобы загрузить карту.'
+                        );
+                    });
                 } else {
-                    mapPlaceholder?.classList.remove('is-hidden');
+                    mapPlaceholder?.classList.remove(
+                        'is-hidden'
+                    );
+
+                    setMapPlaceholderState(
+                        'ready',
+                        'Адрес подтверждён',
+                        'Нажмите, чтобы загрузить карту.'
+                    );
                 }
             }
 
@@ -2589,17 +3668,35 @@
             });
 
             if (addressInput?.value) {
-                addressState?.classList.add('is-visible');
+                addressConfirmed = true;
+
+                addressState?.classList.add(
+                    'is-visible'
+                );
 
                 if (addressConfirmedInput) {
-                    addressConfirmedInput.value = '1';
+                    addressConfirmedInput.value =
+                        '1';
                 }
 
                 if (confirmedText) {
-                    confirmedText.textContent = `Текущий адрес: ${addressInput.value}`;
+                    confirmedText.textContent =
+                        `Текущий адрес: ${addressInput.value}`;
                 }
 
-                confirmedBox?.classList.add('is-visible');
+                confirmedBox?.classList.add(
+                    'is-visible'
+                );
+
+                mapPlaceholder?.classList.remove(
+                    'is-hidden'
+                );
+
+                setMapPlaceholderState(
+                    'ready',
+                    'Адрес уже подтверждён',
+                    'Нажмите, чтобы загрузить карту и показать клинику.'
+                );
             }
 
             const phoneList = document.getElementById('clinicPhoneList');
@@ -2672,34 +3769,173 @@
             reindexPhones();
             bindRemovePhoneButtons();
 
-            document.querySelectorAll('.clinic-working-day-toggle').forEach(toggle => {
-                toggle.addEventListener('change', () => {
-                    const row = toggle.closest('.clinic-working-day');
-                    row?.classList.toggle('is-closed', !toggle.checked);
+            document
+                .querySelectorAll(
+                    '.clinic-working-day-toggle, '
+                    + '.inpatient-working-day-toggle, '
+                    + '.inpatient-visiting-day-toggle'
+                )
+                .forEach(toggle => {
+                    toggle.addEventListener('change', () => {
+                        const row = toggle.closest(
+                            '.clinic-working-day'
+                        );
+
+                        row?.classList.toggle(
+                            'is-closed',
+                            !toggle.checked
+                        );
+                    });
                 });
+
+            /*
+             * В графике посещений поля времени не должны выглядеть
+             * заблокированными. Если пользователь начинает вводить
+             * время в выключенном дне, включаем этот день автоматически.
+             */
+            document
+                .querySelectorAll(
+                    '[data-inpatient-visiting-day] '
+                    + '.inpatient-visiting-from, '
+                    + '[data-inpatient-visiting-day] '
+                    + '.inpatient-visiting-to'
+                )
+                .forEach(control => {
+                    const enableVisitingDay = () => {
+                        const row = control.closest(
+                            '[data-inpatient-visiting-day]'
+                        );
+
+                        const toggle = row?.querySelector(
+                            '.inpatient-visiting-day-toggle'
+                        );
+
+                        if (!toggle || toggle.disabled) {
+                            return;
+                        }
+
+                        if (!toggle.checked) {
+                            toggle.checked = true;
+                            toggle.dispatchEvent(
+                                new Event('change', {
+                                    bubbles: true
+                                })
+                            );
+                        }
+                    };
+
+                    control.addEventListener(
+                        'focus',
+                        enableVisitingDay
+                    );
+
+                    control.addEventListener(
+                        'pointerdown',
+                        enableVisitingDay
+                    );
+                });
+
+            function bindScheduleCopy({
+                buttonId,
+                rowAttribute,
+                toggleSelector,
+                fromSelector,
+                toSelector,
+                targetDays
+            }) {
+                document
+                    .getElementById(buttonId)
+                    ?.addEventListener('click', () => {
+                        const monday = document.querySelector(
+                            `[${rowAttribute}="mon"]`
+                        );
+
+                        if (!monday) {
+                            return;
+                        }
+
+                        const mondayEnabled = monday.querySelector(
+                            toggleSelector
+                        )?.checked ?? true;
+
+                        const mondayFrom = monday.querySelector(
+                            fromSelector
+                        )?.value ?? '';
+
+                        const mondayTo = monday.querySelector(
+                            toSelector
+                        )?.value ?? '';
+
+                        targetDays.forEach(code => {
+                            const row = document.querySelector(
+                                `[${rowAttribute}="${code}"]`
+                            );
+
+                            if (!row) {
+                                return;
+                            }
+
+                            const toggle = row.querySelector(
+                                toggleSelector
+                            );
+                            const from = row.querySelector(
+                                fromSelector
+                            );
+                            const to = row.querySelector(
+                                toSelector
+                            );
+
+                            if (toggle) {
+                                toggle.checked = mondayEnabled;
+                            }
+
+                            if (from) {
+                                from.value = mondayFrom;
+                            }
+
+                            if (to) {
+                                to.value = mondayTo;
+                            }
+
+                            row.classList.toggle(
+                                'is-closed',
+                                !mondayEnabled
+                            );
+                        });
+                    });
+            }
+
+            bindScheduleCopy({
+                buttonId: 'copyMondayButton',
+                rowAttribute: 'data-working-day',
+                toggleSelector: '.clinic-working-day-toggle',
+                fromSelector: '.clinic-working-from',
+                toSelector: '.clinic-working-to',
+                targetDays: ['tue', 'wed', 'thu', 'fri']
             });
 
-            document.getElementById('copyMondayButton')?.addEventListener('click', () => {
-                const monday = document.querySelector('[data-working-day="mon"]');
-                if (!monday) return;
+            bindScheduleCopy({
+                buttonId: 'copyInpatientMondayButton',
+                rowAttribute: 'data-inpatient-working-day',
+                toggleSelector: '.inpatient-working-day-toggle',
+                fromSelector: '.inpatient-working-from',
+                toSelector: '.inpatient-working-to',
+                targetDays: [
+                    'tue', 'wed', 'thu',
+                    'fri', 'sat', 'sun'
+                ]
+            });
 
-                const mondayEnabled = monday.querySelector('.clinic-working-day-toggle')?.checked ?? true;
-                const mondayFrom = monday.querySelector('.clinic-working-from')?.value ?? '08:00';
-                const mondayTo = monday.querySelector('.clinic-working-to')?.value ?? '20:00';
-
-                ['tue', 'wed', 'thu', 'fri'].forEach(code => {
-                    const row = document.querySelector(`[data-working-day="${code}"]`);
-                    if (!row) return;
-
-                    const toggle = row.querySelector('.clinic-working-day-toggle');
-                    const from = row.querySelector('.clinic-working-from');
-                    const to = row.querySelector('.clinic-working-to');
-
-                    if (toggle) toggle.checked = mondayEnabled;
-                    if (from) from.value = mondayFrom;
-                    if (to) to.value = mondayTo;
-                    row.classList.toggle('is-closed', !mondayEnabled);
-                });
+            bindScheduleCopy({
+                buttonId: 'copyVisitingMondayButton',
+                rowAttribute: 'data-inpatient-visiting-day',
+                toggleSelector: '.inpatient-visiting-day-toggle',
+                fromSelector: '.inpatient-visiting-from',
+                toSelector: '.inpatient-visiting-to',
+                targetDays: [
+                    'tue', 'wed', 'thu',
+                    'fri', 'sat', 'sun'
+                ]
             });
 
             const addDoctorModalElement = document.getElementById('clinicAddDoctorModal');
@@ -2713,6 +3949,10 @@
             const clinicDoctorSelectedName = document.getElementById('clinicDoctorSelectedName');
             const clinicDoctorSelectedMeta = document.getElementById('clinicDoctorSelectedMeta');
             const addSelectedDoctorButton = document.getElementById('addSelectedDoctorButton');
+            const clinicNewEmployeePositionWrap =
+                document.getElementById('clinicNewEmployeePositionWrap');
+            const clinicNewEmployeePosition =
+                document.getElementById('clinicNewEmployeePosition');
 
             let selectedClinicDoctor = null;
 
@@ -2734,6 +3974,12 @@
                     .forEach(option => option.classList.remove('is-selected'));
 
                 clinicDoctorSelected?.classList.remove('is-visible');
+                clinicNewEmployeePositionWrap?.classList.add('d-none');
+
+                if (clinicNewEmployeePosition) {
+                    clinicNewEmployeePosition.value =
+                        'Врач';
+                }
 
                 if (clinicDoctorSelectedName) {
                     clinicDoctorSelectedName.textContent = '';
@@ -2771,11 +4017,9 @@
                             .join(' ')
                             .toLowerCase();
 
-                        const alreadyAdded =
-                            option.dataset.employeeSource !== 'nurse'
-                            && usedIds.has(
-                                String(option.dataset.doctorId || '')
-                            );
+                        const alreadyAdded = usedIds.has(
+                            String(option.dataset.doctorId || '')
+                        );
 
                         const visible = !alreadyAdded
                             && (!query || haystack.includes(query));
@@ -2796,21 +4040,11 @@
                         clearSelectedClinicDoctor();
 
                         selectedClinicDoctor = {
-                            source: option.dataset.employeeSource || 'doctor',
-                            id: option.dataset.doctorId
-                                || option.dataset.nurseId
-                                || '',
-                            doctorId: option.dataset.doctorId || '',
-                            nurseId: option.dataset.nurseId || '',
+                            id: option.dataset.doctorId || '',
                             surname: option.dataset.surname || '',
                             name: option.dataset.name || '',
                             patronym: option.dataset.patronym || '',
-                            position: option.dataset.position
-                                || (
-                                    option.dataset.employeeSource === 'nurse'
-                                        ? 'Медицинская сестра'
-                                        : 'Врач'
-                                ),
+                            position: option.dataset.position || 'Врач',
                             speciality: option.dataset.speciality || '',
                             phone: option.dataset.phone || '',
                             email: option.dataset.email || '',
@@ -2835,6 +4069,27 @@
 
                         clinicDoctorSelected?.classList.add('is-visible');
 
+                        if (clinicNewEmployeePosition) {
+                            const knownPositions = new Set([
+                                'Врач',
+                                'Детский психиатр',
+                                'Медицинский психолог',
+                                'Медицинский регистратор',
+                                'Санитар',
+                            ]);
+
+                            clinicNewEmployeePosition.value =
+                                knownPositions.has(
+                                    selectedClinicDoctor.position
+                                )
+                                    ? selectedClinicDoctor.position
+                                    : 'Врач';
+                        }
+
+                        clinicNewEmployeePositionWrap?.classList.remove(
+                            'd-none'
+                        );
+
                         if (addSelectedDoctorButton) {
                             addSelectedDoctorButton.disabled = false;
                         }
@@ -2848,13 +4103,13 @@
 
             const employeeForm = document.getElementById('clinicEmployeeForm');
             const employeeEditIndex = document.getElementById('employeeEditIndex');
-            const employeeSource = document.getElementById('employeeSource');
             const employeeDoctorId = document.getElementById('employeeDoctorId');
-            const employeeNurseId = document.getElementById('employeeNurseId');
             const employeeProfileAvatar = document.getElementById('employeeProfileAvatar');
             const employeeProfileName = document.getElementById('employeeProfileName');
             const employeeProfileMeta = document.getElementById('employeeProfileMeta');
             const employeePosition = document.getElementById('employeePosition');
+            const employeeSpecialitySection =
+                document.getElementById('employeeSpecialitySection');
             const employeeState = document.getElementById('employeeState');
             const employeePhone = document.getElementById('employeePhone');
             const employeeEmail = document.getElementById('employeeEmail');
@@ -2864,6 +4119,133 @@
             const headmasterTransferSection = document.getElementById('headmasterTransferSection');
             const newHeadmasterId = document.getElementById('newHeadmasterId');
             const staffList = document.getElementById('clinicStaffList');
+            const staffPagination =
+                document.getElementById('clinicStaffPagination');
+
+            const STAFF_PAGE_SIZE = 6;
+            let staffCurrentPage = 1;
+
+            function staffCards() {
+                return staffList
+                    ? Array.from(
+                        staffList.querySelectorAll(
+                            '.clinic-staff-card'
+                        )
+                    )
+                    : [];
+            }
+
+            function renderStaffPagination() {
+                if (!staffPagination) {
+                    return;
+                }
+
+                const cards = staffCards();
+                const pageCount = Math.max(
+                    1,
+                    Math.ceil(
+                        cards.length / STAFF_PAGE_SIZE
+                    )
+                );
+
+                staffCurrentPage = Math.min(
+                    staffCurrentPage,
+                    pageCount
+                );
+
+                const start =
+                    (staffCurrentPage - 1)
+                    * STAFF_PAGE_SIZE;
+
+                const end =
+                    start + STAFF_PAGE_SIZE;
+
+                cards.forEach((card, index) => {
+                    card.classList.toggle(
+                        'is-pagination-hidden',
+                        index < start || index >= end
+                    );
+                });
+
+                if (pageCount <= 1) {
+                    staffPagination.innerHTML = '';
+                    staffPagination.classList.remove(
+                        'is-visible'
+                    );
+                    return;
+                }
+
+                const buttons = [];
+
+                buttons.push(`
+                    <button type="button"
+                            class="clinic-staff-pagination__button"
+                            data-staff-page="${staffCurrentPage - 1}"
+                            ${staffCurrentPage <= 1 ? 'disabled' : ''}>
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                `);
+
+                for (
+                    let page = 1;
+                    page <= pageCount;
+                    page++
+                ) {
+                    buttons.push(`
+                        <button type="button"
+                                class="clinic-staff-pagination__button ${page === staffCurrentPage ? 'is-active' : ''}"
+                                data-staff-page="${page}">
+                            ${page}
+                        </button>
+                    `);
+                }
+
+                buttons.push(`
+                    <button type="button"
+                            class="clinic-staff-pagination__button"
+                            data-staff-page="${staffCurrentPage + 1}"
+                            ${staffCurrentPage >= pageCount ? 'disabled' : ''}>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                `);
+
+                staffPagination.innerHTML =
+                    buttons.join('');
+
+                staffPagination.classList.add(
+                    'is-visible'
+                );
+
+                staffPagination
+                    .querySelectorAll(
+                        '[data-staff-page]'
+                    )
+                    .forEach(button => {
+                        button.addEventListener(
+                            'click',
+                            () => {
+                                if (button.disabled) {
+                                    return;
+                                }
+
+                                const page = Number(
+                                    button.dataset.staffPage
+                                );
+
+                                if (
+                                    !Number.isInteger(page)
+                                    || page < 1
+                                    || page > pageCount
+                                ) {
+                                    return;
+                                }
+
+                                staffCurrentPage = page;
+                                renderStaffPagination();
+                            }
+                        );
+                    });
+            }
 
             let editingHeadmaster = false;
 
@@ -2891,55 +4273,10 @@
                 return '';
             }
 
-            function syncEmployeeSpecialityGroups() {
-                const options = Array.from(
-                    document.querySelectorAll('.employee-speciality-option')
-                );
-
-                const hasSeniorProfile = options.some(input =>
-                    input.checked
-                    && input.dataset.specialityGroup === 'senior'
-                );
-
-                const hasNursingProfile = options.some(input =>
-                    input.checked
-                    && input.dataset.specialityGroup === 'nursing'
-                );
-
-                options.forEach(input => {
-                    const group = input.dataset.specialityGroup || '';
-                    const mustDisable = !input.checked && (
-                        (hasSeniorProfile && group === 'nursing')
-                        || (hasNursingProfile && group === 'senior')
-                    );
-
-                    input.disabled = mustDisable;
-
-                    const label = input.closest('.clinic-speciality-tag');
-                    label?.classList.toggle('is-disabled', mustDisable);
-
-                    if (label) {
-                        label.title = mustDisable
-                            ? 'Сначала снимите выбор со специальности другой группы'
-                            : '';
-                    }
-                });
-            }
-
             function selectedEmployeeSpecialities() {
                 return Array.from(
                     document.querySelectorAll('.employee-speciality-option:checked')
                 ).map(input => input.value);
-            }
-
-            function isRemovedEmployeeSpeciality(value) {
-                const normalized = String(value || '')
-                    .replace(/\u00a0/g, ' ')
-                    .replace(/\s+/g, ' ')
-                    .trim()
-                    .toLocaleLowerCase('ru-RU');
-
-                return ['невролог', 'неврология'].includes(normalized);
             }
 
             function normalizeEmployeeSpeciality(value) {
@@ -2952,6 +4289,11 @@
                 const map = {
                     'психиатр': 'Психиатрия',
                     'психиатрия': 'Психиатрия',
+
+                    'психиатр-нарколог': 'Психиатр-нарколог',
+                    'врач-психиатр-нарколог': 'Психиатр-нарколог',
+                    'психиатрия-наркология': 'Психиатр-нарколог',
+
                     'детский психиатр': 'Детская психиатрия',
                     'врач-психиатр детский': 'Детская психиатрия',
                     'детская психиатрия': 'Детская психиатрия',
@@ -2974,12 +4316,9 @@
             }
 
             function employeeSpecialityLabel(value) {
-                if (isRemovedEmployeeSpeciality(value)) {
-                    return '';
-                }
-
                 const map = {
                     'Психиатрия': 'Психиатр',
+                    'Психиатр-нарколог': 'Психиатр-нарколог',
                     'Детская психиатрия': 'Детский психиатр',
                     'Психотерапия': 'Психотерапевт',
                     'Клиническая психология': 'Клинический психолог',
@@ -2997,10 +4336,8 @@
                         return String(value || '')
                             .split(/[,;|]/);
                     })
-                    .filter(value => !isRemovedEmployeeSpeciality(value))
                     .map(normalizeEmployeeSpeciality)
                     .filter(Boolean)
-                    .filter(value => !isRemovedEmployeeSpeciality(value))
                     .filter((value, index, array) => {
                         return array.indexOf(value) === index;
                     });
@@ -3008,19 +4345,6 @@
 
             function clearEmployeeModal() {
                 employeeEditIndex.value = '';
-
-                if (employeeSource) {
-                    employeeSource.value = 'doctor';
-                }
-
-                if (employeeDoctorId) {
-                    employeeDoctorId.value = '';
-                }
-
-                if (employeeNurseId) {
-                    employeeNurseId.value = '';
-                }
-
                 employeePosition.value = 'Врач';
                 employeeState.value = 'active';
                 employeePhone.value = '';
@@ -3030,13 +4354,14 @@
                 document.querySelectorAll('.employee-speciality-option').forEach(input => {
                     input.checked = false;
                 });
-                syncEmployeeSpecialityGroups();
 
                 employeeDismissalField?.classList.remove('is-visible');
                 dismissEmployeeButton?.classList.add('d-none');
 
                 editingHeadmaster = false;
                 headmasterTransferSection?.classList.add('d-none');
+
+                updateEmployeeSpecialityVisibility();
 
                 if (newHeadmasterId) {
                     newHeadmasterId.required = false;
@@ -3045,6 +4370,38 @@
                     Array.from(newHeadmasterId.options).forEach(option => {
                         option.disabled = false;
                     });
+                }
+            }
+
+            function updateEmployeeSpecialityVisibility() {
+                const isRegistrar =
+                    employeePosition?.value
+                    === 'Медицинский регистратор';
+
+                employeeSpecialitySection?.classList.toggle(
+                    'd-none',
+                    isRegistrar
+                );
+
+                document
+                    .querySelectorAll(
+                        '.employee-speciality-option'
+                    )
+                    .forEach(input => {
+                        input.disabled =
+                            isRegistrar;
+
+                        if (isRegistrar) {
+                            input.checked = false;
+                        }
+                    });
+
+                if (
+                    isRegistrar
+                    && employeeProfileMeta
+                ) {
+                    employeeProfileMeta.textContent =
+                        'Медицинский регистратор';
                 }
             }
 
@@ -3087,14 +4444,7 @@
             }
 
             function reindexEmployees() {
-                let doctorIndex = 0;
-
-                staffList?.querySelectorAll('.clinic-staff-card').forEach((card) => {
-                    if ((card.dataset.employeeSource || 'doctor') === 'nurse') {
-                        return;
-                    }
-
-                    const index = doctorIndex++;
+                staffList?.querySelectorAll('.clinic-staff-card').forEach((card, index) => {
                     card.dataset.employeeIndex = String(index);
 
                     const fields = {
@@ -3163,29 +4513,12 @@
 
                 employeeForm?.reset();
 
-                const source = card.dataset.employeeSource || 'doctor';
-
                 employeeEditIndex.value = index;
+                employeeDoctorId.value = card.dataset.doctorId
+                    || card.querySelector('.employee-id')?.value
+                    || '';
 
-                if (employeeSource) {
-                    employeeSource.value = source;
-                }
-
-                if (source === 'nurse') {
-                    employeeDoctorId.value = '';
-                    employeeNurseId.value = card.dataset.nurseId
-                        || card.querySelector('.employee-nurse-id')?.value
-                        || '';
-                } else {
-                    employeeDoctorId.value = card.dataset.doctorId
-                        || card.querySelector('.employee-id')?.value
-                        || '';
-                    employeeNurseId.value = '';
-                }
-
-                editingHeadmaster =
-                    source === 'doctor'
-                    && card.dataset.isHeadmaster === '1';
+                editingHeadmaster = card.dataset.isHeadmaster === '1';
 
                 employeePosition.value = editingHeadmaster
                     ? 'Главный врач'
@@ -3223,7 +4556,6 @@
                             normalizeEmployeeSpeciality(input.value)
                         );
                     });
-                syncEmployeeSpecialityGroups();
 
                 if (newHeadmasterId) {
                     Array.from(newHeadmasterId.options).forEach(option => {
@@ -3242,13 +4574,9 @@
                 }
 
                 if (employeeProfileMeta) {
-                    const profileSpecialities = speciality
-                        .map(employeeSpecialityLabel)
-                        .filter(Boolean);
-
-                    employeeProfileMeta.textContent = profileSpecialities.length
-                        ? profileSpecialities.join(', ')
-                        : 'Специальность не указана';
+                    employeeProfileMeta.textContent = storedSpecialities.length
+                        ? storedSpecialities.join(', ')
+                        : (card.dataset.speciality || 'Специальность не указана');
                 }
 
                 if (employeeProfileAvatar) {
@@ -3258,6 +4586,7 @@
 
                 dismissEmployeeButton?.classList.remove('d-none');
 
+                updateEmployeeSpecialityVisibility();
                 updateDismissalVisibility();
                 updateHeadmasterTransferVisibility();
             }
@@ -3277,19 +4606,28 @@
                         return array.indexOf(value) === index;
                     });
 
-                const specialityBadgesHtml = specialityBadges.length
-                    ? specialityBadges
-                        .map(value => `
+                const specialityBadgesHtml =
+                    data.position === 'Медицинский регистратор'
+                        ? `
                             <span class="clinic-staff-position">
-                                ${escapeHtml(value)}
+                                Регистратура
                             </span>
-                        `)
-                        .join('')
-                    : `
-                        <span class="clinic-staff-position clinic-staff-position--empty">
-                            Специальность не указана
-                        </span>
-                    `;
+                        `
+                        : (
+                            specialityBadges.length
+                                ? specialityBadges
+                                    .map(value => `
+                                        <span class="clinic-staff-position">
+                                            ${escapeHtml(value)}
+                                        </span>
+                                    `)
+                                    .join('')
+                                : `
+                                    <span class="clinic-staff-position clinic-staff-position--empty">
+                                        Специальность не указана
+                                    </span>
+                                `
+                        );
 
                 const specialityInputs = data.specialties
                     .map((value, specialityIndex) => `
@@ -3416,123 +4754,61 @@
             });
 
             addSelectedDoctorButton?.addEventListener('click', () => {
-                if (!selectedClinicDoctor) {
+                if (!selectedClinicDoctor || !staffList) {
                     return;
                 }
 
-                /*
-                 * Раньше сотрудник только дорисовывался в DOM и поэтому
-                 * исчезал после перезагрузки страницы. Теперь сразу
-                 * отправляем отдельный POST на существующий обработчик
-                 * сотрудников и сохраняем clinic_id в базе данных.
-                 */
-                const csrfToken = document.querySelector(
-                    '#clinicSettingsForm input[name="_token"]'
-                )?.value || document.querySelector(
-                    'meta[name="csrf-token"]'
-                )?.content || '';
+                const selectedPosition =
+                    clinicNewEmployeePosition?.value
+                    || selectedClinicDoctor.position
+                    || 'Врач';
 
-                if (!csrfToken) {
-                    window.alert(
-                        'Не удалось определить CSRF-токен. Обновите страницу и повторите попытку.'
-                    );
-
-                    return;
-                }
-
-                const allowedPositions = new Set([
-                    'Врач',
-                    'Детский психиатр',
-                    'Старшая медицинская сестра',
-                    'Медицинская сестра',
-                    'Процедурная медицинская сестра',
-                    'Санитар',
-                    'Медицинский психолог',
-                    'Медицинский регистратор',
-                ]);
-
-                const selectedPosition = String(
-                    selectedClinicDoctor.position || ''
-                ).trim();
-
-                /*
-                 * «Главный врач» через простое добавление не назначаем:
-                 * эта должность меняется только через отдельную логику
-                 * передачи полномочий.
-                 */
-                const isNurseSource =
-                    selectedClinicDoctor.source === 'nurse';
-
-                const position = allowedPositions.has(selectedPosition)
-                    ? selectedPosition
-                    : (
-                        isNurseSource
-                            ? 'Медицинская сестра'
-                            : 'Врач'
-                    );
-
-                const specialties = isNurseSource
-                    ? ['Сестринское дело']
-                    : employeeSpecialitiesForForm(
-                        selectedClinicDoctor.speciality
-                            ? [selectedClinicDoctor.speciality]
-                            : []
-                    );
-
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = @json(
-                    route('doctors.settings.employees.update')
-                );
-                form.className = 'd-none';
-
-                const appendHidden = (name, value) => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = String(value ?? '');
-                    form.appendChild(input);
+                const data = {
+                    id: selectedClinicDoctor.id,
+                    surname: selectedClinicDoctor.surname,
+                    name: selectedClinicDoctor.name,
+                    patronym: selectedClinicDoctor.patronym,
+                    position: selectedPosition,
+                    specialties:
+                        selectedPosition
+                            === 'Медицинский регистратор'
+                            ? []
+                            : (
+                                selectedClinicDoctor.speciality
+                                    ? [selectedClinicDoctor.speciality]
+                                    : []
+                            ),
+                    employment_status: 'active',
+                    dismissed_at: '',
+                    phone: selectedClinicDoctor.phone,
+                    email: selectedClinicDoctor.email,
                 };
 
-                appendHidden('_token', csrfToken);
-                appendHidden('employee_action', 'add');
-                appendHidden(
-                    'employee_source',
-                    isNurseSource ? 'nurse' : 'doctor'
+                const newIndex = staffList
+                    .querySelectorAll('.clinic-staff-card')
+                    .length;
+
+                staffList.insertAdjacentHTML(
+                    'beforeend',
+                    employeeCardTemplate(data, newIndex)
                 );
 
-                if (isNurseSource) {
-                    appendHidden(
-                        'nurse_id',
-                        selectedClinicDoctor.nurseId
-                    );
-                } else {
-                    appendHidden(
-                        'doctor_id',
-                        selectedClinicDoctor.doctorId
-                    );
-                }
+                reindexEmployees();
+                bindEmployeeEditButtons();
 
-                appendHidden('position', position);
-                appendHidden('employment_status', 'active');
-                appendHidden('dismissed_at', '');
-                appendHidden('phone', selectedClinicDoctor.phone || '');
-                appendHidden('email', selectedClinicDoctor.email || '');
+                staffCurrentPage = Math.max(
+                    1,
+                    Math.ceil(
+                        staffCards().length
+                        / STAFF_PAGE_SIZE
+                    )
+                );
 
-                specialties.forEach(value => {
-                    appendHidden('specialties[]', value);
-                });
+                renderStaffPagination();
 
-                document.body.appendChild(form);
-
-                addSelectedDoctorButton.disabled = true;
-                addSelectedDoctorButton.innerHTML = `
-                    <span class="spinner-border spinner-border-sm"
-                          aria-hidden="true"></span>
-                    Добавляем...
-                `;
-
-                form.submit();
+                addDoctorModal?.hide();
+                clearSelectedClinicDoctor();
+                filterClinicDoctors();
             });
 
             employeeState?.addEventListener('change', () => {
@@ -3541,6 +4817,7 @@
             });
 
             employeePosition?.addEventListener('change', () => {
+                updateEmployeeSpecialityVisibility();
                 updateHeadmasterTransferVisibility();
             });
 
@@ -3550,12 +4827,7 @@
             });
 
             dismissEmployeeButton?.addEventListener('click', () => {
-                const hasEmployeeId =
-                    employeeSource?.value === 'nurse'
-                        ? Boolean(employeeNurseId?.value)
-                        : Boolean(employeeDoctorId?.value);
-
-                if (!employeeForm || !hasEmployeeId) {
+                if (!employeeForm || !employeeDoctorId?.value) {
                     return;
                 }
 
@@ -3620,12 +4892,6 @@
                 employeeForm.requestSubmit();
             });
 
-            document.querySelectorAll('.employee-speciality-option')
-                .forEach(input => {
-                    input.addEventListener('change', syncEmployeeSpecialityGroups);
-                });
-
-            syncEmployeeSpecialityGroups();
             reindexEmployees();
             bindEmployeeEditButtons();
 
@@ -3635,16 +4901,9 @@
             });
 
             @if($errors->employee->any())
-                if (employeeSource) {
-                    employeeSource.value = @json((string) old('employee_source', 'doctor'));
-                }
-
                 employeeDoctorId.value = @json((string) old('doctor_id', ''));
-
-                if (employeeNurseId) {
-                    employeeNurseId.value = @json((string) old('nurse_id', ''));
-                }
             employeePosition.value = @json(old('position', 'Врач'));
+            updateEmployeeSpecialityVisibility();
             employeeState.value = @json(old('employment_status', 'active'));
             employeePhone.value = @json(old('phone', ''));
             employeeEmail.value = @json(old('email', ''));
@@ -3666,18 +4925,10 @@
                         normalizeEmployeeSpeciality(input.value)
                     );
                 });
-            syncEmployeeSpecialityGroups();
 
             const errorEmployeeCard = Array.from(
                 staffList?.querySelectorAll('.clinic-staff-card') || []
             ).find(card => {
-                const source = employeeSource?.value || 'doctor';
-
-                if (source === 'nurse') {
-                    return String(card.dataset.nurseId || '')
-                        === String(employeeNurseId?.value || '');
-                }
-
                 return String(card.dataset.doctorId || '')
                     === String(employeeDoctorId.value || '');
             });
@@ -3699,6 +4950,8 @@
             updateHeadmasterTransferVisibility();
             employeeModal?.show();
             @endif
+
+            renderStaffPagination();
 
         })();
     </script>

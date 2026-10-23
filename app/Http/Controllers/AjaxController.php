@@ -10,6 +10,7 @@ use App\Models\LabResearchTemplate;
 use App\Models\Patient;
 use App\Models\PatientCondition;
 use App\Models\Test;
+use App\Support\PatientCareScope;
 use Filament\Forms\Components\Builder;
 use \Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,17 @@ use Illuminate\Support\Facades\Http;
 
 class AjaxController extends Controller
 {
+    const PSYCHIATRISTIC_DOCTORS = [
+        'Психолог',
+        'Патопсихолог',
+        'Детский психолог',
+        'Детский психиатр',
+        'Медицинский психолог',
+        'Психотерапевт',
+        'Детский психотерапевт',
+        'Психиатр'
+    ];
+
     public function medicineList(int $groupIdentificator): JsonResponse {
         return response()->json([
             "data" => Drug::whereGroup($groupIdentificator)->with('receptors')->get()
@@ -28,14 +40,29 @@ class AjaxController extends Controller
     public function getDoctors(): JsonResponse {
         return response()->json([
             'status' => 'success',
-            'items' => Doctor::get(['id', 'name', 'surname', 'patronym'])->toArray()
+            'items' => Doctor::whereNotIn('status', self::PSYCHIATRISTIC_DOCTORS)
+                    ->get(['id', 'name', 'surname', 'patronym', 'status'])
+                    ->toArray()
             ]);
     }
 
-    public function getPatient(): JsonResponse {
+    public function getPsyDoctors(): JsonResponse {
         return response()->json([
             'status' => 'success',
-            'items' => Patient::get(['id', 'name', 'surname', 'patronym'])->toArray()
+            'items' => Doctor::whereIn('status', self::PSYCHIATRISTIC_DOCTORS)
+                        ->get(['id', 'name', 'surname', 'patronym', 'status'])
+                        ->toArray()
+        ]);
+    }
+
+    public function getPatient(?Request $request = null): JsonResponse {
+        $scope = $this->patientSearchScope($request ?? request());
+
+        return response()->json([
+            'status' => 'success',
+            'items' => PatientCareScope::forPatients(Patient::query(), $scope)
+                ->get(['id', 'name', 'surname', 'patronym'])
+                ->toArray()
             ]);
     }
 
@@ -96,25 +123,82 @@ class AjaxController extends Controller
         ]);
     }
 
-    public function searchPatient(Request $request)
+    public function searchPatient(Request $request): JsonResponse
     {
-        $search = $request->query('q');
+        $scope = $this->patientSearchScope($request);
+        $search = trim((string) $request->query('q', ''));
 
-        $patients = Patient::where('surname', 'ilike', "%{$search}%")
-            ->orWhere('name', 'ilike', "%{$search}%")
-            ->orWhere('patronym', 'ilike', "%{$search}%")
-            ->orWhereRaw("CONCAT(surname, ' ', LEFT(name, 1), '.', LEFT(patronym, 1), '.') ILIKE ?", ["%{$search}%"])
-            ->limit(10)
+        if ($search === '' || mb_strlen($search, 'UTF-8') < 1) {
+            return response()->json([
+                'results' => [],
+            ]);
+        }
+
+        $terms = preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        $patients = PatientCareScope::forPatients(Patient::query(), $scope)
+            ->with('diagnose')
+            ->where(function ($query) use ($terms): void {
+                foreach ($terms as $term) {
+                    $like = '%' . $term . '%';
+
+                    $query->where(function ($part) use ($like): void {
+                        $part
+                            ->where('surname', 'ilike', $like)
+                            ->orWhere('name', 'ilike', $like)
+                            ->orWhere('patronym', 'ilike', $like)
+                            ->orWhereRaw(
+                                "CONCAT_WS(' ', surname, name, patronym) ILIKE ?",
+                                [$like]
+                            );
+                    });
+                }
+            })
+            ->orderBy('surname')
+            ->orderBy('name')
+            ->orderBy('patronym')
+            ->limit(12)
             ->get()
-            ->map(function ($patient) {
-                return [
-                    'id' => $patient->id,
-                    'text' => "{$patient->surname} " . mb_substr($patient->name, 0, 1) . "." . mb_substr($patient->patronym, 0, 1) . ".",
-                    'birth_at' => $patient->birth_at
-                ];
-            });
+            ->map(function (Patient $patient): array {
+                $birthAt = $patient->birth_at
+                    ? Carbon::parse($patient->birth_at)
+                    : null;
 
-        return response()->json(['results' => $patients]);
+                $fullName = collect([
+                    $patient->surname,
+                    $patient->name,
+                    $patient->patronym,
+                ])->filter()->implode(' ');
+
+                $diagnosisCode = trim((string) data_get($patient, 'diagnose.code', ''));
+                $diagnosisTitle = trim((string) (
+                    data_get($patient, 'diagnose.title')
+                    ?: data_get($patient, 'diagnose.name')
+                    ?: ''
+                ));
+
+                return [
+                    'id' => (int) $patient->id,
+                    // text оставляем для обратной совместимости с Select2 в других местах.
+                    'text' => $fullName,
+                    'full_name' => $fullName,
+                    'birth_at' => $birthAt?->format('Y-m-d'),
+                    'birth_at_display' => $birthAt?->format('d.m.Y'),
+                    'diagnosis' => [
+                        'id' => $patient->diagnose_id,
+                        'code' => $diagnosisCode !== '' ? $diagnosisCode : null,
+                        'title' => $diagnosisTitle !== '' ? $diagnosisTitle : null,
+                    ],
+                    'diagnosis_label' => ($diagnosisCode !== '' || $diagnosisTitle !== '')
+                        ? trim($diagnosisCode . ($diagnosisCode !== '' && $diagnosisTitle !== '' ? ' — ' : '') . $diagnosisTitle)
+                        : 'не установлен',
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'results' => $patients,
+        ]);
     }
 
     public function searchDrugs(Request $request): JsonResponse
@@ -491,27 +575,93 @@ class AjaxController extends Controller
         return response()->json($forms);
     }
 
-    public function searchPatientFor(int $id)
+    public function searchPatientFor(int $id, ?Request $request = null): JsonResponse
     {
-        $patient = Patient::findOrFail($id);
+        $scope = $this->patientSearchScope($request ?? request());
+        $patient = Patient::query()
+            ->with([
+                'doctor',
+                'diagnose',
+            ])
+            ->findOrFail($id);
+
+        if ($scope !== 'all') {
+            $isInpatient = PatientCareScope::isCurrentlyInpatient((int) $patient->id);
+
+            if (($scope === 'inpatient') !== $isInpatient) {
+                return response()->json([
+                    'message' => $scope === 'outpatient'
+                        ? 'Пациент сейчас находится в стационаре и недоступен для выбора в амбулаторной записи.'
+                        : 'Пациент сейчас не находится в стационаре.',
+                ], 422);
+            }
+        }
+
+        $birthAt = $patient->birth_at
+            ? Carbon::parse($patient->birth_at)
+            : null;
+
+        $fullName = collect([
+            $patient->surname,
+            $patient->name,
+            $patient->patronym,
+        ])->filter()->implode(' ');
+
+        $doctorName = collect([
+            data_get($patient, 'doctor.surname'),
+            data_get($patient, 'doctor.name'),
+            data_get($patient, 'doctor.patronym'),
+        ])->filter()->implode(' ');
 
         return response()->json([
-            'id' => $patient->id,
+            'id' => (int) $patient->id,
+            'full_name' => $fullName,
             'surname' => $patient->surname,
             'name' => $patient->name,
             'patronym' => $patient->patronym,
-            'birth_at' => $patient->birth_at ? Carbon::parse($patient->birth_at)->format('Y-m-d') : '',
+            'birth_at' => $birthAt?->format('Y-m-d'),
+            'birth_at_display' => $birthAt?->format('d.m.Y'),
+            'age' => $birthAt?->age,
+            'gender' => $patient->gender,
+            'medcard_number' => $patient->medcard_number,
             'address_registration' => $patient->address_registration,
             'address_residence' => $patient->address_residence,
             'serial' => $patient->serial,
             'number' => $patient->number,
             'department_code' => $patient->department_code,
             'issued_by' => $patient->issued_by,
-            'issued_at' => $patient->issued_at ? Carbon::parse($patient->issued_at)->format('Y-m-d') : '',
+            'issued_at' => $patient->issued_at
+                ? Carbon::parse($patient->issued_at)->format('Y-m-d')
+                : null,
             'birth_place' => $patient->birth_place,
             'snils' => $patient->snils,
             'oms' => $patient->oms,
+            'phone' => $patient->phone,
+            'email' => $patient->email,
+            'doctor' => [
+                'id' => data_get($patient, 'doctor.id'),
+                'name' => $doctorName,
+            ],
+            'diagnosis' => [
+                'id' => $patient->diagnose_id,
+                'code' => data_get($patient, 'diagnose.code'),
+                'title' => data_get($patient, 'diagnose.title')
+                    ?: data_get($patient, 'diagnose.name'),
+            ],
         ]);
+    }
+
+    private function patientSearchScope(Request $request): string
+    {
+        $scope = $request->query->has('patient_scope')
+            ? $request->query('patient_scope')
+            : 'all';
+
+        if (!is_string($scope) || !in_array($scope, ['all', 'inpatient', 'outpatient'], true)) {
+            abort(422, 'Некорректная область поиска пациентов. Допустимые значения: all, inpatient, outpatient.');
+        }
+
+        return $scope;
     }
 
     public function searchLabParameterGroup(Request $request): JsonResponse
@@ -641,7 +791,12 @@ class AjaxController extends Controller
 
     public function searchAddress(Request $request)
     {
-        $query = trim((string) $request->get('query', ''));
+        $query = trim(
+            (string) $request->get(
+                'query',
+                ''
+            )
+        );
 
         if (mb_strlen($query) < 2) {
             return response()->json([
@@ -649,65 +804,345 @@ class AjaxController extends Controller
             ]);
         }
 
-        $token = config('dadata.dadata_api');
+        /*
+         * Основной источник — DaData.
+         *
+         * Поддерживаем оба имени переменной окружения:
+         * DADATA_API_KEY и DADATA_TOKEN.
+         */
+        $token = config('dadata.dadata_api')
+            ?: config('dadata.token');
 
-        if (!$token) {
-            return response()->json([
-                'suggestions' => [],
-                'message' => 'DaData API key is not configured',
-            ], 500);
+        if ($token) {
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' =>
+                        'Token ' . $token,
+                    'Content-Type' =>
+                        'application/json',
+                    'Accept' =>
+                        'application/json',
+                ])
+                    ->timeout(8)
+                    ->post(
+                        'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
+                        [
+                            'query' => $query,
+                            'count' => 8,
+                            'division' =>
+                                'administrative',
+                        ]
+                    );
+
+                if ($response->successful()) {
+                    $suggestions = collect(
+                        $response->json(
+                            'suggestions',
+                            []
+                        )
+                    )
+                        ->map(
+                            static function (
+                                array $item
+                            ): array {
+                                $data =
+                                    $item['data']
+                                    ?? [];
+
+                                return [
+                                    'value' =>
+                                        $item['value']
+                                        ?? '',
+
+                                    'unrestricted_value' =>
+                                        $item[
+                                            'unrestricted_value'
+                                        ]
+                                        ?? '',
+
+                                    'postal_code' =>
+                                        $data[
+                                            'postal_code'
+                                        ]
+                                        ?? null,
+
+                                    'region' =>
+                                        $data[
+                                            'region_with_type'
+                                        ]
+                                        ?? null,
+
+                                    'city' =>
+                                        $data[
+                                            'city_with_type'
+                                        ]
+                                        ?? $data[
+                                            'settlement_with_type'
+                                        ]
+                                        ?? null,
+
+                                    'street' =>
+                                        $data[
+                                            'street_with_type'
+                                        ]
+                                        ?? null,
+
+                                    'house' =>
+                                        $data['house']
+                                        ?? null,
+
+                                    'flat' =>
+                                        $data['flat']
+                                        ?? null,
+
+                                    'fias_id' =>
+                                        $data['fias_id']
+                                        ?? null,
+
+                                    'fias_level' =>
+                                        $data[
+                                            'fias_level'
+                                        ]
+                                        ?? null,
+
+                                    'geo_lat' =>
+                                        $data['geo_lat']
+                                        ?? null,
+
+                                    'geo_lon' =>
+                                        $data['geo_lon']
+                                        ?? null,
+
+                                    'source' =>
+                                        'dadata',
+                                ];
+                            }
+                        )
+                        ->values();
+
+                    return response()->json([
+                        'suggestions' =>
+                            $suggestions,
+                        'source' =>
+                            'dadata',
+                    ]);
+                }
+
+                logger()->warning(
+                    'DaData address request failed',
+                    [
+                        'status' =>
+                            $response->status(),
+                        'body' =>
+                            mb_substr(
+                                $response->body(),
+                                0,
+                                500
+                            ),
+                    ]
+                );
+            } catch (\Throwable $exception) {
+                logger()->warning(
+                    'DaData address request exception',
+                    [
+                        'message' =>
+                            $exception->getMessage(),
+                    ]
+                );
+            }
+        } else {
+            logger()->warning(
+                'DaData token is not configured; using OSM fallback.'
+            );
         }
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Token ' . $token,
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-        ])->timeout(8)->post(
-            'https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',
-            [
-                'query' => $query,
-                'count' => 8,
-                'division' => 'administrative',
-            ]
-        );
+        /*
+         * Fallback без DaData.
+         *
+         * Нужен прежде всего для уже подтверждённого адреса:
+         * карта сможет получить координаты даже если ключ DaData
+         * отсутствует или внешний сервис временно недоступен.
+         */
+        try {
+            $userAgent = sprintf(
+                '%s/1.0 (%s)',
+                (string) config(
+                    'app.name',
+                    'Laravel'
+                ),
+                (string) config(
+                    'app.url',
+                    'localhost'
+                )
+            );
 
-        if (!$response->successful()) {
+            $response = Http::withHeaders([
+                'Accept' =>
+                    'application/json',
+                'User-Agent' =>
+                    $userAgent,
+            ])
+                ->timeout(8)
+                ->get(
+                    'https://nominatim.openstreetmap.org/search',
+                    [
+                        'q' => $query,
+                        'format' =>
+                            'jsonv2',
+                        'addressdetails' =>
+                            1,
+                        'limit' =>
+                            8,
+                        'countrycodes' =>
+                            'ru',
+                        'accept-language' =>
+                            'ru',
+                    ]
+                );
+
+            if (!$response->successful()) {
+                return response()->json(
+                    [
+                        'suggestions' => [],
+                        'message' =>
+                            'Сервис поиска адресов временно недоступен.',
+                    ],
+                    502
+                );
+            }
+
+            $suggestions = collect(
+                $response->json()
+            )
+                ->map(
+                    static function (
+                        array $item
+                    ): array {
+                        $address =
+                            $item['address']
+                            ?? [];
+
+                        $city =
+                            $address['city']
+                            ?? $address['town']
+                            ?? $address['village']
+                            ?? $address[
+                                'municipality'
+                            ]
+                            ?? null;
+
+                        $region =
+                            $address['state']
+                            ?? $address['region']
+                            ?? $address[
+                                'state_district'
+                            ]
+                            ?? null;
+
+                        $street =
+                            $address['road']
+                            ?? $address[
+                                'pedestrian'
+                            ]
+                            ?? $address[
+                                'residential'
+                            ]
+                            ?? null;
+
+                        return [
+                            'value' =>
+                                $item[
+                                    'display_name'
+                                ]
+                                ?? '',
+
+                            'unrestricted_value' =>
+                                $item[
+                                    'display_name'
+                                ]
+                                ?? '',
+
+                            'postal_code' =>
+                                $address[
+                                    'postcode'
+                                ]
+                                ?? null,
+
+                            'region' =>
+                                $region,
+
+                            'city' =>
+                                $city,
+
+                            'street' =>
+                                $street,
+
+                            'house' =>
+                                $address[
+                                    'house_number'
+                                ]
+                                ?? null,
+
+                            'flat' =>
+                                null,
+
+                            'fias_id' =>
+                                null,
+
+                            'fias_level' =>
+                                null,
+
+                            'geo_lat' =>
+                                $item['lat']
+                                ?? null,
+
+                            'geo_lon' =>
+                                $item['lon']
+                                ?? null,
+
+                            'source' =>
+                                'osm',
+                        ];
+                    }
+                )
+                ->filter(
+                    static fn (
+                        array $item
+                    ): bool =>
+                        $item['value'] !== ''
+                        && $item[
+                            'geo_lat'
+                        ] !== null
+                        && $item[
+                            'geo_lon'
+                        ] !== null
+                )
+                ->values();
+
             return response()->json([
-                'suggestions' => [],
-                'message' => 'DaData request failed',
-            ], 502);
+                'suggestions' =>
+                    $suggestions,
+                'source' =>
+                    'osm',
+            ]);
+        } catch (\Throwable $exception) {
+            logger()->error(
+                'Address search fallback failed',
+                [
+                    'message' =>
+                        $exception->getMessage(),
+                ]
+            );
+
+            return response()->json(
+                [
+                    'suggestions' => [],
+                    'message' =>
+                        'Не удалось получить координаты адреса.',
+                ],
+                502
+            );
         }
-
-        $suggestions = collect($response->json('suggestions', []))
-            ->map(function ($item) {
-                $data = $item['data'] ?? [];
-
-                return [
-                    'value' => $item['value'] ?? '',
-                    'unrestricted_value' => $item['unrestricted_value'] ?? '',
-
-                    'postal_code' => $data['postal_code'] ?? null,
-                    'region' => $data['region_with_type'] ?? null,
-                    'city' => $data['city_with_type'] ?? $data['settlement_with_type'] ?? null,
-                    'street' => $data['street_with_type'] ?? null,
-                    'house' => $data['house'] ?? null,
-                    'flat' => $data['flat'] ?? null,
-
-                    'fias_id' => $data['fias_id'] ?? null,
-                    'city_fias_id' => $data['city_fias_id'] ?? null,
-                    'settlement_fias_id' => $data['settlement_fias_id'] ?? null,
-                    'street_fias_id' => $data['street_fias_id'] ?? null,
-                    'house_fias_id' => $data['house_fias_id'] ?? null,
-                    'fias_level' => $data['fias_level'] ?? null,
-                    'geo_lat' => $data['geo_lat'] ?? null,
-                    'geo_lon' => $data['geo_lon'] ?? null,
-                ];
-            })
-            ->values();
-
-        return response()->json([
-            'suggestions' => $suggestions,
-        ]);
     }
 
     public function searchInsuranceOrganizations(Request $request)

@@ -14,10 +14,19 @@ class Clinic extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
+    public const TYPE_OUTPATIENT = 'outpatient';
+    public const TYPE_INPATIENT = 'inpatient';
+
+    public const INPATIENT_MODE_DAY = 'day';
+    public const INPATIENT_MODE_NIGHT = 'night';
+    public const INPATIENT_MODE_ROUND_THE_CLOCK = 'round_the_clock';
+
     protected $guarded = [];
 
     protected $casts = [
         'created_at' => 'datetime:d.m.Y H:i:s',
+        'inpatient_working_hours' => 'array',
+        'inpatient_visiting_hours' => 'array',
     ];
 
     // Форматированная дата создания

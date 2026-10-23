@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class SettingsController
+class SettingsController extends SettingsBaseController
 {
     private const NURSE_POSITIONS = [
         'Старшая медицинская сестра',
@@ -23,41 +23,13 @@ class SettingsController
         'Процедурная медицинская сестра',
     ];
 
-    private const DOCTOR_POSITIONS = [
-        'Главный врач',
-        'Врач',
-        'Детский психиатр',
-    ];
-
-    private const MANAGED_STAFF_POSITIONS = [
-        'Главный врач',
-        'Врач',
-        'Детский психиатр',
-        'Старшая медицинская сестра',
-        'Медицинская сестра',
-        'Процедурная медицинская сестра',
-        'Санитар',
-        'Медицинский психолог',
-        'Медицинский регистратор',
-    ];
-
     private const SPECIALTY_MAP = [
         'Психиатрия' => 'Психиатр',
+        'Психиатр-нарколог' => 'Психиатр-нарколог',
         'Детская психиатрия' => 'Детский психиатр',
         'Психотерапия' => 'Психотерапевт',
         'Клиническая психология' => 'Клинический психолог',
         'Сестринское дело' => 'Сестринское дело',
-    ];
-
-    private const SENIOR_PROFILE_SPECIALTIES = [
-        'Психиатрия',
-        'Детская психиатрия',
-        'Психотерапия',
-        'Клиническая психология',
-    ];
-
-    private const NURSING_PROFILE_SPECIALTIES = [
-        'Сестринское дело',
     ];
 
     public function index()
@@ -66,7 +38,7 @@ class SettingsController
         $isPrivatePractice = !$doctor?->clinic_id;
 
         if ($isPrivatePractice) {
-            return view(
+            return $this->settingsView(
                 'doctors.settings.general',
                 [
                     'doctor' => $doctor,
@@ -75,18 +47,25 @@ class SettingsController
                     'doctors' => collect(),
                     'clinicDoctors' => collect(),
                     'clinicNurses' => collect(),
+                    'clinicRegistrars' => collect(),
                     'availableDoctors' => collect(),
                     'availableNurses' => collect(),
                     'staffSummary' => [
                         'doctors' => 0,
                         'nurses' => 0,
+                        'registrars' => 0,
                     ],
                     'clinicPhones' => [],
                     'clinicServices' => [
                         'in_person',
                         'telemedicine',
                     ],
+                    'clinicType' => Clinic::TYPE_OUTPATIENT,
+                    'inpatientMode' =>
+                        Clinic::INPATIENT_MODE_ROUND_THE_CLOCK,
                     'weekDays' => [],
+                    'inpatientWeekDays' => [],
+                    'inpatientVisitingWeekDays' => [],
                 ]
             );
         }
@@ -113,6 +92,23 @@ class SettingsController
             ->orderBy('surname')
             ->orderBy('name')
             ->get();
+
+        /*
+         * Регистраторы пока хранятся в doctors как системные
+         * сотрудники, но считаются отдельной кадровой категорией.
+         * В кабинетах и расписании врачей они уже отсекаются
+         * по profession = "Медицинский регистратор".
+         */
+        $clinicRegistrars = $clinicDoctorRows
+            ->filter(
+                static fn (Doctor $employee): bool =>
+                    mb_strtolower(
+                        trim(
+                            (string) $employee->profession
+                        )
+                    ) === 'медицинский регистратор'
+            )
+            ->values();
 
         /*
          * В списке сотрудников показываем ВСЕ Doctor-записи текущей
@@ -189,6 +185,19 @@ class SettingsController
             }
         );
 
+        $clinicRegistrars->each(
+            static function (Doctor $employee): void {
+                $employee->profession =
+                    'Медицинский регистратор';
+
+                /*
+                 * Регистратор не имеет медицинского профиля.
+                 * Старый status не показываем даже до первого сохранения.
+                 */
+                $employee->status = null;
+            }
+        );
+
         /*
          * Один Doctor.id = один врач. Количество его специальностей
          * на состав и счётчик врачей не влияет.
@@ -202,6 +211,10 @@ class SettingsController
              */
             'doctors' => $clinicDoctors->unique('id')->count(),
             'nurses' => $clinicNurses->unique('id')->count(),
+            'registrars' =>
+                $clinicRegistrars
+                    ->unique('id')
+                    ->count(),
         ];
 
         /*
@@ -294,6 +307,35 @@ class SettingsController
             ) ?: [];
         }
 
+        $clinicType = old(
+            'clinic_type',
+            $clinic->clinic_type ?: Clinic::TYPE_OUTPATIENT
+        );
+
+        $inpatientMode = old(
+            'inpatient_mode',
+            $clinic->inpatient_mode
+                ?: Clinic::INPATIENT_MODE_ROUND_THE_CLOCK
+        );
+
+        $inpatientWorkingHours = old(
+            'inpatient_working_hours',
+            $clinic->inpatient_working_hours ?? []
+        );
+
+        $inpatientVisitingHours = old(
+            'inpatient_visiting_hours',
+            $clinic->inpatient_visiting_hours ?? []
+        );
+
+        if (!is_array($inpatientWorkingHours)) {
+            $inpatientWorkingHours = [];
+        }
+
+        if (!is_array($inpatientVisitingHours)) {
+            $inpatientVisitingHours = [];
+        }
+
         $schedule = $clinic
             ->workSchedules()
             ->get()
@@ -310,12 +352,25 @@ class SettingsController
         ];
 
         $weekDays = [];
+        $inpatientWeekDays = [];
+        $inpatientVisitingWeekDays = [];
+
+        $defaultInpatientFrom =
+            $inpatientMode === Clinic::INPATIENT_MODE_NIGHT
+                ? '20:00'
+                : '08:00';
+
+        $defaultInpatientTo =
+            $inpatientMode === Clinic::INPATIENT_MODE_NIGHT
+                ? '08:00'
+                : '20:00';
 
         foreach ($days as $dayNumber => $day) {
             $item = $schedule->get($dayNumber);
+            $code = $day['code'];
 
             $weekDays[] = [
-                'code' => $day['code'],
+                'code' => $code,
                 'label' => $day['label'],
                 'open' => $item
                     ? (bool) $item->enabled
@@ -327,9 +382,55 @@ class SettingsController
                     ? substr((string) $item->end_time, 0, 5)
                     : '20:00',
             ];
+
+            $inpatientHours = (array) (
+                $inpatientWorkingHours[$code]
+                ?? []
+            );
+
+            $inpatientWeekDays[] = [
+                'code' => $code,
+                'label' => $day['label'],
+                'open' => array_key_exists(
+                    'enabled',
+                    $inpatientHours
+                )
+                    ? (bool) $inpatientHours['enabled']
+                    : true,
+                'from' => (string) (
+                    $inpatientHours['from']
+                    ?? $defaultInpatientFrom
+                ),
+                'to' => (string) (
+                    $inpatientHours['to']
+                    ?? $defaultInpatientTo
+                ),
+            ];
+
+            $visitingHours = (array) (
+                $inpatientVisitingHours[$code]
+                ?? []
+            );
+
+            $inpatientVisitingWeekDays[] = [
+                'code' => $code,
+                'label' => $day['label'],
+                'open' => (bool) (
+                    $visitingHours['enabled']
+                    ?? false
+                ),
+                'from' => (string) (
+                    $visitingHours['from']
+                    ?? ''
+                ),
+                'to' => (string) (
+                    $visitingHours['to']
+                    ?? ''
+                ),
+            ];
         }
 
-        return view(
+        return $this->settingsView(
             'doctors.settings.general',
             compact(
                 'doctor',
@@ -338,12 +439,17 @@ class SettingsController
                 'doctors',
                 'clinicDoctors',
                 'clinicNurses',
+                'clinicRegistrars',
                 'availableDoctors',
                 'availableNurses',
                 'staffSummary',
                 'clinicPhones',
                 'clinicServices',
-                'weekDays'
+                'clinicType',
+                'inpatientMode',
+                'weekDays',
+                'inpatientWeekDays',
+                'inpatientVisitingWeekDays'
             )
         );
     }
@@ -355,52 +461,110 @@ class SettingsController
             auth()->user()->doctor->clinic_id
         );
 
-        foreach ($request->array('employees') as $index => $employeeData) {
-            if (
-                $this->hasConflictingSpecialtyGroups(
-                    $employeeData['specialties'] ?? []
-                )
-            ) {
-                return back()
-                    ->withErrors([
-                        'employees.' . $index . '.specialties' =>
-                            'Специальности врачебного профиля и сестринского дела нельзя выбирать одновременно.',
-                    ])
-                    ->withInput();
-            }
+        // Запрещаем отправлять другой clinic_type даже вручную через HTTP.
+        if ($request->filled('clinic_type')
+            && (string) $request->input('clinic_type') !== (string) $clinic->clinic_type) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'clinic_type' => 'Тип учреждения можно установить только при регистрации через Filament.',
+            ]);
         }
 
         DB::transaction(
             function () use ($request, $clinic): void {
+                // Тип учреждения фиксируется при создании в Filament.
+                // Здесь его нельзя изменять: амбулатория не превращается
+                // в стационар после сохранения обычной формы настроек.
                 $clinic->name = $request->name;
                 $clinic->address = $request->address;
                 $clinic->description = $request->description;
                 $clinic->phones = $request->phones;
                 $clinic->city = $request->city;
-                $clinic->services = $request->services;
+
+                /*
+                 * Форматы «Очный приём / Телемедицина» относятся к
+                 * амбулаторной части. Для стационара блок скрыт и его
+                 * поля не отправляются, поэтому прежнее значение не
+                 * затираем: оно пригодится, если клинику снова переключат
+                 * в амбулаторный режим.
+                 */
+                if (
+                    $clinic->clinic_type
+                    === Clinic::TYPE_OUTPATIENT
+                ) {
+                    $clinic->services = $request->services;
+                } else {
+                    $clinic->inpatient_mode = $request->string(
+                        'inpatient_mode'
+                    )->toString();
+
+                    $clinic->inpatient_working_hours =
+                        $request->array(
+                            'inpatient_working_hours'
+                        );
+
+                    $clinic->inpatient_visiting_hours =
+                        $request->array(
+                            'inpatient_visiting_hours'
+                        );
+                }
+
+                /*
+                 * Координаты подтверждённого адреса должны храниться
+                 * вместе с самой клиникой. Иначе после перезагрузки
+                 * карта снова вынуждена геокодировать уже известный адрес.
+                 */
+                if (
+                    Schema::hasColumn(
+                        'clinics',
+                        'latitude'
+                    )
+                ) {
+                    $clinic->latitude =
+                        $request->filled('latitude')
+                            ? (float) $request->latitude
+                            : null;
+                }
+
+                if (
+                    Schema::hasColumn(
+                        'clinics',
+                        'longitude'
+                    )
+                ) {
+                    $clinic->longitude =
+                        $request->filled('longitude')
+                            ? (float) $request->longitude
+                            : null;
+                }
+
                 $clinic->save();
 
-                foreach (
-                    $request->array('working_hours')
-                    as $key => $value
+                if (
+                    $clinic->clinic_type
+                    === Clinic::TYPE_OUTPATIENT
                 ) {
-                    ClinicWorkShedule::updateOrCreate(
-                        [
-                            'clinic_id' => $clinic->id,
-                            'day_number' =>
-                                ClinicWorkShedule::dayToNumber(
-                                    $key
-                                ),
-                        ],
-                        [
-                            'enabled' =>
-                                (bool) ($value['enabled'] ?? false),
-                            'start_time' =>
-                                $value['from'] ?? null,
-                            'end_time' =>
-                                $value['to'] ?? null,
-                        ]
-                    );
+                    foreach (
+                        $request->array('working_hours')
+                        as $key => $value
+                    ) {
+                        ClinicWorkShedule::updateOrCreate(
+                            [
+                                'clinic_id' => $clinic->id,
+                                'day_number' =>
+                                    ClinicWorkShedule::dayToNumber(
+                                        $key
+                                    ),
+                            ],
+                            [
+                                'enabled' =>
+                                    (bool) ($value['enabled'] ?? false),
+                                'start_time' =>
+                                    $value['from'] ?? null,
+                                'end_time' =>
+                                    $value['to'] ?? null,
+                            ]
+                        );
+                    }
                 }
 
                 /*
@@ -457,9 +621,19 @@ class SettingsController
                         $value['specialties'] ?? []
                     );
 
-                    $employee->status = $status !== ''
-                        ? $status
-                        : null;
+                    if (
+                        trim(
+                            (string) (
+                                $value['position']
+                                ?? ''
+                            )
+                        )
+                        === 'Медицинский регистратор'
+                    ) {
+                        $employee->status = null;
+                    } elseif ($status !== '') {
+                        $employee->status = $status;
+                    }
 
                     $this->fillOptionalEmployeeFields(
                         $employee,
@@ -492,77 +666,39 @@ class SettingsController
     public function updateEmployee(
         Request $request
     ): RedirectResponse {
-        $user = auth()->user();
-        $currentDoctor = $user?->doctor;
-
-        abort_unless(
-            $currentDoctor
-                && (int) $currentDoctor->clinic_id > 0,
-            403
-        );
-
+        $currentDoctor = auth()->user()->doctor;
         $clinicId = (int) $currentDoctor->clinic_id;
         $clinic = Clinic::findOrFail($clinicId);
 
-        $isAdmin = method_exists($user, 'hasRole')
-            && $user->hasRole('admins');
-
         abort_unless(
-            $isAdmin
-                || (int) $clinic->headmaster_id
-                    === (int) $currentDoctor->id,
+            (int) $clinic->headmaster_id
+                === (int) $currentDoctor->id,
             403
         );
-
-        $employeeAction = (string) $request->input(
-            'employee_action',
-            'update'
-        );
-
-        $employeeSource = (string) $request->input(
-            'employee_source',
-            'doctor'
-        );
-
-        $isNurseSource = $employeeSource === 'nurse';
 
         $validator = Validator::make(
             $request->all(),
             [
-                'employee_action' => [
-                    'nullable',
-                    Rule::in([
-                        'add',
-                        'update',
-                    ]),
-                ],
-
-                'employee_source' => [
-                    'nullable',
-                    Rule::in([
-                        'doctor',
-                        'nurse',
-                    ]),
-                ],
-
                 'doctor_id' => [
-                    Rule::requiredIf(!$isNurseSource),
-                    'nullable',
+                    'required',
                     'integer',
-                    Rule::exists('doctors', 'id'),
-                ],
-
-                'nurse_id' => [
-                    Rule::requiredIf($isNurseSource),
-                    'nullable',
-                    'integer',
-                    Rule::exists('nurses', 'id'),
+                    Rule::exists('doctors', 'id')
+                        ->where('clinic_id', $clinicId),
                 ],
 
                 'position' => [
                     'required',
                     'string',
-                    Rule::in(self::MANAGED_STAFF_POSITIONS),
+                    Rule::in([
+                        'Главный врач',
+                        'Врач',
+                        'Детский психиатр',
+                        'Старшая медицинская сестра',
+                        'Медицинская сестра',
+                        'Санитар',
+                        'Медицинский психолог',
+                        'Медицинский регистратор',
+                    ]),
                 ],
 
                 'employment_status' => [
@@ -609,27 +745,14 @@ class SettingsController
                     'nullable',
                     'integer',
                     Rule::exists('doctors', 'id')
-                        ->where(
-                            static function ($query) use ($clinicId): void {
-                                $query
-                                    ->where('clinic_id', $clinicId)
-                                    ->whereIn(
-                                        'profession',
-                                        self::DOCTOR_POSITIONS
-                                    );
-                            }
-                        ),
+                        ->where('clinic_id', $clinicId),
                 ],
             ],
             [
                 'doctor_id.required' =>
                     'Не удалось определить сотрудника.',
                 'doctor_id.exists' =>
-                    'Сотрудник не найден.',
-                'nurse_id.required' =>
-                    'Не удалось определить медицинскую сестру.',
-                'nurse_id.exists' =>
-                    'Медицинская сестра не найдена.',
+                    'Сотрудник не относится к текущей клинике.',
                 'specialties.*.in' =>
                     'Выбрана неизвестная специальность.',
                 'new_headmaster_id.exists' =>
@@ -648,186 +771,17 @@ class SettingsController
 
         $data = $validator->validated();
 
-        if (
-            $this->hasConflictingSpecialtyGroups(
-                $data['specialties'] ?? []
-            )
-        ) {
-            return back()
-                ->withErrors(
-                    [
-                        'specialties' =>
-                            'Специальности врачебного профиля и сестринского дела нельзя выбирать одновременно.',
-                    ],
-                    'employee'
-                )
-                ->withInput();
-        }
-
-        /*
-         * Медсестра живёт в nurses. user_id здесь не используется
-         * ни для поиска, ни для дедупликации, ни для изменения clinic_id.
-         */
-        if ($isNurseSource) {
-            if (
-                !in_array(
-                    $data['position'],
-                    self::NURSE_POSITIONS,
-                    true
-                )
-            ) {
-                return back()
-                    ->withErrors(
-                        [
-                            'position' =>
-                                'Для медицинской сестры выберите сестринскую должность.',
-                        ],
-                        'employee'
-                    )
-                    ->withInput();
-            }
-
-            $nurseQuery = Nurse::query()
-                ->where(
-                    'id',
-                    (int) $data['nurse_id']
-                );
-
-            if ($employeeAction === 'add') {
-                $nurseQuery->where(
-                    static function ($query) use ($clinicId): void {
-                        $query
-                            ->where('clinic_id', $clinicId)
-                            ->orWhereNull('clinic_id')
-                            ->orWhere('clinic_id', 0);
-                    }
-                );
-            } else {
-                $nurseQuery->where('clinic_id', $clinicId);
-            }
-
-            $nurse = $nurseQuery->first();
-
-            if (!$nurse) {
-                return back()
-                    ->withErrors(
-                        [
-                            'nurse_id' =>
-                                $employeeAction === 'add'
-                                    ? 'Медицинская сестра уже относится к другой клинике или недоступна для добавления.'
-                                    : 'Медицинская сестра не относится к текущей клинике.',
-                        ],
-                        'employee'
-                    )
-                    ->withInput();
-            }
-
-            DB::transaction(
-                function () use (
-                    $nurse,
-                    $data,
-                    $clinicId
-                ): void {
-                    $nurse->clinic_id =
-                        $data['employment_status'] === 'dismissed'
-                            ? 0
-                            : $clinicId;
-
-                    $nurse->profession = $data['position'];
-
-                    if (Schema::hasColumn('nurses', 'phone')) {
-                        $nurse->phone = $data['phone'] ?? null;
-                    }
-
-                    if (Schema::hasColumn('nurses', 'email')) {
-                        $nurse->email = $data['email'] ?? null;
-                    }
-
-                    if (Schema::hasColumn('nurses', 'employment_status')) {
-                        $nurse->employment_status =
-                            $data['employment_status'];
-                    }
-
-                    if (Schema::hasColumn('nurses', 'dismissed_at')) {
-                        $nurse->dismissed_at =
-                            $data['employment_status'] === 'dismissed'
-                                ? ($data['dismissed_at'] ?? now())
-                                : null;
-                    }
-
-                    $nurse->save();
-                }
-            );
-
-            Cache::forget('clinic_' . $clinicId);
-
-            return redirect()
-                ->route('doctors.settings.index')
-                ->with(
-                    'employee_success',
-                    $employeeAction === 'add'
-                        ? 'Медицинская сестра была успешно добавлена в клинику.'
-                        : 'Данные медицинской сестры были успешно сохранены.'
-                );
-        }
-
-        if (
-            in_array(
-                $data['position'],
-                self::NURSE_POSITIONS,
-                true
-            )
-        ) {
-            return back()
-                ->withErrors(
-                    [
-                        'position' =>
-                            'Сестринский персонал должен редактироваться через запись из таблицы nurses.',
-                    ],
-                    'employee'
-                )
-                ->withInput();
-        }
-
-        $employeeQuery = Doctor::query()
-            ->where(
-                'id',
+        $employee = Doctor::where(
+            'clinic_id',
+            $clinicId
+        )
+            ->findOrFail(
                 (int) $data['doctor_id']
             );
 
-        if ($employeeAction === 'add') {
-            $employeeQuery->where(
-                static function ($query) use ($clinicId): void {
-                    $query
-                        ->where('clinic_id', $clinicId)
-                        ->orWhereNull('clinic_id')
-                        ->orWhere('clinic_id', 0);
-                }
-            );
-        } else {
-            $employeeQuery->where('clinic_id', $clinicId);
-        }
-
-        $employee = $employeeQuery->first();
-
-        if (!$employee) {
-            return back()
-                ->withErrors(
-                    [
-                        'doctor_id' =>
-                            $employeeAction === 'add'
-                                ? 'Сотрудник уже относится к другой клинике или недоступен для добавления.'
-                                : 'Сотрудник не относится к текущей клинике.',
-                    ],
-                    'employee'
-                )
-                ->withInput();
-        }
-
         $isCurrentHeadmaster =
-            $employeeAction !== 'add'
-            && (int) $clinic->headmaster_id
-                === (int) $employee->id;
+            (int) $clinic->headmaster_id
+            === (int) $employee->id;
 
         $headmasterTransferRequired =
             $isCurrentHeadmaster
@@ -872,42 +826,65 @@ class SettingsController
                 $data,
                 $employee,
                 $clinic,
-                $clinicId,
-                $employeeAction,
                 $headmasterTransferRequired
             ): void {
-                if ($employeeAction === 'add') {
-                    $employee->clinic_id = $clinicId;
-                }
+                $employee->profession =
+                    $data['position'];
 
-                $employee->profession = $data['position'];
-
+                /*
+                 * В текущей БД отдельного поля specialties нет.
+                 * Поэтому выбранные профили храним в doctors.status
+                 * одной строкой через запятую.
+                 */
                 $status = $this->specialtiesToStatus(
                     $data['specialties'] ?? []
                 );
 
-                $employee->status = $status !== ''
-                    ? $status
-                    : null;
+                if (
+                    $data['position']
+                    === 'Медицинский регистратор'
+                ) {
+                    $employee->status = null;
+                } elseif ($status !== '') {
+                    $employee->status = $status;
+                }
 
                 $this->fillOptionalEmployeeFields(
                     $employee,
                     $data
                 );
 
-                if (Schema::hasColumn('doctors', 'employment_status')) {
+                if (
+                    Schema::hasColumn(
+                        'doctors',
+                        'employment_status'
+                    )
+                ) {
                     $employee->employment_status =
                         $data['employment_status'];
                 }
 
-                if (Schema::hasColumn('doctors', 'dismissed_at')) {
+                if (
+                    Schema::hasColumn(
+                        'doctors',
+                        'dismissed_at'
+                    )
+                ) {
                     $employee->dismissed_at =
-                        $data['employment_status'] === 'dismissed'
-                            ? ($data['dismissed_at'] ?? now())
-                            : null;
+                        $data['employment_status']
+                            === 'dismissed'
+                                ? ($data['dismissed_at'] ?? now())
+                                : null;
                 }
 
-                if ($data['employment_status'] === 'dismissed') {
+                if (
+                    $data['employment_status']
+                    === 'dismissed'
+                ) {
+                    /*
+                     * В проекте непривязанный врач хранится
+                     * с clinic_id = 0.
+                     */
                     $employee->clinic_id = 0;
                 }
 
@@ -918,11 +895,11 @@ class SettingsController
                         (int) $data['new_headmaster_id'];
                     $clinic->save();
                 } elseif (
-                    $employeeAction !== 'add'
-                    && $data['position'] === 'Главный врач'
+                    $data['position'] === 'Главный врач'
                     && $data['employment_status'] !== 'dismissed'
                 ) {
-                    $clinic->headmaster_id = $employee->id;
+                    $clinic->headmaster_id =
+                        $employee->id;
                     $clinic->save();
                 }
             }
@@ -934,72 +911,8 @@ class SettingsController
             ->route('doctors.settings.index')
             ->with(
                 'employee_success',
-                $employeeAction === 'add'
-                    ? 'Сотрудник был успешно добавлен в клинику.'
-                    : 'Данные сотрудника были успешно сохранены.'
+                'Данные сотрудника были успешно сохранены.'
             );
-    }
-
-    private function hasConflictingSpecialtyGroups(
-        array $specialties
-    ): bool {
-        $specialties = collect($specialties)
-            ->flatMap(
-                static fn ($value): array =>
-                    array_map(
-                        'trim',
-                        preg_split('/[,;|]/u', (string) $value) ?: []
-                    )
-            )
-            ->filter()
-            ->map(
-                fn (string $value): string =>
-                    $this->normalizeSpecialtyForGroup($value)
-            )
-            ->filter()
-            ->unique();
-
-        return $specialties
-                ->intersect(self::SENIOR_PROFILE_SPECIALTIES)
-                ->isNotEmpty()
-            && $specialties
-                ->intersect(self::NURSING_PROFILE_SPECIALTIES)
-                ->isNotEmpty();
-    }
-
-    private function normalizeSpecialtyForGroup(
-        string $value
-    ): string {
-        $normalized = mb_strtolower(trim($value));
-
-        return match ($normalized) {
-            'психиатр', 'психиатрия' => 'Психиатрия',
-            'детский психиатр',
-            'врач-психиатр детский',
-            'детская психиатрия' => 'Детская психиатрия',
-            'психотерапевт', 'психотерапия' => 'Психотерапия',
-            'медицинский психолог',
-            'клинический психолог',
-            'клиническая психология' => 'Клиническая психология',
-            'медицинская сестра',
-            'старшая медицинская сестра',
-            'процедурная медицинская сестра',
-            'сестринское дело' => 'Сестринское дело',
-            default => trim($value),
-        };
-    }
-
-    private function isRemovedSpecialty(
-        string $value
-    ): bool {
-        return in_array(
-            mb_strtolower(trim($value)),
-            [
-                'невролог',
-                'неврология',
-            ],
-            true
-        );
     }
 
     private function specialtiesToStatus(
@@ -1010,22 +923,20 @@ class SettingsController
                 static function ($value): array {
                     return array_map(
                         'trim',
-                        preg_split('/[,;|]/u', (string) $value) ?: []
+                        explode(
+                            ',',
+                            (string) $value
+                        )
                     );
                 }
             )
             ->filter()
-            ->reject(
-                fn (string $specialty): bool =>
-                    $this->isRemovedSpecialty($specialty)
-            )
             ->map(
                 static function (string $specialty): string {
                     return self::SPECIALTY_MAP[$specialty]
                         ?? $specialty;
                 }
             )
-            ->filter()
             ->unique()
             ->values()
             ->implode(', ');

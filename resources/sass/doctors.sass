@@ -152,3 +152,536 @@ table
 
     & .table__indications-column
         width: 25vw
+
+
+// ===== Новая навигация врача: стили изолированы классом doctor-sidebar =====
+
+.doctor-sidebar
+    --doctor-side-muted: #97aac1
+    --doctor-side-text: #edf5ff
+    --doctor-side-accent: #65e4de
+    width: 286px
+    min-width: 286px
+    height: 100vh
+    height: 100dvh
+    position: relative
+    z-index: 1042
+    flex: 0 0 auto
+    display: flex
+    flex-direction: column
+    color: var(--doctor-side-text)
+    font-family: 'Montserrat', system-ui, sans-serif
+    background: radial-gradient(ellipse at 16% -10%, rgba(47, 126, 170, .25), transparent 49%), linear-gradient(167deg, #12253c 0%, #0c1b30 50%, #0a182a 100%)
+    border-right: 1px solid rgba(161, 202, 230, .12)
+    box-shadow: 6px 0 28px rgba(10, 25, 42, .055)
+    transition: width .25s ease, min-width .25s ease, transform .28s ease
+.doctor-sidebar *, .doctor-sidebar *::before, .doctor-sidebar *::after, .doctor-mobile-navbar *, .doctor-mobile-navbar *::before, .doctor-mobile-navbar *::after
+    box-sizing: border-box
+.doctor-sidebar__top
+    position: relative
+    display: flex
+    align-items: center
+    min-height: 96px
+    padding: 20px 21px 17px
+    border-bottom: 1px solid rgba(187, 216, 242, .085)
+    flex-shrink: 0
+.doctor-sidebar__brand
+    display: flex
+    align-items: center
+    gap: 12px
+    min-width: 0
+    text-decoration: none !important
+    color: #fff !important
+.doctor-sidebar__brand-icon
+    width: 46px
+    height: 46px
+    flex-shrink: 0
+    border-radius: 14px
+    display: grid
+    place-items: center
+    color: #062e37
+    font-size: 23px
+    background: linear-gradient(140deg, #7af1dc 0%, #44c9d3 72%, #3da8d4 100%)
+    box-shadow: 0 6px 23px rgba(48, 215, 206, .2), inset 0 1px rgba(255,255,255,.3)
+.doctor-sidebar__brand-copy
+    display: flex
+    min-width: 0
+    flex-direction: column
+    gap: 3px
+    white-space: nowrap
+.doctor-sidebar__brand-copy strong
+    font-size: 17px
+    font-weight: 780
+    letter-spacing: -.035em
+    line-height: 1.15
+.doctor-sidebar__brand-copy small
+    color: #81a7bc
+    font-weight: 750
+    font-size: 9px
+    letter-spacing: .15em
+.doctor-sidebar__collapse
+    position: absolute
+    top: 34px
+    right: -13px
+    z-index: 1
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 27px
+    height: 27px
+    padding: 0
+    border: 1px solid #d7e5ee
+    border-radius: 50%
+    background: #fff
+    box-shadow: 0 2px 12px rgba(9, 37, 58, .2)
+    color: #465d70
+    font-size: 12px
+    cursor: pointer
+    transition: transform .18s ease, background .18s ease
+.doctor-sidebar__collapse:hover
+    background: #e8fcfa
+    transform: scale(1.08)
+.doctor-sidebar__close
+    display: none
+.doctor-sidebar__scroll
+    flex: 1 1 auto
+    min-height: 0
+    overflow-y: auto
+    overflow-x: hidden
+    scrollbar-width: thin
+    scrollbar-color: rgba(122, 161, 195, .23) transparent
+    padding: 11px 12px 25px
+.doctor-sidebar__scroll::-webkit-scrollbar
+    width: 5px
+.doctor-sidebar__scroll::-webkit-scrollbar-thumb
+    border-radius: 5px
+    background: rgba(122, 161, 195, .2)
+.doctor-sidebar__group + .doctor-sidebar__group
+    margin-top: 15px
+.doctor-sidebar__heading
+    display: flex
+    align-items: center
+    height: 35px
+    padding: 5px 12px
+    color: #6e8aa7
+    font-size: 9.5px
+    font-weight: 800
+    letter-spacing: .12em
+    text-transform: uppercase
+    white-space: nowrap
+.doctor-sidebar__nav
+    display: flex
+    flex-direction: column
+    list-style: none
+    margin: 0
+    padding: 0
+    gap: 5px
+.doctor-sidebar__nav li
+    margin: 0
+    padding: 0
+.doctor-sidebar__link
+    position: relative
+    display: flex
+    align-items: center
+    min-height: 51px
+    gap: 12px
+    padding: 8px 11px
+    border: 1px solid transparent
+    border-radius: 12px
+    background: transparent
+    color: #a5b8cc !important
+    text-decoration: none !important
+    font-size: 12.7px
+    font-weight: 610
+    line-height: 1.35
+    transition: background .17s ease, border-color .17s ease, color .17s ease, transform .17s ease
+.doctor-sidebar__link:hover
+    background: rgba(181, 213, 235, .09)
+    color: #fff !important
+.doctor-sidebar__link-icon
+    display: grid
+    place-items: center
+    flex-shrink: 0
+    width: 34px
+    height: 34px
+    border-radius: 10px
+    background: rgba(164, 192, 224, .08)
+    color: #9cb9cf
+    font-size: 17px
+    transition: background .17s ease, color .17s ease
+.doctor-sidebar__link:hover .doctor-sidebar__link-icon
+    color: #b0f0e8
+    background: rgba(99, 218, 212, .12)
+.doctor-sidebar__link-text
+    flex: 1 1 auto
+    min-width: 0
+    white-space: nowrap
+.doctor-sidebar__link-active-dot
+    opacity: 0
+    height: 6px
+    width: 6px
+    margin-right: 3px
+    flex-shrink: 0
+    border-radius: 50%
+    background: #6be5da
+    box-shadow: 0 0 12px rgba(67, 228, 220, .65)
+.doctor-sidebar__link.is-active
+    border-color: rgba(97, 220, 211, .21)
+    background: linear-gradient(95deg, rgba(45, 172, 175, .26), rgba(45, 132, 162, .1))
+    color: #f4fffe !important
+.doctor-sidebar__link.is-active::before
+    content: ''
+    position: absolute
+    left: -1px
+    top: 11px
+    bottom: 11px
+    width: 3px
+    border-radius: 0 4px 4px 0
+    background: #70ecdd
+    box-shadow: 0 0 14px rgba(78, 232, 224, .5)
+.doctor-sidebar__link.is-active .doctor-sidebar__link-icon
+    background: rgba(89, 223, 212, .15)
+    color: #6fede3
+.doctor-sidebar__link.is-active .doctor-sidebar__link-active-dot
+    opacity: 1
+.doctor-sidebar__footer
+    flex-shrink: 0
+    padding: 12px 13px 17px
+    border-top: 1px solid rgba(187, 216, 242, .085)
+    background: linear-gradient(to top, rgba(4, 12, 27, .3), transparent)
+.doctor-sidebar__mode-card
+    display: flex
+    align-items: center
+    gap: 11px
+    min-height: 66px
+    padding: 11px 12px
+    border: 1px solid rgba(106, 207, 216, .12)
+    border-radius: 13px
+    background: rgba(45, 117, 151, .1)
+    margin-bottom: 12px
+.doctor-sidebar__mode-icon
+    display: grid
+    place-items: center
+    width: 37px
+    height: 37px
+    flex-shrink: 0
+    border-radius: 10px
+    background: rgba(54, 211, 208, .11)
+    color: #74dcd6
+    font-size: 18px
+.doctor-sidebar__mode-copy
+    display: flex
+    flex: 1 1 auto
+    min-width: 0
+    flex-direction: column
+    gap: 4px
+.doctor-sidebar__mode-copy small
+    color: #849eb6
+    font-size: 10px
+    font-weight: 600
+.doctor-sidebar__mode-copy strong
+    color: #e3f5f4
+    font-size: 12px
+    font-weight: 650
+    white-space: nowrap
+.doctor-sidebar__mode-indicator
+    align-self: center
+    flex-shrink: 0
+    width: 7px
+    height: 7px
+    border-radius: 50%
+    background: #65d8cd
+    box-shadow: 0 0 0 4px rgba(76, 201, 188, .12)
+.doctor-sidebar__account-dropdown
+    width: 100%
+.doctor-sidebar__account
+    display: flex
+    align-items: center
+    gap: 10px
+    width: 100%
+    min-height: 60px
+    padding: 9px 10px
+    border: 1px solid rgba(188, 210, 235, .115)
+    border-radius: 13px
+    color: #fff
+    background: rgba(171, 203, 234, .065)
+    cursor: pointer
+    text-align: left
+    transition: background .17s ease, border-color .17s ease
+.doctor-sidebar__account:hover, .doctor-sidebar__account[aria-expanded="true"]
+    background: rgba(171, 203, 234, .11)
+    border-color: rgba(171, 203, 234, .2)
+.doctor-sidebar__avatar
+    display: grid
+    place-items: center
+    width: 38px
+    height: 38px
+    flex-shrink: 0
+    border-radius: 11px
+    color: #f7ffff
+    font-size: 16px
+    font-weight: 800
+    background: linear-gradient(145deg, #3c8db7, #285a82)
+    border: 1px solid rgba(255,255,255,.18)
+.doctor-sidebar__account-copy
+    display: flex
+    flex-direction: column
+    min-width: 0
+    flex: 1 1 auto
+    gap: 3px
+.doctor-sidebar__account-copy strong
+    font-size: 12px
+    font-weight: 740
+    color: #eef7ff
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+.doctor-sidebar__account-copy small
+    font-size: 10px
+    color: #819bb4
+    white-space: nowrap
+.doctor-sidebar__account-chevron
+    color: #829bb4
+    font-size: 17px
+.doctor-sidebar__dropdown
+    --bs-dropdown-link-active-bg: #e8f7f5
+    --bs-dropdown-link-active-color: #126e77
+    width: max-content
+    min-width: 235px
+    max-width: min(290px, calc(100vw - 24px))
+    padding: 7px
+    border: 1px solid #dce8f2
+    border-radius: 13px
+    background: #fff
+    box-shadow: 0 16px 40px rgba(7, 29, 48, .22)
+    font-family: 'Montserrat', system-ui, sans-serif
+.doctor-sidebar__dropdown .dropdown-item
+    display: flex
+    align-items: center
+    gap: 10px
+    padding: 10px 12px
+    border-radius: 8px
+    color: #283f53
+    font-size: 12px
+    font-weight: 600
+.doctor-sidebar__dropdown .dropdown-item:hover, .doctor-sidebar__dropdown .dropdown-item:focus
+    background: #eef9f8
+    color: #106a77
+.doctor-sidebar__dropdown .dropdown-item i
+    color: #7196a7
+    font-size: 16px
+.doctor-sidebar__dropdown .dropdown-divider
+    border-color: #ecf0f4
+    margin: 6px 3px
+.doctor-sidebar__dropdown .doctor-sidebar__logout
+    color: #bb4c59
+.doctor-sidebar__dropdown .doctor-sidebar__logout i
+    color: #bb4c59
+.doctor-sidebar a:focus-visible, .doctor-sidebar button:focus-visible, .doctor-mobile-navbar button:focus-visible
+    outline: 2px solid #7bf0e7
+    outline-offset: 3px
+.doctor-mobile-navbar
+    display: none
+.doctor-sidebar__backdrop
+    display: none
+@media (min-width: 992px)
+    .doctor-sidebar.is-collapsed
+        width: 82px
+        min-width: 82px
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__top
+        padding: 20px 16px 17px
+        justify-content: center
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__brand-copy, .doctor-sidebar.is-collapsed .doctor-sidebar__heading span, .doctor-sidebar.is-collapsed .doctor-sidebar__link-text, .doctor-sidebar.is-collapsed .doctor-sidebar__link-active-dot, .doctor-sidebar.is-collapsed .doctor-sidebar__account-copy, .doctor-sidebar.is-collapsed .doctor-sidebar__account-chevron, .doctor-sidebar.is-collapsed .doctor-sidebar__mode-card
+        display: none
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__collapse i
+        transform: rotate(180deg)
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__scroll
+        padding: 11px 12px 18px
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__heading
+        position: relative
+        height: 26px
+        padding: 0
+        justify-content: center
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__heading::after
+        content: ''
+        display: block
+        width: 26px
+        height: 1px
+        background: rgba(170, 206, 230, .14)
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__group + .doctor-sidebar__group
+        margin-top: 13px
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__link
+        padding: 7px
+        justify-content: center
+        gap: 0
+        min-height: 49px
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__link-icon
+        width: 35px
+        height: 35px
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__footer
+        padding: 14px 12px 19px
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__account
+        justify-content: center
+        min-height: 52px
+        padding: 6px
+
+    .doctor-sidebar.is-collapsed .doctor-sidebar__dropdown
+        margin-left: 15px !important
+
+@media (max-width: 991.98px)
+    body
+        flex-direction: column
+
+    body > .main-content
+        width: 100%
+        min-height: 0
+        flex: 1 1 auto
+
+    .doctor-mobile-navbar
+        display: flex
+        align-items: center
+        gap: 12px
+        width: 100%
+        height: 66px
+        min-height: 66px
+        padding: 0 17px
+        flex-shrink: 0
+        border-bottom: 1px solid #e5ebf1
+        background: #fff
+        box-shadow: 0 2px 16px rgba(22, 53, 81, .035)
+        font-family: 'Montserrat', system-ui, sans-serif
+
+    .doctor-mobile-navbar__menu
+        display: grid
+        place-items: center
+        width: 40px
+        height: 40px
+        flex-shrink: 0
+        padding: 0
+        background: #eef5f8
+        border: 1px solid #e4eef3
+        border-radius: 10px
+        color: #1a435a
+        font-size: 23px
+        cursor: pointer
+
+    .doctor-mobile-navbar__identity
+        display: flex
+        align-items: center
+        gap: 10px
+        min-width: 0
+        flex: 1 1 auto
+
+    .doctor-mobile-navbar__symbol
+        display: grid
+        place-items: center
+        width: 35px
+        height: 35px
+        border-radius: 10px
+        color: #063f45
+        background: linear-gradient(140deg, #7af1dc, #3fc6d2)
+        font-size: 18px
+
+    .doctor-mobile-navbar__title
+        display: flex
+        flex-direction: column
+        color: #183047
+        font-weight: 780
+        font-size: 13px
+        line-height: 1.3
+        white-space: nowrap
+
+    .doctor-mobile-navbar__title small
+        color: #8195a5
+        font-size: 10px
+        font-weight: 600
+
+    .doctor-mobile-navbar__mode
+        padding: 8px 11px
+        border-radius: 999px
+        color: #1a7c81
+        background: #e8f9f6
+        font-size: 10px
+        font-weight: 750
+        white-space: nowrap
+
+    .doctor-sidebar
+        position: fixed
+        top: 0
+        left: 0
+        height: 100vh
+        height: 100dvh
+        width: min(310px, calc(100vw - 38px))
+        max-width: 310px
+        min-width: 0
+        transform: translateX(-105%)
+        z-index: 1051
+        box-shadow: none
+
+    .doctor-sidebar.is-open
+        transform: translateX(0)
+        box-shadow: 9px 0 46px rgba(8, 20, 35, .28)
+
+    .doctor-sidebar__top
+        padding-right: 61px
+
+    .doctor-sidebar__collapse
+        display: none
+
+    .doctor-sidebar__close
+        position: absolute
+        display: grid
+        place-items: center
+        width: 35px
+        height: 35px
+        right: 16px
+        top: 26px
+        border: 1px solid rgba(255,255,255,.12)
+        border-radius: 9px
+        background: rgba(255,255,255,.07)
+        color: #dce8f4
+        font-size: 15px
+        cursor: pointer
+
+    .doctor-sidebar__backdrop
+        position: fixed
+        inset: 0
+        z-index: 1050
+        display: block
+        pointer-events: none
+        opacity: 0
+        background: rgba(5, 17, 32, .52)
+        -webkit-backdrop-filter: blur(3px)
+        backdrop-filter: blur(3px)
+        transition: opacity .26s ease
+
+    .doctor-sidebar__backdrop.is-visible
+        pointer-events: auto
+        opacity: 1
+
+    body.doctor-sidebar-open > .main-content
+        pointer-events: none
+
+@media (max-width: 400px)
+    .doctor-mobile-navbar
+        padding: 0 12px
+        gap: 10px
+
+    .doctor-mobile-navbar__mode
+        display: none
+
+@media (prefers-reduced-motion: reduce)
+    .doctor-sidebar, .doctor-sidebar__link, .doctor-sidebar__collapse, .doctor-sidebar__backdrop, .doctor-sidebar__account
+        transition: none
+

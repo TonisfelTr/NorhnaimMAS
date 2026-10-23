@@ -8,6 +8,8 @@ use App\Models\LabParameter;
 use App\Models\InstrumentalResearch;
 use App\Models\LabResearchTemplate;
 use App\Models\Patient;
+use App\Models\HospitalDepartment;
+use App\Support\HospitalPatientAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -224,8 +226,19 @@ class MedicalCardController extends Controller
         ];
     }
 
-    public function index(Patient $patient)
+    public function index(Request $request, Patient $patient, HospitalPatientAccess $access)
     {
+        $user = $request->user();
+        abort_unless($user && $access->canRead($user, $patient), 403);
+
+        // Audit each successful authorization, including direct URL access.
+        $isAdmin = $user->hasRole('admins');
+        $access->auditRead($user, $patient, $isAdmin ? 'admin-readonly' : 'doctor');
+
+        if ($isAdmin) {
+            return $this->adminReadOnlyCard($patient, $user, $access);
+        }
+
         $contacts = $patient->contacts()
             ->orderBy('created_at', 'desc')
             ->get();
@@ -447,6 +460,136 @@ class MedicalCardController extends Controller
             'templatesMap',
             'prescriptions',
         ));
+    }
+
+    /**
+     * Read-only administrator presentation. Never reuse the clinical edit form:
+     * it contains action buttons for medications, research and documentation.
+     */
+    private function adminReadOnlyCard(Patient $patient, $user, HospitalPatientAccess $access)
+    {
+        $clinicIds = $access->adminClinicIds($user);
+        $departmentIds = HospitalDepartment::query()
+            ->whereIn('clinic_id', $clinicIds)->where('enabled', true)
+            ->pluck('id')->map(static fn ($id): int => (int) $id)->all();
+
+        $placement = $access->activeAssignments($clinicIds, $departmentIds)
+            ->where('patient_id', $patient->getKey())
+            ->with(['bed.room.department', 'attendingDoctor'])
+            ->firstOrFail();
+
+        $fullName = trim(implode(' ', array_filter([
+            $patient->surname, $patient->name, $patient->patronym,
+        ])));
+        $patientInfo = [
+            'full_name' => $fullName,
+            'birth_date' => $this->adminBirthDate($patient),
+            'gender' => $patient->gender ?? $patient->sex ?? '—',
+            'medcard_number' => $patient->medcard_number ?? $patient->medical_card_number ?? '—',
+            'snils' => $patient->snils ?? '—',
+            'oms' => $patient->oms ?? '—',
+            'address' => $patient->address_registration ?? '—',
+            'department' => $placement->bed?->room?->department?->name ?? '—',
+            'room' => $placement->bed?->room?->number ?? '—',
+            'bed' => $placement->bed?->number ?? '—',
+            'admitted_at' => $placement->assigned_at?->format('d.m.Y H:i') ?? '—',
+            'doctor' => $placement->attendingDoctor
+                ? trim(implode(' ', array_filter([
+                    $placement->attendingDoctor->surname,
+                    $placement->attendingDoctor->name,
+                    $placement->attendingDoctor->patronym,
+                ]))) : 'Не назначен',
+        ];
+
+        $anamneses = $patient->anamneses()->orderByDesc('created_at')->limit(30)->get()
+            ->map(fn ($item): array => [
+                'date' => $this->adminDate($item->created_at),
+                'text' => $this->adminPlainText($item->text ?? $item->description ?? null),
+            ])->all();
+
+        $epicrises = $patient->epicrises()->orderByDesc('created_at')->limit(30)->get()
+            ->map(fn ($item): array => [
+                'date' => $this->adminDate($item->created_at),
+                'text' => $this->adminPlainText($item->text ?? $item->description ?? $item->conclusion ?? null),
+            ])->all();
+
+        $researches = $patient->labResearches()->with('patient')
+            ->orderByDesc('created_at')->limit(20)->get()
+            ->map(function ($research): array {
+                [$paramsPayload, $valuesMap] = $this->buildLabResearchPayloads($research);
+                $values = collect($paramsPayload)->map(function (array $parameter) use ($valuesMap): array {
+                    $entry = $valuesMap[(string) $parameter['id']] ?? [];
+                    return [
+                        'parameter' => (string) ($parameter['name'] ?? 'Параметр'),
+                        'value' => $this->adminPlainText($entry['value'] ?? null),
+                        'unit' => (string) ($parameter['unit'] ?? ''),
+                        'reference' => (string) ($parameter['ref'] ?? ''),
+                    ];
+                })->values()->all();
+
+                return [
+                    'date' => $this->adminDate($research->created_at),
+                    'title' => $this->adminPlainText($research->name ?? $research->title ?? 'Лабораторное исследование'),
+                    'values' => $values,
+                ];
+            })->all();
+
+        $instrumentals = $patient->instrumentalResearches()->orderByDesc('created_at')
+            ->limit(30)->get()->map(fn ($item): array => [
+                'date' => $this->adminDate($item->created_at),
+                'type' => $this->adminPlainText($item->type ?? $item->name ?? 'Инструментальное исследование'),
+                'result' => $this->adminPlainText($item->result ?? $item->conclusion ?? $item->description ?? null),
+            ])->all();
+
+        $prescriptions = $patient->prescriptions()->orderByDesc('created_at')
+            ->limit(30)->get()->map(fn ($item): array => [
+                'date' => $this->adminDate($item->created_at),
+                'drug' => $this->adminPlainText($item->generic_name ?? $item->name ?? null),
+                'dose' => $this->adminPlainText($item->dosage ?? $item->dose ?? null),
+            ])->all();
+
+        $documents = $patient->documents()->orderByDesc('created_at')
+            ->limit(30)->get()->map(fn ($item): array => [
+                'date' => $this->adminDate($item->created_at),
+                'name' => $this->adminPlainText($item->title ?? $item->name ?? $item->original_name ?? 'Документ'),
+            ])->all();
+
+        return view('doctors.admin-medical-card', compact(
+            'patientInfo', 'anamneses', 'epicrises', 'researches', 'instrumentals',
+            'prescriptions', 'documents'
+        ));
+    }
+
+    private function adminPlainText(mixed $value): string
+    {
+        if (!is_scalar($value) || trim((string) $value) === '') {
+            return '—';
+        }
+
+        $text = strip_tags(html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return trim((string) (preg_replace('/[ \t]+/u', ' ', $text) ?? $text));
+    }
+
+    private function adminBirthDate(Patient $patient): string
+    {
+        try {
+            $raw = $patient->getRawOriginal('birth_at');
+            return $raw ? Carbon::parse($raw)->format('d.m.Y') : '—';
+        } catch (\Throwable) {
+            return '—';
+        }
+    }
+
+    private function adminDate(mixed $value): string
+    {
+        if (!$value) {
+            return '—';
+        }
+        try {
+            return Carbon::parse($value)->format('d.m.Y H:i');
+        } catch (\Throwable) {
+            return '—';
+        }
     }
 
     public function update(UpdatePatientMedcardRequest $request, Patient $patient) {

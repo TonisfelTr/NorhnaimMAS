@@ -87,6 +87,76 @@
             background: rgba(255, 255, 255, .18);
         }
 
+        .settings-navbar__dropdown {
+            position: relative;
+        }
+
+        .settings-navbar__dropdown-toggle {
+            border: 0;
+            background: transparent;
+        }
+
+        .settings-navbar__dropdown-toggle::after {
+            margin-left: 2px;
+            vertical-align: .12em;
+        }
+
+        .settings-navbar__dropdown-menu {
+            min-width: 290px;
+            margin-top: 8px !important;
+            padding: 8px;
+            border: 1px solid #dce7eb;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 22px 56px rgba(15, 23, 42, .18);
+        }
+
+        .settings-navbar__dropdown-item {
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border-radius: 12px;
+            color: #263746;
+            text-decoration: none;
+            transition: .16s ease;
+        }
+
+        .settings-navbar__dropdown-item:hover,
+        .settings-navbar__dropdown-item.active {
+            background: #eefafb;
+            color: #075f6b;
+        }
+
+        .settings-navbar__dropdown-icon {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            border-radius: 11px;
+            background: #e8f8fa;
+            color: var(--settings-primary-dark);
+            font-size: 16px;
+        }
+
+        .settings-navbar__dropdown-copy strong,
+        .settings-navbar__dropdown-copy small {
+            display: block;
+        }
+
+        .settings-navbar__dropdown-copy strong {
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .settings-navbar__dropdown-copy small {
+            margin-top: 2px;
+            color: #7b8794;
+            font-size: 10px;
+            line-height: 1.35;
+        }
+
         .settings-navbar__context {
             display: inline-flex;
             min-height: 36px;
@@ -435,11 +505,6 @@
 @endsection
 
 @section('main')
-    @php
-        $settingsDoctor = auth()->user()?->doctor;
-        $settingsIsPrivatePractice = (bool) ($settingsDoctor && !$settingsDoctor->clinic_id);
-    @endphp
-
     <nav class="settings-navbar navbar navbar-expand-xl">
         <div class="container-fluid settings-navbar__inner">
             <a class="settings-navbar__brand" href="{{ url('/doctors/settings') }}">
@@ -461,51 +526,141 @@
 
             <div class="collapse navbar-collapse" id="settingsNavbar">
                 <ul class="navbar-nav settings-navbar__menu">
+                    @if(auth()->user()?->doctor)
                     <li class="nav-item">
-                        <a class="settings-navbar__link {{ request()->is('doctors/settings') ? 'active' : '' }}"
-                           href="{{ url('/doctors/settings') }}">
+                        <a class="settings-navbar__link {{ is_route('doctors.settings.index') ? 'active' : '' }}"
+                           href="{{ route('doctors.settings.index') }}">
                             <i class="bi bi-sliders"></i>
                             Общие
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="settings-navbar__link {{ request()->is('doctors/settings/offices*') ? 'active' : '' }}"
-                           href="{{ url('/doctors/settings/offices') }}">
-                            <i class="bi bi-door-open"></i>
-                            Кабинеты
-                        </a>
-                    </li>
+                    @endif
 
-                    <li class="nav-item">
-                        <a class="settings-navbar__link {{ request()->is('doctors/settings/districts*') ? 'active' : '' }}"
-                           href="{{ url('/doctors/settings/districts') }}">
-                            <i class="bi bi-geo-alt"></i>
-                            Участки
-                        </a>
-                    </li>
+                    {{-- Принадлежность стационаров настраивается только из амбулатории.
+                         Глобальные права страницы пока сохранены исключительно за debug-тестером. --}}
+                    @if(
+                        \App\Http\Middleware\ClinicSettingsAccessMiddleware::allows(auth()->user())
+                        && auth()->user()?->doctor?->clinic?->clinic_type === \App\Models\Clinic::TYPE_OUTPATIENT
+                    )
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ request()->routeIs('doctors.settings.clinic-affiliations.*') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.clinic-affiliations.index') }}">
+                                <i class="bi bi-buildings"></i>
+                                Принадлежность стационаров
+                            </a>
+                        </li>
+                    @endif
 
-                    <li class="nav-item">
-                        <a class="settings-navbar__link {{ request()->is('doctors/settings/clinic-schedule*') ? 'active' : '' }}"
-                           href="{{ url('/doctors/settings/clinic-schedule') }}">
+                    @if(auth()->user()?->doctor)
+                    {{-- Приоритет у модели $clinic, переданной контроллером текущей страницы. --}}
+                    @if(($clinic ?? auth()->user()?->doctor?->clinic)?->clinic_type === \App\Models\Clinic::TYPE_INPATIENT)
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ is_route('doctors.settings.departments') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.departments') }}">
+                                <i class="bi bi-diagram-3"></i>
+                                Отделения
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ is_route('doctors.settings.rooms') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.rooms') }}">
+                                <i class="bi bi-door-closed"></i>
+                                Палаты и койки
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ is_route('doctors.settings.duty-schedule') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.duty-schedule') }}">
+                                <i class="bi bi-calendar-check"></i>
+                                Дежурства
+                            </a>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ is_route('doctors.settings.offices') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.offices') }}">
+                                <i class="bi bi-door-open"></i>
+                                Кабинеты
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ is_route('doctors.settings.districts') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.districts') }}">
+                                <i class="bi bi-geo-alt"></i>
+                                Участки
+                            </a>
+                        </li>
+                    @endif
+
+                    <li class="nav-item dropdown settings-navbar__dropdown">
+                        <button type="button"
+                                class="settings-navbar__link settings-navbar__dropdown-toggle dropdown-toggle {{ (is_route('doctors.settings.clinic-schedule') || is_route('doctors.settings.vacation-schedule')) ? 'active' : '' }}"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
                             <i class="bi bi-calendar-week"></i>
-                            График клиники
-                        </a>
+                            Графики
+                        </button>
+
+                        <div class="dropdown-menu settings-navbar__dropdown-menu">
+                            @unless(($clinic ?? auth()->user()?->doctor?->clinic)?->clinic_type === \App\Models\Clinic::TYPE_INPATIENT)
+                                <a class="settings-navbar__dropdown-item {{ is_route('doctors.settings.clinic-schedule') ? 'active' : '' }}"
+                                   href="{{ route('doctors.settings.clinic-schedule') }}">
+                                    <span class="settings-navbar__dropdown-icon">
+                                        <i class="bi bi-building-check"></i>
+                                    </span>
+                                    <span class="settings-navbar__dropdown-copy">
+                                        <strong>График клиники</strong>
+                                        <small>Рабочая неделя, особые периоды и ограничения</small>
+                                    </span>
+                                </a>
+                            @endunless
+
+                            <a class="settings-navbar__dropdown-item {{ is_route('doctors.settings.vacation-schedule') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.vacation-schedule') }}">
+                                <span class="settings-navbar__dropdown-icon">
+                                    <i class="bi bi-sun"></i>
+                                </span>
+                                <span class="settings-navbar__dropdown-copy">
+                                    <strong>График отпусков</strong>
+                                    <small>Отпуска врачей и медицинского персонала</small>
+                                </span>
+                            </a>
+                        </div>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="settings-navbar__link {{ request()->is('doctors/settings/doctors-schedule*') ? 'active' : '' }}"
-                           href="{{ url('/doctors/settings/doctors-schedule') }}">
-                            <i class="bi bi-calendar2-range"></i>
-                            Расписание врачей
-                        </a>
-                    </li>
+                    @unless(($clinic ?? auth()->user()?->doctor?->clinic)?->clinic_type === \App\Models\Clinic::TYPE_INPATIENT)
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ is_route('doctors.settings.doctors-schedule') ? 'active' : '' }}"
+                               href="{{ route('doctors.settings.doctors-schedule') }}">
+                                <i class="bi bi-calendar2-range"></i>
+                                Расписание врачей
+                            </a>
+                        </li>
+                    @endunless
+                    @endif
                 </ul>
 
-                @if($settingsDoctor)
+                @if(request()->routeIs('doctors.settings.clinic-affiliations.*'))
                     <div class="settings-navbar__context">
-                        <i class="bi {{ $settingsIsPrivatePractice ? 'bi-person-badge' : 'bi-hospital' }}"></i>
-                        {{ $settingsIsPrivatePractice ? 'Частная практика' : 'Клиника' }}
+                        <i class="bi bi-diagram-3"></i>
+                        Структура учреждений
+                    </div>
+                @elseif(auth()->user()?->doctor)
+                    <div class="settings-navbar__context">
+                        @if(($clinic ?? auth()->user()?->doctor?->clinic)?->clinic_type === \App\Models\Clinic::TYPE_INPATIENT)
+                            <i class="bi bi-hospital"></i>
+                            Стационар
+                        @elseif(auth()->user()->doctor->clinic_id)
+                            <i class="bi bi-hospital"></i>
+                            Клиника
+                        @else
+                            <i class="bi bi-person-badge"></i>
+                            Частная практика
+                        @endif
                     </div>
                 @endif
             </div>
