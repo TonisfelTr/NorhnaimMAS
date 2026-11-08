@@ -1,5 +1,12 @@
-import '../css/medical_card_certificates.css';
+// Keep CSS cascade deterministic: page base -> certificate widgets -> shared modal theme -> transfer overrides.
 import '../sass/medical_card.sass';
+import '../css/medical_card_certificates.css';
+import '../sass/medical_card_modals.sass';
+import '../sass/medical_card_transfer.sass';
+import './medical_card_transfer.js';
+import '../sass/medical_visit_audit.sass';
+import './medical_visit_audit.js';
+import './telemedicine_journal.js';
 import * as bootstrap from 'bootstrap';
 import { EditorState, EditorSelection, StateEffect, StateField } from '@codemirror/state';
 import {
@@ -187,13 +194,8 @@ function showToast(message = 'Сохранено', type = 'success') {
 
 function printHtml(html) {
     const iframe = document.createElement('iframe');
-
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
+    iframe.className = 'mc-medical-print-frame';
+    iframe.title = 'Печать медицинского документа';
 
     document.body.appendChild(iframe);
 
@@ -207,6 +209,67 @@ function printHtml(html) {
         iframe.contentWindow.print();
         setTimeout(() => iframe.remove(), 500);
     };
+}
+
+function initMedicalCardModalUi() {
+    // Match the existing Blade classes and enhance included partials too.
+    // Do not touch the global authentication/administrative dialogs.
+    const modalIcons = {
+        modalUploadDocument: 'cloud-arrow-up',
+        testStartModal: 'qr-code',
+        modalAddLab: 'droplet-half',
+        modalViewLab: 'clipboard2-pulse',
+        modalAddAnamnesis: 'journal-text',
+        modalAddLabOrder: 'clipboard2-plus',
+        modalAddEpicrisis: 'journal-medical',
+        modalAddInstrumentalResearch: 'heart-pulse',
+        modalEditInstrumentalResearch: 'pencil-square',
+        modalInstrumentalResult: 'clipboard2-check',
+        modalViewInstrumentalResearch: 'file-earmark-medical',
+        modalDeleteInstrumentalResearch: 'trash3',
+        modalViewResult: 'graph-up',
+        assignTestModal: 'clipboard-check',
+        prescriptionModal: 'capsule',
+        modalTransferPatientDoctor: 'arrow-left-right',
+    };
+
+    // Certificate dialog markup is in a separate partial not included in this refactor.
+    qsa('[data-cert-modal]').forEach(modal => modal.classList.add('mc-modal-ui'));
+
+    Object.entries(modalIcons).forEach(([id, iconName]) => {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+
+        modal.classList.add('mc-modal-ui');
+        const header = qs('.modal-header', modal);
+        if (!header) return;
+        const modalTitle = qs('.modal-title', header);
+        if (modalTitle && !modal.hasAttribute('aria-labelledby')) {
+            if (!modalTitle.id) modalTitle.id = `mc-modal-title-${id}`;
+            modal.setAttribute('aria-labelledby', modalTitle.id);
+        }
+
+        // Modal variants with existing branding retain their custom headings.
+        if (qs('.mc-modal-heading, .presc-modal-heading, .instrumental-result-modal__heading, .instrumental-view-modal__heading, .assign-test-modal__eyebrow, .mc-transfer-modal-heading', header)) {
+            return;
+        }
+        if (qs('.mc-modal-heading__icon', header)) return;
+
+        const title = qs('.modal-title', header);
+        if (!title) return;
+        if (!title.id) title.id = `mc-modal-title-${id}`;
+        if (!modal.hasAttribute('aria-labelledby')) {
+            modal.setAttribute('aria-labelledby', title.id);
+        }
+
+        const icon = document.createElement('span');
+        icon.className = 'mc-modal-heading__icon';
+        icon.setAttribute('aria-hidden', 'true');
+        const iconElement = document.createElement('i');
+        iconElement.className = `bi bi-${iconName}`;
+        icon.append(iconElement);
+        header.insertBefore(icon, header.firstChild);
+    });
 }
 
 function initTooltips() {
@@ -310,8 +373,7 @@ function initModalValidationErrors() {
 
     /*
      * Ошибка формы важнее deep-link на просмотр исследования.
-     * Удаляем параметры до события window.load, чтобы встроенный
-     * Blade-скрипт тоже не открыл старую модалку результата.
+     * Удаляем параметры до события window.load, чтобы глубокая ссылка не открыла старую модалку результата.
      */
     const url = new URL(window.location.href);
     url.searchParams.delete('research');
@@ -3069,7 +3131,6 @@ function initPrescriptionDrugSelect2() {
         }
 
         modal.dataset.docEditorBound = '1';
-        injectEpicrisisDocumentStyles();
 
         const jsonInput = ensureHiddenInput(form, 'text_json', 'epicrisisTextJson');
         const legacyToolbar = modal.querySelector('.epicrisis-toolbar');
@@ -3104,7 +3165,6 @@ function initPrescriptionDrugSelect2() {
 
         textarea.classList.add('d-none');
         textarea.required = false;
-        textarea.style.display = 'none';
 
         const pendingInlineMarks = new Set();
 
@@ -3126,7 +3186,6 @@ function initPrescriptionDrugSelect2() {
                     }),
                     EditorView.lineWrapping,
                     epicrisisDocField,
-                    epicrisisDocumentTheme(),
                     EditorView.updateListener.of(update => {
                         if (update.docChanged) {
                             syncEpicrisisHiddenFields(update.view, textarea, jsonInput);
@@ -4258,179 +4317,6 @@ function initPrescriptionDrugSelect2() {
         return typeof value === 'number'
             ? Number.isInteger(value) && value > 0
             : /^\d+$/.test(String(value || '').trim());
-    }
-
-    function epicrisisDocumentTheme() {
-        return EditorView.theme({
-            '&': {
-                border: '1px solid #e5e7eb',
-                borderRadius: '16px',
-                background: '#eef2f7',
-                overflow: 'hidden',
-            },
-            '&.cm-focused': {
-                outline: '0',
-                boxShadow: '0 0 0 .25rem rgba(13, 110, 253, .12)',
-                borderColor: 'rgba(13, 110, 253, .55)',
-            },
-            '.cm-scroller': {
-                maxHeight: 'calc(100vh - 300px)',
-                overflow: 'auto',
-                fontFamily: 'Arial, "Times New Roman", serif',
-                fontSize: '15px',
-                lineHeight: '1.6',
-            },
-            '.cm-content': {
-                width: '794px',
-                maxWidth: 'calc(100% - 28px)',
-                minHeight: '720px',
-                margin: '24px auto',
-                padding: '64px 72px',
-                background: '#fff',
-                boxShadow: '0 14px 38px rgba(15, 23, 42, .16)',
-                borderRadius: '2px',
-                caretColor: '#111827',
-                counterReset: 'epicrisis-doc-ol',
-                whiteSpace: 'pre-wrap',
-            },
-            '.cm-line': {
-                padding: '0',
-                minHeight: '1.55em',
-            },
-            '.cm-selectionBackground': {
-                background: 'rgba(13, 110, 253, .22) !important',
-            },
-            '.epicrisis-doc-bold': {
-                fontWeight: '700',
-            },
-            '.epicrisis-doc-italic': {
-                fontStyle: 'italic',
-            },
-            '.epicrisis-doc-underline': {
-                textDecoration: 'underline',
-            },
-            '.epicrisis-doc-h3': {
-                fontSize: '1.35rem',
-                fontWeight: '700',
-                lineHeight: '1.35',
-                marginTop: '.35rem',
-                marginBottom: '.45rem',
-            },
-            '.epicrisis-doc-h4': {
-                fontSize: '1.1rem',
-                fontWeight: '700',
-                lineHeight: '1.35',
-                marginTop: '.25rem',
-                marginBottom: '.35rem',
-            },
-            '.epicrisis-doc-list-ul': {
-                paddingLeft: '1.4rem',
-                position: 'relative',
-            },
-            '.epicrisis-doc-list-ul::before': {
-                content: '"•"',
-                position: 'absolute',
-                left: '.25rem',
-            },
-            '.epicrisis-doc-list-ol': {
-                paddingLeft: '1.6rem',
-                position: 'relative',
-                counterIncrement: 'epicrisis-doc-ol',
-            },
-            '.epicrisis-doc-list-ol::before': {
-                content: 'counter(epicrisis-doc-ol) "."',
-                position: 'absolute',
-                left: '.25rem',
-                fontWeight: '600',
-            },
-            '.epicrisis-doc-align-left': {
-                textAlign: 'left',
-            },
-            '.epicrisis-doc-align-center': {
-                textAlign: 'center',
-            },
-            '.epicrisis-doc-align-right': {
-                textAlign: 'right',
-            },
-        });
-    }
-
-    function injectEpicrisisDocumentStyles() {
-        if (document.querySelector('#epicrisisDocumentEditorStyles')) {
-            return;
-        }
-
-        const style = document.createElement('style');
-        style.id = 'epicrisisDocumentEditorStyles';
-        style.textContent = `
-            .epicrisis-doc-toolbar {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 4px;
-                padding: 8px;
-                margin-bottom: 8px;
-                border: 1px solid #e5e7eb;
-                border-radius: 14px;
-                background: #f8fafc;
-            }
-
-            .epicrisis-doc-toolbar .btn {
-                border-radius: 9px;
-                min-width: 34px;
-                font-size: 13px;
-            }
-
-            .epicrisis-doc-toolbar .btn.active {
-                color: #0d6efd;
-                background: #e8f1ff;
-                border-color: #9ec5fe;
-            }
-
-            .epicrisis-diagnosis-search {
-                width: 100%;
-            }
-
-            .epicrisis-diagnosis-menu {
-                width: 100%;
-                max-height: 280px;
-                overflow-y: auto;
-                z-index: 2200;
-                border-radius: 12px;
-                box-shadow: 0 12px 32px rgba(15, 23, 42, .14);
-            }
-
-            .epicrisis-diagnosis-item {
-                white-space: normal;
-                text-align: left;
-            }
-
-            .epicrisis-selected-diagnosis {
-                border: 1px solid #dbeafe;
-                background: #eff6ff;
-                border-radius: 14px;
-                padding: 12px;
-                color: #1e3a8a;
-                margin-top: 10px;
-            }
-
-            @media print {
-                .epicrisis-doc-toolbar {
-                    display: none;
-                }
-
-                .epicrisis-doc-editor {
-                    border: 0 !important;
-                }
-
-                .epicrisis-doc-editor .cm-content {
-                    box-shadow: none !important;
-                    margin: 0 !important;
-                }
-            }
-        `;
-
-        document.head.appendChild(style);
     }
 
     function ensureHiddenInput(form, name, id) {
@@ -6153,34 +6039,125 @@ function initPatientInfoForm() {
     collectPassport();
 }
 
+
+function initVisitHistoryDeepLink() {
+    const query = new URLSearchParams(window.location.search);
+    const isVisitTab = query.get('tab') === 'visits';
+    const hasVisitErrors = Boolean(qs('#pane-visits .vh[data-has-errors="1"]'));
+    if (!isVisitTab && !hasVisitErrors) return;
+
+    const button = qs('#cardTabs [data-bs-target="#pane-visits"]');
+    const openId = query.get('visit_open');
+    // A numeric ID may be used to find one already rendered visit, never as raw CSS.
+    const entry = /^\d+$/.test(openId || '')
+        ? document.getElementById(`visit-entry-${openId}`)
+        : null;
+    const expanded = entry || qs('#pane-visits .vh-entry[open]');
+    const scrollToEntry = () => {
+        if (expanded) {
+            window.setTimeout(() => expanded.scrollIntoView({ behavior: 'auto', block: 'start' }), 140);
+        }
+    };
+
+    if (button) {
+        if (button.classList.contains('active')) {
+            scrollToEntry();
+        } else {
+            button.addEventListener('shown.bs.tab', scrollToEntry, { once: true });
+            bootstrap.Tab.getOrCreateInstance(button).show();
+        }
+    } else {
+        scrollToEntry();
+    }
+}
+
 function initLabResultDeepLink() {
-    if (document.querySelector('.modal[data-open-on-error="1"]')) {
+    if (qs('.modal[data-open-on-error="1"]')) {
         return;
     }
 
     const query = new URLSearchParams(window.location.search);
     const researchId = query.get('research');
+    const instrumentalId = query.get('instrumental_research');
 
-    if (!researchId || !/^\d+$/.test(researchId)) {
+    if (!researchId && !instrumentalId) {
         return;
     }
 
-    const button = qs(
-        `[data-lab-view][data-id="${researchId}"]`
-    );
+    // Never interpolate unchecked URL values into selectors.
+    const isNumeric = value => /^\d+$/.test(String(value || ''));
+    const byDataId = (selector, id) => qsa(selector)
+        .find(button => button.dataset.id === String(id)) || null;
+    const byPayloadId = (selector, id) => qsa(selector)
+        .find(button => {
+            const payload = safeJsonParse(button.dataset.payload, {});
+            return String(payload?.id ?? '') === String(id);
+        }) || null;
 
-    if (!button) {
-        console.warn(
-            `Исследование #${researchId} не найдено на странице`
-        );
+    window.setTimeout(() => {
+        if (qs('.modal[data-open-on-error="1"]') || qs('.modal.show')) {
+            return;
+        }
 
-        return;
-    }
+        let trigger = null;
 
-    openResearchModal(
-        button,
-        '#modalViewLab'
-    );
+        // Готовый лабораторный анализ — просмотр; ещё не готовый — редактирование.
+        if (isNumeric(researchId)) {
+            trigger = byDataId('[data-lab-view]', researchId)
+                || byDataId('[data-lab-edit]', researchId);
+        }
+
+        // Инструментальное исследование: просмотр / внесение результата / редактирование.
+        if (!trigger && isNumeric(instrumentalId)) {
+            trigger = byDataId('[data-instrumental-view]', instrumentalId)
+                || byPayloadId('[data-instrumental-result]', instrumentalId)
+                || byPayloadId('[data-instrumental-edit]', instrumentalId);
+        }
+
+        if (!trigger) {
+            console.warn('[MedicalCard] Не найдена запись для открытия по ссылке', {
+                researchId,
+                instrumentalId,
+            });
+            return;
+        }
+
+        // Use the existing Bootstrap instance and its event-based tab transition.
+        const targetSelector = trigger.hasAttribute('data-lab-view')
+            ? '#modalViewLab'
+            : trigger.hasAttribute('data-lab-edit')
+                ? '#modalAddLab'
+                : trigger.hasAttribute('data-instrumental-view')
+                    ? '#modalViewInstrumentalResearch'
+                    : trigger.hasAttribute('data-instrumental-result')
+                        ? '#modalInstrumentalResult'
+                        : '#modalEditInstrumentalResearch';
+
+        if (targetSelector === '#modalViewLab') {
+            openResearchModal(trigger, targetSelector);
+            return;
+        }
+
+        const labsTab = qs('#cardTabs [data-bs-target="#pane-labs"]');
+        const pane = qs('#pane-labs');
+        const show = () => {
+            if (targetSelector === '#modalAddLab') {
+                // Existing lab edit listener is delegated to the trigger.
+                trigger.click();
+            } else {
+                getBootstrapModal(qs(targetSelector))?.show(trigger);
+            }
+        };
+
+        if (pane?.classList.contains('active') && pane?.classList.contains('show')) {
+            show();
+        } else if (labsTab) {
+            labsTab.addEventListener('shown.bs.tab', show, { once: true });
+            bootstrap.Tab.getOrCreateInstance(labsTab).show();
+        } else {
+            show();
+        }
+    }, 275);
 }
 
 function initInstrumentalResearchModals() {
@@ -6876,9 +6853,6 @@ function initAnamnesisModal() {
             return;
         }
 
-        loading.style.flexDirection = 'column';
-        loading.style.gap = '8px';
-
         let mainRow = qs('[data-ai-loading-main]', loading);
 
         if (!mainRow) {
@@ -6919,12 +6893,11 @@ function initAnamnesisModal() {
                 <div id="aiEstimateLabel" class="small text-muted mt-1">
                     Оставшееся время приблизительное
                 </div>
-                <div class="progress mt-2" style="height:4px;">
+                <div class="progress mt-2 mc-ai-progress">
                     <div
                         id="aiEstimatedProgress"
                         class="progress-bar progress-bar-striped progress-bar-animated"
                         role="progressbar"
-                        style="width:2%"
                         aria-valuemin="0"
                         aria-valuemax="100"
                         aria-valuenow="2"
@@ -7758,8 +7731,7 @@ function initAnamnesisModal() {
                     ${escapeHtml(symptom)}
                     <button
                         type="button"
-                        class="btn-close ms-1"
-                        style="font-size:.55rem"
+                        class="btn-close ms-1 mc-symptom-remove"
                         aria-label="Удалить"
                         data-remove-symptom="${escapeHtml(symptom)}"
                     ></button>
@@ -7979,11 +7951,13 @@ function initAnamnesisModal() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    initMedicalCardModalUi();
     initTooltips();
     initAnamnesisModal();
     initPatientInfoForm();
     initConfirmForms();
     initDefaultTab();
+    initVisitHistoryDeepLink();
     initContactsTabState();
     initLabOrderReopen();
     initLabParamSearch();
@@ -7991,8 +7965,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initLabViewModal();
     initLabActions();
     initModalValidationErrors();
-    initLabResultDeepLink();
     initInstrumentalResearchModals();
+    initLabResultDeepLink();
     initInstrumentalResultFiles();
     initPrescriptionIndicationSwitch();
     initPrescriptionDrugSelect2();

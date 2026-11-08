@@ -71,6 +71,36 @@ class SettingsController extends SettingsBaseController
         }
 
         $clinic = Clinic::findOrFail($doctor->clinic_id);
+        // clinic-telemedicine-timezones:timezone-index:v1:begin
+        $clinicTimezoneOptions = \DateTimeZone::listIdentifiers(\DateTimeZone::ALL);
+        $clinicTimezoneDefault = \App\Support\ClinicAppointmentTime::timezone(null);
+        $clinicTimezoneRaw = old('timezone', $clinic->getAttribute('timezone'));
+        $clinicTimezoneValue = is_string($clinicTimezoneRaw)
+            && in_array($clinicTimezoneRaw, $clinicTimezoneOptions, true)
+                ? $clinicTimezoneRaw : '';
+        // clinic-telemedicine-timezones:timezone-index:v1:end
+        // clinic-benefit-requisites:index-vars:v1:begin
+        $benefitClinicProfile = \App\Services\ClinicBenefitPrescriptionSettings::profile($clinic);
+        $benefitClinicSetupErrors = \App\Services\BenefitPrescriptionRules::setupErrors($benefitClinicProfile);
+
+        $benefitClinicOldInput = old('benefit_clinic');
+        $benefitClinicForm = [];
+
+        foreach ([
+            'prescribing_enabled', 'kind', 'ogrn', 'code', 'series',
+            'numbering_source', 'license_number', 'license_date', 'license_authority',
+        ] as $benefitClinicField) {
+            $benefitClinicValue = is_array($benefitClinicOldInput)
+                && array_key_exists($benefitClinicField, $benefitClinicOldInput)
+                    ? $benefitClinicOldInput[$benefitClinicField]
+                    : ($benefitClinicProfile[$benefitClinicField]
+                        ?? ($benefitClinicField === 'kind' ? 'organization' : ''));
+
+            $benefitClinicForm[$benefitClinicField] = $benefitClinicField === 'prescribing_enabled'
+                ? in_array($benefitClinicValue, [true, 1, '1'], true)
+                : (is_scalar($benefitClinicValue) ? (string) $benefitClinicValue : '');
+        }
+        // clinic-benefit-requisites:index-vars:v1:end
 
         /*
          * Принадлежность сотрудника клинике определяем только по clinic_id.
@@ -435,6 +465,16 @@ class SettingsController extends SettingsBaseController
             compact(
                 'doctor',
                 'clinic',
+                // clinic-telemedicine-timezones:timezone-compact:v1:begin
+                'clinicTimezoneOptions',
+                'clinicTimezoneDefault',
+                'clinicTimezoneValue',
+                // clinic-telemedicine-timezones:timezone-compact:v1:end
+                // clinic-benefit-requisites:index-compact:v1:begin
+                'benefitClinicProfile',
+                'benefitClinicSetupErrors',
+                'benefitClinicForm',
+                // clinic-benefit-requisites:index-compact:v1:end
                 'isPrivatePractice',
                 'doctors',
                 'clinicDoctors',
@@ -479,6 +519,27 @@ class SettingsController extends SettingsBaseController
                 $clinic->description = $request->description;
                 $clinic->phones = $request->phones;
                 $clinic->city = $request->city;
+                // clinic-telemedicine-timezones:timezone-save:v1:begin
+                $clinicTimezoneSettings = $request->validated();
+                if (array_key_exists('timezone', $clinicTimezoneSettings)) {
+                    $clinic->timezone = $clinicTimezoneSettings['timezone'] ?? null;
+                }
+                // clinic-telemedicine-timezones:timezone-save:v1:end
+                // clinic-benefit-requisites:save:v1:begin
+                \App\Services\ClinicBenefitPrescriptionSettings::store(
+                    $clinic,
+                    $request->validated()
+                );
+                // clinic-benefit-requisites:save:v1:end
+                // clinic-benefit-okato:save:v1:begin
+                $benefitOkatoSettings = $request->validated();
+
+                if (array_key_exists('benefit_okato_prefix', $benefitOkatoSettings)) {
+                    // Пустая строка означает явную очистку, NULL — отсутствие настройки.
+                    $clinic->benefit_okato_prefix =
+                        $benefitOkatoSettings['benefit_okato_prefix'] ?? '';
+                }
+                // clinic-benefit-okato:save:v1:end
 
                 /*
                  * Форматы «Очный приём / Телемедицина» относятся к

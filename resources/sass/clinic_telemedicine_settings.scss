@@ -1,0 +1,27 @@
+.tm-settings .settings-container { max-width: 1200px; }
+.tm-settings .settings-panel__header { align-items: flex-start; }
+.tm-settings__stack { display: grid; gap: 24px; }
+.tm-settings__field { display: grid; gap: 8px; }
+.tm-settings__field .settings-control { width: 100%; max-width: 100%; }
+.tm-settings__provider { display: grid; gap: 18px; padding: 24px; background: #f7fafc; border: 1px solid #dfe8ed; border-radius: 18px; }
+.tm-settings__provider h3 { display: flex; gap: 10px; align-items: center; margin: 0; font-size: 18px; font-weight: 700; }
+.tm-settings__provider > .settings-field-hint { margin: 0; }
+.tm-settings__notice { margin-bottom: 20px; padding: 18px 22px; color: #435a68; background: #f1f8fb; border: 1px solid #d5e8f0; border-radius: 16px; }
+.tm-settings__notice ul { margin: 10px 0 0; padding-left: 22px; }
+.tm-settings__notice p { margin: 10px 0 0; }
+.tm-settings__notice--success { color: #17623c; background: #edf9f1; border-color: #cce9d5; }
+.tm-settings__notice--error { color: #8b3030; background: #fff2f2; border-color: #f1cece; }
+.tm-settings__field-error { color: #a83434; font-size: 14px; }
+.tm-settings__token-state { display: flex; align-items: center; gap: 8px; color: #456372; font-size: 14px; }
+.tm-settings__check { display: flex; align-items: flex-start; gap: 10px; margin: 0; font-size: 14px; }
+.tm-settings__check input { margin-top: 4px; accent-color: #048696; }
+.tm-settings__timezone { display: flex; align-items: flex-start; gap: 12px; color: #41596a; }
+.tm-settings__timezone > i { font-size: 22px; color: #048696; }
+.tm-settings__timezone p { margin: 5px 0 0; }
+.tm-settings__footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 28px; border-top: 1px solid #e3e9ef; }
+.tm-settings [hidden] { display: none !important; }
+@media (max-width: 767px) {
+    .tm-settings__provider { padding: 18px; }
+    .tm-settings__footer { flex-direction: column; align-items: stretch; padding: 20px; }
+    .tm-settings__footer .settings-button { justify-content: center; }
+}

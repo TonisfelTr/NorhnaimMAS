@@ -20,7 +20,7 @@ class ResearchController extends Controller
         $labResearch = new LabResearch();
         $labResearch->planned_at = $request->planned_at;
         $labResearch->priority = $request->priority;
-        $labResearch->status = $request->status;
+        $labResearch->status = 'ordered';
         $labResearch->laboratory = $request->laboratory ?: 'Анализ от ' . Carbon::now()->format('d.m.Y H:i');
         $labResearch->comment = $request->comment;
         $labResearch->parameters = $request->param_ids;

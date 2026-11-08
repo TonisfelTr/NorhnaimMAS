@@ -14,11 +14,7 @@ class UpdatePatientMedcardRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $patient = $this->route('patient');
-        $user = $this->user();
-
-        return $patient instanceof Patient && $user !== null
-            && app(HospitalPatientAccess::class)->canEdit($user, $patient);
+        return (auth()->user()->doctor->clinic_id === $this->route()->parameter('patient')->clinic_id) || auth()->user()->hasRole('clinic_admin');
     }
 
     /**

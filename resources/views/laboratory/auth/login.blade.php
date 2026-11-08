@@ -1,0 +1,3 @@
+@extends('laboratory.layout')
+@section('title','Вход лаборанта')
+@section('content')<div class="nh-card p-4 mx-auto" style="max-width:460px"><h1 class="h4 mb-2">Вход в лабораторию</h1><p class="text-secondary">Только для сотрудника лаборатории своей клиники.</p><form method="post" action="{{route('laboratory.login.submit')}}">@csrf<div class="mb-3"><label class="form-label">Email</label><input class="form-control" name="email" type="email" autocomplete="username" value="{{old('email')}}" required autofocus></div><div class="mb-3"><label class="form-label">Пароль</label><input class="form-control" name="password" type="password" autocomplete="current-password" required></div><button class="btn btn-primary w-100">Войти</button></form></div>@endsection

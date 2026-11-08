@@ -1,0 +1,155 @@
+.mc-tm-toolbar
+  display: flex
+  align-items: center
+  justify-content: space-between
+  gap: 16px
+  flex-wrap: wrap
+  margin: 0 0 18px
+
+.mc-tm-toolbar__tabs
+  display: flex
+  gap: 5px
+  padding: 5px
+  border: 1px solid #dce9ee
+  border-radius: 14px
+  background: #f4f8fb
+
+.mc-tm-filter
+  padding: 9px 15px
+  border-radius: 10px
+  color: #64748b
+  font-size: 13px
+  font-weight: 700
+  text-decoration: none
+  &.is-active
+    color: #087e86
+    background: #fff
+    box-shadow: 0 2px 9px rgba(30, 60, 90, .08)
+
+.mc-tm-toolbar__create
+  display: flex
+  flex-direction: column
+  gap: 5px
+  align-items: flex-end
+  small
+    max-width: 350px
+    font-size: 11px
+    color: #64748b
+
+.mc-tm-create
+  border-radius: 12px
+  padding: 10px 17px
+
+.mc-tm-row-actions
+  display: flex
+  justify-content: flex-end
+  align-items: center
+  gap: 12px
+  padding: 0 18px 14px
+  margin-top: -5px
+
+.mc-tm-protected
+  font-size: 11px
+  line-height: 1.5
+  color: #64748b
+  text-align: right
+
+.mc-tm-status--scheduled
+  color: #087e86
+  background: #e9f9f9
+  border-color: #c7eeee
+
+.mc-tm-status--deleted
+  color: #64748b
+  background: #f1f5f9
+  border-color: #e2e8f0
+
+.mc-tm-status--in_progress
+  color: #1d4ed8
+  background: #eff6ff
+
+.mc-tm-modal
+  .modal-dialog
+    max-width: 600px
+  .modal-header
+    align-items: flex-start
+    gap: 18px
+  .btn-close
+    flex-shrink: 0
+    margin: 0 0 0 auto
+  .modal-body
+    padding: 22px
+  .form-label
+    font-weight: 700
+  .form-text
+    font-size: 12px
+    line-height: 1.55
+
+.mc-tm-modal__subtitle
+  margin: 6px 0 0
+  font-size: 12px
+  color: #64748b
+
+.mc-tm-modal__note
+  display: flex
+  align-items: flex-start
+  gap: 10px
+  padding: 13px 15px
+  border-radius: 12px
+  background: #f0f8fb
+  color: #365c70
+  font-size: 13px
+  line-height: 1.6
+
+.mc-tm-confirm
+  display: flex
+  align-items: flex-start
+  gap: 11px
+  font-size: 13px
+  line-height: 1.55
+  .form-check-input
+    flex-shrink: 0
+
+@media (max-width: 640px)
+  .mc-tm-toolbar, .mc-tm-toolbar__create
+    align-items: stretch
+    width: 100%
+  .mc-tm-toolbar__tabs
+    width: 100%
+  .mc-tm-filter
+    flex: 1
+    text-align: center
+    padding: 9px
+  .mc-tm-row-actions
+    justify-content: flex-start
+  .mc-tm-protected
+    text-align: left
+
+.mc-tm-entry
+  margin-bottom: 16px
+  border: 1px solid #e2ebf3
+  border-radius: 19px
+  background: #fff
+  overflow: hidden
+  .mc-audit-session
+    margin: 0
+    border: 0
+    border-radius: 0
+    box-shadow: none
+  .mc-tm-row-actions:empty
+    display: none
+
+.mc-tm-status--held
+  background: #ecfdf5
+  color: #047857
+  border-color: #b5ead6
+
+.mc-tm-status--not_held
+  background: #fff1f1
+  color: #a23b42
+  border-color: #f4d0d1
+
+.mc-tm-status--pending, .mc-tm-status--unknown, .mc-tm-status--protected
+  background: #fff9e8
+  color: #735728
+  border-color: #efdfb2

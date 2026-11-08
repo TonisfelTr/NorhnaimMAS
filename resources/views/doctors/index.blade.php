@@ -428,7 +428,7 @@
                     <div class="nh-workbench__institution">
                         <i class="bi bi-buildings" aria-hidden="true"></i>
                         <span>{{ $workbenchInstitutionTitle ?? 'Учреждение не указано' }}</span>
-                        @if($workbenchInstitutionParent)
+                        @if(!empty($workbenchInstitutionParent))
                             <small>Головная организация: {{ $workbenchInstitutionParent }}</small>
                         @endif
                     </div>
@@ -444,16 +444,7 @@
 
 
             @if($workbenchMode === 'outpatient')
-                <section class="nh-workbench__card nh-workbench__full-card" aria-labelledby="workbenchOutpatientOverview">
-                    <h2 class="nh-workbench__section-title" id="workbenchOutpatientOverview">Амбулаторный рабочий стол</h2>
-                    <p class="nh-workbench__muted mt-2 mb-0">
-                        Здесь будет персональный обзор амбулаторного приёма. Для работы с текущими записями
-                        используй пункты «Регистратура» и «Записать на приём» в верхнем меню.
-                        @if($isAdmin)
-                            Для отладочной учётной записи перед переходом выбирается нужная амбулаторная клиника.
-                        @endif
-                    </p>
-                </section>
+                @include('doctors.partials.workbench.outpatient-dashboard')
             @elseif($departments->isEmpty() && $isAdmin)
                 <section class="nh-workbench__card nh-workbench__setup" aria-labelledby="workbenchAdminSetupTitle">
                     <div class="nh-workbench__setup-top">

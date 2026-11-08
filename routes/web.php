@@ -23,10 +23,13 @@ use App\Http\Controllers\Doctors\InpatientAdmissionController;
 use App\Http\Controllers\Doctors\InpatientSettingsWorkspaceController;
 use App\Http\Controllers\Doctors\InstrumentalResearchController;
 use App\Http\Controllers\Doctors\MedicalCardController;
+use App\Http\Controllers\Doctors\PatientDoctorTransferController;
+use App\Http\Controllers\Doctors\MedicalEncounterController;
 use App\Http\Controllers\Doctors\MedicalComissionController;
 use App\Http\Controllers\Doctors\MilitaryCommissionDocumentController;
 use App\Http\Controllers\Doctors\MseReferralController;
 use App\Http\Controllers\Doctors\NeuralNetworkController;
+use App\Http\Controllers\Doctors\PatientDisabilityController;
 use App\Http\Controllers\Doctors\PatientTestingController;
 use App\Http\Controllers\Doctors\PrescriptionsController;
 use App\Http\Controllers\Doctors\ReceptionController;
@@ -107,12 +110,44 @@ Route::prefix('api')->group(function (): void {
     require __DIR__ . '/api.php';
 });
 
-// ONLY these 3 endpoints are shared between clinical users and authorized admins.
+// Shared endpoints for clinical users and authorized admins, including medical encounter routes.
 // For doctors, DoctorOrHospitalAdmin invokes the existing DoctorHardLockMiddleware.
 // Admins must also have explicit permissions and authorized clinic records.
 Route::middleware(['auth', DoctorOrHospitalAdmin::class])->prefix('doctors')->as('doctors.')->group(function (): void {
     Route::get('/', [DoctorsIndexController::class, 'index'])->name('main');
     Route::get('/patients/{patient:id}', [MedicalCardController::class, 'index'])->whereNumber('patient')->name('patients.medical_card');
+
+    // PATIENT_DOCTOR_TRANSFER_ROUTES_START
+    Route::get('/patients/{patient:id}/doctor-transfer/candidates', [PatientDoctorTransferController::class, 'candidates'])
+        ->whereNumber('patient')->middleware('throttle:60,1')
+        ->name('patients.doctor-transfer.candidates');
+    Route::post('/patients/{patient:id}/doctor-transfer', [PatientDoctorTransferController::class, 'store'])
+        ->whereNumber('patient')->middleware('throttle:10,1')
+        ->name('patients.doctor-transfer.store');
+    // PATIENT_DOCTOR_TRANSFER_ROUTES_END
+
+
+    // Отдельные сведения об инвалидности: ручное внесение и проверка документа.
+    // Те же auth / DoctorOrHospitalAdmin, что и при открытии медкарты.
+    // PatientDisabilityController дополнительно проверяет canRead + canEdit для пациента.
+    Route::post('/patients/{patient:id}/disability', [PatientDisabilityController::class, 'save'])
+        ->whereNumber('patient')->middleware('throttle:20,1')
+        ->name('patients.disability.save');
+
+    Route::post('/patients/{patient:id}/disability/verification', [PatientDisabilityController::class, 'verification'])
+        ->whereNumber('patient')->middleware('throttle:10,1')
+        ->name('patients.disability.verification');
+
+    // Приёмы и телемедицина: те же auth / DoctorOrHospitalAdmin, что и у медицинской карты.
+    // Проверка доступа к конкретному пациенту и клинике выполняется в MedicalEncounterController.
+    Route::post('/patients/{patient:id}/visits/{registryRecord}/encounter', [MedicalEncounterController::class, 'save'])
+        ->whereNumber('registryRecord')
+        ->middleware('throttle:30,1')
+        ->name('patients.visits.encounter.save');
+
+    Route::get('/patients/{patient:id}/visits/{registryRecord}/protocol', [MedicalEncounterController::class, 'printProtocol'])
+        ->whereNumber('registryRecord')
+        ->name('patients.visits.protocol.print');
     Route::post('/workbench/assignments/{assignment}/attending', [DoctorsIndexController::class, 'updateAttendingDoctor'])->whereNumber('assignment')->name('workbench.attending.update');
 });
 
@@ -152,9 +187,10 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
     Route::prefix('reception')->as('reception.')->group(function (): void {
         Route::get('/', [ReceptionController::class, 'index'])->name('index');
         Route::get('/create', [ReceptionController::class, 'create'])->name('create');
+        Route::get('/availability', [ReceptionController::class, 'availability'])->name('availability');
         Route::post('/store', [ReceptionController::class, 'store'])->name('store');
         Route::get('/archives', [ReceptionController::class, 'archives'])->name('archives');
-        Route::get('/edit/{record_id}', [ReceptionController::class, 'edit'])->name('edit');
+        Route::get('/edit/{registryRecord}', [ReceptionController::class, 'edit'])->name('edit');
         Route::post('/edit/{id}', [ReceptionController::class, 'update'])->name('update');
         Route::post('/delete/{id}', [ReceptionController::class, 'destroy'])->name('destroy');
         Route::prefix('tests')->as('tests.')->group(function (): void {
@@ -438,3 +474,22 @@ Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLock
         });
     });
 });
+require_once __DIR__ . '/laboratory.php';
+
+// NORHNAIM: medical visit attestation and telemedicine audit.
+require __DIR__ . '/medical_visit_audit.php';
+
+// NORHNAIM_BENEFIT_PRESCRIPTIONS_ROUTES_V1
+require __DIR__ . '/benefit_prescriptions.php';
+
+// NORHNAIM_REGISTRY_APPOINTMENT_ARRIVAL_ROUTES_V1
+require __DIR__ . '/reception_arrival.php';
+
+// NORHNAIM_DISABILITY_VERIFICATION_ACTION_ROUTES_V1
+require __DIR__ . '/patient_disability_verification.php';
+
+// NORHNAIM_TELEMED_AVAILABLE_SLOTS_ROUTES_V1
+require __DIR__ . '/telemedicine_available_slots.php';
+
+// NORHNAIM_DOCTOR_APPOINTMENT_TIMEZONE_ROUTES_V1
+require __DIR__ . '/doctor_appointment_timezone.php';

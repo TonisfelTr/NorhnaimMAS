@@ -28,302 +28,10 @@ use Illuminate\View\View;
 
 class ReceptionController extends Controller
 {
+    use \App\Support\ValidatesDoctorAppointmentTime;
+
     private const APPOINTMENT_FORMAT_IN_PERSON = 'in_person';
     private const APPOINTMENT_FORMAT_TELEMEDICINE = 'telemedicine';
-
-    public function index(Request $request): View
-    {
-        $user = $request->user();
-        $isDebug = app()->hasDebugModeEnabled();
-
-        $doctor = $user && method_exists($user, 'doctor')
-            ? $user->doctor()->with('clinic')->first()
-            : null;
-
-        $nurse = $user && method_exists($user, 'nurse')
-            ? $user->nurse()->with('clinic')->first()
-            : null;
-
-        // Режим берём у фактической клиники пользователя, как в навигации.
-        // Отладочный $hostClinic не определяет область поиска пациентов.
-        $currentClinic = $doctor?->clinic ?? $nurse?->clinic;
-        $clinicIsInpatient = $currentClinic?->clinic_type === Clinic::TYPE_INPATIENT;
-
-        // Верхний поиск отправляет q, основная форма — fullname.
-        if (!$request->filled('fullname') && is_string($request->query('q'))) {
-            $request->merge(['fullname' => trim($request->query('q'))]);
-        }
-
-        // Удалённый переключатель больше не управляет режимом страницы.
-        // Очищаем старый параметр, чтобы он не переносился в пагинацию.
-        $request->query->remove('patient_scope');
-
-        // Сохраняем существующую форму оформления из стационарного navbar.
-        if ($clinicIsInpatient && $request->boolean('admit')
-            && class_exists(InpatientAdmissionController::class)) {
-            return app(InpatientAdmissionController::class)->index($request);
-        }
-
-        if ($clinicIsInpatient) {
-            return $this->inpatientReceptionIndex(
-                $request,
-                $currentClinic,
-                $doctor,
-                $nurse,
-                $isDebug
-            );
-        }
-
-        $currentDoctorId = $doctor?->id
-            ? (int) $doctor->id
-            : null;
-
-        $currentClinicId = $doctor?->clinic_id
-            ? (int) $doctor->clinic_id
-            : ($nurse?->clinic_id ? (int) $nurse->clinic_id : null);
-
-        /*
-         * В старой базе частная практика могла иметь clinic_id = 0.
-         * В новой — clinic_id может быть NULL. Оба варианта считаем
-         * частной практикой.
-         */
-        $isPrivateDoctor = $doctor !== null
-            && ((int) ($doctor->clinic_id ?? 0) === 0);
-
-        /*
-         |--------------------------------------------------------------------------
-         | Врачи для поиска по существующим записям
-         |--------------------------------------------------------------------------
-         |
-         | Фильтр использует область доступа журнала. Наличие активного
-         | кабинета проверяется отдельно при создании и изменении записи.
-         */
-        $doctors = $this->receptionFilterDoctors(
-            $currentClinicId,
-            $isPrivateDoctor ? $currentDoctorId : null,
-            $isDebug
-        );
-
-        $selectedDoctorId = $request->filled('doctor_id')
-            ? $request->integer('doctor_id')
-            : null;
-
-        $doctorSearchOptions = $doctors
-            ->map(function (Doctor $filterDoctor) use ($selectedDoctorId): array {
-                return array_merge(
-                    $this->receptionDoctorDisplayData($filterDoctor),
-                    ['selected' => (int) $filterDoctor->id === $selectedDoctorId]
-                );
-            })
-            ->values()
-            ->all();
-
-        /*
-         |--------------------------------------------------------------------------
-         | Текущие записи регистратуры
-         |--------------------------------------------------------------------------
-         */
-        $receptionsQuery = RegistryRecord::query()
-            ->with(['patient', 'doctor'])
-            ->orderByDesc('for_datetime');
-
-        if (!$isDebug) {
-            $receptionsQuery->whereBetween('for_datetime', [
-                Carbon::now()->startOfDay(),
-                Carbon::now()->endOfDay(),
-            ]);
-        }
-
-        $this->scopeReceptionRecords(
-            $receptionsQuery,
-            $currentClinicId,
-            $isPrivateDoctor ? $currentDoctorId : null,
-            $isDebug
-        );
-        PatientCareScope::forRecords($receptionsQuery, 'outpatient');
-
-        if ($request->filled('doctor_id')) {
-            $receptionsQuery->where(
-                'doctor_id',
-                $request->integer('doctor_id')
-            );
-        }
-
-        if (
-            $request->filled('fullname')
-            || $request->filled('birth_at')
-            || $request->filled('address_residence')
-        ) {
-            $receptionsQuery->whereHas(
-                'patient',
-                function ($query) use ($request): void {
-                    $this->applyPatientSearchFilters($query, $request);
-                }
-            );
-        }
-
-        $receptions = $receptionsQuery
-            ->paginate(30, ['*'], 'receptions_page')
-            ->withQueryString();
-
-        $receptionRows = $receptions->getCollection()
-            ->map(function (RegistryRecord $record) use (
-                $isDebug,
-                $isPrivateDoctor,
-                $currentDoctorId,
-                $currentClinicId
-            ): array {
-                $patient = $record->patient;
-                $doctorData = $this->receptionDoctorDisplayData($record->doctor);
-                $canModify = $isDebug || ($isPrivateDoctor
-                    ? $currentDoctorId && (int) $record->doctor_id === $currentDoctorId
-                    : $currentClinicId && (int) $record->clinic_id === $currentClinicId);
-
-                return [
-                    'id' => $record->id,
-                    'patient_id' => $patient?->id,
-                    'patient_name' => $patient?->fullname ?? 'Пациент не указан',
-                    'patient_initials' => mb_substr($patient?->surname ?? 'П', 0, 1)
-                        . mb_substr($patient?->name ?? '', 0, 1),
-                    'birth_date' => $patient?->birth_at
-                        ? Carbon::parse($patient->birth_at)->format('d.m.Y')
-                        : null,
-                    'doctor_name' => $doctorData['full_name'],
-                    'doctor_profile' => $doctorData['profile'],
-                    'appointment_format' => $record->appointment_format ?: self::APPOINTMENT_FORMAT_IN_PERSON,
-                    'appointment_format_label' => $record->appointment_format === self::APPOINTMENT_FORMAT_TELEMEDICINE
-                        ? 'Телемедицина'
-                        : 'Очный приём',
-                    'appointment_format_icon' => $record->appointment_format === self::APPOINTMENT_FORMAT_TELEMEDICINE
-                        ? 'bi-camera-video'
-                        : 'bi-person-check',
-                    'appointment_format_class' => $record->appointment_format === self::APPOINTMENT_FORMAT_TELEMEDICINE
-                        ? 'is-telemedicine'
-                        : 'is-in-person',
-                    'address_registration' => $patient?->address_registration ?: '—',
-                    'address_residence' => $patient?->address_residence ?: '—',
-                    'medical_card_url' => $patient
-                        ? route('doctors.patients.medical_card', $patient->id)
-                        : null,
-                    'can_modify' => $canModify,
-                    'edit_url' => $canModify
-                        ? route('doctors.reception.edit', $record->id)
-                        : null,
-                ];
-            })
-            ->values()
-            ->all();
-
-        /*
-         |--------------------------------------------------------------------------
-         | Поиск непосредственно по patients
-         |--------------------------------------------------------------------------
-         |
-         | Раньше поиск шёл только через registry_records. Поэтому пациент,
-         | существующий в patients, но ещё не имеющий registry_records,
-         | не мог быть найден.
-         */
-        $patientsQuery = $this->receptionVisiblePatients(
-            $currentClinicId,
-            $isPrivateDoctor ? $currentDoctorId : null,
-            $isDebug
-        )
-            ->with(['doctor', 'diagnose']);
-        PatientCareScope::forPatients($patientsQuery, 'outpatient');
-
-        $this->applyPatientSearchFilters($patientsQuery, $request);
-
-        if ($request->filled('doctor_id')) {
-            $selectedDoctorId = $request->integer('doctor_id');
-
-            $patientsQuery->where(
-                function ($query) use ($selectedDoctorId): void {
-                    $query
-                        ->where('doctor_id', $selectedDoctorId)
-                        ->orWhereIn(
-                            'id',
-                            RegistryRecord::query()
-                                ->select('patient_id')
-                                ->where('doctor_id', $selectedDoctorId)
-                        );
-                }
-            );
-        }
-
-        $patients = $patientsQuery
-            ->orderBy('surname')
-            ->orderBy('name')
-            ->orderBy('patronym')
-            ->paginate(30, ['*'], 'patients_page')
-            ->withQueryString();
-
-        /*
-         |--------------------------------------------------------------------------
-         | Данные владельца регистратуры
-         |--------------------------------------------------------------------------
-         */
-        if ($isDebug) {
-            $hostClinic = Clinic::query()
-                ->orderBy('id')
-                ->first();
-
-            $name = 'Администратор';
-            $surname = 'Дебаггеров';
-            $patronym = 'Тестович';
-            $profession = 'дебаггер';
-        } else {
-            $hostClinic = $currentClinicId
-                ? Clinic::query()->find($currentClinicId)
-                : null;
-
-            $name = $doctor?->name ?? $nurse?->name ?? '';
-            $surname = $doctor?->surname ?? $nurse?->surname ?? '';
-            $patronym = $doctor?->patronym ?? $nurse?->patronym ?? '';
-            $profession = $nurse?->profession
-                ?? $doctor?->profession
-                ?? 'врач';
-        }
-
-        $futureReceptionsQuery = RegistryRecord::query()
-            ->where(
-                'for_datetime',
-                '>',
-                Carbon::now()->addDay()->startOfDay()
-            );
-
-        $this->scopeReceptionRecords(
-            $futureReceptionsQuery,
-            $currentClinicId,
-            $isPrivateDoctor ? $currentDoctorId : null,
-            $isDebug
-        );
-        PatientCareScope::forRecords($futureReceptionsQuery, 'outpatient');
-
-        $futureReceptions = $futureReceptionsQuery->count();
-
-        return view('doctors.reception.table', [
-            'receptions' => $receptions,
-            'receptionRows' => $receptionRows,
-            'patients' => $patients,
-            'hostClinic' => $hostClinic,
-            'receptionClinicName' => $hostClinic?->name ?? 'Частная практика',
-            'name' => $name,
-            'surname' => $surname,
-            'patronym' => $patronym,
-            'profession' => $profession,
-            'doctors' => $doctors,
-            'doctorSearchOptions' => $doctorSearchOptions,
-            'futureReceptions' => $futureReceptions,
-            'isDebug' => $isDebug,
-            'isPrivateDoctor' => $isPrivateDoctor,
-            'receptionPage' => $this->receptionPageData(
-                false,
-                $receptions->total(),
-                $futureReceptions,
-                $receptions->total()
-            ),
-        ]);
-    }
 
     /**
      * Поиск по пациентам с действующим размещением в стационаре.
@@ -704,7 +412,7 @@ class ReceptionController extends Controller
             'count_label' => ($isInpatient ? 'Пациентов: ' : 'Записей: ') . $resultCount,
             'first_stat_label' => $isInpatient ? 'Сейчас в стационаре' : 'Найдено записей',
             'first_stat_value' => $firstCount,
-            'second_stat_label' => $isInpatient ? 'Найдено пациентов' : 'В ожидании',
+            'second_stat_label' => $isInpatient ? 'Найдено пациентов' : 'Будущие записи',
             'second_stat_value' => $secondCount,
             'empty_title' => $isInpatient
                 ? ($firstCount > 0 ? 'Госпитализированные пациенты не найдены' : 'В стационаре пока нет пациентов')
@@ -855,6 +563,11 @@ class ReceptionController extends Controller
     public function create(Request $request): View
     {
         $currentClinicId = $this->currentReceptionClinicId($request);
+        // clinic-telemedicine-timezones:timezone-create-context:v1:begin
+        $appointmentTimeContext = \App\Support\ClinicAppointmentTime::formContext(
+            null, $currentClinicId, request()->session()->getOldInput()
+        );
+        // clinic-telemedicine-timezones:timezone-create-context:v1:end
         $activeClinicQuarantine =
             $this->activeClinicQuarantine($currentClinicId);
 
@@ -897,7 +610,10 @@ class ReceptionController extends Controller
         );
 
         return view('doctors.reception.create', compact(
-            'doctors',
+// clinic-telemedicine-timezones:timezone-create-compact:v1:begin
+'doctors',
+            'appointmentTimeContext',
+// clinic-telemedicine-timezones:timezone-create-compact:v1:end
             'doctorClinicIds',
             'clinicWorkSchedules',
             'clinicScheduleExceptions',
@@ -945,7 +661,9 @@ class ReceptionController extends Controller
                 'patronym' => 'nullable|string|max:255',
                 'birth_at' => 'required|date|before_or_equal:today',
                 'gender' => 'required|in:M,F',
-                'appointment_datetime' => 'required|date|after_or_equal:now',
+// clinic-telemedicine-timezones:timezone-store-rule:v1:begin
+'appointment_datetime' => 'required|date',
+// clinic-telemedicine-timezones:timezone-store-rule:v1:end
                 'appointment_format' => 'required|in:in_person,telemedicine',
                 'address_registration' => 'required|string',
                 'address_residence' => 'required|string',
@@ -1211,17 +929,25 @@ class ReceptionController extends Controller
 
         $doctorId = $selectedDoctor->id;
 
-        $this->validateAppointmentWithinClinicSchedule(
-            $selectedDoctor,
-            Carbon::parse($validatedData['appointment_datetime']),
-            $validatedData['appointment_format']
-        );
+// clinic-telemedicine-timezones:timezone-store-clinic-validation:v1:begin
+$this->validateAppointmentWithinClinicSchedule($selectedDoctor, Carbon::instance($this->appointmentStart((string) $validatedData['appointment_datetime'], (int) $clinicId)), $validatedData['appointment_format']);
+// clinic-telemedicine-timezones:timezone-store-clinic-validation:v1:end
+
+        $validatedData['appointment_duration_minutes'] = $this->requiredAppointmentDuration($request);
 
         DB::transaction(function () use (
             $validatedData,
             $doctorId,
             $clinicId
         ): void {
+            // doctor-availability: validate immediately before the first write.
+            $this->assertDoctorAppointmentTime(
+                (int) $doctorId, (int) $clinicId,
+                (string) $validatedData['appointment_datetime'],
+                (int) $validatedData['appointment_duration_minutes'],
+                (string) $validatedData['appointment_format']
+            );
+
             if (!empty($validatedData['patient_id'])) {
                 $patient = Patient::query()
                     ->lockForUpdate()
@@ -1299,13 +1025,18 @@ class ReceptionController extends Controller
             $record = new RegistryRecord();
             $record->patient_id = $patient->id;
             $record->doctor_id = $doctorId;
-            $record->for_datetime = Carbon::parse(
-                $validatedData['appointment_datetime']
+// clinic-telemedicine-timezones:timezone-store-stamp:v1:begin
+\App\Support\ClinicAppointmentTime::stamp(
+                $record,
+                $this->appointmentStart((string) $validatedData['appointment_datetime'], (int) $clinicId),
+                (int) $clinicId
             );
+// clinic-telemedicine-timezones:timezone-store-stamp:v1:end
             $record->appointment_format =
                 $validatedData['appointment_format'];
             $record->appointment = false;
             $record->clinic_id = $clinicId;
+            $record->setAttribute('appointment_duration_minutes', (int) $validatedData['appointment_duration_minutes']);
             $record->save();
         });
 
@@ -1551,7 +1282,9 @@ class ReceptionController extends Controller
             return null;
         }
 
-        $today = Carbon::today()->toDateString();
+// clinic-telemedicine-timezones:timezone-quarantine-today:v1:begin
+$today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId))->toDateString();
+// clinic-telemedicine-timezones:timezone-quarantine-today:v1:end
 
         return ClinicScheduleException::query()
             ->where('clinic_id', $clinicId)
@@ -2221,7 +1954,7 @@ class ReceptionController extends Controller
     }
 
 
-    private function validateAppointmentWithinClinicSchedule(
+    public function validateAppointmentWithinClinicSchedule(
         Doctor $doctor,
         Carbon $appointment,
         string $appointmentFormat = self::APPOINTMENT_FORMAT_IN_PERSON
@@ -2684,6 +2417,313 @@ class ReceptionController extends Controller
             && $appointment->lt($endsAt);
     }
 
+    public function index(Request $request): View
+    {
+        $user = $request->user();
+        $isDebug = app()->hasDebugModeEnabled();
+
+        $doctor = $user && method_exists($user, 'doctor')
+            ? $user->doctor()->with('clinic')->first()
+            : null;
+
+        $nurse = $user && method_exists($user, 'nurse')
+            ? $user->nurse()->with('clinic')->first()
+            : null;
+
+        // Режим берём у фактической клиники пользователя, как в навигации.
+        // Отладочный $hostClinic не определяет область поиска пациентов.
+        $currentClinic = $doctor?->clinic ?? $nurse?->clinic;
+        $clinicIsInpatient = $currentClinic?->clinic_type === Clinic::TYPE_INPATIENT;
+
+        // Верхний поиск отправляет q, основная форма — fullname.
+        if (!$request->filled('fullname') && is_string($request->query('q'))) {
+            $request->merge(['fullname' => trim($request->query('q'))]);
+        }
+
+        // Удалённый переключатель больше не управляет режимом страницы.
+        // Очищаем старый параметр, чтобы он не переносился в пагинацию.
+        $request->query->remove('patient_scope');
+
+        // Сохраняем существующую форму оформления из стационарного navbar.
+        if ($clinicIsInpatient && $request->boolean('admit')
+            && class_exists(InpatientAdmissionController::class)) {
+            return app(InpatientAdmissionController::class)->index($request);
+        }
+
+        if ($clinicIsInpatient) {
+            return $this->inpatientReceptionIndex(
+                $request,
+                $currentClinic,
+                $doctor,
+                $nurse,
+                $isDebug
+            );
+        }
+
+        $currentDoctorId = $doctor?->id
+            ? (int) $doctor->id
+            : null;
+
+        $currentClinicId = $doctor?->clinic_id
+            ? (int) $doctor->clinic_id
+            : ($nurse?->clinic_id ? (int) $nurse->clinic_id : null);
+
+        /*
+         * В старой базе частная практика могла иметь clinic_id = 0.
+         * В новой — clinic_id может быть NULL. Оба варианта считаем
+         * частной практикой.
+         */
+        $isPrivateDoctor = $doctor !== null
+            && ((int) ($doctor->clinic_id ?? 0) === 0);
+
+        /*
+         |--------------------------------------------------------------------------
+         | Врачи для поиска по существующим записям
+         |--------------------------------------------------------------------------
+         |
+         | Фильтр использует область доступа журнала. Наличие активного
+         | кабинета проверяется отдельно при создании и изменении записи.
+         */
+        $doctors = $this->receptionFilterDoctors(
+            $currentClinicId,
+            $isPrivateDoctor ? $currentDoctorId : null,
+            $isDebug
+        );
+
+        $selectedDoctorId = $request->filled('doctor_id')
+            ? $request->integer('doctor_id')
+            : null;
+
+        $doctorSearchOptions = $doctors
+            ->map(function (Doctor $filterDoctor) use ($selectedDoctorId): array {
+                return array_merge(
+                    $this->receptionDoctorDisplayData($filterDoctor),
+                    ['selected' => (int) $filterDoctor->id === $selectedDoctorId]
+                );
+            })
+            ->values()
+            ->all();
+
+        /*
+         |--------------------------------------------------------------------------
+         | Текущие записи регистратуры
+         |--------------------------------------------------------------------------
+         */
+        $receptionsQuery = RegistryRecord::query()
+            ->with(['patient', 'doctor'])
+            ->orderByDesc('for_datetime');
+
+        if (!$isDebug) {
+            /* Built-in date filter replaced below (RECEPTION-SCHEDULE-DATES). */;
+        }
+
+        $this->scopeReceptionRecords(
+            $receptionsQuery,
+            $currentClinicId,
+            $isPrivateDoctor ? $currentDoctorId : null,
+            $isDebug
+        );
+        PatientCareScope::forRecords($receptionsQuery, 'outpatient');
+
+        if ($request->filled('doctor_id')) {
+            $receptionsQuery->where(
+                'doctor_id',
+                $request->integer('doctor_id')
+            );
+        }
+
+        if (
+            $request->filled('fullname')
+            || $request->filled('birth_at')
+            || $request->filled('address_residence')
+        ) {
+            $receptionsQuery->whereHas(
+                'patient',
+                function ($query) use ($request): void {
+                    $this->applyPatientSearchFilters($query, $request);
+                }
+            );
+        }
+
+        // RECEPTION-SCHEDULE-1: dates/formats only; existing access scopes are preserved.
+        $receptionSchedule = app(\App\Support\ReceptionAppointmentSchedule::class);
+        $receptionScheduleFilters = $receptionSchedule->filters($request);
+        $receptionSchedule->applyFilters($receptionsQuery, $receptionScheduleFilters);
+
+// clinic-telemedicine-timezones:timezone-future-counter:v1:begin
+$futureReceptionsQuery = (clone $receptionsQuery)->reorder();
+        \App\Support\ClinicAppointmentTime::whereComparedToNow($futureReceptionsQuery, '>');
+        $futureReceptions = $futureReceptionsQuery->count();
+// clinic-telemedicine-timezones:timezone-future-counter:v1:end
+
+        $receptions = $receptionsQuery
+            ->paginate(30, ['*'], 'receptions_page')
+            ->withQueryString();
+
+        $receptionRows = $receptions->getCollection()
+            ->map(function (RegistryRecord $record) use (
+                $isDebug,
+                $isPrivateDoctor,
+                $currentDoctorId,
+                $currentClinicId
+            ): array {
+                $patient = $record->patient;
+                $doctorData = $this->receptionDoctorDisplayData($patient?->doctor);
+                $canModify = $isDebug || ($isPrivateDoctor
+                        ? $currentDoctorId && (int) $record->doctor_id === $currentDoctorId
+                        : $currentClinicId && (int) $record->clinic_id === $currentClinicId);
+
+                return [
+                    'id' => $record->id,
+                    // NORHNAIM_REGISTRY_APPOINTMENT_ARRIVAL_V1
+                    'appointment' => (bool) $record->appointment,
+                    'arrival_can_confirm' => (static function ($value): bool {
+                        if (!$value) {
+                            return false;
+                        }
+
+                        try {
+                            return now()->gte(
+                                Carbon::parse($value)->subHour()
+                            );
+                        } catch (\Throwable) {
+                            return false;
+                        }
+                    })(
+                        $record->getRawOriginal('for_datetime')
+                            ?: $record->for_datetime
+                    ),
+                    'patient_id' => $patient?->id,
+                    'patient_name' => $patient?->fullname ?? 'Пациент не указан',
+                    'patient_initials' => mb_substr($patient?->surname ?? 'П', 0, 1)
+                        . mb_substr($patient?->name ?? '', 0, 1),
+                    'birth_date' => $patient?->birth_at
+                        ? Carbon::parse($patient->birth_at)->format('d.m.Y')
+                        : null,
+                    'doctor_name' => $doctorData['full_name'],
+                    'doctor_profile' => $doctorData['profile'],
+                    'appointment_format' => $record->appointment_format ?: self::APPOINTMENT_FORMAT_IN_PERSON,
+                    'appointment_format_label' => $record->appointment_format === self::APPOINTMENT_FORMAT_TELEMEDICINE
+                        ? 'Телемедицина'
+                        : 'Очный приём',
+                    'appointment_format_icon' => $record->appointment_format === self::APPOINTMENT_FORMAT_TELEMEDICINE
+                        ? 'bi-camera-video'
+                        : 'bi-person-check',
+                    'appointment_format_class' => $record->appointment_format === self::APPOINTMENT_FORMAT_TELEMEDICINE
+                        ? 'is-telemedicine'
+                        : 'is-in-person',
+                    'address_registration' => $patient?->address_registration ?: '—',
+                    'address_residence' => $patient?->address_residence ?: '—',
+                    'medical_card_url' => $patient
+                        ? route('doctors.patients.medical_card', $patient->id)
+                        : null,
+                    'can_modify' => $canModify,
+                    'edit_url' => $canModify
+                        ? route('doctors.reception.edit', $record->id)
+                        : null,
+                ];
+            })
+            ->values()
+            ->all();
+
+        $receptionRows = $receptionSchedule->decorateRows($receptionRows, $receptions->getCollection());
+
+        /*
+         |--------------------------------------------------------------------------
+         | Поиск непосредственно по patients
+         |--------------------------------------------------------------------------
+         |
+         | Раньше поиск шёл только через registry_records. Поэтому пациент,
+         | существующий в patients, но ещё не имеющий registry_records,
+         | не мог быть найден.
+         */
+        $patientsQuery = $this->receptionVisiblePatients(
+            $currentClinicId,
+            $isPrivateDoctor ? $currentDoctorId : null,
+            $isDebug
+        )
+            ->with(['doctor', 'diagnose']);
+        PatientCareScope::forPatients($patientsQuery, 'outpatient');
+
+        $this->applyPatientSearchFilters($patientsQuery, $request);
+
+        if ($request->filled('doctor_id')) {
+            $selectedDoctorId = $request->integer('doctor_id');
+
+            $patientsQuery->where(
+                function ($query) use ($selectedDoctorId): void {
+                    $query
+                        ->where('doctor_id', $selectedDoctorId)
+                        ->orWhereIn(
+                            'id',
+                            RegistryRecord::query()
+                                ->select('patient_id')
+                                ->where('doctor_id', $selectedDoctorId)
+                        );
+                }
+            );
+        }
+
+        $patients = $patientsQuery
+            ->orderBy('surname')
+            ->orderBy('name')
+            ->orderBy('patronym')
+            ->paginate(30, ['*'], 'patients_page')
+            ->withQueryString();
+
+        /*
+         |--------------------------------------------------------------------------
+         | Данные владельца регистратуры
+         |--------------------------------------------------------------------------
+         */
+        if ($isDebug) {
+            $hostClinic = Clinic::query()
+                ->orderBy('id')
+                ->first();
+
+            $name = 'Администратор';
+            $surname = 'Дебаггеров';
+            $patronym = 'Тестович';
+            $profession = 'дебаггер';
+        } else {
+            $hostClinic = $currentClinicId
+                ? Clinic::query()->find($currentClinicId)
+                : null;
+
+            $name = $doctor?->name ?? $nurse?->name ?? '';
+            $surname = $doctor?->surname ?? $nurse?->surname ?? '';
+            $patronym = $doctor?->patronym ?? $nurse?->patronym ?? '';
+            $profession = $nurse?->profession
+                ?? $doctor?->profession
+                ?? 'неизвестно';
+        }
+
+        // Future count is prepared before paginate() mutates limit/offset.
+
+        return view('doctors.reception.table', [
+            'receptionScheduleFilters' => $receptionScheduleFilters,
+            'receptions' => $receptions,
+            'receptionRows' => $receptionRows,
+            'patients' => $patients,
+            'hostClinic' => $hostClinic,
+            'receptionClinicName' => $hostClinic?->name ?? 'Частная практика',
+            'name' => $name,
+            'surname' => $surname,
+            'patronym' => $patronym,
+            'profession' => $profession,
+            'doctors' => $doctors,
+            'doctorSearchOptions' => $doctorSearchOptions,
+            'futureReceptions' => $futureReceptions,
+            'isDebug' => $isDebug,
+            'isPrivateDoctor' => $isPrivateDoctor,
+            'receptionPage' => $this->receptionPageData(
+                false,
+                $receptions->total(),
+                $futureReceptions,
+                $receptions->total()
+            ),
+        ]);
+    }
 
     public function archives(Request $request): View|JsonResponse
     {
@@ -2722,9 +2762,11 @@ class ReceptionController extends Controller
             ])
             ->where(
                 function ($query) use ($now): void {
-                    $query
-                        ->where('appointment', true)
-                        ->orWhere('for_datetime', '<=', $now);
+// clinic-telemedicine-timezones:timezone-archive-threshold:v1:begin
+$query->where('appointment', true)->orWhere(function ($past) use ($now): void {
+                        \App\Support\ClinicAppointmentTime::whereComparedToNow($past, '<=', $now);
+                    });
+// clinic-telemedicine-timezones:timezone-archive-threshold:v1:end
                 }
             );
 
@@ -2936,20 +2978,22 @@ class ReceptionController extends Controller
         );
     }
 
-    public function edit(Patient $patient)
+    public function edit(RegistryRecord $registryRecord)
     {
-        $record = RegistryRecord::with('patient')
-            ->whereBelongsTo($patient)
-            ->firstOrFail();
+        // Сохраняем имя переменной, которое используется в шаблоне.
+        $record = $registryRecord;
 
-        $currentClinicId = $this->currentReceptionClinicId(
-            request()
+        $currentClinicId = $this->currentReceptionClinicId(request());
+        // clinic-telemedicine-timezones:timezone-edit-context:v1:begin
+        $appointmentTimeContext = \App\Support\ClinicAppointmentTime::formContext(
+            $record, $currentClinicId, request()->session()->getOldInput()
         );
+        // clinic-telemedicine-timezones:timezone-edit-context:v1:end
 
+        // Проверяем доступ до загрузки пациента и его документов.
         if (
             !$currentClinicId
-            || (int) $record->clinic_id
-                !== (int) $currentClinicId
+            || (int) $record->clinic_id !== (int) $currentClinicId
         ) {
             abort(
                 403,
@@ -2957,11 +3001,24 @@ class ReceptionController extends Controller
             );
         }
 
+        // Получаем пациента, связанного с записью на приём.
+        $record->loadMissing('patient');
+
+        $patient = $record->patient;
+
+        abort_if(
+            $patient === null,
+            404,
+            'Пациент записи не найден.'
+        );
+
         $appointmentFormats = $this->clinicAppointmentFormats(
             $currentClinicId
         );
+
         $recordAppointmentFormat = $record->appointment_format
             ?: self::APPOINTMENT_FORMAT_IN_PERSON;
+
         $defaultAppointmentFormat = in_array(
             $recordAppointmentFormat,
             $appointmentFormats,
@@ -2985,7 +3042,9 @@ class ReceptionController extends Controller
             )
             ->all();
 
-        $clinicWorkSchedules = $this->clinicWorkSchedulesForDoctors($doctors);
+        $clinicWorkSchedules = $this->clinicWorkSchedulesForDoctors(
+            $doctors
+        );
 
         [
             $clinicScheduleExceptions,
@@ -3035,7 +3094,10 @@ class ReceptionController extends Controller
             'doctors.reception.edit',
             compact(
                 'record',
-                'doctors',
+// clinic-telemedicine-timezones:timezone-edit-compact:v1:begin
+'doctors',
+            'appointmentTimeContext',
+// clinic-telemedicine-timezones:timezone-edit-compact:v1:end
                 'patient',
                 'doctorClinicIds',
                 'clinicWorkSchedules',
@@ -3095,16 +3157,33 @@ class ReceptionController extends Controller
             $appointmentFormat
         );
 
-        $this->validateAppointmentWithinClinicSchedule(
-            $selectedDoctor,
-            Carbon::parse($request->appointment_datetime),
-            $appointmentFormat
-        );
+        $appointmentDuration = $this->changedAppointmentDuration($request, $record);
+        if ($appointmentDuration !== null) {
+            $this->validateAppointmentWithinClinicSchedule(
+                $selectedDoctor,
+                /* clinic-telemedicine-timezones:timezone-update-clinic-validation:v1:begin */ Carbon::instance($this->appointmentStart((string) $request->appointment_datetime, (int) $currentClinicId)) /* clinic-telemedicine-timezones:timezone-update-clinic-validation:v1:end */,
+                $appointmentFormat
+            );
+            $this->assertDoctorAppointmentTime(
+                (int) $selectedDoctor->id, (int) $currentClinicId,
+                (string) $request->appointment_datetime, $appointmentDuration, $appointmentFormat
+            );
+            $record->setAttribute('appointment_duration_minutes', $appointmentDuration);
+            $record->doctor_id = $selectedDoctor->id;
+// clinic-telemedicine-timezones:timezone-update-stamp:v1:begin
+\App\Support\ClinicAppointmentTime::stamp(
+                $record,
+                $this->appointmentStart((string) $request->appointment_datetime, (int) $currentClinicId),
+                (int) $currentClinicId
+            );
+// clinic-telemedicine-timezones:timezone-update-stamp:v1:end
+            $record->appointment_format = $appointmentFormat;
+        }
 
-        $record->doctor_id = $selectedDoctor->id;
-        $record->clinic_id = $selectedDoctor->clinic_id;
-        $record->for_datetime = $request->appointment_datetime;
-        $record->appointment_format = $appointmentFormat;
+
+        $record->clinic_id = $currentClinicId;
+
+
         $record->save();
 
         $patient = $record->patient;
@@ -3125,6 +3204,14 @@ class ReceptionController extends Controller
     public function destroy($id)
     {
         $record = RegistryRecord::findOrFail($id);
+        // NORHNAIM_TELEMED_JOURNAL_V1: do not bypass telemedicine cancellation rules.
+        if ($record->appointment_format === 'telemedicine') {
+            return app(TelemedicineJournalController::class)->destroy(
+                request(), $record->patient, (int) $record->getKey(),
+                app(\App\Services\TelemedicineJournalService::class)
+            );
+        }
+
         $record->delete(); // Soft delete — удаляется через `deleted_at`
 
         return redirect()

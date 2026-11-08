@@ -12,15 +12,27 @@ class ClinicSettingsAccessMiddleware
     public static function allows(?User $user): bool
     {
         return $user !== null && (
-            $user->hasRole('clinic_admin') || self::isDedicatedDebugTester($user)
+            $user->hasRole('clinic_admin') || self::isDedicatedAdmin($user)
         );
     }
 
-    public static function isDedicatedDebugTester(?User $user): bool
+    /**
+     * Зарезервированный администратор с действительной системной ролью.
+     * По одному совпадению email права не предоставляются.
+     */
+    public static function isDedicatedAdmin(?User $user): bool
     {
         return $user !== null
-            && config('app.debug') === true
-            && strcasecmp((string) $user->email, 'admin@admin.ru') === 0;
+            && strcasecmp(trim((string) $user->getRawOriginal('email')), 'admin@admin.ru') === 0
+            && $user->hasRole('admins');
+    }
+
+    /**
+     * Сохраняем прежнюю debug-only семантику для остальных вызовов проекта.
+     */
+    public static function isDedicatedDebugTester(?User $user): bool
+    {
+        return config('app.debug') === true && self::isDedicatedAdmin($user);
     }
 
     /**

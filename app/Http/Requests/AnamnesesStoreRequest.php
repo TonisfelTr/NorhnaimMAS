@@ -11,8 +11,8 @@ class AnamnesesStoreRequest extends FormRequest
         return auth()->check() &&
             (
                 !config('app.debug')
-                    ? auth()->user()->hasRole('doctor')
-                    : auth()->user()->hasRole('doctor') || auth()->user()->hasRole('admins')
+                    ? auth()->user()->hasRole('doctors')
+                    : auth()->user()->hasRole('doctors') || auth()->user()->hasRole('admins')
             );
     }
 

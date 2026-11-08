@@ -1,0 +1,479 @@
+// Medical card: formal consultation attestation and WebRTC audit log.
+// No inline CSS is needed in Blade templates.
+.mc-audit-panel, .mc-audit-log
+  --mc-audit-blue: #2563eb
+  --mc-audit-teal: #087e86
+  --mc-audit-muted: #64748b
+  --mc-audit-line: #dfe7f0
+  color: #1e293b
+
+.mc-audit-panel
+  overflow: hidden
+  border: 1px solid var(--mc-audit-line)
+  border-radius: 20px
+  background: #fff
+  box-shadow: 0 9px 28px rgba(30, 60, 90, .045)
+
+.mc-audit-panel__head
+  display: flex
+  gap: 14px
+  align-items: flex-start
+  padding: 20px
+  background: linear-gradient(115deg, #f1f8ff, #f6fafc 65%, #fff)
+  border-bottom: 1px solid var(--mc-audit-line)
+
+.mc-audit-panel__icon
+  display: grid
+  place-items: center
+  flex: 0 0 44px
+  width: 44px
+  height: 44px
+  font-size: 21px
+  border-radius: 13px
+  background: #e2eeff
+  color: #2563eb
+
+.mc-audit-panel__heading
+  min-width: 0
+
+  h2
+    margin: 0 0 5px
+    font-size: 17px
+    font-weight: 800
+    line-height: 1.35
+
+  p
+    margin: 0
+    max-width: 900px
+    color: var(--mc-audit-muted)
+    font-size: 13px
+    line-height: 1.55
+
+.mc-audit-appointments
+  padding: 3px 20px
+
+.mc-audit-appointment
+  display: flex
+  gap: 16px
+  align-items: center
+  justify-content: space-between
+  padding: 15px 0
+
+  + .mc-audit-appointment
+    border-top: 1px solid #edf1f5
+
+.mc-audit-appointment__details
+  min-width: 0
+
+.mc-audit-appointment__date
+  font-size: 14px
+  font-weight: 750
+
+.mc-audit-appointment__id
+  display: inline-block
+  margin-left: 7px
+  font-size: 11px
+  color: #64748b
+  font-weight: 600
+
+.mc-audit-appointment__meta
+  margin-top: 4px
+  color: #6b7b90
+  font-size: 12px
+
+.mc-audit-appointment__note
+  max-width: 750px
+  margin-top: 6px
+  font-size: 12px
+  white-space: pre-wrap
+  overflow-wrap: anywhere
+
+.mc-audit-appointment__actions
+  display: flex
+  gap: 8px
+  align-items: center
+  flex-wrap: wrap
+  justify-content: flex-end
+
+.mc-audit-status
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: 6px
+  padding: 6px 10px
+  border-radius: 999px
+  border: 1px solid transparent
+  white-space: nowrap
+  font-size: 11px
+  line-height: 1.2
+  font-weight: 800
+
+.mc-audit-status--held
+  color: #047857
+  border-color: #b5ead6
+  background: #ecfdf5
+
+.mc-audit-status--notheld
+  color: #a23b42
+  border-color: #f4d0d1
+  background: #fff1f1
+
+.mc-audit-status--pending
+  color: #735728
+  border-color: #efdfb2
+  background: #fff9e8
+
+.mc-audit-panel__empty, .mc-audit-log__empty
+  padding: 25px
+  text-align: center
+  color: var(--mc-audit-muted)
+  font-size: 13px
+
+.mc-audit-panel__footnote
+  border-top: 1px solid #edf1f5
+  margin: 0
+  padding: 11px 20px
+  color: #64748b
+  font-size: 11px
+  line-height: 1.5
+
+.mc-audit-modal .modal-dialog
+  max-width: 700px
+
+.mc-audit-modal__subtitle
+  margin-top: 5px
+  font-size: 12px
+  color: #64748b
+
+.mc-audit-modal__notice
+  display: flex
+  align-items: center
+  gap: 9px
+  padding: 12px 14px
+  background: #eff6ff
+  color: #1d4d89
+  border: 1px solid #dbeafe
+  border-radius: 12px
+  font-size: 12px
+  line-height: 1.45
+
+.mc-audit-radio-grid
+  display: grid
+  grid-template-columns: repeat(2, minmax(0, 1fr))
+  gap: 12px
+  margin: 0
+  padding: 0
+  border: 0
+
+.mc-audit-radio-card
+  cursor: pointer
+
+  input
+    position: absolute
+    width: 1px
+    height: 1px
+    opacity: 0
+
+  .mc-audit-radio-card__surface
+    display: flex
+    align-items: flex-start
+    gap: 11px
+    height: 100%
+    min-height: 84px
+    padding: 16px
+    border: 1px solid #dbe3ed
+    border-radius: 13px
+    transition: background .15s, border-color .15s
+
+    > i
+      font-size: 21px
+      color: #64748b
+
+    strong, small
+      display: block
+
+    strong
+      margin-bottom: 5px
+      font-size: 13px
+      color: #24344e
+
+    small
+      font-size: 11px
+      line-height: 1.5
+      color: #66768b
+
+  input:checked + .mc-audit-radio-card__surface
+    border-color: #79a7ef
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .07)
+    background: #f3f8ff
+
+    > i
+      color: #2563eb
+
+  input:focus-visible + .mc-audit-radio-card__surface
+    outline: 3px solid #93c5fd
+    outline-offset: 2px
+
+.mc-audit-attestation
+  display: flex
+  gap: 10px
+  align-items: flex-start
+  padding: 13px 15px
+  border: 1px solid #d9e6f0
+  border-radius: 12px
+  background: #f8fafc
+  cursor: pointer
+  font-size: 12px
+  line-height: 1.6
+
+  input
+    margin-top: 3px
+    flex: 0 0 auto
+
+.mc-audit-log__hero
+  display: flex
+  align-items: center
+  gap: 16px
+  padding: 21px
+  margin-bottom: 18px
+  background: linear-gradient(125deg, #f1f8ff, #f4fbf8)
+  border: 1px solid #dce9f2
+  border-radius: 18px
+
+  h2
+    margin: 0 0 5px
+    font-size: 20px
+    font-weight: 800
+
+  p
+    margin: 0
+    font-size: 13px
+    color: #66768b
+    line-height: 1.5
+
+.mc-audit-log__hero-icon
+  display: grid
+  place-items: center
+  flex: 0 0 54px
+  width: 54px
+  height: 54px
+  border-radius: 16px
+  background: #e0edff
+  color: #2563eb
+  font-size: 25px
+
+.mc-audit-session
+  border: 1px solid #dfe7f0
+  border-radius: 16px
+  margin-bottom: 12px
+  background: #fff
+  overflow: hidden
+  box-shadow: 0 5px 15px rgba(20, 41, 73, .035)
+
+.mc-audit-session__summary
+  display: grid
+  grid-template-columns: minmax(140px, .7fr) minmax(140px, 1.4fr) minmax(135px, .9fr) auto
+  align-items: center
+  gap: 12px
+  padding: 17px 20px
+  list-style: none
+  cursor: pointer
+
+  &::-webkit-details-marker
+    display: none
+
+  &:hover
+    background: #f8fbff
+
+  &:focus-visible
+    outline: 3px solid #93c5fd
+    outline-offset: -3px
+
+.mc-audit-session__date
+  font-size: 13px
+  font-weight: 800
+
+.mc-audit-session__name
+  min-width: 0
+  font-size: 12px
+  color: #334155
+
+  small
+    display: block
+    color: #64748b
+    margin-top: 2px
+
+.mc-audit-session__count
+  color: #64748b
+  font-size: 11px
+  white-space: nowrap
+
+  i
+    display: inline-block
+    margin-left: 5px
+    transition: transform .15s
+
+.mc-audit-session[open] .mc-audit-session__count i
+  transform: rotate(180deg)
+
+.mc-audit-session__body
+  padding: 20px
+  border-top: 1px solid #e7edf5
+
+.mc-audit-summary
+  display: grid
+  grid-template-columns: repeat(4, minmax(0, 1fr))
+  gap: 9px
+
+.mc-audit-summary__item
+  min-width: 0
+  display: flex
+  flex-direction: column
+  gap: 6px
+  border: 1px solid #e1eaf1
+  border-radius: 12px
+  padding: 13px
+  background: #f8fbfd
+
+  span
+    font-size: 11px
+    color: #64748b
+
+  strong
+    font-size: 12px
+    color: #293e59
+
+.mc-audit-session__confirmed
+  margin: 15px 0 0
+  font-size: 12px
+  line-height: 1.6
+  color: #334155
+  overflow-wrap: anywhere
+
+.mc-audit-session__timeline-title
+  font-size: 14px
+  font-weight: 800
+  margin: 20px 0 15px
+
+.mc-audit-timeline
+  padding: 0
+  margin: 0
+  list-style: none
+
+.mc-audit-timeline__item
+  display: grid
+  grid-template-columns: 150px 16px 1fr
+  gap: 11px
+  min-height: 60px
+
+  time
+    font-size: 11px
+    color: #64748b
+    padding-top: 3px
+
+.mc-audit-timeline__marker
+  width: 12px
+  height: 12px
+  border-radius: 50%
+  background: #3b82f6
+  margin-top: 3px
+  box-shadow: 0 0 0 4px #eff6ff
+
+.mc-audit-timeline__marker--manual
+  background: #0f9d85
+  box-shadow: 0 0 0 4px #e5f9f3
+
+.mc-audit-timeline__description
+  display: flex
+  flex-direction: column
+  gap: 2px
+  padding-bottom: 15px
+  font-size: 12px
+
+  strong
+    color: #26374c
+
+  span
+    color: #64748b
+    overflow-wrap: anywhere
+
+  .mc-audit-timeline__correction
+    color: #9a5c1e
+    font-weight: 700
+
+.mc-audit-session__disclaimer
+  margin: 16px 0 0
+  padding: 12px
+  color: #596c80
+  background: #f5f8fc
+  border-radius: 10px
+  font-size: 11px
+  line-height: 1.5
+
+@media (max-width: 1000px)
+  .mc-audit-session__summary
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+
+  .mc-audit-summary
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+
+@media (max-width: 640px)
+  .mc-audit-appointment
+    flex-direction: column
+    align-items: flex-start
+
+  .mc-audit-appointment__actions
+    justify-content: flex-start
+
+  .mc-audit-panel__head
+    padding: 14px
+
+  .mc-audit-appointments
+    padding: 2px 14px
+
+  .mc-audit-radio-grid
+    grid-template-columns: 1fr
+
+  .mc-audit-session__summary
+    grid-template-columns: 1fr
+    gap: 5px
+    padding: 14px
+
+  .mc-audit-session__body
+    padding: 14px
+
+  .mc-audit-summary
+    grid-template-columns: 1fr 1fr
+
+  .mc-audit-timeline__item
+    grid-template-columns: 100px 12px 1fr
+    gap: 7px
+
+.mc-audit-confirmation-history
+  margin-top: 7px
+  font-size: 11px
+  color: #5f7388
+
+  summary
+    color: #2563eb
+    cursor: pointer
+    font-weight: 650
+    list-style-position: inside
+
+  ol
+    padding-left: 20px
+    margin: 7px 0 0
+
+  li
+    padding: 3px 0
+    overflow-wrap: anywhere
+
+  span
+    display: block
+    padding-left: 6px
+
+.mc-audit-session__action-bar
+  display: flex
+  flex-wrap: wrap
+  gap: 10px
+  margin-top: 14px

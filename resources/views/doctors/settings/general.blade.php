@@ -1522,6 +1522,15 @@
                                                    placeholder="Название медицинской организации">
                                         </div>
 
+                                        {{-- clinic-telemedicine-timezones:timezone-field:v1:begin --}}
+                                        @include('doctors.settings.partials.clinic_timezone')
+                                        {{-- clinic-telemedicine-timezones:timezone-field:v1:end --}}
+                                        {{-- clinic-benefit-okato:view:v1:begin --}}
+                                        @include('doctors.settings.partials.benefit_okato_prefix')
+                                        {{-- clinic-benefit-okato:view:v1:end --}}
+                                        {{-- clinic-benefit-requisites:settings-view:v1:begin --}}
+                                        @include('doctors.settings.partials.benefit_prescription_settings')
+                                        {{-- clinic-benefit-requisites:settings-view:v1:end --}}
                                         <div class="settings-col-12 clinic-settings-address">
                                             <label class="settings-label" for="clinicAddress">
                                                 Адрес клиники
@@ -2016,6 +2025,9 @@
                                             <span>
                                             <strong>Телемедицина</strong>
                                             <p>Дистанционные консультации через информационную систему.</p>
+                                            {{-- clinic-telemedicine-timezones:telemedicine-activation-hint:v1:begin --}}
+                                            <p class="settings-field-hint">После сохранения формата в верхнем меню появится вкладка с настройками видеосвязи.</p>
+                                            {{-- clinic-telemedicine-timezones:telemedicine-activation-hint:v1:end --}}
                                         </span>
                                         </label>
                                     </div>

@@ -49,6 +49,59 @@ class ClinicSettingsUpdateRequest extends FormRequest
             ],
 
             'name' => 'required|string|max:255',
+            // clinic-telemedicine-timezones:timezone-rules:v1:begin
+            'timezone' => [
+                'sometimes', 'nullable', 'string', 'max:64',
+                Rule::in(\DateTimeZone::listIdentifiers(\DateTimeZone::ALL)),
+            ],
+            // clinic-telemedicine-timezones:timezone-rules:v1:end
+            // clinic-benefit-requisites:rules:v1:begin
+            'benefit_clinic' => [
+                'sometimes',
+                'array:prescribing_enabled,kind,ogrn,code,series,numbering_source,license_number,license_date,license_authority',
+                'required_array_keys:prescribing_enabled,kind',
+            ],
+            'benefit_clinic.prescribing_enabled' => [
+                'bail',
+                'required_with:benefit_clinic',
+                'boolean',
+            ],
+            'benefit_clinic.kind' => [
+                'bail',
+                'required_with:benefit_clinic',
+                'string',
+                Rule::in(['organization', 'individual']),
+            ],
+            'benefit_clinic.ogrn' => [
+                'bail',
+                'nullable',
+                'string',
+                $this->input('benefit_clinic.kind') === 'individual'
+                    ? 'regex:/\A[0-9]{15}\z/'
+                    : 'regex:/\A[0-9]{13}\z/',
+            ],
+            'benefit_clinic.code' => ['bail', 'nullable', 'string', 'max:50'],
+            'benefit_clinic.series' => [
+                'bail',
+                'nullable',
+                'string',
+                'max:20',
+                'regex:/\A[0-9]{2}[0-9A-ZА-ЯЁ\/-]*\z/iu',
+            ],
+            'benefit_clinic.numbering_source' => ['bail', 'nullable', 'string', 'max:1000'],
+            'benefit_clinic.license_number' => ['bail', 'nullable', 'string', 'max:100'],
+            'benefit_clinic.license_date' => ['bail', 'nullable', 'string', 'date_format:Y-m-d'],
+            'benefit_clinic.license_authority' => ['bail', 'nullable', 'string', 'max:500'],
+            // clinic-benefit-requisites:rules:v1:end
+            // clinic-benefit-okato:rules:v1:begin
+            'benefit_okato_prefix' => [
+                'bail',
+                'sometimes',
+                'nullable',
+                'string',
+                'regex:/\A[0-9]{2}\z/',
+            ],
+            // clinic-benefit-okato:rules:v1:end
             'description' => 'nullable|string|max:10000',
 
             'address' => 'required|string|max:500',
@@ -124,6 +177,39 @@ class ClinicSettingsUpdateRequest extends FormRequest
             'inpatient_mode.in' => 'Выбран недопустимый режим стационара.',
 
             'name.required' => 'Укажите название клиники.',
+            // clinic-telemedicine-timezones:timezone-messages:v1:begin
+            'timezone.string' => 'Выберите часовой пояс клиники из списка.',
+            'timezone.max' => 'Выберите часовой пояс клиники из списка.',
+            'timezone.in' => 'Выберите действующий часовой пояс клиники из списка.',
+            // clinic-telemedicine-timezones:timezone-messages:v1:end
+            // clinic-benefit-requisites:messages:v1:begin
+            'benefit_clinic.array' => 'Проверьте поля реквизитов для льготных рецептов.',
+            'benefit_clinic.required_array_keys' => 'Укажите юридический статус и настройку оформления льготных рецептов.',
+            'benefit_clinic.prescribing_enabled.required_with' => 'Укажите, включено ли оформление льготных рецептов.',
+            'benefit_clinic.prescribing_enabled.boolean' => 'Выберите, включено ли оформление льготных рецептов.',
+            'benefit_clinic.kind.required_with' => 'Выберите юридический статус клиники.',
+            'benefit_clinic.kind.string' => 'Выберите юридический статус клиники из списка.',
+            'benefit_clinic.kind.in' => 'Выберите юридическое лицо или индивидуального предпринимателя.',
+            'benefit_clinic.ogrn.string' => 'Введите ОГРН или ОГРНИП цифрами без пробелов.',
+            'benefit_clinic.ogrn.regex' => 'ОГРН юридического лица должен содержать 13 цифр, ОГРНИП — 15 цифр.',
+            'benefit_clinic.code.string' => 'Введите код организации текстом.',
+            'benefit_clinic.code.max' => 'Код организации не должен превышать 50 символов.',
+            'benefit_clinic.series.string' => 'Введите серию рецептов текстом.',
+            'benefit_clinic.series.max' => 'Серия рецептов не должна превышать 20 символов.',
+            'benefit_clinic.series.regex' => 'Серия начинается с двух цифр; далее допустимы цифры, русские и латинские буквы, дефис и косая черта.',
+            'benefit_clinic.numbering_source.string' => 'Укажите источник нумерации текстом.',
+            'benefit_clinic.numbering_source.max' => 'Источник нумерации не должен превышать 1000 символов.',
+            'benefit_clinic.license_number.string' => 'Введите номер лицензии текстом.',
+            'benefit_clinic.license_number.max' => 'Номер лицензии не должен превышать 100 символов.',
+            'benefit_clinic.license_date.string' => 'Укажите дату выдачи лицензии в формате ГГГГ-ММ-ДД.',
+            'benefit_clinic.license_date.date_format' => 'Укажите существующую дату выдачи лицензии в формате ГГГГ-ММ-ДД.',
+            'benefit_clinic.license_authority.string' => 'Укажите название лицензирующего органа текстом.',
+            'benefit_clinic.license_authority.max' => 'Название лицензирующего органа не должно превышать 500 символов.',
+            // clinic-benefit-requisites:messages:v1:end
+            // clinic-benefit-okato:messages:v1:begin
+            'benefit_okato_prefix.string' => 'Укажите первые две цифры ОКАТО.',
+            'benefit_okato_prefix.regex' => 'Укажите ровно две цифры ОКАТО от 0 до 9 или оставьте поле пустым.',
+            // clinic-benefit-okato:messages:v1:end
 
             'address.required' => 'Укажите адрес клиники.',
             'address_confirmed.accepted' => 'Выберите адрес из предложенного списка.',

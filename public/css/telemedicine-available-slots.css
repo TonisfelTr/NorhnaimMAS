@@ -1,0 +1,61 @@
+.tm-booking-dialog-wide {
+    max-width: 1120px !important;
+}
+
+.tm-booking-body-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.78fr);
+    column-gap: 24px;
+    align-items: start;
+}
+
+.tm-booking-body-grid > .tm-booking-main {
+    grid-column: 1;
+    min-width: 0;
+}
+
+.tm-booking-body-grid > .tm-booking-sidebar {
+    grid-column: 2;
+    grid-row: 1 / span 50;
+    align-self: start;
+    position: sticky;
+    top: 0;
+    min-width: 0;
+    margin-top: 0 !important;
+    max-height: 65vh;
+    overflow: auto;
+}
+
+.tm-booking-sidebar [data-tm-slot-days] {
+    gap: 6px !important;
+}
+
+.tm-booking-sidebar [data-tm-slot-list] {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+}
+
+.tm-booking-sidebar [data-tm-slot-list] > .btn {
+    width: 100%;
+}
+
+@media (max-width: 991.98px) {
+    .tm-booking-dialog-wide {
+        max-width: calc(100% - 24px) !important;
+    }
+
+    .tm-booking-body-grid {
+        display: block;
+    }
+
+    .tm-booking-body-grid > .tm-booking-sidebar {
+        position: static;
+        max-height: none;
+        margin-top: 16px !important;
+    }
+}
+
+.tm-booking-sidebar [data-tm-doctor-timezone] {
+    width: 100%;
+}

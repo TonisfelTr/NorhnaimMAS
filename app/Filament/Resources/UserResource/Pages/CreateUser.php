@@ -3,16 +3,27 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\Hash;
 
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
-    protected function beforeCreate(): void
+    // Users, roles, clinics and doctors should all commit (or roll back) together.
+    protected ?bool $hasDatabaseTransactions = true;
+
+    private array $doctorFormData = [];
+
+    protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $this->data['password'] = Hash::make($this->data['password']);
+        $this->doctorFormData = UserResource::pullDoctorFields($data);
+
+        return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        // Here $this->record is already the NEW user with its own ID.
+        UserResource::saveDoctorProfile($this->record, $this->doctorFormData);
     }
 }

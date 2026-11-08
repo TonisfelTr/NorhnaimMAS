@@ -254,6 +254,72 @@ services:
             retries: 12
             start_period: 45s
 
+    # ================================================================
+    # Локальный стенд WebRTC Норхнейма (без вмешательства в Laravel).
+    # Запуск: bash telemedicine/scripts/start.sh.old
+    # Профиль telemedicine не запускается при обычном docker compose up.
+    # ================================================================
+    telemedicine-signaling:
+        profiles: [telemedicine]
+        image: python:3.13-alpine
+        restart: unless-stopped
+        init: true
+        working_dir: /srv/telemedicine
+        command: ["python", "-u", "server.py"]
+        environment:
+            PYTHONDONTWRITEBYTECODE: "1"
+            PYTHONUNBUFFERED: "1"
+            # Пустой секрет допустим для парсинга Compose, но сервер
+            # откажется запускаться, пока не выполнен init.py.
+            TELEMEDICINE_SIGNALING_SECRET: "${TELEMEDICINE_SIGNALING_SECRET:-}"
+            TELEMEDICINE_TURN_SECRET: "${TELEMEDICINE_TURN_SECRET:-}"
+            TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_TURN_HOST:-127.0.0.1}"
+            TELEMEDICINE_TURN_PORT: "${TELEMEDICINE_TURN_PORT:-3478}"
+            TELEMEDICINE_ALLOWED_ORIGINS: "${TELEMEDICINE_ALLOWED_ORIGINS:-http://localhost:3100,http://127.0.0.1:3100}"
+            TELEMEDICINE_MAX_ROOMS: "${TELEMEDICINE_MAX_ROOMS:-20}"
+            TELEMEDICINE_AUDIT_URL: "${TELEMEDICINE_AUDIT_URL:-http://laravel.test/internal/telemedicine/audit/events}"
+            TELEMEDICINE_AUDIT_SECRET: "${TELEMEDICINE_AUDIT_SECRET:-}"
+        volumes:
+            - "./telemedicine/signaling:/srv/telemedicine:ro"
+        ports:
+            - "127.0.0.1:${TELEMEDICINE_UI_PORT:-3100}:8080"
+        read_only: true
+        tmpfs:
+            - /tmp:size=16m
+        cap_drop: [ALL]
+        security_opt:
+            - no-new-privileges:true
+        mem_limit: 256m
+        cpus: 1.0
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8080/health', timeout=3)"]
+            interval: 20s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+
+    telemedicine-turn:
+        profiles: [telemedicine]
+        image: coturn/coturn:4.18.0
+        restart: unless-stopped
+        init: true
+        # Только тест на одной WSL/Windows-машине: TURN слушает 127.0.0.1.
+        # host-сеть исключает проброс сотен relay UDP-портов.
+        network_mode: host
+        entrypoint: ["/bin/sh", "/srv/telemedicine/turn-entrypoint.sh"]
+        environment:
+            TELEMEDICINE_TURN_SECRET: "${TELEMEDICINE_TURN_SECRET:-}"
+            TELEMEDICINE_TURN_PORT: "${TELEMEDICINE_TURN_PORT:-3478}"
+            TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_TURN_HOST:-127.0.0.1}"
+        volumes:
+            - "./telemedicine/turn/entrypoint.sh:/srv/telemedicine/turn-entrypoint.sh:ro"
+        security_opt:
+            - no-new-privileges:true
+        mem_limit: 512m
+        cpus: 1.0
+
 networks:
     sail:
         driver: bridge

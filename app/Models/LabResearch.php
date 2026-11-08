@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Observers\LabResearchObserver;
+
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+#[ObservedBy([LabResearchObserver::class])]
 class LabResearch extends Model
 {
     protected $guarded = [];

@@ -12,6 +12,7 @@
         "filament/filament": "^3.3",
         "filament/spatie-laravel-media-library-plugin": "^3.2",
         "laravel/framework": "^11.0",
+        "laravel/reverb": "*",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
         "phpoffice/phpword": "^1.3",

@@ -26,7 +26,21 @@ docker-compose.yml
 /config/php/
 /pgadmin-data/
 /init.sql/
-/Doctor::query()->select('id', 'user_id')->limit(20)->get()->toArray();
 /docker/
-/start.sh
+/start.sh.old
 /remove_zone_identifier.sh
+
+# Telemedicine development secrets
+/.env.telemedicine
+
+# Temporary TLS keys for mobile WebRTC testing
+/telemedicine/certs/
+/tools/
+/storage/app/private
+/.norhnaim-backups/
+/.phpunit.cache/
+/.telemedicine-access-backups/
+/.telemedicine-journal-backups/
+/qa/
+/patches/
+/telemedicine/

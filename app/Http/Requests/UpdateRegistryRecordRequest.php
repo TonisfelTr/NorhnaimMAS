@@ -20,7 +20,9 @@ class UpdateRegistryRecordRequest extends FormRequest
             'name' => 'required|string|max:255',
             'patronym' => 'required|string|max:255',
             'birth_at' => 'required|date|before_or_equal:today',
-            'appointment_datetime' => 'required|date|after_or_equal:now',
+// clinic-telemedicine-timezones:timezone-update-rule:v1:begin
+'appointment_datetime' => 'required|date',
+// clinic-telemedicine-timezones:timezone-update-rule:v1:end
             'appointment_format' => 'required|in:in_person,telemedicine',
             'address_registration' => 'required|string',
             'address_residence' => 'required|string',

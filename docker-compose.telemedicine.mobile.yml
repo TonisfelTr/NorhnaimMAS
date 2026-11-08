@@ -1,0 +1,52 @@
+# NORHNAIM: local Wi-Fi WebRTC HTTPS test overlay.
+# Use only with docker-compose.yml and --env-file .env --env-file .env.telemedicine.
+services:
+  telemedicine-signaling:
+    environment:
+      TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_LAN_IP:?Configure telemedicine LAN IP first}"
+      TELEMEDICINE_ALLOWED_ORIGINS: "http://localhost:${TELEMEDICINE_UI_PORT:-3100},http://127.0.0.1:${TELEMEDICINE_UI_PORT:-3100},https://${TELEMEDICINE_LAN_IP}:${TELEMEDICINE_HTTPS_PORT:-3443}"
+
+  telemedicine-turn:
+    # Uses host networking from the base compose (UDP relay ports need LAN access).
+    environment:
+      TELEMEDICINE_LAN_IP: "${TELEMEDICINE_LAN_IP:?Configure telemedicine LAN IP first}"
+      TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_LAN_IP}"
+      TELEMEDICINE_RELAY_MIN_PORT: "${TELEMEDICINE_RELAY_MIN_PORT:-49160}"
+      TELEMEDICINE_RELAY_MAX_PORT: "${TELEMEDICINE_RELAY_MAX_PORT:-49259}"
+    entrypoint: ["/bin/sh", "/srv/telemedicine/turn-mobile-entrypoint.sh"]
+    volumes:
+      - "./telemedicine/mobile/turn-mobile-entrypoint.sh:/srv/telemedicine/turn-mobile-entrypoint.sh:ro"
+
+  telemedicine-https:
+    profiles: [telemedicine]
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    init: true
+    ports:
+      # WSL/Docker may not own the Windows Wi-Fi IP; bind on all interfaces,
+      # then limit inbound access to the local network using host firewalls.
+      - "${TELEMEDICINE_HTTPS_BIND_IP:-0.0.0.0}:${TELEMEDICINE_HTTPS_PORT:-3443}:443"
+    volumes:
+      # Do not mount the CA signing key inside any container.
+      - "./telemedicine/mobile/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "./telemedicine/certs/mobile.crt:/etc/nginx/tls/mobile.crt:ro"
+      - "./telemedicine/certs/mobile.key:/etc/nginx/tls/mobile.key:ro"
+    depends_on:
+      telemedicine-signaling:
+        condition: service_healthy
+    networks: [sail]
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=16m
+      - /var/run:size=2m
+      - /tmp:size=8m
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

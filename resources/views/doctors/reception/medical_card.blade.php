@@ -1,745 +1,30 @@
 @extends('doctors.reception')
-@section('title', "{$patient->getFullNameWithInitials()} - медицинская карта пациента")
+@section('title', $medicalCardTitle)
 @section('assets')
     @parent
     @vite('resources/js/medical_card.js')
-
-    <!-- PRESCRIPTION_MODAL_FIXED_STYLES_START -->
-    <style>
-        .prescription-modal-ui {
-            --pm-primary: #2563eb;
-            --pm-primary-dark: #1d4ed8;
-            --pm-text: #172033;
-            --pm-muted: #667085;
-            --pm-border: #e4e9f0;
-            --pm-bg: #f5f7fb;
-        }
-
-        .prescription-modal-ui .modal-dialog {
-            width: min(1320px, calc(100vw - 32px)) !important;
-            max-width: 1320px !important;
-            height: auto !important;
-            max-height: calc(100dvh - 32px) !important;
-            margin: 16px auto !important;
-        }
-
-        .prescription-modal-ui .modal-content {
-            width: 100% !important;
-            height: auto !important;
-            max-height: calc(100dvh - 32px) !important;
-            overflow: hidden !important;
-            border: 1px solid rgba(148, 163, 184, .28) !important;
-            border-radius: 22px !important;
-            background: #fff !important;
-            box-shadow: 0 28px 80px rgba(15, 23, 42, .22) !important;
-        }
-
-        .prescription-modal-ui .modal-content > form {
-            display: flex !important;
-            width: 100% !important;
-            height: auto !important;
-            min-height: 0 !important;
-            max-height: calc(100dvh - 32px) !important;
-            flex-direction: column !important;
-        }
-
-        .prescription-modal-ui .modal-header {
-            display: flex !important;
-            flex: 0 0 auto !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            padding: 18px 22px !important;
-            border-bottom: 1px solid var(--pm-border) !important;
-            background:
-                radial-gradient(circle at 0 0, rgba(37, 99, 235, .09), transparent 34%),
-                #fff !important;
-        }
-
-        .presc-modal-heading {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            min-width: 0;
-        }
-
-        .presc-modal-heading__icon {
-            display: grid;
-            width: 44px;
-            height: 44px;
-            flex: 0 0 44px;
-            place-items: center;
-            border-radius: 14px;
-            background: #e9f1ff;
-            color: var(--pm-primary);
-            font-size: 20px;
-        }
-
-        .prescription-modal-ui .modal-title {
-            margin: 0 !important;
-            color: var(--pm-text) !important;
-            font-size: 20px !important;
-            font-weight: 800 !important;
-            line-height: 1.2 !important;
-        }
-
-        .presc-modal-subtitle {
-            margin-top: 3px;
-            color: var(--pm-muted);
-            font-size: 12px;
-        }
-
-        .prescription-modal-ui .modal-body {
-            flex: 1 1 auto !important;
-            min-height: 0 !important;
-            overflow: auto !important;
-            padding: 18px 22px 22px !important;
-            background: var(--pm-bg) !important;
-        }
-
-        .presc-layout {
-            display: grid !important;
-            grid-template-columns: minmax(0, 2fr) minmax(310px, .9fr) !important;
-            gap: 18px !important;
-            align-items: start !important;
-        }
-
-        .presc-main {
-            display: grid;
-            gap: 14px;
-            min-width: 0;
-        }
-
-        .prescription-modal-ui .presc-section {
-            margin: 0 !important;
-            padding: 17px !important;
-            border: 1px solid var(--pm-border) !important;
-            border-radius: 17px !important;
-            background: #fff !important;
-            box-shadow: 0 5px 18px rgba(15, 23, 42, .035) !important;
-        }
-
-        .prescription-modal-ui .presc-section-head {
-            margin-bottom: 13px !important;
-        }
-
-        .prescription-modal-ui .presc-section-title {
-            margin: 0 0 13px !important;
-            color: var(--pm-text) !important;
-            font-size: 14px !important;
-            font-weight: 800 !important;
-        }
-
-        .prescription-modal-ui .presc-section-head .presc-section-title {
-            margin-bottom: 2px !important;
-        }
-
-        .prescription-modal-ui .presc-section-hint,
-        .prescription-modal-ui .form-text {
-            color: var(--pm-muted) !important;
-            font-size: 11px !important;
-            line-height: 1.45 !important;
-        }
-
-        .prescription-modal-ui .presc-indication-switch {
-            display: grid !important;
-            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            gap: 10px !important;
-        }
-
-        .prescription-modal-ui .presc-radio-card {
-            display: block !important;
-            margin: 0 !important;
-            cursor: pointer;
-        }
-
-        .prescription-modal-ui .presc-radio-card input {
-            position: absolute !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-
-        .prescription-modal-ui .presc-radio-card__body {
-            display: flex !important;
-            min-height: 72px !important;
-            align-items: center !important;
-            gap: 11px !important;
-            padding: 11px 12px !important;
-            border: 1px solid #dbe2eb !important;
-            border-radius: 14px !important;
-            background: #fff !important;
-            transition: .16s ease !important;
-        }
-
-        .prescription-modal-ui .presc-radio-card:hover .presc-radio-card__body {
-            border-color: #b8cae8 !important;
-            transform: translateY(-1px);
-        }
-
-        .prescription-modal-ui .presc-radio-card__icon {
-            display: grid !important;
-            width: 34px !important;
-            height: 34px !important;
-            flex: 0 0 34px !important;
-            place-items: center !important;
-            border-radius: 10px !important;
-            background: #f1f5f9 !important;
-            color: #64748b !important;
-            font-size: 15px !important;
-        }
-
-        .prescription-modal-ui .presc-radio-card__title {
-            display: block !important;
-            margin: 0 0 2px !important;
-            color: var(--pm-text) !important;
-            font-size: 13px !important;
-            font-weight: 800 !important;
-        }
-
-        .prescription-modal-ui .presc-radio-card__text {
-            display: block !important;
-            color: var(--pm-muted) !important;
-            font-size: 11px !important;
-        }
-
-        .prescription-modal-ui .presc-radio-card input:checked + .presc-radio-card__body {
-            border-color: #6ea0ff !important;
-            background: #eef4ff !important;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, .09) !important;
-        }
-
-        .prescription-modal-ui .presc-radio-card input:checked + .presc-radio-card__body .presc-radio-card__icon {
-            background: var(--pm-primary) !important;
-            color: #fff !important;
-        }
-
-        .presc-patient-card {
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-            padding: 12px 13px !important;
-            border: 1px solid #e3eaf3 !important;
-            border-radius: 14px !important;
-            background: linear-gradient(135deg, #f8fbff, #f3f7fc) !important;
-        }
-
-        .presc-patient-card__avatar {
-            display: grid !important;
-            width: 42px !important;
-            height: 42px !important;
-            flex: 0 0 42px !important;
-            place-items: center !important;
-            border-radius: 13px !important;
-            background: #dfeaff !important;
-            color: var(--pm-primary-dark) !important;
-            font-size: 13px !important;
-            font-weight: 900 !important;
-        }
-
-        .presc-patient-card__content {
-            min-width: 0;
-        }
-
-        .presc-patient-card__name {
-            overflow: hidden;
-            color: var(--pm-text);
-            font-size: 14px;
-            font-weight: 800;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .presc-patient-card__meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 7px 14px;
-            margin-top: 4px;
-            color: var(--pm-muted);
-            font-size: 11px;
-        }
-
-        .prescription-modal-ui .form-label {
-            display: block !important;
-            margin-bottom: 6px !important;
-            color: #344054 !important;
-            font-size: 12px !important;
-            font-weight: 750 !important;
-        }
-
-        .prescription-modal-ui .form-control,
-        .prescription-modal-ui .form-select,
-        .prescription-modal-ui .select2-container--bootstrap-5 .select2-selection {
-            min-height: 42px !important;
-            border-color: #d9e1eb !important;
-            border-radius: 12px !important;
-            background-color: #fff !important;
-            font-size: 13px !important;
-        }
-
-        .prescription-modal-ui .presc-drug-picker .select2-container {
-            width: 100% !important;
-        }
-
-        .prescription-modal-ui .select2-container--bootstrap-5 .select2-dropdown {
-            overflow: hidden !important;
-            border-color: #cfd9e7 !important;
-            border-radius: 13px !important;
-            box-shadow: 0 18px 45px rgba(15, 23, 42, .16) !important;
-        }
-
-        .presc-fields-grid {
-            display: grid !important;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-            gap: 12px !important;
-        }
-
-        .presc-field {
-            min-width: 0;
-        }
-
-        .presc-field--validity {
-            grid-column: span 2;
-        }
-
-        .presc-strict-warning {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            margin-top: 12px;
-            padding: 10px 12px;
-            border: 1px solid #f5d58d;
-            border-radius: 12px;
-            background: #fff8e6;
-            color: #8a5a00;
-            font-size: 12px;
-        }
-
-        .prescription-modal-ui .presc-regimen {
-            display: flex !important;
-            align-items: center !important;
-            flex-wrap: wrap !important;
-            gap: 8px !important;
-            padding: 12px 13px !important;
-            border: 1px dashed #cfd9e7 !important;
-            border-radius: 14px !important;
-            background: #f8fafc !important;
-        }
-
-        .prescription-modal-ui .presc-regimen__input {
-            width: 74px !important;
-            min-width: 74px !important;
-        }
-
-        .prescription-modal-ui .presc-regimen__select {
-            width: 82px !important;
-            min-width: 82px !important;
-        }
-
-        .prescription-modal-ui .presc-regimen__select--meal {
-            width: 96px !important;
-            min-width: 96px !important;
-        }
-
-        .prescription-modal-ui .presc-regimen__badge {
-            display: inline-flex !important;
-            min-width: 42px !important;
-            min-height: 32px !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 4px 9px !important;
-            border-radius: 999px !important;
-            background: #e6efff !important;
-            color: var(--pm-primary-dark) !important;
-            font-size: 12px !important;
-            font-weight: 850 !important;
-        }
-
-        .prescription-modal-ui .presc-side-card {
-            position: sticky !important;
-            top: 0 !important;
-            max-height: calc(100dvh - 190px) !important;
-            overflow: auto !important;
-            padding: 17px !important;
-            border: 1px solid var(--pm-border) !important;
-            border-radius: 18px !important;
-            background: #fff !important;
-            box-shadow: 0 8px 25px rgba(15, 23, 42, .05) !important;
-        }
-
-        .presc-side-card__head {
-            display: flex !important;
-            align-items: flex-start !important;
-            gap: 11px !important;
-            margin-bottom: 13px !important;
-        }
-
-        .presc-side-card__icon {
-            display: grid !important;
-            width: 38px !important;
-            height: 38px !important;
-            flex: 0 0 38px !important;
-            place-items: center !important;
-            border-radius: 12px !important;
-            background: #eeeaff !important;
-            color: #6d4aff !important;
-            font-size: 17px !important;
-        }
-
-        .presc-side-card__title {
-            color: var(--pm-text) !important;
-            font-size: 14px !important;
-            font-weight: 850 !important;
-        }
-
-        .presc-side-card__hint {
-            margin-top: 3px !important;
-            color: var(--pm-muted) !important;
-            font-size: 11px !important;
-        }
-
-        .presc-side-card__toolbar {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            gap: 8px !important;
-            margin-bottom: 12px !important;
-        }
-
-        .presc-filter-badge,
-        .presc-count-badge {
-            display: inline-flex !important;
-            min-height: 27px !important;
-            align-items: center !important;
-            padding: 4px 9px !important;
-            border-radius: 999px !important;
-            font-size: 10px !important;
-            font-weight: 750 !important;
-        }
-
-        .presc-filter-badge {
-            background: #edf4ff !important;
-            color: #2658a6 !important;
-        }
-
-        .presc-count-badge {
-            background: #f2f4f7 !important;
-            color: #667085 !important;
-        }
-
-        .presc-suggestions-state {
-            display: flex !important;
-            min-height: 155px !important;
-            align-items: center !important;
-            justify-content: center !important;
-            flex-direction: column !important;
-            gap: 9px !important;
-            padding: 18px !important;
-            border: 1px dashed #d7e0ec !important;
-            border-radius: 14px !important;
-            background: #fafcff !important;
-            color: #8a96a8 !important;
-            font-size: 12px !important;
-            text-align: center !important;
-        }
-
-        .prescription-modal-ui .modal-footer {
-            display: flex !important;
-            flex: 0 0 auto !important;
-            flex-direction: row !important;
-            flex-wrap: wrap !important;
-            align-items: center !important;
-            justify-content: flex-end !important;
-            gap: 9px !important;
-            padding: 13px 22px !important;
-            border-top: 1px solid var(--pm-border) !important;
-            background: #fff !important;
-            box-shadow: 0 -10px 25px rgba(15, 23, 42, .035) !important;
-        }
-
-        .presc-footer-note {
-            display: flex !important;
-            align-items: center !important;
-            gap: 7px !important;
-            margin-right: auto !important;
-            color: var(--pm-muted) !important;
-            font-size: 11px !important;
-        }
-
-        .presc-btn {
-            display: inline-flex !important;
-            width: auto !important;
-            min-height: 42px !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 7px !important;
-            padding: 9px 16px !important;
-            border-radius: 12px !important;
-            font-size: 12px !important;
-            font-weight: 750 !important;
-        }
-
-        .presc-btn--primary {
-            min-width: 165px !important;
-        }
-
-        @media (max-width: 1100px) {
-            .presc-layout {
-                grid-template-columns: 1fr !important;
-            }
-
-            .prescription-modal-ui .presc-side-card {
-                position: static !important;
-                max-height: none !important;
-            }
-        }
-
-        @media (max-width: 850px) {
-            .prescription-modal-ui .modal-dialog {
-                width: calc(100vw - 12px) !important;
-                margin: 6px auto !important;
-            }
-
-            .prescription-modal-ui .presc-indication-switch {
-                grid-template-columns: 1fr !important;
-            }
-
-            .presc-fields-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-
-            .presc-field--validity {
-                grid-column: span 1;
-            }
-
-            .presc-footer-note {
-                display: none !important;
-            }
-        }
-
-        @media (max-width: 575px) {
-            .presc-fields-grid {
-                grid-template-columns: 1fr !important;
-            }
-
-            .prescription-modal-ui .modal-footer {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-            }
-
-            .prescription-modal-ui .modal-footer .btn {
-                width: 100% !important;
-            }
-        }
-
-        /* d-none должен перекрывать display:flex у состояний боковой панели. */
-        .prescription-modal-ui .d-none {
-            display: none !important;
-        }
-    </style>
-    <!-- PRESCRIPTION_MODAL_FIXED_STYLES_END -->
+    {{-- NORHNAIM_BENEFIT_PRESCRIPTIONS_V1 --}}
+    <link rel="stylesheet" href="{{ asset('css/benefit-prescriptions.css') }}?v=1">
+    <script src="{{ asset('js/benefit-prescriptions.js') }}?v=1" defer></script>
 @endsection
 @section('sub-main')
-    @php
-        /*
-         * Ошибки относятся к отправленной форме, а не ко всей медкарте.
-         * Поддерживаем default и отдельные bags patientUpdate / anamnesis.
-         * _medical_card_form используется только для интерфейса, не для доступа.
-         */
-        $medicalCardOldInput = session()->getOldInput();
-        $medicalCardSubmittedForm = $medicalCardOldInput['_medical_card_form'] ?? null;
-
-        if (!is_string($medicalCardSubmittedForm)) {
-            $medicalCardSubmittedForm = null;
-        }
-
-        // Совместимость с последней отправкой до установки этого исправления.
-        if ($medicalCardSubmittedForm === null) {
-            if (
-                array_key_exists('surname', $medicalCardOldInput)
-                && array_key_exists('email', $medicalCardOldInput)
-            ) {
-                $medicalCardSubmittedForm = 'patient_info';
-            } elseif (
-                array_key_exists('title', $medicalCardOldInput)
-                && array_key_exists('diag_source', $medicalCardOldInput)
-            ) {
-                $medicalCardSubmittedForm = 'anamnesis';
-            }
-        }
-
-        $medicalCardDefaultErrors = $errors->getBag('default');
-        $patientInfoErrors = $errors->getBag('patientUpdate');
-        $anamnesisErrors = $errors->getBag('anamnesis');
-
-        if (!$patientInfoErrors->any() && $medicalCardSubmittedForm === 'patient_info') {
-            $patientInfoErrors = $medicalCardDefaultErrors;
-        }
-
-        if (!$anamnesisErrors->any() && $medicalCardSubmittedForm === 'anamnesis') {
-            $anamnesisErrors = $medicalCardDefaultErrors;
-        }
-
-        // Ошибки этих форм не дублируем в загрузке документов и исследованиях.
-        $otherMedicalCardErrors = in_array(
-            $medicalCardSubmittedForm,
-            ['patient_info', 'anamnesis'],
-            true
-        )
-            ? new \Illuminate\Support\MessageBag()
-            : $medicalCardDefaultErrors;
-
-        $medicalCardErrorTab = $patientInfoErrors->any()
-            ? 'patient-info'
-            : ($anamnesisErrors->any() ? 'anamnesis' : null);
-
-        /*
-         * ================================================================
-         * CHILD / REPRESENTATIVE CONTEXT
-         * ================================================================
-         * Новые удостоверяющие документы и представители живут отдельно
-         * от legacy-паспортных полей patients.
-         */
-        $rawPatientBirthAt = $patient->getRawOriginal('birth_at') ?: $patient->birth_at;
-        $patientBirthDateObject = null;
-
-        try {
-            $patientBirthDateObject = $rawPatientBirthAt
-                ? \Illuminate\Support\Carbon::parse($rawPatientBirthAt)
-                : null;
-        } catch (\Throwable $exception) {
-            $patientBirthDateObject = null;
-        }
-
-        $patientAge = $patientBirthDateObject?->age;
-        $isMinorPatient = $patientAge !== null && $patientAge < 18;
-        $isChildUnder14 = $patientAge !== null && $patientAge < 14;
-
-        /*
-         * HTML input[type=date] принимает только YYYY-MM-DD.
-         * Accessor Patient::birth_at возвращает dd.mm.YYYY, поэтому
-         * для формы используем raw-значение/Carbon отдельно.
-         */
-        $patientBirthDateInput = $patientBirthDateObject?->format('Y-m-d') ?? '';
-
-        $patientGenderLabel = match ($patient->gender) {
-            'M' => 'Мужской',
-            'F' => 'Женский',
-            default => 'не указан',
-        };
-
-        $patientAgeLabel = null;
-
-        if ($patientAge !== null) {
-            $ageMod10 = $patientAge % 10;
-            $ageMod100 = $patientAge % 100;
-
-            $ageWord = ($ageMod10 === 1 && $ageMod100 !== 11)
-                ? 'год'
-                : (($ageMod10 >= 2 && $ageMod10 <= 4 && ($ageMod100 < 12 || $ageMod100 > 14))
-                    ? 'года'
-                    : 'лет');
-
-            $patientAgeLabel = $patientAge . ' ' . $ageWord;
-        }
-
-        $patientDocumentTypeLabels = [
-            'passport_rf' => 'Паспорт гражданина РФ',
-            'birth_certificate' => 'Свидетельство о рождении',
-            'foreign_passport' => 'Иностранный паспорт',
-            'residence_permit' => 'Вид на жительство',
-            'temporary_identity' => 'Временное удостоверение личности',
-            'foreign_identity' => 'Иностранный документ, удостоверяющий личность',
-            'other' => 'Другой документ',
-        ];
-
-        $representativeTypeLabels = [
-            'mother' => 'Мать',
-            'father' => 'Отец',
-            'adoptive_parent' => 'Усыновитель',
-            'guardian' => 'Опекун',
-            'trustee' => 'Попечитель',
-            'authorized' => 'Уполномоченный представитель',
-            'other' => 'Другой представитель',
-        ];
-
-        $authorityDocumentTypeLabels = [
-            'guardianship_order' => 'Документ об установлении опеки/попечительства',
-            'power_of_attorney' => 'Доверенность',
-            'other' => 'Другой документ',
-        ];
-
-        $formatPatientCardDate = static function ($value): string {
-            if (!$value) {
-                return '—';
-            }
-
-            try {
-                return \Illuminate\Support\Carbon::parse($value)->format('d.m.Y');
-            } catch (\Throwable $exception) {
-                return (string) $value;
-            }
-        };
-
-        $patientIdentityDocument = \Illuminate\Support\Facades\DB::table('patient_identity_documents')
-            ->where('patient_id', $patient->id)
-            ->where('is_active', true)
-            ->orderByDesc('is_primary')
-            ->orderByDesc('id')
-            ->first();
-
-        $primaryRepresentative = null;
-        $representativeIdentityDocument = null;
-        $representativeAuthorityDocument = null;
-
-        if ($isMinorPatient) {
-            $primaryRepresentative = \Illuminate\Support\Facades\DB::table('patient_representatives')
-                ->where('patient_id', $patient->id)
-                ->where('is_active', true)
-                ->orderByDesc('is_primary')
-                ->orderByDesc('id')
-                ->first();
-
-            if ($primaryRepresentative) {
-                $representativeIdentityDocument = \Illuminate\Support\Facades\DB::table('patient_representative_documents')
-                    ->where('representative_id', $primaryRepresentative->id)
-                    ->where('document_purpose', 'identity')
-                    ->where('is_active', true)
-                    ->orderByDesc('is_primary')
-                    ->orderByDesc('id')
-                    ->first();
-
-                $representativeAuthorityDocument = \Illuminate\Support\Facades\DB::table('patient_representative_documents')
-                    ->where('representative_id', $primaryRepresentative->id)
-                    ->where('document_purpose', 'authority')
-                    ->where('is_active', true)
-                    ->orderByDesc('is_primary')
-                    ->orderByDesc('id')
-                    ->first();
-            }
-        }
-
-        $patientIdentityDocumentLabel = $patientIdentityDocument
-            ? ($patientIdentityDocument->document_name
-                ?: ($patientDocumentTypeLabels[$patientIdentityDocument->document_type] ?? 'Документ пациента'))
-            : ($isChildUnder14 ? 'Свидетельство о рождении' : 'Документ пациента');
-
-        $primaryRepresentativeFullName = $primaryRepresentative
-            ? collect([
-                $primaryRepresentative->surname,
-                $primaryRepresentative->name,
-                $primaryRepresentative->patronym,
-            ])->filter()->implode(' ')
-            : null;
-    @endphp
     <div id="medicalCardRoot"
          class="medical-card-page"
          data-active-tab="{{ $medicalCardErrorTab ?? session('active_tab') }}"
          data-address-suggest-url="{{ route('api-search-address') }}">
         <div class="mc-wrap">
+            @if(session('patient_transfer_success'))
+                <div class="alert alert-success mc-patient-transfer-alert" role="status">
+                    <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
+                    {{ session('patient_transfer_success') }}
+                </div>
+            @endif
+
 
             <div class="mc-patient-shell">
                 <div class="mc-patient-head">
                     <div class="mc-patient-avatar-modern">
-                        {{ mb_substr($patient->name, 0, 1) . mb_substr($patient->surname, 0, 1) }}
+                        {{ $patientAvatarInitials }}
                     </div>
 
                     <div class="mc-patient-main">
@@ -781,6 +66,22 @@
                                 <i class="bi bi-clock-history"></i>
                                 Пациент с: {{ $patient->created_at }}
                             </span>
+
+                            @if($patientDisability['status'] !== 'unknown')
+                                <span class="mc-patient-chip" title="Наличие инвалидности — по представленным сведениям, не из реестра">
+                                    <i class="bi bi-person-badge"></i>
+                                    {{ $patientDisability['presence_short_label'] }}
+                                    @if($patientDisability['status'] === 'present' && $patientDisability['group'])
+                                        · {{ $patientDisability['group_label'] }}
+                                    @endif
+                                </span>
+                                @if($patientDisability['status'] === 'present')
+                                    <span class="mc-patient-chip" title="Проверка документа сотрудником клиники; не государственная онлайн-проверка">
+                                        <i class="bi bi-{{ $patientDisability['verified'] ? 'shield-check' : 'shield-exclamation' }}"></i>
+                                        Документ МСЭ: {{ $patientDisability['document_check_short_label'] }}
+                                    </span>
+                                @endif
+                            @endif
                         </div>
                     </div>
 
@@ -811,8 +112,22 @@
 
                         <div>
                             <div class="mc-patient-meta-label">Лечащий врач</div>
-                            <div class="mc-patient-meta-value">
-                                {{ $patient->with('doctor')->first()->surname . ' ' . $patient->with('doctor')->first()->name . ' ' . $patient->with('doctor')->first()->patronym }}
+                            <div class="mc-patient-doctor-line">
+                                <div class="mc-patient-meta-value">
+                                    {{ $assignedDoctorName }}
+                                </div>
+                                {{-- PATIENT_DOCTOR_TRANSFER_BUTTON_START --}}
+                                @if($canTransferPatient)
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-sm mc-patient-doctor-transfer"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalTransferPatientDoctor"
+                                            title="Передать пациента другому лечащему врачу">
+                                        <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+                                        Передать
+                                    </button>
+                                @endif
+                                {{-- PATIENT_DOCTOR_TRANSFER_BUTTON_END --}}
                             </div>
                         </div>
                     </div>
@@ -822,16 +137,6 @@
                             <i class="bi bi-activity"></i>
                         </div>
 
-                        @php
-                            $currentDiagnosis = $patient->diagnose;
-
-                            $currentDiagnosisCode = $currentDiagnosis?->code;
-
-                            $currentDiagnosisTitle =
-                                $currentDiagnosis?->title
-                                ?? $currentDiagnosis?->name
-                                ?? null;
-                        @endphp
 
                         <div class="mc-patient-meta-value">
                             @if($currentDiagnosisCode)
@@ -906,6 +211,20 @@
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pane-anamnesis"
                                     type="button">
                                 Анамнез
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-visits" data-bs-toggle="tab"
+                                    data-bs-target="#pane-visits" type="button" role="tab"
+                                    aria-controls="pane-visits" aria-selected="false">
+                                <i class="bi bi-clock-history me-1"></i> История приёмов и телемедицины
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-telemedicine-log" data-bs-toggle="tab"
+                                    data-bs-target="#pane-telemedicine-log" type="button" role="tab"
+                                    aria-controls="pane-telemedicine-log" aria-selected="false">
+                                <i class="bi bi-camera-video me-1" aria-hidden="true"></i> Журнал телемедицины
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -1028,6 +347,9 @@
                             </div>
                         </div>
                     </div>
+
+                    @include('doctors.reception.partials.patient_disability')
+                    @include('doctors.reception.partials.patient_disability_verification_action')
 
                     @if($patientInfoErrors->any())
                         <div class="alert alert-danger" id="patientInfoValidationErrors" role="alert">
@@ -1261,20 +583,12 @@
                                                         <span class="patient-info-check-card__hint d-block">Отметка для регистрационных и медицинских предупреждений.</span>
                                                     </span>
                                                 </label>
-
-                                                <label class="patient-info-check-card" for="patientDisability">
-                                                    <input type="hidden" name="disability" value="0">
-                                                    <input id="patientDisability"
-                                                           class="form-check-input"
-                                                           type="checkbox"
-                                                           name="disability"
-                                                           value="1"
-                                                        @checked((bool)$patient->disability)>
+                                                <div class="patient-info-check-card" role="note">
                                                     <span>
                                                         <span class="patient-info-check-card__title">Инвалидность</span>
-                                                        <span class="patient-info-check-card__hint d-block">Наличие действующего статуса инвалида.</span>
+                                                        <span class="patient-info-check-card__hint d-block">Группа и подтверждение документа ведутся в отдельном блоке «Инвалидность» выше.</span>
                                                     </span>
-                                                </label>
+                                                </div>
 
                                                 <label class="patient-info-check-card" for="patientMarried">
                                                     <input type="hidden" name="married" value="0">
@@ -1318,20 +632,12 @@
                                                         <span class="patient-info-check-card__hint d-block">Регистрационная и медицинская отметка.</span>
                                                     </span>
                                                 </label>
-
-                                                <label class="patient-info-check-card" for="patientDisability">
-                                                    <input type="hidden" name="disability" value="0">
-                                                    <input id="patientDisability"
-                                                           class="form-check-input"
-                                                           type="checkbox"
-                                                           name="disability"
-                                                           value="1"
-                                                        @checked((bool)$patient->disability)>
+                                                <div class="patient-info-check-card" role="note">
                                                     <span>
                                                         <span class="patient-info-check-card__title">Инвалидность</span>
-                                                        <span class="patient-info-check-card__hint d-block">Наличие действующего статуса инвалидности.</span>
+                                                        <span class="patient-info-check-card__hint d-block">Группа и подтверждение документа ведутся в отдельном блоке «Инвалидность» выше.</span>
                                                     </span>
-                                                </label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1433,13 +739,13 @@
                                             </div>
                                             <div class="col-md-8">
                                                 <label class="form-label">Кем выдан</label>
-                                                <div class="form-control bg-light" style="min-height: 42px; height: auto; white-space: normal;">
+                                                <div class="form-control bg-light mc-readonly-multiline">
                                                     {{ $patientIdentityDocument->issued_by ?: '—' }}
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Дата выдачи</label>
-                                                <div class="form-control bg-light">{{ $formatPatientCardDate($patientIdentityDocument->issued_at) }}</div>
+                                                <div class="form-control bg-light">{{ $patientIdentityIssuedLabel }}</div>
                                             </div>
                                         </div>
                                     @else
@@ -1473,7 +779,7 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Дата рождения</label>
-                                                <div class="form-control bg-light">{{ $formatPatientCardDate($primaryRepresentative->birth_at) }}</div>
+                                                <div class="form-control bg-light">{{ $primaryRepresentativeBirthLabel }}</div>
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">СНИЛС</label>
@@ -1514,7 +820,7 @@
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label">Дата выдачи</label>
-                                                    <div class="form-control bg-light">{{ $formatPatientCardDate($representativeIdentityDocument->issued_at) }}</div>
+                                                    <div class="form-control bg-light">{{ $representativeIdentityIssuedLabel }}</div>
                                                 </div>
                                                 @if($representativeIdentityDocument->department_code)
                                                     <div class="col-md-4">
@@ -1524,7 +830,7 @@
                                                 @endif
                                                 <div class="{{ $representativeIdentityDocument->department_code ? 'col-md-8' : 'col-12' }}">
                                                     <label class="form-label">Кем выдан</label>
-                                                    <div class="form-control bg-light" style="min-height: 42px; height: auto; white-space: normal;">
+                                                    <div class="form-control bg-light mc-readonly-multiline">
                                                         {{ $representativeIdentityDocument->issued_by ?: '—' }}
                                                     </div>
                                                 </div>
@@ -1560,11 +866,11 @@
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label">Дата выдачи</label>
-                                                    <div class="form-control bg-light">{{ $formatPatientCardDate($representativeAuthorityDocument->issued_at) }}</div>
+                                                    <div class="form-control bg-light">{{ $representativeAuthorityIssuedLabel }}</div>
                                                 </div>
                                                 <div class="col-12">
                                                     <label class="form-label">Кем выдан</label>
-                                                    <div class="form-control bg-light" style="min-height: 42px; height: auto; white-space: normal;">
+                                                    <div class="form-control bg-light mc-readonly-multiline">
                                                         {{ $representativeAuthorityDocument->issued_by ?: '—' }}
                                                     </div>
                                                 </div>
@@ -1749,13 +1055,12 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-3">
                                         <div
-                                            class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-                                            style="width: 44px; height: 44px;">
+                                            class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mc-documents-stat-icon">
                                             <i class="bi bi-folder2-open fs-5"></i>
                                         </div>
                                         <div>
                                             <div class="small text-muted">Всего документов</div>
-                                            <div class="h5 mb-0">{{ $patient->documents->count() }}</div>
+                                            <div class="h5 mb-0">{{ $patientDocumentsCount }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1767,8 +1072,7 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-3">
                                         <div
-                                            class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center"
-                                            style="width: 44px; height: 44px;">
+                                            class="rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center mc-documents-stat-icon">
                                             <i class="bi bi-file-earmark-medical fs-5"></i>
                                         </div>
                                         <div>
@@ -1785,14 +1089,13 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center gap-3">
                                         <div
-                                            class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
-                                            style="width: 44px; height: 44px;">
+                                            class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center mc-documents-stat-icon">
                                             <i class="bi bi-clock-history fs-5"></i>
                                         </div>
                                         <div>
                                             <div class="small text-muted">Последнее обновление</div>
                                             <div class="fw-semibold">
-                                                {{ isset($documents) && $documents->count() ? $documents->first()->updated_at?->format('d.m.Y H:i') : '—' }}
+                                                {{ $lastPatientDocumentUpdateLabel }}
                                             </div>
                                         </div>
                                     </div>
@@ -1812,14 +1115,14 @@
                                             <th>Документ</th>
                                             <th>Комментарий</th>
                                             <th>Дата</th>
-                                            <th class="text-end" style="width: 120px;">Действия</th>
+                                            <th class="text-end mc-documents-actions-col">Действия</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         @foreach($documents as $document)
                                             <tr>
-                                                <td @if($document->medical_file)style="color: green;"@endif>
-                                                    @switch($document->fileExtension())
+                                                <td class="{{ $document->medical_file ? 'mc-document-medical' : '' }}">
+                                                    @switch($document->card_file_extension)
                                                         @case('doc')
                                                             <i class="bi bi-filetype-doc"></i>
                                                             @break
@@ -1837,8 +1140,7 @@
                                                 <td>
                                                     <div
                                                         class="fw-semibold">{{ $document->name ?? $document->title ?? 'Документ' }}</div>
-                                                    <div class="small"
-                                                         style="color: green;">{{ $document->medical_file ? 'Медицинский документ' : '' }}</div>
+                                                    <div class="small mc-document-medical">{{ $document->medical_file ? 'Медицинский документ' : '' }}</div>
                                                 </td>
                                                 <td>{{ $document->description ?? '—' }}</td>
                                                 <td class="text-nowrap">{{ $document->created_at?->format('d.m.Y H:i') }}</td>
@@ -1847,7 +1149,7 @@
                                                             [$patient->id, $document->id]) }}" method="post">
                                                         @csrf
                                                         <button type="submit" class="btn btn-link p-1">
-                                                            <i class="bi bi-trash" style="color: red;"></i>
+                                                            <i class="bi bi-trash text-danger"></i>
                                                         </button>
                                                         <a href="{{ route('doctors.patients.documents.download', [$patient->id, $document->id]) }}"
                                                            class="btn btn-link p-1"
@@ -1866,8 +1168,7 @@
                             @else
                                 <div class="text-center py-5">
                                     <div
-                                        class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3"
-                                        style="width: 72px; height: 72px;">
+                                        class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3 mc-documents-empty-icon">
                                         <i class="bi bi-folder2-open fs-2 text-muted"></i>
                                     </div>
                                     <div class="h6 mb-1">Документов пока нет</div>
@@ -1887,14 +1188,14 @@
                         </div>
                     </div>
 
-                    <div class="modal fade" id="modalUploadDocument" tabindex="-1" aria-hidden="true">
+                    <div class="modal fade mc-modal-ui mc-modal-ui--teal" id="modalUploadDocument" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <form class="modal-content" method="post" enctype="multipart/form-data">
                                 <div class="modal-header">
                                     @csrf
                                     <input type="file" id="document-upload__upload" name="document_upload" hidden>
                                     <input type="hidden" name="patient_id" value="{{ $patient->id }}">
-                                    <input type="hidden" name="doctor_id" value="{{ auth()->user()->doctor->id }}">
+                                    <input type="hidden" name="doctor_id" value="{{ $currentDoctorId ?? '' }}">
                                     <h5 class="modal-title">Загрузка документа</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Закрыть"></button>
@@ -2010,6 +1311,17 @@
                     @empty
                         <div class="alert alert-light border">Записей анамнеза пока нет.</div>
                     @endforelse
+                </div>
+
+                <div class="tab-pane fade mc-pane" id="pane-visits" role="tabpanel"
+                     aria-labelledby="tab-visits" tabindex="0">
+                    @include('doctors.reception.partials.medical_visit_confirmation')
+                    @include('doctors.reception.partials.visit_history')
+                </div>
+
+                <div class="tab-pane fade mc-pane" id="pane-telemedicine-log" role="tabpanel"
+                     aria-labelledby="tab-telemedicine-log" tabindex="0">
+                    @include('doctors.reception.partials.telemedicine_audit_log')
                 </div>
 
                 <div class="tab-pane fade mc-pane"
@@ -2154,10 +1466,7 @@
                                                         ) }}"
                                                                         data-params='@json($research->params_payload ?? [])'
                                                                         data-values='@json($research->values_map ?? [])'
-                                                                        data-collected-at="{{ optional(
-                                                            $research->collected_at
-                                                            ?? $research->planned_at
-                                                        )->format('Y-m-d H:i') }}"
+                                                                        data-collected-at="{{ $research->card_collected_at }}"
                                                                         data-laboratory="{{ $research->laboratory }}"
                                                                         data-comment="{{ $research->comment }}">
                                                                     <i class="bi bi-eye"></i>
@@ -2170,7 +1479,7 @@
                                                                         data-id="{{ $research->id }}"
                                                                         data-params='@json($research->params_payload ?? [])'
                                                                         data-values='@json($research->values_map ?? [])'
-                                                                        data-planned-at="{{ optional($research->planned_at)->format('Y-m-d\TH:i') }}"
+                                                                        data-planned-at="{{ $research->card_planned_at }}"
                                                                         data-priority="{{ $research->priority }}"
                                                                         data-laboratory="{{ $research->laboratory }}"
                                                                         data-comment="{{ $research->comment }}"
@@ -2262,47 +1571,7 @@
 
                                                 <tbody>
                                                 @foreach($instrumentalResearches as $instrumentalResearch)
-                                                    @php
-                                                        $instrumentalPayload = [
-                                                            'id' => $instrumentalResearch->id,
-                                                            'study_type' => $instrumentalResearch->study_type,
-                                                            'name' => $instrumentalResearch->name,
-                                                            'body_area' => $instrumentalResearch->body_area,
-                                                            'priority' => $instrumentalResearch->priority,
-                                                            'status' => $instrumentalResearch->status,
-                                                            'with_contrast' => $instrumentalResearch->with_contrast,
-                                                            'planned_at' => $instrumentalResearch->planned_at?->format('Y-m-d\TH:i'),
-                                                            'performed_at' => $instrumentalResearch->performed_at?->format('Y-m-d\TH:i'),
-                                                            'result_at' => $instrumentalResearch->result_at?->format('Y-m-d\TH:i'),
-                                                            'organization' => $instrumentalResearch->organization,
-                                                            'specialist_name' => $instrumentalResearch->specialist_name,
-                                                            'indication' => $instrumentalResearch->indication,
-                                                            'description' => $instrumentalResearch->description,
-                                                            'conclusion' => $instrumentalResearch->conclusion,
-                                                            'recommendations' => $instrumentalResearch->recommendations,
-                                                            'type_label' => $instrumentalResearch->type_label,
-                                                            'body_area' => $instrumentalResearch->body_area,
-                                                            'result_at' => $instrumentalResearch->result_at?->format('Y-m-d\TH:i'),
-                                                            'files' => $instrumentalResearch->getMedia(\App\Models\InstrumentalResearch::MEDIA_COLLECTION_RESULTS)
-                                                                ->map(function ($media) use ($patient, $instrumentalResearch) {
-                                                                    return [
-                                                                        'id' => $media->id,
-                                                                        'name' => $media->name,
-                                                                        'file_name' => $media->file_name,
-                                                                        'mime_type' => $media->mime_type,
-                                                                        'size' => $media->size,
-                                                                        'view_url' => route('doctors.patients.instrumentals.media.view',
-                                                                            [
-                                                                                'patient' => $patient->id,
-                                                                                'instrumentalResearch' => $instrumentalResearch->id,
-                                                                                'media' => $media->id,
-                                                                            ]
-                                                                        ),
-                                                                    ];
-                                                                })
-                                                                ->values(),
-                                                        ];
-                                                    @endphp
+
 
                                                     <tr>
                                                         <td>
@@ -2348,7 +1617,7 @@
                                                                     data-bs-toggle="modal"
                                                                     data-bs-target="#modalEditInstrumentalResearch"
                                                                     data-instrumental-edit
-                                                                    data-payload='@json($instrumentalPayload)'
+                                                                    data-payload='@json($instrumentalResearch->card_payload)'
                                                                     data-update-url="{{ route('doctors.patients.instrumentals.update', [
                                                             'patient' => $patient->id,
                                                             'instrumentalResearch' => $instrumentalResearch->id,
@@ -2365,7 +1634,7 @@
                                                                         data-bs-toggle="modal"
                                                                         data-bs-target="#modalInstrumentalResult"
                                                                         data-instrumental-result
-                                                                        data-payload='@json($instrumentalPayload)'
+                                                                        data-payload='@json($instrumentalResearch->card_payload)'
                                                                         data-result-url="{{ route(
                                                             'doctors.patients.instrumentals.result',
                                                             [
@@ -2385,7 +1654,7 @@
                                                                         data-bs-target="#modalViewInstrumentalResearch"
                                                                         data-instrumental-view
                                                                         data-id="{{ $instrumentalResearch->id }}"
-                                                                        data-payload='@json($instrumentalPayload)'
+                                                                        data-payload='@json($instrumentalResearch->card_payload)'
                                                                         data-viewed-url="{{ route(
                                                             'doctors.patients.instrumentals.view',
                                                             [
@@ -2478,8 +1747,8 @@
                         <div id="assignmentsList" class="mt-2"></div>
                     </div>
 
-                    <div class="modal fade" id="testStartModal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+                    <div class="modal fade mc-modal-ui mc-modal-ui--violet" id="testStartModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered mc-test-start-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">Тестирование пациента</h5>
@@ -2490,8 +1759,7 @@
                                     <div class="mb-3">
                                         <div class="small text-muted">Одноразовый PIN (для персонала):</div>
                                         <div class="d-flex align-items-center gap-2">
-                                            <div id="test-pin"
-                                                 style="font-size:32px;font-weight:800;letter-spacing:2px;">—
+                                            <div id="test-pin" class="mc-test-pin">—
                                             </div>
                                             <span id="pin-timer" class="badge text-bg-light ms-2"></span>
                                             <button id="copy-pin" type="button"
@@ -2646,7 +1914,7 @@
                                                         {{ $contact->name }}
                                                     </div>
 
-                                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contact->phone) }}"
+                                                    <a href="tel:{{ $contact->phone_href }}"
                                                        class="contact-card__phone">
                                                         <i class="bi bi-telephone"></i>
                                                         {{ $contact->phone }}
@@ -2657,7 +1925,7 @@
                                             <div class="contact-card__actions">
                                                 <form method="post"
                                                       action="{{ route('doctors.patients.contacts.destroy', [$patient->id, $contact->id]) }}"
-                                                      onsubmit="return confirm('Удалить контакт «{{ $contact->name }}»?');">
+                                                      data-confirm="Удалить контакт «{{ $contact->name }}»?">
                                                     @csrf
                                                     @method('DELETE')
 
@@ -2754,13 +2022,15 @@
                         </button>
                     </div>
 
+                    @include('doctors.reception.partials.benefit_prescription_list')
+
                     <div class="d-flex flex-column gap-4">
                         @foreach($prescriptions as $date => $datePrescriptions)
 
                             <div class="prescription-date-group">
                                 <div class="d-flex align-items-center gap-2 mb-3">
                                     <div class="fw-semibold fs-6">
-                                        {{ $datePrescriptions->first()->date_label ?? $date }}
+                                        {{ $prescriptionDateLabels[$date] ?? $date }}
                                     </div>
 
                                     <div class="flex-grow-1 border-top"></div>
@@ -2784,7 +2054,7 @@
                                                     <div>
                                                         <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                                                     <span class="badge text-bg-light border">
-                                                        {{ ucfirst($prescription->drug?->groupName() ?? 'Препарат') }}
+                                                        {{ $prescription->card_group_label }}
                                                     </span>
                                                             <span
                                                                 class="badge text-bg-success-subtle border text-success-emphasis">
@@ -2879,7 +2149,7 @@
                             </div>
                             <div>
                                 <div class="epicrisis-stat-card__label">Всего эпикризов</div>
-                                <div class="epicrisis-stat-card__value">{{ $patient->epicrises->count() }}</div>
+                                <div class="epicrisis-stat-card__value">{{ $epicrisesCount }}</div>
                             </div>
                         </div>
 
@@ -2890,7 +2160,7 @@
                             <div>
                                 <div class="epicrisis-stat-card__label">С диагнозом</div>
                                 <div
-                                    class="epicrisis-stat-card__value">{{ $patient->epicrises()->with('diagnose')->count() }}</div>
+                                    class="epicrisis-stat-card__value">{{ $epicrisesWithDiagnosisCount }}</div>
                             </div>
                         </div>
 
@@ -2901,13 +2171,13 @@
                             <div>
                                 <div class="epicrisis-stat-card__label">Последний эпикриз</div>
                                 <div class="epicrisis-stat-card__value fs-6">
-                                    {{ $patient->epicrises()->latest('created_at')->first() }}
+                                    {{ $lastEpicrisisDateLabel }}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    @if($epicrisesCount = $patient->epicrises()->count())
+                    @if($epicrisesCount > 0)
                         <div class="epicrisis-list-card">
                             <div class="epicrisis-list-head">
                                 <div>
@@ -3001,9 +2271,10 @@
         </div>
     </div>
 
+    @include('doctors.reception.partials.medical_visit_confirmation_modal')
     @include('doctors.reception.certificates.modals')
 
-    <div class="modal fade" id="modalAddLab" tabindex="-1" aria-hidden="true"
+    <div class="modal fade mc-modal-ui mc-modal-ui--teal" id="modalAddLab" tabindex="-1" aria-hidden="true"
          data-mode="result"
          data-api-params="{{ route('api.params.search') }}"
          data-gender="{{ $patient->lab_gender }}"
@@ -3019,7 +2290,7 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title">Внести изменения — результаты анализа</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
@@ -3071,10 +2342,10 @@
                                     <table class="table align-middle mb-0" id="resultParamsTable">
                                         <thead class="table-light">
                                         <tr>
-                                            <th style="min-width: 280px;">Параметр</th>
+                                            <th class="mc-lab-parameter-col">Параметр</th>
                                             <th class="text-nowrap">Реф. интервал</th>
                                             <th>Ед.</th>
-                                            <th style="width: 180px;">Значение</th>
+                                            <th class="mc-lab-value-col">Значение</th>
                                             <th class="text-center">Флаг</th>
                                             <th class="text-end"></th>
                                         </tr>
@@ -3102,16 +2373,8 @@
         </div>
     </div>
 
-    @php
-        $currentDoctorId = auth()->user()?->doctor()->first()?->id;
 
-        $isTreatingDoctor =
-            $currentDoctorId !== null
-            && $patient->doctor_id !== null
-            && (int) $currentDoctorId === (int) $patient->doctor_id;
-    @endphp
-
-    <div class="modal fade"
+    <div class="modal fade mc-modal-ui mc-modal-ui--teal"
          id="modalViewLab"
          tabindex="-1"
          aria-hidden="true"
@@ -3131,7 +2394,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Результаты анализа</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
@@ -3171,10 +2434,10 @@
                                     <table class="table align-middle mb-0" id="v_paramsTable">
                                         <thead class="table-light">
                                         <tr>
-                                            <th style="min-width:280px">Параметр</th>
+                                            <th class="mc-lab-parameter-col">Параметр</th>
                                             <th>Реф. интервал</th>
                                             <th>Ед.</th>
-                                            <th style="width:180px;">Значение</th>
+                                            <th class="mc-lab-value-col">Значение</th>
                                             <th class="text-center">Флаг</th>
                                         </tr>
                                         </thead>
@@ -3199,7 +2462,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade"
+    <div class="modal fade mc-modal-ui mc-modal-ui--violet"
          id="modalAddAnamnesis"
          tabindex="-1"
          aria-hidden="true"
@@ -3214,7 +2477,7 @@
 
                 <div class="modal-header">
                     <h3 class="modal-title">Добавить запись анамнеза</h3>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
@@ -3362,8 +2625,7 @@
                                                 <div class="text-muted small">добавляйте свои через поле ниже</div>
                                             </div>
 
-                                            <div id="m-sym-list" class="border rounded p-1"
-                                                 style="max-height:260px; overflow:auto;"></div>
+                                            <div id="m-sym-list" class="border rounded p-1 mc-manual-symptoms"></div>
 
                                             <div class="input-group mt-2">
                                                 <input id="m-sym-input" type="text" class="form-control"
@@ -3415,7 +2677,7 @@
             </form>
         </div>
     </div>
-    <div class="modal fade"
+    <div class="modal fade mc-modal-ui mc-modal-ui--teal"
          id="modalAddLabOrder"
          tabindex="-1"
          aria-hidden="true"
@@ -3439,7 +2701,7 @@
                     <h5 class="modal-title">Создать направление на анализ</h5>
                     <button type="button"
                             class="btn-close"
-                            data-bs-dismiss="modal"></button>
+                            data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
@@ -3743,7 +3005,7 @@
 
                                         <thead class="table-light">
                                         <tr>
-                                            <th style="min-width:280px">
+                                            <th class="mc-lab-parameter-col">
                                                 Параметр
                                             </th>
                                             <th>
@@ -3752,8 +3014,7 @@
                                             <th>
                                                 Ед.
                                             </th>
-                                            <th class="text-end"
-                                                style="width:70px;"></th>
+                                            <th class="text-end mc-lab-actions-col"></th>
                                         </tr>
                                         </thead>
 
@@ -3793,7 +3054,7 @@
             </form>
         </div>
     </div>
-    <div class="modal fade epicrisis-modal-ui" id="modalAddEpicrisis" tabindex="-1" aria-hidden="true">
+    <div class="modal fade epicrisis-modal-ui mc-modal-ui" id="modalAddEpicrisis" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <form class="modal-content"
                   method="post"
@@ -3811,7 +3072,7 @@
                             Поиск диагноза по МКБ-10 и форматированный текст эпикриза.
                         </div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body pt-2">
@@ -3894,7 +3155,7 @@
             </form>
         </div>
     </div>
-    <div class="modal fade"
+    <div class="modal fade mc-modal-ui mc-modal-ui--teal"
          id="modalAddInstrumentalResearch"
          tabindex="-1"
          aria-hidden="true">
@@ -3922,7 +3183,7 @@
 
                     <button type="button"
                             class="btn-close"
-                            data-bs-dismiss="modal"></button>
+                            data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
@@ -4054,7 +3315,7 @@
             </form>
         </div>
     </div>
-    <div class="modal fade"
+    <div class="modal fade mc-modal-ui mc-modal-ui--teal"
          id="modalEditInstrumentalResearch"
          tabindex="-1"
          aria-hidden="true">
@@ -4077,7 +3338,7 @@
 
                     <button type="button"
                             class="btn-close"
-                            data-bs-dismiss="modal"></button>
+                            data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
@@ -4221,7 +3482,7 @@
             </form>
         </div>
     </div>
-    <div class="modal fade instrumental-result-modal"
+    <div class="modal fade instrumental-result-modal mc-modal-ui mc-modal-ui--teal"
          id="modalInstrumentalResult"
          tabindex="-1"
          aria-hidden="true">
@@ -4551,7 +3812,7 @@
             </form>
         </div>
     </div>
-    <div class="modal fade instrumental-view-modal"
+    <div class="modal fade instrumental-view-modal mc-modal-ui mc-modal-ui--teal"
          id="modalViewInstrumentalResearch"
          tabindex="-1"
          aria-hidden="true">
@@ -4831,7 +4092,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade"
+    <div class="modal fade mc-modal-ui mc-modal-ui--danger"
          id="modalDeleteInstrumentalResearch"
          tabindex="-1"
          aria-hidden="true">
@@ -4849,12 +4110,22 @@
 
                     <button type="button"
                             class="btn-close"
-                            data-bs-dismiss="modal"></button>
+                            data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
 
                 <div class="modal-body">
-                    Удалить исследование
-                    <strong id="deleteInstrumentalResearchName"></strong>?
+                    <div class="mc-modal-delete-notice" role="alert">
+                        <span class="mc-modal-delete-notice__icon" aria-hidden="true">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </span>
+                        <div>
+                            <div class="mc-modal-delete-notice__title">Подтвердите удаление</div>
+                            <div>Удалить исследование «<strong id="deleteInstrumentalResearchName"></strong>»?</div>
+                            <div class="mc-modal-delete-notice__hint">
+                                Исследование исчезнет из списка пациента. Убедитесь, что выбрали нужную запись.
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -4872,12 +4143,12 @@
             </form>
         </div>
     </div>
-    <div class="modal fade" id="modalViewResult" tabindex="-1" aria-hidden="true">
+    <div class="modal fade mc-modal-ui mc-modal-ui--violet" id="modalViewResult" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="viewResultTitle">Результат теста</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body" id="viewResultBody">
 
@@ -4891,16 +4162,16 @@
             </div>
         </div>
     </div>
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div class="position-fixed bottom-0 end-0 p-3 mc-toast-stack">
         <div id="toastSaved" class="toast align-items-center text-bg-success border-0" role="alert">
             <div class="d-flex">
                 <div class="toast-body">Сохранено</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Закрыть"></button>
             </div>
         </div>
     </div>
 
-    <div class="modal fade assign-test-modal-ui"
+    <div class="modal fade assign-test-modal-ui mc-modal-ui mc-modal-ui--violet"
          id="assignTestModal"
          tabindex="-1"
          aria-hidden="true"
@@ -5098,35 +4369,10 @@
             </form>
         </div>
     </div>
-    @php
-        $prescriptionPatientName = collect([
-            $patient->surname,
-            $patient->name,
-            $patient->patronym,
-        ])->filter(fn ($value) => filled($value))->implode(' ');
 
-        $prescriptionPatientInitials = collect([
-            $patient->surname,
-            $patient->name,
-        ])->filter(fn ($value) => filled($value))
-          ->map(fn ($value) => mb_strtoupper(mb_substr((string) $value, 0, 1)))
-          ->take(2)
-          ->implode('');
-
-        $prescriptionBirthDate = $patient->birth_at
-            ? \Illuminate\Support\Carbon::parse($patient->birth_at)->format('d.m.Y')
-            : 'дата рождения не указана';
-
-        $prescriptionBirthDateValue = $patient->birth_at
-            ? \Illuminate\Support\Carbon::parse($patient->birth_at)->format('Y-m-d')
-            : '';
-
-        $prescriptionDiagnosisCode = data_get($patient, 'prescription_diagnosis_code')
-            ?: optional($patient->diagnose)->code;
-    @endphp
 
     <div
-        class="modal fade prescription-modal-ui"
+        class="modal fade prescription-modal-ui mc-modal-ui"
         id="prescriptionModal"
         tabindex="-1"
         aria-labelledby="prescriptionModalTitle"
@@ -5197,6 +4443,7 @@
 
                         <div class="presc-layout">
                             <div class="presc-main">
+                                @include('doctors.reception.partials.benefit_prescription_fields')
                                 <section class="presc-section">
                                     <div class="presc-section-head">
                                         <div>
@@ -5581,6 +4828,8 @@
                             Отмена
                         </button>
 
+                        @include('doctors.reception.partials.benefit_prescription_actions')
+
                         <button
                             id="printRecipeButton_modal"
                             type="button"
@@ -5604,128 +4853,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        window.addEventListener('load', function () {
-            const query = new URLSearchParams(window.location.search);
-
-            if (query.get('tab') !== 'labs') {
-                return;
-            }
-
-            /*
-             * Открываем вкладку «Анализы и исследования».
-             */
-            const labsTabButton = document.querySelector(
-                '#cardTabs [data-bs-target="#pane-labs"]'
-            );
-
-            if (labsTabButton) {
-                if (window.bootstrap?.Tab) {
-                    bootstrap.Tab
-                        .getOrCreateInstance(labsTabButton)
-                        .show();
-                } else {
-                    labsTabButton.click();
-                }
-            }
-
-            const findById = function (selector, id) {
-                if (!id) {
-                    return null;
-                }
-
-                return Array.from(
-                    document.querySelectorAll(selector)
-                ).find(function (button) {
-                    return String(button.dataset.id) === String(id);
-                }) || null;
-            };
-
-            const findByPayloadId = function (selector, id) {
-                if (!id) {
-                    return null;
-                }
-
-                return Array.from(
-                    document.querySelectorAll(selector)
-                ).find(function (button) {
-                    try {
-                        const payload = JSON.parse(
-                            button.dataset.payload || '{}'
-                        );
-
-                        return String(payload.id) === String(id);
-                    } catch (error) {
-                        return false;
-                    }
-                }) || null;
-            };
-
-            /*
-             * Небольшая задержка нужна, чтобы успели
-             * подключиться обработчики модальных окон.
-             */
-            window.setTimeout(function () {
-                const labResearchId = query.get('research');
-                const instrumentalResearchId =
-                    query.get('instrumental_research');
-
-                let targetButton = null;
-
-                /*
-                 * Лабораторный анализ:
-                 * готовый открываем в режиме просмотра,
-                 * незавершённый — в режиме редактирования.
-                 */
-                if (labResearchId) {
-                    targetButton =
-                        findById(
-                            '[data-lab-view]',
-                            labResearchId
-                        )
-                        || findById(
-                            '[data-lab-edit]',
-                            labResearchId
-                        );
-                }
-
-                /*
-                 * Инструментальное исследование:
-                 * готовое открываем в режиме просмотра.
-                 * Для незавершённого открываем внесение результата
-                 * либо редактирование назначения.
-                 */
-                if (!targetButton && instrumentalResearchId) {
-                    targetButton =
-                        findById(
-                            '[data-instrumental-view]',
-                            instrumentalResearchId
-                        )
-                        || findByPayloadId(
-                            '[data-instrumental-result]',
-                            instrumentalResearchId
-                        )
-                        || findByPayloadId(
-                            '[data-instrumental-edit]',
-                            instrumentalResearchId
-                        );
-                }
-
-                if (!targetButton) {
-                    console.warn(
-                        'Не найдена запись для просмотра',
-                        {
-                            labResearchId,
-                            instrumentalResearchId
-                        }
-                    );
-
-                    return;
-                }
-
-                targetButton.click();
-            }, 250);
-        });
-    </script>
+    {{-- PATIENT_DOCTOR_TRANSFER_MODAL_INCLUDE --}}
+    @include('doctors.reception.partials.patient_doctor_transfer_modal')
 @endsection

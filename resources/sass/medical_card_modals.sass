@@ -1,0 +1,1307 @@
+// Перенесено из встроенного <style> медицинской карты.
+// Сохранены существующие селекторы, чтобы не сломать текущую форму рецепта.
+.prescription-modal-ui
+  --pm-primary: #2563eb
+  --pm-primary-dark: #1d4ed8
+  --pm-text: #172033
+  --pm-muted: #667085
+  --pm-border: #e4e9f0
+  --pm-bg: #f5f7fb
+
+.prescription-modal-ui .modal-dialog
+  width: min(1320px, calc(100vw - 32px)) !important
+  max-width: 1320px !important
+  height: auto !important
+  max-height: calc(100dvh - 32px) !important
+  margin: 16px auto !important
+
+.prescription-modal-ui .modal-content
+  width: 100% !important
+  height: auto !important
+  max-height: calc(100dvh - 32px) !important
+  overflow: hidden !important
+  border: 1px solid rgba(148, 163, 184, .28) !important
+  border-radius: 22px !important
+  background: #fff !important
+  box-shadow: 0 28px 80px rgba(15, 23, 42, .22) !important
+
+.prescription-modal-ui .modal-content > form
+  display: flex !important
+  width: 100% !important
+  height: auto !important
+  min-height: 0 !important
+  max-height: calc(100dvh - 32px) !important
+  flex-direction: column !important
+
+.prescription-modal-ui .modal-header
+  display: flex !important
+  flex: 0 0 auto !important
+  align-items: center !important
+  justify-content: space-between !important
+  padding: 18px 22px !important
+  border-bottom: 1px solid var(--pm-border) !important
+  background: radial-gradient(circle at 0 0, rgba(37, 99, 235, .09), transparent 34%), #fff !important
+
+.presc-modal-heading
+  display: flex
+  align-items: center
+  gap: 13px
+  min-width: 0
+
+.presc-modal-heading__icon
+  display: grid
+  width: 44px
+  height: 44px
+  flex: 0 0 44px
+  place-items: center
+  border-radius: 14px
+  background: #e9f1ff
+  color: var(--pm-primary)
+  font-size: 20px
+
+.prescription-modal-ui .modal-title
+  margin: 0 !important
+  color: var(--pm-text) !important
+  font-size: 20px !important
+  font-weight: 800 !important
+  line-height: 1.2 !important
+
+.presc-modal-subtitle
+  margin-top: 3px
+  color: var(--pm-muted)
+  font-size: 12px
+
+.prescription-modal-ui .modal-body
+  flex: 1 1 auto !important
+  min-height: 0 !important
+  overflow: auto !important
+  padding: 18px 22px 22px !important
+  background: var(--pm-bg) !important
+
+.presc-layout
+  display: grid !important
+  grid-template-columns: minmax(0, 2fr) minmax(310px, .9fr) !important
+  gap: 18px !important
+  align-items: start !important
+
+.presc-main
+  display: grid
+  gap: 14px
+  min-width: 0
+
+.prescription-modal-ui .presc-section
+  margin: 0 !important
+  padding: 17px !important
+  border: 1px solid var(--pm-border) !important
+  border-radius: 17px !important
+  background: #fff !important
+  box-shadow: 0 5px 18px rgba(15, 23, 42, .035) !important
+
+.prescription-modal-ui .presc-section-head
+  margin-bottom: 13px !important
+
+.prescription-modal-ui .presc-section-title
+  margin: 0 0 13px !important
+  color: var(--pm-text) !important
+  font-size: 14px !important
+  font-weight: 800 !important
+
+.prescription-modal-ui .presc-section-head .presc-section-title
+  margin-bottom: 2px !important
+
+.prescription-modal-ui .presc-section-hint, .prescription-modal-ui .form-text
+  color: var(--pm-muted) !important
+  font-size: 11px !important
+  line-height: 1.45 !important
+
+.prescription-modal-ui .presc-indication-switch
+  display: grid !important
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important
+  gap: 10px !important
+
+.prescription-modal-ui .presc-radio-card
+  display: block !important
+  margin: 0 !important
+  cursor: pointer
+
+.prescription-modal-ui .presc-radio-card input
+  position: absolute !important
+  opacity: 0 !important
+  pointer-events: none !important
+
+.prescription-modal-ui .presc-radio-card__body
+  display: flex !important
+  min-height: 72px !important
+  align-items: center !important
+  gap: 11px !important
+  padding: 11px 12px !important
+  border: 1px solid #dbe2eb !important
+  border-radius: 14px !important
+  background: #fff !important
+  transition: .16s ease !important
+
+.prescription-modal-ui .presc-radio-card:hover .presc-radio-card__body
+  border-color: #b8cae8 !important
+  transform: translateY(-1px)
+
+.prescription-modal-ui .presc-radio-card__icon
+  display: grid !important
+  width: 34px !important
+  height: 34px !important
+  flex: 0 0 34px !important
+  place-items: center !important
+  border-radius: 10px !important
+  background: #f1f5f9 !important
+  color: #64748b !important
+  font-size: 15px !important
+
+.prescription-modal-ui .presc-radio-card__title
+  display: block !important
+  margin: 0 0 2px !important
+  color: var(--pm-text) !important
+  font-size: 13px !important
+  font-weight: 800 !important
+
+.prescription-modal-ui .presc-radio-card__text
+  display: block !important
+  color: var(--pm-muted) !important
+  font-size: 11px !important
+
+.prescription-modal-ui .presc-radio-card input:checked + .presc-radio-card__body
+  border-color: #6ea0ff !important
+  background: #eef4ff !important
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .09) !important
+
+.prescription-modal-ui .presc-radio-card input:checked + .presc-radio-card__body .presc-radio-card__icon
+  background: var(--pm-primary) !important
+  color: #fff !important
+
+.presc-patient-card
+  display: flex !important
+  align-items: center !important
+  gap: 12px !important
+  padding: 12px 13px !important
+  border: 1px solid #e3eaf3 !important
+  border-radius: 14px !important
+  background: linear-gradient(135deg, #f8fbff, #f3f7fc) !important
+
+.presc-patient-card__avatar
+  display: grid !important
+  width: 42px !important
+  height: 42px !important
+  flex: 0 0 42px !important
+  place-items: center !important
+  border-radius: 13px !important
+  background: #dfeaff !important
+  color: var(--pm-primary-dark) !important
+  font-size: 13px !important
+  font-weight: 900 !important
+
+.presc-patient-card__content
+  min-width: 0
+
+.presc-patient-card__name
+  overflow: hidden
+  color: var(--pm-text)
+  font-size: 14px
+  font-weight: 800
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.presc-patient-card__meta
+  display: flex
+  flex-wrap: wrap
+  gap: 7px 14px
+  margin-top: 4px
+  color: var(--pm-muted)
+  font-size: 11px
+
+.prescription-modal-ui .form-label
+  display: block !important
+  margin-bottom: 6px !important
+  color: #344054 !important
+  font-size: 12px !important
+  font-weight: 750 !important
+
+.prescription-modal-ui .form-control, .prescription-modal-ui .form-select, .prescription-modal-ui .select2-container--bootstrap-5 .select2-selection
+  min-height: 42px !important
+  border-color: #d9e1eb !important
+  border-radius: 12px !important
+  background-color: #fff !important
+  font-size: 13px !important
+
+.prescription-modal-ui .presc-drug-picker .select2-container
+  width: 100% !important
+
+.prescription-modal-ui .select2-container--bootstrap-5 .select2-dropdown
+  overflow: hidden !important
+  border-color: #cfd9e7 !important
+  border-radius: 13px !important
+  box-shadow: 0 18px 45px rgba(15, 23, 42, .16) !important
+
+.presc-fields-grid
+  display: grid !important
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important
+  gap: 12px !important
+
+.presc-field
+  min-width: 0
+
+.presc-field--validity
+  grid-column: span 2
+
+.presc-strict-warning
+  display: flex
+  align-items: center
+  gap: 9px
+  margin-top: 12px
+  padding: 10px 12px
+  border: 1px solid #f5d58d
+  border-radius: 12px
+  background: #fff8e6
+  color: #8a5a00
+  font-size: 12px
+
+.prescription-modal-ui .presc-regimen
+  display: flex !important
+  align-items: center !important
+  flex-wrap: wrap !important
+  gap: 8px !important
+  padding: 12px 13px !important
+  border: 1px dashed #cfd9e7 !important
+  border-radius: 14px !important
+  background: #f8fafc !important
+
+.prescription-modal-ui .presc-regimen__input
+  width: 74px !important
+  min-width: 74px !important
+
+.prescription-modal-ui .presc-regimen__select
+  width: 82px !important
+  min-width: 82px !important
+
+.prescription-modal-ui .presc-regimen__select--meal
+  width: 96px !important
+  min-width: 96px !important
+
+.prescription-modal-ui .presc-regimen__badge
+  display: inline-flex !important
+  min-width: 42px !important
+  min-height: 32px !important
+  align-items: center !important
+  justify-content: center !important
+  padding: 4px 9px !important
+  border-radius: 999px !important
+  background: #e6efff !important
+  color: var(--pm-primary-dark) !important
+  font-size: 12px !important
+  font-weight: 850 !important
+
+.prescription-modal-ui .presc-side-card
+  position: sticky !important
+  top: 0 !important
+  max-height: calc(100dvh - 190px) !important
+  overflow: auto !important
+  padding: 17px !important
+  border: 1px solid var(--pm-border) !important
+  border-radius: 18px !important
+  background: #fff !important
+  box-shadow: 0 8px 25px rgba(15, 23, 42, .05) !important
+
+.presc-side-card__head
+  display: flex !important
+  align-items: flex-start !important
+  gap: 11px !important
+  margin-bottom: 13px !important
+
+.presc-side-card__icon
+  display: grid !important
+  width: 38px !important
+  height: 38px !important
+  flex: 0 0 38px !important
+  place-items: center !important
+  border-radius: 12px !important
+  background: #eeeaff !important
+  color: #6d4aff !important
+  font-size: 17px !important
+
+.presc-side-card__title
+  color: var(--pm-text) !important
+  font-size: 14px !important
+  font-weight: 850 !important
+
+.presc-side-card__hint
+  margin-top: 3px !important
+  color: var(--pm-muted) !important
+  font-size: 11px !important
+
+.presc-side-card__toolbar
+  display: flex !important
+  align-items: center !important
+  justify-content: space-between !important
+  gap: 8px !important
+  margin-bottom: 12px !important
+
+.presc-filter-badge, .presc-count-badge
+  display: inline-flex !important
+  min-height: 27px !important
+  align-items: center !important
+  padding: 4px 9px !important
+  border-radius: 999px !important
+  font-size: 10px !important
+  font-weight: 750 !important
+
+.presc-filter-badge
+  background: #edf4ff !important
+  color: #2658a6 !important
+
+.presc-count-badge
+  background: #f2f4f7 !important
+  color: #667085 !important
+
+.presc-suggestions-state
+  display: flex !important
+  min-height: 155px !important
+  align-items: center !important
+  justify-content: center !important
+  flex-direction: column !important
+  gap: 9px !important
+  padding: 18px !important
+  border: 1px dashed #d7e0ec !important
+  border-radius: 14px !important
+  background: #fafcff !important
+  color: #8a96a8 !important
+  font-size: 12px !important
+  text-align: center !important
+
+.prescription-modal-ui .modal-footer
+  display: flex !important
+  flex: 0 0 auto !important
+  flex-direction: row !important
+  flex-wrap: wrap !important
+  align-items: center !important
+  justify-content: flex-end !important
+  gap: 9px !important
+  padding: 13px 22px !important
+  border-top: 1px solid var(--pm-border) !important
+  background: #fff !important
+  box-shadow: 0 -10px 25px rgba(15, 23, 42, .035) !important
+
+.presc-footer-note
+  display: flex !important
+  align-items: center !important
+  gap: 7px !important
+  margin-right: auto !important
+  color: var(--pm-muted) !important
+  font-size: 11px !important
+
+.presc-btn
+  display: inline-flex !important
+  width: auto !important
+  min-height: 42px !important
+  align-items: center !important
+  justify-content: center !important
+  gap: 7px !important
+  padding: 9px 16px !important
+  border-radius: 12px !important
+  font-size: 12px !important
+  font-weight: 750 !important
+
+.presc-btn--primary
+  min-width: 165px !important
+
+@media (max-width: 1100px)
+  .presc-layout
+    grid-template-columns: 1fr !important
+
+  .prescription-modal-ui .presc-side-card
+    position: static !important
+    max-height: none !important
+
+
+@media (max-width: 850px)
+  .prescription-modal-ui .modal-dialog
+    width: calc(100vw - 12px) !important
+    margin: 6px auto !important
+
+  .prescription-modal-ui .presc-indication-switch
+    grid-template-columns: 1fr !important
+
+  .presc-fields-grid
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important
+
+  .presc-field--validity
+    grid-column: span 1
+
+  .presc-footer-note
+    display: none !important
+
+
+@media (max-width: 575px)
+  .presc-fields-grid
+    grid-template-columns: 1fr !important
+
+  .prescription-modal-ui .modal-footer
+    display: grid !important
+    grid-template-columns: 1fr !important
+
+  .prescription-modal-ui .modal-footer .btn
+    width: 100% !important
+
+
+.prescription-modal-ui .d-none
+  display: none !important
+
+
+
+// Медицинская карта — единый дизайн модальных окон.
+// Подключается только на странице медицинской карты через resources/js/medical_card.js.
+// Классы mc-modal-ui добавлены в Blade; внешние модалки страницы не затрагиваются.
+
+$mc-ink: #17243b
+$mc-muted: #66758b
+$mc-border: #e1e9f4
+$mc-surface: #f7f9fd
+$mc-blue: #2563eb
+
+.mc-modal-ui
+  --mc-modal-accent: #2563eb
+  --mc-modal-soft: #eaf2ff
+  --mc-modal-deep: #1d4ed8
+
+  &.mc-modal-ui--violet
+    --mc-modal-accent: #7854db
+    --mc-modal-soft: #f1edff
+    --mc-modal-deep: #6545bf
+
+  &.mc-modal-ui--teal
+    --mc-modal-accent: #0f8e96
+    --mc-modal-soft: #e6f8f7
+    --mc-modal-deep: #0a777d
+
+  &.mc-modal-ui--danger
+    --mc-modal-accent: #dc3545
+    --mc-modal-soft: #fff0f1
+    --mc-modal-deep: #b42335
+
+  .modal-dialog
+    width: calc(100% - 36px)
+    max-width: 730px
+    margin: 18px auto
+
+    &.modal-lg
+      max-width: 950px
+
+    &.modal-xl
+      max-width: 1240px
+
+    &.modal-dialog-scrollable
+      max-height: calc(100dvh - 36px)
+
+  .modal-content
+    min-width: 0
+    border: 1px solid rgba(129, 152, 184, .24)
+    border-radius: 21px
+    background: #fff
+    box-shadow: 0 22px 75px rgba(15, 35, 70, .23), 0 3px 10px rgba(15, 35, 70, .05)
+    overflow: hidden
+
+    > form
+      min-height: 0
+
+  // Важно: позиция крестика не зависит от Bootstrap-отступов, flex-раскладки,
+  // длины заголовка или от сторонних правил в текущем medical_card.sass.
+  .modal-header
+    position: relative !important
+    display: flex !important
+    flex: 0 0 auto !important
+    align-items: center !important
+    justify-content: flex-start !important
+    gap: 14px
+    min-height: 98px
+    padding: 20px 76px 20px 24px !important
+    margin: 0 !important
+    border-bottom: 1px solid $mc-border !important
+    border-radius: 20px 20px 0 0
+    background: linear-gradient(115deg, var(--mc-modal-soft) 0%, #fff 53%, #fff 100%) !important
+
+    > .btn-close
+      position: absolute !important
+      top: 18px !important
+      right: 18px !important
+      bottom: auto !important
+      left: auto !important
+      display: block !important
+      flex: 0 0 40px !important
+      width: 40px !important
+      height: 40px !important
+      min-width: 40px !important
+      margin: 0 !important
+      padding: 0 !important
+      border: 1px solid #dce6f2 !important
+      border-radius: 12px !important
+      background-color: #fff !important
+      background-position: center !important
+      background-repeat: no-repeat !important
+      background-size: 12px !important
+      box-shadow: 0 2px 7px rgba(27, 52, 94, .04) !important
+      opacity: 1 !important
+      transform: none !important
+      z-index: 5
+      transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease
+
+      &:hover
+        border-color: #b6c9e2 !important
+        background-color: #edf3fa !important
+        box-shadow: 0 4px 12px rgba(28, 57, 98, .11) !important
+
+      &:focus-visible
+        outline: 2px solid var(--mc-modal-accent)
+        outline-offset: 2px
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, .12) !important
+
+    > div:not(.mc-modal-heading)
+      min-width: 0
+      max-width: 100%
+
+    .modal-title
+      margin: 0 !important
+      color: $mc-ink !important
+      font-size: clamp(17px, 1.6vw, 21px) !important
+      font-weight: 800 !important
+      line-height: 1.3 !important
+      letter-spacing: -.015em
+      overflow-wrap: anywhere
+
+    .small.text-muted
+      color: $mc-muted !important
+      font-size: 12px
+      line-height: 1.45
+
+  .mc-modal-heading
+    display: flex
+    min-width: 0
+    align-items: center
+    gap: 14px
+
+    &__icon
+      display: grid
+      flex: 0 0 48px
+      width: 48px
+      height: 48px
+      place-items: center
+      border: 1px solid rgba(255, 255, 255, .83)
+      border-radius: 15px
+      background: #fff
+      box-shadow: 0 5px 17px rgba(25, 55, 98, .06)
+      color: var(--mc-modal-accent)
+      font-size: 23px
+
+    &__content
+      min-width: 0
+
+    &__eyebrow
+      margin-bottom: 4px
+      color: var(--mc-modal-deep)
+      font-size: 10px
+      font-weight: 800
+      letter-spacing: .095em
+      line-height: 1.35
+      text-transform: uppercase
+
+    &__subtitle
+      margin-top: 4px
+      color: $mc-muted
+      font-size: 12px
+      font-weight: 400
+      line-height: 1.45
+
+  .modal-body
+    min-width: 0
+    min-height: 0
+    padding: 24px !important
+    background: $mc-surface
+    color: $mc-ink
+
+    .form-label
+      margin-bottom: 7px
+      color: #37455e
+      font-size: 12px
+      font-weight: 750
+
+    .form-text, .text-muted.small, .small.text-muted
+      color: $mc-muted !important
+      line-height: 1.5
+
+    .form-control, .form-select
+      min-height: 42px
+      border: 1px solid #d6e0ed
+      border-radius: 11px
+      background-color: #fff
+      color: $mc-ink
+      font-size: 13px
+      box-shadow: none
+      transition: border-color .18s ease, box-shadow .18s ease
+
+      &:focus
+        border-color: var(--mc-modal-accent)
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10)
+
+      &:disabled
+        background: #f1f4f9
+        color: #8290a4
+
+    textarea.form-control
+      min-height: 90px
+      line-height: 1.6
+      resize: vertical
+
+    .input-group-text
+      border-color: #d6e0ed
+      border-radius: 11px
+      background: #eef3fa
+      color: #5b6c84
+
+    .form-check-input
+      cursor: pointer
+      border-color: #cad7e8
+
+      &:focus
+        border-color: var(--mc-modal-accent)
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .10)
+
+    .form-check-label
+      color: #394861
+      font-size: 13px
+      cursor: pointer
+
+    // Карточки данных внутри двухколоночных лабораторных форм.
+    .row > [class*="col-"] > .border.rounded.p-3
+      border-color: $mc-border !important
+      border-radius: 17px !important
+      background: #fff
+      box-shadow: 0 5px 19px rgba(23, 48, 85, .035)
+
+    .table-responsive
+      max-width: 100%
+      border: 1px solid $mc-border
+      border-radius: 13px
+      background: #fff
+
+    .table
+      margin: 0
+      font-size: 12px
+      --bs-table-bg: #fff
+      --bs-table-striped-bg: #f8fbff
+
+      > :not(caption) > * > *
+        padding: 11px 12px
+        border-bottom-color: #ecf0f6
+
+      thead th
+        background: #f0f4fa
+        color: #50617b
+        font-size: 11px
+        font-weight: 750
+        letter-spacing: .015em
+        white-space: nowrap
+
+      tbody tr:last-child > *
+        border-bottom-width: 0
+
+    .alert
+      border-radius: 12px
+
+  .modal-footer
+    display: flex !important
+    flex: 0 0 auto
+    flex-wrap: wrap
+    align-items: center
+    justify-content: flex-end
+    gap: 9px
+    margin: 0
+    padding: 16px 24px !important
+    border-top: 1px solid $mc-border !important
+    border-radius: 0 0 20px 20px
+    background: #fff !important
+
+    > .btn, > .d-flex .btn
+      min-height: 40px
+      margin: 0 !important
+      padding: 9px 17px
+      border-radius: 11px
+      font-size: 12px
+      font-weight: 750
+
+    .btn-light, .btn-outline-secondary
+      border: 1px solid #dae4ef
+      background: #f4f7fb
+      color: #40506a
+
+      &:hover
+        background: #e9eff7
+        color: #24334e
+
+    .btn-primary
+      border-color: $mc-blue
+      background-color: $mc-blue
+      box-shadow: 0 3px 9px rgba(37, 99, 235, .14)
+
+      &:hover:not(:disabled)
+        border-color: #1d4ed8
+        background-color: #1d4ed8
+
+    .btn-danger
+      box-shadow: 0 3px 9px rgba(220, 53, 69, .16)
+
+  // Select2 is appended to the modal, not to the <select>; use common geometry.
+  .select2-container--bootstrap-5 .select2-selection
+    min-height: 42px
+    border-color: #d6e0ed
+    border-radius: 11px
+
+  .select2-container--bootstrap-5 .select2-dropdown
+    overflow: hidden
+    border-color: #d6e0ed
+    border-radius: 12px
+    box-shadow: 0 13px 30px rgba(21, 44, 78, .15)
+
+  // Bootstrap's d-none must still hide async UI sections and disabled states.
+  .d-none
+    display: none !important
+
+// The small PIN modal must not become as wide as normal form dialogs.
+#testStartModal.mc-modal-ui
+  .modal-dialog
+    max-width: 560px
+
+  .mc-test-pin
+    padding: 7px 12px
+    border: 1px solid #dcd4ff
+    border-radius: 11px
+    background: #f3efff
+    color: #5a3bb7
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace
+    font-size: clamp(22px, 6vw, 32px)
+    font-weight: 850
+    letter-spacing: .10em
+    line-height: 1.25
+    font-variant-numeric: tabular-nums
+
+  #patient-link
+    min-width: 0
+    overflow-wrap: anywhere
+    font-size: 12px
+
+  #pinQrCanvas
+    display: inline-block
+    max-width: 100%
+    height: auto
+    padding: 8px
+    border: 1px solid $mc-border
+    border-radius: 16px
+    background: #fff
+    box-shadow: 0 6px 19px rgba(20, 38, 70, .05)
+
+  .modal-body > .mb-3
+    padding: 14px
+    border: 1px solid $mc-border
+    border-radius: 14px
+    background: #fff
+
+#modalUploadDocument.mc-modal-ui
+  .document-upload-dropzone
+    border: 2px dashed #aec9f2
+    border-radius: 15px
+    background: #f0f6ff
+    padding: 24px 16px
+    text-align: center
+    transition: background-color .2s ease, border-color .2s ease, transform .2s ease
+
+    &:hover, &.is-dragover
+      border-color: #3978e7
+      background: #e6f0ff
+
+    &__icon
+      color: #2563eb
+
+  .document-upload-file
+    padding: 12px 14px
+    border: 1px solid #dae5f3
+    border-radius: 12px
+    background: #fff
+
+#modalAddAnamnesis.mc-modal-ui
+  #aiPanel
+    min-height: 180px
+    border-color: $mc-border !important
+    border-radius: 15px !important
+    background: #fff
+
+  #editorBox
+    min-height: 300px
+
+  .ai-loading
+    flex-direction: column
+    gap: 8px
+    padding: 14px
+    border: 1px solid #d9ddf9
+    border-radius: 12px
+    background: #f4f2ff
+
+  .mc-ai-progress
+    height: 6px
+    overflow: hidden
+    border-radius: 999px
+    background: #e1ddfb
+
+  #aiEstimatedProgress
+    width: 2%
+    background-color: #7c58d8
+
+  .mc-manual-symptoms
+    max-height: 260px
+    overflow: auto
+    background: #fff
+
+  #diagnosisMenu, #paramMenu
+    z-index: 2000
+
+#modalAddLab.mc-modal-ui, #modalViewLab.mc-modal-ui, #modalAddLabOrder.mc-modal-ui
+  .mc-lab-parameter-col
+    min-width: 280px
+
+  .mc-lab-value-col
+    width: 180px
+
+  .mc-lab-actions-col
+    width: 70px
+
+#modalAddEpicrisis.mc-modal-ui
+  .epicrisis-side-card, .epicrisis-editor-card
+    border: 1px solid $mc-border
+    border-radius: 16px
+    background: #fff
+    box-shadow: 0 4px 15px rgba(18, 45, 82, .035)
+
+  .epicrisis-side-card
+    padding: 18px
+
+  .epicrisis-editor-card
+    padding: 18px
+
+#modalDeleteInstrumentalResearch.mc-modal-ui
+  .modal-dialog
+    max-width: 530px
+
+  .mc-modal-delete-notice
+    display: flex
+    align-items: flex-start
+    gap: 15px
+    padding: 18px
+    border: 1px solid #f3cbd0
+    border-radius: 16px
+    background: #fff
+    color: $mc-ink
+    line-height: 1.55
+
+    &__icon
+      display: grid
+      flex: 0 0 44px
+      height: 44px
+      place-items: center
+      border-radius: 13px
+      background: #fee9eb
+      color: #c42e41
+      font-size: 23px
+
+    &__title
+      margin-bottom: 5px
+      font-size: 16px
+      font-weight: 800
+
+    &__hint
+      margin-top: 8px
+      color: $mc-muted
+      font-size: 12px
+
+// Already designed modals: their own headings remain intact, but use the same
+// header geometry and top-right close button as every other modal.
+#modalInstrumentalResult.mc-modal-ui, #modalViewInstrumentalResearch.mc-modal-ui
+  .instrumental-result-modal__heading, .instrumental-view-modal__heading
+    min-width: 0
+    max-width: 100%
+    padding-right: 2px
+
+  .instrumental-result-modal__icon, .instrumental-view-modal__icon
+    flex-shrink: 0
+
+#assignTestModal.mc-modal-ui
+  .modal-header
+    .assign-test-modal__title
+      margin: 3px 0
+
+    .assign-test-modal__eyebrow
+      color: var(--mc-modal-deep)
+      font-size: 11px
+      font-weight: 750
+
+    .assign-test-modal__subtitle
+      max-width: 720px
+      color: $mc-muted
+      font-size: 12px
+      line-height: 1.45
+
+#prescriptionModal.mc-modal-ui
+  .modal-dialog
+    width: min(1320px, calc(100vw - 32px)) !important
+    max-width: 1320px !important
+
+  .modal-header
+    padding-right: 76px !important
+
+  .presc-modal-heading
+    max-width: 100%
+
+    &__icon
+      flex-shrink: 0
+
+  .modal-content
+    border-radius: 21px !important
+
+  .presc-radio-card input:focus-visible + .presc-radio-card__body
+    outline: 3px solid rgba(37, 99, 235, .25)
+    outline-offset: 2px
+
+  .modal-footer .presc-footer-note
+    max-width: 400px
+    line-height: 1.4
+
+// Other simple elements of the documents pane: formerly inline style attributes.
+.mc-docs-summary-icon
+  flex: 0 0 44px
+  width: 44px
+  height: 44px
+
+.mc-docs-empty-icon
+  width: 72px
+  height: 72px
+
+.mc-docs-actions-col
+  width: 120px
+
+.mc-saved-toast-container
+  z-index: 1080
+
+// CodeMirror editor for epicrises, previously defined through EditorView.theme()
+// and a script-generated <style>. All these rules now compile as normal Sass.
+.epicrisis-doc-editor
+  .cm-editor
+    border: 1px solid #e5e7eb
+    border-radius: 16px
+    background: #eef2f7
+    overflow: hidden
+
+    &.cm-focused
+      outline: 0
+      border-color: rgba(13, 110, 253, .55)
+      box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .12)
+
+  .cm-scroller
+    max-height: calc(100vh - 300px)
+    overflow: auto
+    font-family: Arial, "Times New Roman", serif
+    font-size: 15px
+    line-height: 1.6
+
+  .cm-content
+    width: 794px
+    max-width: calc(100% - 28px)
+    min-height: 720px
+    margin: 24px auto
+    padding: 64px 72px
+    background: #fff
+    box-shadow: 0 14px 38px rgba(15, 23, 42, .16)
+    border-radius: 2px
+    caret-color: #111827
+    counter-reset: epicrisis-doc-ol
+    white-space: pre-wrap
+
+  .cm-line
+    padding: 0
+    min-height: 1.55em
+
+  .cm-selectionBackground
+    background: rgba(13, 110, 253, .22) !important
+
+  .epicrisis-doc-bold
+    font-weight: 700
+
+  .epicrisis-doc-italic
+    font-style: italic
+
+  .epicrisis-doc-underline
+    text-decoration: underline
+
+  .epicrisis-doc-h3
+    font-size: 1.35rem
+    font-weight: 700
+    line-height: 1.35
+    margin-top: .35rem
+    margin-bottom: .45rem
+
+  .epicrisis-doc-h4
+    font-size: 1.1rem
+    font-weight: 700
+    line-height: 1.35
+    margin-top: .25rem
+    margin-bottom: .35rem
+
+  .epicrisis-doc-list-ul
+    padding-left: 1.4rem
+    position: relative
+
+    &::before
+      content: "•"
+      position: absolute
+      left: .25rem
+
+  .epicrisis-doc-list-ol
+    padding-left: 1.6rem
+    position: relative
+    counter-increment: epicrisis-doc-ol
+
+    &::before
+      content: counter(epicrisis-doc-ol) "."
+      position: absolute
+      left: .25rem
+      font-weight: 600
+
+  .epicrisis-doc-align-left
+    text-align: left
+
+  .epicrisis-doc-align-center
+    text-align: center
+
+  .epicrisis-doc-align-right
+    text-align: right
+
+.epicrisis-doc-toolbar
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 4px
+  padding: 8px
+  margin-bottom: 8px
+  border: 1px solid #e5e7eb
+  border-radius: 14px
+  background: #f8fafc
+
+  .btn
+    min-width: 34px
+    border-radius: 9px
+    font-size: 13px
+
+    &.active
+      border-color: #9ec5fe
+      background: #e8f1ff
+      color: #0d6efd
+
+.epicrisis-diagnosis-search
+  width: 100%
+
+.epicrisis-diagnosis-menu
+  width: 100%
+  max-height: 280px
+  overflow-y: auto
+  z-index: 2200
+  border-radius: 12px
+  box-shadow: 0 12px 32px rgba(15, 23, 42, .14)
+
+.epicrisis-diagnosis-item
+  white-space: normal
+  text-align: left
+
+.epicrisis-selected-diagnosis
+  margin-top: 10px
+  padding: 12px
+  border: 1px solid #dbeafe
+  border-radius: 14px
+  background: #eff6ff
+  color: #1e3a8a
+
+@media (max-width: 991.98px)
+  .mc-modal-ui
+    .modal-dialog.modal-xl
+      max-width: calc(100% - 24px)
+
+    .modal-body
+      padding: 19px !important
+
+  #modalAddEpicrisis .epicrisis-doc-editor .cm-content
+    min-height: 500px
+    padding: 36px
+
+@media (max-width: 575.98px)
+  .mc-modal-ui
+    .modal-dialog
+      width: calc(100% - 12px) !important
+      max-width: calc(100% - 12px) !important
+      margin: 6px auto !important
+
+    .modal-content
+      border-radius: 16px
+
+    .modal-header
+      min-height: 88px
+      padding: 14px 60px 14px 14px !important
+      border-radius: 16px 16px 0 0
+
+      > .btn-close
+        top: 13px !important
+        right: 13px !important
+        width: 35px !important
+        height: 35px !important
+        min-width: 35px !important
+        border-radius: 10px !important
+
+      .modal-title
+        font-size: 17px !important
+
+    .mc-modal-heading
+      gap: 10px
+
+      &__icon
+        flex-basis: 38px
+        width: 38px
+        height: 38px
+        border-radius: 11px
+        font-size: 19px
+
+      &__eyebrow
+        font-size: 9px
+
+      &__subtitle
+        font-size: 11px
+
+    .modal-body
+      padding: 14px !important
+
+    .modal-footer
+      gap: 7px
+      padding: 12px 14px !important
+
+      > .btn, > .d-flex .btn
+        flex: 1 1 auto
+        min-height: 39px
+        padding: 8px 12px
+
+      > .d-flex
+        width: 100%
+        flex-wrap: wrap
+        justify-content: flex-end
+
+    .modal-body .row > [class*="col-"] > .border.rounded.p-3
+      padding: 14px !important
+
+  #modalAddEpicrisis .epicrisis-doc-editor .cm-content
+    max-width: calc(100% - 12px)
+    min-height: 350px
+    margin: 10px auto
+    padding: 18px
+
+  #prescriptionModal.mc-modal-ui
+    .modal-dialog
+      width: calc(100vw - 12px) !important
+      max-width: calc(100vw - 12px) !important
+
+    .modal-header
+      padding-right: 60px !important
+
+    .modal-footer
+      display: grid !important
+      grid-template-columns: 1fr !important
+
+      .btn
+        width: 100% !important
+
+  #testStartModal.mc-modal-ui #test-pin
+    font-size: 23px
+
+@media print
+  .epicrisis-doc-toolbar
+    display: none
+
+  .epicrisis-doc-editor
+    border: 0 !important
+
+    .cm-content
+      margin: 0 !important
+      box-shadow: none !important
+
+@media (prefers-reduced-motion: reduce)
+  .mc-modal-ui .modal-header > .btn-close
+    transition: none
+
+// Технические UI-элементы раньше получали inline CSS из JS.
+.mc-medical-print-frame
+  position: fixed
+  right: 0
+  bottom: 0
+  width: 0
+  height: 0
+  border: 0
+
+#modalAddAnamnesis.mc-modal-ui .mc-symptom-remove
+  width: .65rem
+  height: .65rem
+  padding: 0
+  font-size: .55rem
+  background-size: .55rem
+
+// Classes formerly declared as inline style attributes in medical_card.blade.php.
+.mc-readonly-multiline
+  min-height: 42px
+  height: auto
+  white-space: normal
+
+.mc-test-start-dialog
+  max-width: 520px
+
+.mc-lab-parameter-col
+  min-width: 280px
+
+.mc-lab-value-col
+  width: 180px
+
+.mc-lab-actions-col
+  width: 70px
+
+.mc-manual-symptoms
+  max-height: 260px
+  overflow: auto
+
+.mc-toast-stack
+  z-index: 1080
+
+// Keep the decorative header icon consistent for plain Bootstrap modal markup.
+.mc-modal-ui .modal-header > .mc-modal-heading__icon
+  display: grid
+  width: 46px
+  height: 46px
+  flex: 0 0 46px
+  place-items: center
+  border: 1px solid rgba(255, 255, 255, .85)
+  border-radius: 14px
+  background: #fff
+  box-shadow: 0 4px 16px rgba(25, 55, 98, .07)
+  color: var(--mc-modal-accent)
+  font-size: 22px
+
+@media (max-width: 575.98px)
+  .mc-modal-ui .modal-header > .mc-modal-heading__icon
+    width: 38px
+    height: 38px
+    flex-basis: 38px
+    border-radius: 11px
+    font-size: 18px

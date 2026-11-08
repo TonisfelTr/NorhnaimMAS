@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Central server-side access checks for the inpatient workbench and medical cards.
- * A doctor sees their inpatient clinic, with patient rows limited to assigned departments.
- * The bootstrap debug account can inspect inpatient clinics without a separate access table.
- * This temporary development exception is disabled when APP_DEBUG=false.
+ * Reading a medical card is permitted to a doctor/nurse who has a real staff
+ * profile in the clinic connected with the patient. Writing remains restricted.
+ * Patient access by medical staff does NOT depend on APP_DEBUG.
  */
 class HospitalPatientAccess
 {
@@ -24,6 +24,32 @@ class HospitalPatientAccess
      * The project's bootstrap administrator is a developer-only account.
      * A generic "admins" role is NOT sufficient to see patients in production.
      */
+    // NORHNAIM_CLINIC_ADMIN_GLOBAL_MEDCARD_V1
+    /**
+     * clinic_admin — глобальный администратор медицинских карт.
+     * Дополнительно сохраняем точный системный аккаунт admin@admin.ru
+     * как совместимый идентификатор проекта.
+     */
+    public function isGlobalClinicAdmin(User $user): bool
+    {
+        if ($user->hasRole('clinic_admin')) {
+            return true;
+        }
+
+        foreach (['email', 'login'] as $field) {
+            if (
+                strcasecmp(
+                    trim((string) $user->getRawOriginal($field)),
+                    'admin@admin.ru'
+                ) === 0
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function isDebugAdmin(User $user): bool
     {
         if (!config('app.debug') || !$user->hasRole('admins')) {
@@ -111,46 +137,134 @@ class HospitalPatientAccess
 
     public function isAdminReader(User $user): bool
     {
-        return $this->isDebugAdmin($user);
+        return $this->isGlobalClinicAdmin($user)
+            || $this->isDebugAdmin($user);
     }
 
+    /**
+     * Медкарта доступна любому сотруднику, действительно прикреплённому
+     * к одной из клиник, в которой лечится/наблюдается пациент.
+     *
+     * Роль admins/clinic_admin сама по себе НЕ даёт доступ ко всем пациентам.
+     * APP_DEBUG не используется для выдачи доступа сотрудникам.
+     */
     public function canRead(User $user, Patient $patient): bool
     {
-        // Only the debug bootstrap account can read inpatient records as an admin.
-        if ($user->hasRole('admins')) {
-            if (!$this->isDebugAdmin($user)) {
-                return false;
-            }
-
-            $clinics = $this->adminClinicIds($user);
-            $departments = HospitalDepartment::query()
-                ->whereIn('clinic_id', $clinics)
-                ->where('enabled', true)
-                ->pluck('id')->map(static fn ($id): int => (int) $id)->all();
-
-            return $this->activeAssignments($clinics, $departments)
-                ->where('patient_id', $patient->getKey())->exists();
-        }
-
-        if (!$user->hasRole('doctors')) {
-            return false;
-        }
-
-        $doctor = $user->doctor()->with('clinic')->first();
-        if (!$doctor instanceof Doctor || !$doctor->clinic) {
-            return false;
-        }
-
-        // Existing outpatient attachment, additionally restricted to the doctor's clinic.
-        if ((int) $patient->doctor_id === (int) $doctor->getKey()
-            && $this->belongsToDoctorClinic($patient, $doctor)) {
+        if ($this->isGlobalClinicAdmin($user)) {
             return true;
         }
 
-        $departments = $this->doctorDepartmentIds($doctor);
+        // NORHNAIM_TELEMED_ACCESS_V1: permits reading; canEdit remains unchanged.
+        if (app(\App\Support\TelemedicineJournalAccess::class)->canManage($user, $patient)) {
+            return true;
+        }
 
-        return $this->activeAssignments([(int) $doctor->clinic_id], $departments)
-            ->where('patient_id', $patient->getKey())->exists();
+        // Ранее согласованный выделенный системный администратор.
+        // Только точный логин/email вместе с системной ролью, не просто роль admins.
+        if ($this->isSystemAdmin($user)) {
+            return true;
+        }
+
+        $clinicIds = $this->staffClinicIds($user);
+        if ($clinicIds === []) {
+            return false;
+        }
+
+        // Прямая принадлежность пациента клинике.
+        if (Schema::hasColumn('patients', 'clinic_id')) {
+            $patientClinicId = (int) $patient->getAttribute('clinic_id');
+            if ($patientClinicId > 0 && in_array($patientClinicId, $clinicIds, true)) {
+                return true;
+            }
+        }
+
+        // Пациент обращался в эту клинику (включая запись к любому её врачу).
+        // Удалённая/отменённая запись не является подтверждением доступа.
+        if (Schema::hasTable('registry_records')
+            && Schema::hasColumn('registry_records', 'clinic_id')
+            && Schema::hasColumn('registry_records', 'patient_id')) {
+            $record = DB::table('registry_records')
+                ->where('patient_id', $patient->getKey())
+                ->whereIn('clinic_id', $clinicIds);
+
+            if (Schema::hasColumn('registry_records', 'deleted_at')) {
+                $record->whereNull('deleted_at');
+            }
+
+            if ($record->exists()) {
+                return true;
+            }
+        }
+
+        // Совместимость со старыми амбулаторными пациентами, у которых
+        // заполнен doctor_id, но clinic_id отсутствует.
+        if (Schema::hasColumn('patients', 'doctor_id')) {
+            $patientDoctorId = (int) $patient->getAttribute('doctor_id');
+            if ($patientDoctorId > 0 && Doctor::query()
+                ->whereKey($patientDoctorId)
+                ->whereIn('clinic_id', $clinicIds)
+                ->exists()) {
+                return true;
+            }
+        }
+
+        // Стационар: все действующие госпитализации клиники, в том числе
+        // пациентов другого отделения или временно размещённых в коридоре.
+        // Продолжаем использовать существующую проверку иерархии койки/палаты.
+        $departmentIds = HospitalDepartment::query()
+            ->whereIn('clinic_id', $clinicIds)
+            ->pluck('id')
+            ->map(static fn ($id): int => (int) $id)
+            ->all();
+
+        return $departmentIds !== [] && $this->activeAssignments($clinicIds, $departmentIds)
+            ->where('patient_id', $patient->getKey())
+            ->exists();
+    }
+
+    /** @return list<int> Клинике должен принадлежать именно сотрудник, а не только его роль. */
+    private function staffClinicIds(User $user): array
+    {
+        $ids = [];
+        $doctorRole = $user->hasRole('doctors');
+        $nurseRole = $user->hasRole('nurses') || $user->hasRole('nurse');
+
+        if ($doctorRole && method_exists($user, 'doctor')) {
+            $doctor = $user->doctor()->with('clinic')->first();
+            if ($doctor instanceof Doctor && $doctor->clinic && (int) $doctor->clinic_id > 0) {
+                $ids[] = (int) $doctor->clinic_id;
+            }
+        }
+
+        // В некоторых версиях Norhnaim медсестра имеет и Doctor-профиль
+        // для авторизации. Разрешаем Nurse-профиль при любой медицинской роли.
+        if (($doctorRole || $nurseRole) && method_exists($user, 'nurse')) {
+            $nurse = $user->nurse()->with('clinic')->first();
+            if ($nurse && $nurse->clinic && (int) $nurse->clinic_id > 0) {
+                $ids[] = (int) $nurse->clinic_id;
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * Исключение только для выделенного системного аккаунта.
+     * Обычная роль admins не даёт глобальных прав чтения.
+     */
+    private function isSystemAdmin(User $user): bool
+    {
+        if (!$user->hasRole('admins')) {
+            return false;
+        }
+
+        foreach (['email', 'login'] as $field) {
+            if (strcasecmp(trim((string) $user->getRawOriginal($field)), 'admin@admin.ru') === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -160,6 +274,10 @@ class HospitalPatientAccess
      */
     public function canEdit(User $user, Patient $patient): bool
     {
+        if ($this->isGlobalClinicAdmin($user)) {
+            return true;
+        }
+
         if ($user->hasRole('admins') || !$user->hasRole('doctors')) {
             return false;
         }

@@ -1,0 +1,111 @@
+// Дополнение к существующей теме mc-modal-ui медицинской карты.
+.mc-patient-doctor-line
+  display: flex
+  align-items: center
+  flex-wrap: wrap
+  gap: 8px 12px
+  min-width: 0
+
+.mc-patient-doctor-transfer
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: 6px
+  border-radius: 10px
+  font-size: 12px
+  font-weight: 700
+  white-space: nowrap
+
+.mc-patient-transfer-alert
+  margin: 12px 0 0
+  border-radius: 14px
+
+.mc-doctor-transfer-modal
+  .modal-dialog
+    max-width: 660px
+
+  .mc-transfer-panel
+    padding: 17px
+    border: 1px solid #e1e9f4
+    border-radius: 15px
+    background: #fff
+
+  .mc-transfer-panel__eyebrow
+    margin-bottom: 5px
+    color: #66758b
+    font-size: 11px
+    font-weight: 700
+    text-transform: uppercase
+    letter-spacing: .045em
+
+  .mc-transfer-panel__name
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 8px
+    color: #17243b
+    font-size: 16px
+    font-weight: 800
+
+  .mc-transfer-arrow
+    display: flex
+    align-items: center
+    justify-content: center
+    margin: 12px 0
+    color: #4777c3
+    font-size: 19px
+
+  .mc-transfer-search
+    margin-bottom: 9px
+
+  .mc-transfer-status
+    display: block
+    min-height: 18px
+    margin-top: 7px
+    color: #66758b
+    font-size: 12px
+
+  .mc-transfer-preview
+    margin-top: 12px
+    padding: 11px 13px
+    border: 1px solid #cfe0f8
+    border-radius: 11px
+    background: #f0f6ff
+    color: #24518c
+    font-size: 12px
+    line-height: 1.5
+
+  .mc-transfer-confirm
+    padding: 13px 15px
+    border: 1px solid #e0e8f3
+    border-radius: 12px
+    background: #fff
+    font-size: 12px
+
+    .form-check-input
+      margin-top: 2px
+
+  .mc-transfer-warning
+    display: flex
+    align-items: flex-start
+    gap: 9px
+    margin-top: 14px
+    padding: 12px 14px
+    border-radius: 12px
+    background: #eef5ff
+    color: #3d577c
+    font-size: 12px
+    line-height: 1.5
+
+  .modal-footer .btn-primary
+    min-width: 180px
+
+  @media (max-width: 575px)
+    .mc-transfer-panel
+      padding: 13px
+
+    .modal-footer
+      flex-direction: column-reverse
+
+      .btn
+        width: 100%

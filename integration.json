@@ -1,0 +1,991 @@
+{
+  "migrations": [
+    "database/migrations/2026_11_07_000004_add_appointment_timezone_snapshot_to_registry_records_table.php",
+    "database/migrations/2026_11_08_000003_add_telemedicine_settings_and_timezone_to_clinics_table.php",
+    "database/migrations/2026_11_08_000004_create_telemedicine_provider_sessions_table.php"
+  ],
+  "ops": [
+    {
+      "kind": "register_provider",
+      "path": "bootstrap/providers.php",
+      "provider": "App\\Providers\\ClinicTelemedicineSettingsServiceProvider"
+    },
+    {
+      "anchor": "                    {{-- Организационная структура доступна администратору, а не всем врачам. --}}",
+      "kind": "text_insert",
+      "label": "settings-nav",
+      "path": "resources/views/doctors/settings.blade.php",
+      "position": "before",
+      "snippet": "                    @if ($clinicTelemedicineNavigation['visible'] ?? false)\n                        <li class=\"nav-item\">\n                            <a class=\"settings-navbar__link {{ $clinicTelemedicineNavigation['active'] ? 'active' : '' }}\"\n                               href=\"{{ $clinicTelemedicineNavigation['url'] }}\">\n                                <i class=\"bi bi-camera-video\" aria-hidden=\"true\"></i>\n                                Телемедицина\n                            </a>\n                        </li>\n                    @endif\n"
+    },
+    {
+      "anchor": "$clinic = Clinic::findOrFail($doctor->clinic_id);",
+      "conflicts": [
+        "$clinicTimezoneOptions =",
+        "$clinicTimezoneValue ="
+      ],
+      "kind": "php_insert",
+      "label": "timezone-index",
+      "method": "index",
+      "path": "app/Http/Controllers/Doctors/SettingsController.php",
+      "snippet": "        $clinicTimezoneOptions = \\DateTimeZone::listIdentifiers(\\DateTimeZone::ALL);\n        $clinicTimezoneDefault = \\App\\Support\\ClinicAppointmentTime::timezone(null);\n        $clinicTimezoneRaw = old('timezone', $clinic->getAttribute('timezone'));\n        $clinicTimezoneValue = is_string($clinicTimezoneRaw)\n            && in_array($clinicTimezoneRaw, $clinicTimezoneOptions, true)\n                ? $clinicTimezoneRaw : '';\n"
+    },
+    {
+      "anchor": "'clinic',",
+      "conflicts": [
+        "'clinicTimezoneOptions',",
+        "'clinicTimezoneValue',"
+      ],
+      "kind": "php_insert",
+      "label": "timezone-compact",
+      "method": "index",
+      "path": "app/Http/Controllers/Doctors/SettingsController.php",
+      "snippet": "                'clinicTimezoneOptions',\n                'clinicTimezoneDefault',\n                'clinicTimezoneValue',\n"
+    },
+    {
+      "anchor": "$clinic->city = $request->city;",
+      "conflicts": [
+        "$clinicTimezoneSettings ="
+      ],
+      "kind": "php_insert",
+      "label": "timezone-save",
+      "method": "update",
+      "path": "app/Http/Controllers/Doctors/SettingsController.php",
+      "snippet": "                $clinicTimezoneSettings = $request->validated();\n                if (array_key_exists('timezone', $clinicTimezoneSettings)) {\n                    $clinic->timezone = $clinicTimezoneSettings['timezone'] ?? null;\n                }\n"
+    },
+    {
+      "anchor": "'name' => 'required|string|max:255',",
+      "conflicts": [
+        "'timezone' =>"
+      ],
+      "kind": "php_insert",
+      "label": "timezone-rules",
+      "method": "rules",
+      "path": "app/Http/Requests/ClinicSettingsUpdateRequest.php",
+      "snippet": "            'timezone' => [\n                'sometimes', 'nullable', 'string', 'max:64',\n                Rule::in(\\DateTimeZone::listIdentifiers(\\DateTimeZone::ALL)),\n            ],\n"
+    },
+    {
+      "anchor": "'name.required' => 'Укажите название клиники.',",
+      "conflicts": [
+        "'timezone.string' =>"
+      ],
+      "kind": "php_insert",
+      "label": "timezone-messages",
+      "method": "messages",
+      "path": "app/Http/Requests/ClinicSettingsUpdateRequest.php",
+      "snippet": "            'timezone.string' => 'Выберите часовой пояс клиники из списка.',\n            'timezone.max' => 'Выберите часовой пояс клиники из списка.',\n            'timezone.in' => 'Выберите действующий часовой пояс клиники из списка.',\n"
+    },
+    {
+      "anchor": "                                        {{-- clinic-benefit-okato:view:v1:begin --}}",
+      "kind": "text_insert",
+      "label": "timezone-field",
+      "path": "resources/views/doctors/settings/general.blade.php",
+      "position": "before",
+      "snippet": "                                        @include('doctors.settings.partials.clinic_timezone')\n"
+    },
+    {
+      "anchor": "                                            <p>Дистанционные консультации через информационную систему.</p>",
+      "kind": "text_insert",
+      "label": "telemedicine-activation-hint",
+      "path": "resources/views/doctors/settings/general.blade.php",
+      "position": "after",
+      "snippet": "                                            <p class=\"settings-field-hint\">После сохранения формата в верхнем меню появится вкладка с настройками видеосвязи.</p>\n"
+    },
+    {
+      "kind": "method_replace",
+      "label": "timezone-parse-local",
+      "method": "appointmentStart",
+      "new": "    private function appointmentStart(string $value, ?int $clinicId = null): DateTimeImmutable\n    {\n        $clinicId ??= $this->currentReceptionClinicId(request());\n        return ClinicAppointmentTime::parseLocal($value, $clinicId);\n    }",
+      "old": "    private function appointmentStart(string $value): DateTimeImmutable\n    {\n        $zone = new DateTimeZone((string) config('app.timezone', 'UTC'));\n        foreach (['Y-m-d\\TH:i', 'Y-m-d\\TH:i:s', 'Y-m-d H:i', 'Y-m-d H:i:s'] as $format) {\n            $date = DateTimeImmutable::createFromFormat('!' . $format, $value, $zone);\n            $errors = DateTimeImmutable::getLastErrors();\n            if ($date !== false\n                && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))\n                && $date->format($format) === $value\n                && $date->format('s') === '00') {\n                return $date;\n            }\n        }\n\n        throw ValidationException::withMessages([\n            'appointment_datetime' => 'Укажите корректные дату и время приёма с точностью до минуты.',\n        ]);\n    }",
+      "path": "app/Support/ValidatesDoctorAppointmentTime.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-parse-doc",
+      "new": "/** Browser datetime-local is interpreted in the authenticated clinic timezone. */",
+      "old": "/** Browser datetime-local is interpreted in the application's timezone. */",
+      "path": "app/Support/ValidatesDoctorAppointmentTime.php"
+    },
+    {
+      "kind": "method_replace",
+      "label": "timezone-unchanged-and-confirm",
+      "method": "changedAppointmentDuration",
+      "new": "    private function changedAppointmentDuration(Request $request, RegistryRecord $record): ?int\n    {\n        $values = $request->validate([\n            'appointment_timezone_confirmed' => ['sometimes', 'boolean'],\n        ], [\n            'appointment_timezone_confirmed.boolean' => 'Подтвердите часовой пояс записи установленным флажком.',\n        ]);\n        $clinicId = $this->currentReceptionClinicId($request);\n        $zone = ClinicAppointmentTime::timezone($clinicId);\n        $original = ClinicAppointmentTime::describe($record, $zone);\n        $rawValue = $request->input('appointment_datetime');\n        $requested = is_string($rawValue) ? ClinicAppointmentTime::minuteValue($rawValue) : null;\n        $explicitConfirmation = $original['legacy']\n            && in_array($values['appointment_timezone_confirmed'] ?? false, [true, 1, '1'], true);\n\n        $originalDuration = $record->getAttribute('appointment_duration_minutes');\n        $originalDuration = $originalDuration === null ? null : (int) $originalDuration;\n        $requestedDuration = $request->input('appointment_duration_minutes');\n        $hasDuration = $requestedDuration !== null && $requestedDuration !== '';\n        $duration = $hasDuration ? $this->requiredAppointmentDuration($request) : $originalDuration;\n        $appointmentFormat = $this->requestedAppointmentFormat($request);\n        $originalFormat = (string) ($record->getAttribute('appointment_format') ?: 'in_person');\n\n        $same = !$explicitConfirmation && $requested !== null\n            && (int) $request->input('doctor_id') === (int) $record->doctor_id\n            && $requested === $original['datetime_local']\n            && $duration === $originalDuration\n            && $appointmentFormat === $originalFormat;\n        if ($same) {\n            // Preserve the exact old stored value, including seconds and unknown timezone.\n            return null;\n        }\n        if ($original['legacy'] && $requested === $original['datetime_local'] && !$explicitConfirmation) {\n            throw ValidationException::withMessages([\n                'appointment_timezone_confirmed' => 'Подтвердите часовой пояс прежнего времени записи либо явно выберите новые дату и время.',\n            ]);\n        }\n        $this->appointmentStart(is_string($rawValue) ? $rawValue : '', $clinicId);\n        if ($duration === null) {\n            throw ValidationException::withMessages([\n                'appointment_duration_minutes' => 'Для изменения параметров записи или подтверждения часового пояса укажите длительность приёма.',\n            ]);\n        }\n        return $duration;\n    }",
+      "old": "    private function changedAppointmentDuration(Request $request, RegistryRecord $record): ?int\n    {\n        $start = $this->appointmentStart((string) $request->input('appointment_datetime'));\n        $zone = new DateTimeZone((string) config('app.timezone', 'UTC'));\n        $rawOriginal = $record->getAttribute('for_datetime');\n        $original = $rawOriginal instanceof DateTimeInterface\n            ? DateTimeImmutable::createFromInterface($rawOriginal)->setTimezone($zone)\n            : (new DateTimeImmutable((string) $rawOriginal, $zone))->setTimezone($zone);\n\n        $originalDuration = $record->getAttribute('appointment_duration_minutes');\n        $originalDuration = $originalDuration === null ? null : (int) $originalDuration;\n        $requestedDuration = $request->input('appointment_duration_minutes');\n        $hasDuration = $requestedDuration !== null && $requestedDuration !== '';\n        $duration = $hasDuration ? $this->requiredAppointmentDuration($request) : $originalDuration;\n        $appointmentFormat = $this->requestedAppointmentFormat($request);\n        $originalFormat = (string) ($record->getAttribute('appointment_format') ?: 'in_person');\n\n        $same = (int) $request->input('doctor_id') === (int) $record->doctor_id\n            && $start->format('Y-m-d\\TH:i') === $original->format('Y-m-d\\TH:i')\n            && $duration === $originalDuration\n            && $appointmentFormat === $originalFormat;\n\n        if ($same) {\n            return null;\n        }\n\n        if ($duration === null) {\n            throw ValidationException::withMessages([\n                'appointment_duration_minutes' => 'Для изменения параметров записи укажите продолжительность приёма.',\n            ]);\n        }\n\n        return $duration;\n    }",
+      "path": "app/Support/ValidatesDoctorAppointmentTime.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-assert-clinic",
+      "method": "assertDoctorAppointmentTime",
+      "new": "$this->appointmentStart($value, $clinicId),",
+      "old": "$this->appointmentStart($value),",
+      "path": "app/Support/ValidatesDoctorAppointmentTime.php"
+    },
+    {
+      "anchor": "$record->setAttribute('appointment_duration_minutes', $durationMinutes);",
+      "kind": "php_insert",
+      "label": "timezone-create-duration-stamp",
+      "method": "createAppointmentWithDuration",
+      "path": "app/Support/ValidatesDoctorAppointmentTime.php",
+      "snippet": "        $clinicId = $this->currentReceptionClinicId(request());\n        abort_unless($clinicId && (int) $record->clinic_id === $clinicId, 403);\n        $rawStart = $attributes['for_datetime'] ?? null;\n        $value = $rawStart instanceof DateTimeInterface\n            ? $rawStart->format('Y-m-d\\TH:i:s') : (is_string($rawStart) ? $rawStart : '');\n        ClinicAppointmentTime::stamp($record, $this->appointmentStart($value, $clinicId), $clinicId);"
+    },
+    {
+      "count": 2,
+      "kind": "text_replace",
+      "label": "timezone-working-clinic",
+      "new": "$zone = $this->timezone($clinicId);",
+      "old": "$zone = $this->timezone();",
+      "path": "app/Services/DoctorAppointmentAvailability.php"
+    },
+    {
+      "kind": "method_replace",
+      "label": "timezone-working-resolver",
+      "method": "timezone",
+      "new": "    private function timezone(int $clinicId): DateTimeZone\n    {\n        return new DateTimeZone(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId));\n    }",
+      "old": "    private function timezone(): DateTimeZone\n    {\n        // An invalid app timezone is a configuration error, never a silent UTC fallback.\n        return new DateTimeZone((string) config('app.timezone', 'UTC'));\n    }",
+      "path": "app/Services/DoctorAppointmentAvailability.php"
+    },
+    {
+      "anchor": "$slots = Intervals::slots($working, $durationMinutes, $step, $minimumStart);",
+      "kind": "php_insert",
+      "label": "timezone-slot-transitions",
+      "method": "day",
+      "path": "app/Services/DoctorAppointmentAvailability.php",
+      "snippet": "        $slots = array_values(array_filter($slots, static function (string $clock) use ($date, $zone, $durationMinutes): bool {\n            try {\n                $start = \\App\\Support\\ClinicAppointmentTime::parseLocalInTimezone($date . 'T' . $clock, $zone->getName());\n                $end = $start->setTimezone(new DateTimeZone('UTC'))\n                    ->modify('+' . $durationMinutes . ' minutes')->setTimezone($zone);\n                return $start->getOffset() === $end->getOffset()\n                    && $start->format('Y-m-d') === $end->format('Y-m-d');\n            } catch (ValidationException) {\n                return false;\n            }\n        }));"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-duration-transition",
+      "method": "assert",
+      "new": "$end = $local->setTimezone(new DateTimeZone('UTC'))\n            ->modify('+' . $durationMinutes . ' minutes')->setTimezone($zone);\n        if ($local->getOffset() !== $end->getOffset()) {\n            $this->reject('Приём пересекает перевод часов в часовом поясе клиники. Выберите другой интервал.');\n        }",
+      "old": "$end = $local->modify('+' . $durationMinutes . ' minutes');",
+      "path": "app/Services/DoctorAppointmentAvailability.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-store-rule",
+      "method": "store",
+      "new": "'appointment_datetime' => 'required|date',",
+      "old": "'appointment_datetime' => 'required|date|after_or_equal:now',",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-update-rule",
+      "method": "rules",
+      "new": "'appointment_datetime' => 'required|date',",
+      "old": "'appointment_datetime' => 'required|date|after_or_equal:now',",
+      "path": "app/Http/Requests/UpdateRegistryRecordRequest.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-store-clinic-validation",
+      "method": "store",
+      "new": "$this->validateAppointmentWithinClinicSchedule($selectedDoctor, Carbon::instance($this->appointmentStart((string) $validatedData['appointment_datetime'], (int) $clinicId)), $validatedData['appointment_format']);",
+      "old": "$this->validateAppointmentWithinClinicSchedule($selectedDoctor, Carbon::parse($validatedData['appointment_datetime']), $validatedData['appointment_format']);",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-store-stamp",
+      "method": "store",
+      "new": "\\App\\Support\\ClinicAppointmentTime::stamp(\n                $record,\n                $this->appointmentStart((string) $validatedData['appointment_datetime'], (int) $clinicId),\n                (int) $clinicId\n            );",
+      "old": "$record->for_datetime = Carbon::parse(\n                $validatedData['appointment_datetime']\n            );",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "kind": "php_expression",
+      "label": "timezone-update-clinic-validation",
+      "method": "update",
+      "new": "Carbon::instance($this->appointmentStart((string) $request->appointment_datetime, (int) $currentClinicId))",
+      "old": "Carbon::parse($request->appointment_datetime)",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-update-stamp",
+      "method": "update",
+      "new": "\\App\\Support\\ClinicAppointmentTime::stamp(\n                $record,\n                $this->appointmentStart((string) $request->appointment_datetime, (int) $currentClinicId),\n                (int) $currentClinicId\n            );",
+      "old": "$record->for_datetime = $this->appointmentStart((string) $request->appointment_datetime)->format('Y-m-d H:i:s');",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "anchor": "$currentClinicId = $this->currentReceptionClinicId($request);",
+      "kind": "php_insert",
+      "label": "timezone-create-context",
+      "method": "create",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php",
+      "snippet": "        $appointmentTimeContext = \\App\\Support\\ClinicAppointmentTime::formContext(\n            null, $currentClinicId, request()->session()->getOldInput()\n        );"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-create-compact",
+      "method": "create",
+      "new": "'doctors',\n            'appointmentTimeContext',",
+      "old": "'doctors',",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "anchor": "$currentClinicId = $this->currentReceptionClinicId(request());",
+      "kind": "php_insert",
+      "label": "timezone-edit-context",
+      "method": "edit",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php",
+      "snippet": "        $appointmentTimeContext = \\App\\Support\\ClinicAppointmentTime::formContext(\n            $record, $currentClinicId, request()->session()->getOldInput()\n        );"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-edit-compact",
+      "method": "edit",
+      "new": "'doctors',\n            'appointmentTimeContext',",
+      "old": "'doctors',",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-quarantine-today",
+      "method": "activeClinicQuarantine",
+      "new": "$today = Carbon::today(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId))->toDateString();",
+      "old": "$today = Carbon::today()->toDateString();",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-future-counter",
+      "method": "index",
+      "new": "$futureReceptionsQuery = (clone $receptionsQuery)->reorder();\n        \\App\\Support\\ClinicAppointmentTime::whereComparedToNow($futureReceptionsQuery, '>');\n        $futureReceptions = $futureReceptionsQuery->count();",
+      "old": "$futureReceptions = (clone $receptionsQuery)->reorder()\n            ->where('for_datetime', '>', $receptionScheduleFilters['now_sql'])->count();",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-archive-threshold",
+      "method": "archives",
+      "new": "$query->where('appointment', true)->orWhere(function ($past) use ($now): void {\n                        \\App\\Support\\ClinicAppointmentTime::whereComparedToNow($past, '<=', $now);\n                    });",
+      "old": "$query\n                        ->where('appointment', true)\n                        ->orWhere('for_datetime', '<=', $now);",
+      "path": "app/Http/Controllers/Doctors/ReceptionController.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-create-value",
+      "new": "value=\"{{ $appointmentTimeContext['value'] }}\"",
+      "old": "value=\"{{ old('appointment_datetime') }}\"",
+      "path": "resources/views/doctors/reception/create.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-edit-value",
+      "new": "value=\"{{ $appointmentTimeContext['value'] }}\"",
+      "old": "value=\"{{ old('appointment_datetime', \\Illuminate\\Support\\Carbon::parse($record->for_datetime)->setTimezone(config('app.timezone', 'UTC'))->format('Y-m-d\\\\TH:i')) }}\"",
+      "path": "resources/views/doctors/reception/edit.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-availability-original",
+      "new": "     data-availability-original-datetime=\"{{ $appointmentTimeContext['original_datetime'] }}\"",
+      "old": "     data-availability-original-datetime=\"{{ $availabilityRecord?->for_datetime ? \\Illuminate\\Support\\Carbon::parse($availabilityRecord->for_datetime)->setTimezone(config('app.timezone', 'UTC'))->format('Y-m-d\\TH:i') : '' }}\"",
+      "path": "resources/views/doctors/reception/partials/doctor_appointment_availability.blade.php"
+    },
+    {
+      "anchor": "    <div class=\"row g-3\">",
+      "kind": "text_insert",
+      "label": "timezone-availability-input",
+      "path": "resources/views/doctors/reception/partials/doctor_appointment_availability.blade.php",
+      "position": "after",
+      "snippet": "        @include('doctors.reception.partials.appointment_timezone_input')"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-availability-asset-version",
+      "new": "?v=1.1.1",
+      "old": "?v=1.1.0",
+      "path": "resources/views/doctors/reception/partials/doctor_appointment_availability.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-js-confirm-changed",
+      "new": "const confirmation = form.querySelector('[data-appointment-time-confirm]');\n            return !(confirmation && confirmation.checked) && !duration.validity.badInput && sameSchedule(inputs(), original);",
+      "old": "return !duration.validity.badInput && sameSchedule(inputs(), original);",
+      "path": "public/js/doctor-appointment-availability.js"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-js-confirm-listener",
+      "new": "if (event.target && ['appointment_format', 'appointment_timezone_confirmed'].includes(event.target.name)) refresh();",
+      "old": "if (event.target && event.target.name === 'appointment_format') refresh();",
+      "path": "public/js/doctor-appointment-availability.js"
+    },
+    {
+      "kind": "method_replace",
+      "label": "timezone-schedule-filters",
+      "method": "filters",
+      "new": "    public function filters(Request $request): array\n    {\n        $user = $request->user();\n        $doctor = $user && method_exists($user, 'doctor') ? $user->doctor()->first() : null;\n        $nurse = $user && method_exists($user, 'nurse') ? $user->nurse()->first() : null;\n        $clinicId = $doctor?->clinic_id ?? $nurse?->clinic_id;\n        $zone = new DateTimeZone(ClinicAppointmentTime::timezone($clinicId === null ? null : (int) $clinicId));\n        try {\n            return self::normalizeFilters($request->only([\n                'reception_period', 'reception_date', 'reception_format',\n            ]), new DateTimeImmutable('now', $zone));\n        } catch (InvalidArgumentException $e) {\n            abort(422, $e->getMessage());\n        }\n    }",
+      "old": "    public function filters(Request $request): array\n    {\n        $zone = new DateTimeZone((string) config('app.timezone', 'UTC'));\n        try {\n            return self::normalizeFilters($request->only([\n                'reception_period', 'reception_date', 'reception_format',\n            ]), new DateTimeImmutable('now', $zone));\n        } catch (InvalidArgumentException $e) {\n            abort(422, $e->getMessage());\n        }\n    }",
+      "path": "app/Support/ReceptionAppointmentSchedule.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-schedule-bounds",
+      "method": "normalizeFilters",
+      "new": "'from' => $start?->format('Y-m-d H:i:s'), 'until' => $end?->format('Y-m-d H:i:s'),\n            'from_utc' => $start?->setTimezone(new DateTimeZone('UTC'))->format(DateTimeInterface::ATOM),\n            'until_utc' => $end?->setTimezone(new DateTimeZone('UTC'))->format(DateTimeInterface::ATOM),",
+      "old": "'from' => $start?->format('Y-m-d H:i:s'), 'until' => $end?->format('Y-m-d H:i:s'),",
+      "path": "app/Support/ReceptionAppointmentSchedule.php"
+    },
+    {
+      "kind": "method_replace",
+      "label": "timezone-schedule-query",
+      "method": "applyFilters",
+      "new": "    public function applyFilters(Builder $query, array $filters): void\n    {\n        $query->whereNull('registry_records.deleted_at');\n        if ($filters['from'] !== null || $filters['until'] !== null) {\n            $fromUtc = $filters['from_utc'] === null ? null\n                : ClinicAppointmentTime::queryTimestamp($query, new DateTimeImmutable($filters['from_utc']));\n            $untilUtc = $filters['until_utc'] === null ? null\n                : ClinicAppointmentTime::queryTimestamp($query, new DateTimeImmutable($filters['until_utc']));\n            $query->where(static function (Builder $dates) use ($filters, $fromUtc, $untilUtc): void {\n                $dates->where(static function (Builder $known) use ($fromUtc, $untilUtc): void {\n                    $known->whereNotNull('appointment_starts_at_utc');\n                    if ($fromUtc !== null) $known->where('appointment_starts_at_utc', '>=', $fromUtc);\n                    if ($untilUtc !== null) $known->where('appointment_starts_at_utc', '<', $untilUtc);\n                })->orWhere(static function (Builder $legacy) use ($filters): void {\n                    $legacy->whereNull('appointment_starts_at_utc');\n                    if ($filters['from'] !== null) $legacy->where('for_datetime', '>=', $filters['from']);\n                    if ($filters['until'] !== null) $legacy->where('for_datetime', '<', $filters['until']);\n                });\n            });\n        }\n        if ($filters['format'] !== 'all') $query->where('appointment_format', $filters['format']);\n        $query->reorder();\n        ClinicAppointmentTime::orderByStart($query, $filters['direction']);\n    }",
+      "old": "    public function applyFilters(Builder $query, array $filters): void\n    {\n        $query->whereNull('registry_records.deleted_at');\n        if ($filters['from'] !== null) $query->where('for_datetime', '>=', $filters['from']);\n        if ($filters['until'] !== null) $query->where('for_datetime', '<', $filters['until']);\n        if ($filters['format'] !== 'all') $query->where('appointment_format', $filters['format']);\n        $query->reorder('for_datetime', $filters['direction'])->orderBy('registry_records.id', $filters['direction']);\n    }",
+      "path": "app/Support/ReceptionAppointmentSchedule.php"
+    },
+    {
+      "anchor": "$now = new DateTimeImmutable('now', $zone);",
+      "kind": "php_insert",
+      "label": "timezone-schedule-zone-cache",
+      "method": "decorateRows",
+      "path": "app/Support/ReceptionAppointmentSchedule.php",
+      "snippet": "        $clinicTimezones = [];"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-schedule-rows",
+      "method": "decorateRows",
+      "new": "$clinicKey = (int) ($record->clinic_id ?? 0);\n            $clinicZone = $clinicTimezones[$clinicKey] ??= ClinicAppointmentTime::timezone($record->clinic_id === null ? null : $clinicKey);\n            $description = ClinicAppointmentTime::describe($record, $clinicZone);\n            $start = ClinicAppointmentTime::startInstant($record)?->setTimezone(new DateTimeZone($clinicZone));\n            $row['schedule'] = self::describe($start,\n                (string) $record->getAttribute('appointment_format'),\n                $confirmations[$id] ?? [], $encounters[$id] ?? [], $now->setTimezone(new DateTimeZone($clinicZone)));\n            $row['schedule'] = array_replace($row['schedule'], $description);\n            if ($description['legacy'] && $description['date'] !== null && $row['schedule']['state'] === 'unknown') {\n                $row['schedule']['state_label'] = 'Уточните часовой пояс';\n                $row['schedule']['state_class'] = 'text-bg-warning';\n            }",
+      "old": "$raw = $record->getRawOriginal('for_datetime');\n            $start = self::parseStart($raw, $zone);\n            $row['schedule'] = self::describe($start,\n                (string) $record->getAttribute('appointment_format'),\n                $confirmations[$id] ?? [], $encounters[$id] ?? [], $now);",
+      "path": "app/Support/ReceptionAppointmentSchedule.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-schedule-cell",
+      "new": "        @if($receptionRow['schedule']['date'])\n            @if($receptionRow['schedule']['iso'])\n                <time datetime=\"{{ $receptionRow['schedule']['iso'] }}\" class=\"text-nowrap\">\n                    <span class=\"fw-bold fs-5\">{{ $receptionRow['schedule']['time'] }}</span>\n                    <span class=\"ms-1\">{{ $receptionRow['schedule']['date'] }}</span>\n                </time>\n            @else\n                <span class=\"text-nowrap\"><strong>{{ $receptionRow['schedule']['time'] }}</strong> {{ $receptionRow['schedule']['date'] }}</span>\n            @endif\n            @include('shared.appointment_timezone_display', ['appointmentTime' => $receptionRow['schedule']])",
+      "old": "        @if($receptionRow['schedule']['iso'])\n            <time datetime=\"{{ $receptionRow['schedule']['iso'] }}\" class=\"text-nowrap\">\n                <span class=\"fw-bold fs-5\">{{ $receptionRow['schedule']['time'] }}</span>\n                <span class=\"ms-1\">{{ $receptionRow['schedule']['date'] }}</span>\n            </time>",
+      "path": "resources/views/doctors/reception/partials/reception_schedule_cell.blade.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-count",
+      "method": "buildVisitHistory",
+      "new": "$upcomingQuery = (clone $base)->whereNull('deleted_at');\n        \\App\\Support\\ClinicAppointmentTime::whereComparedToNow($upcomingQuery, '>', $now);\n        $totals['upcoming'] = $upcomingQuery->count();",
+      "old": "$totals['upcoming'] = (clone $base)\n            ->whereNull('deleted_at')->where('for_datetime', '>', $now)->count();",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-past",
+      "method": "buildVisitHistory",
+      "new": "\\App\\Support\\ClinicAppointmentTime::whereComparedToNow($query, '<=', $now);",
+      "old": "$query->where('for_datetime', '<=', $now);",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-upcoming",
+      "method": "buildVisitHistory",
+      "new": "$query->whereNull('deleted_at');\n            \\App\\Support\\ClinicAppointmentTime::whereComparedToNow($query, '>', $now);",
+      "old": "$query->where('for_datetime', '>', $now)->whereNull('deleted_at');",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-ascending",
+      "method": "buildVisitHistory",
+      "new": "\\App\\Support\\ClinicAppointmentTime::orderByStart($query);",
+      "old": "$query->orderBy('for_datetime')->orderBy('id');",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-descending",
+      "method": "buildVisitHistory",
+      "new": "\\App\\Support\\ClinicAppointmentTime::orderByStart($query, 'desc');",
+      "old": "$query->orderByDesc('for_datetime')->orderByDesc('id');",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-date-buildVisitHistory",
+      "method": "buildVisitHistory",
+      "new": "$appointmentTime = \\App\\Support\\ClinicAppointmentTime::describe($record);\n                $displayDate = \\App\\Support\\ClinicAppointmentTime::displayDate($record);\n                $date = $displayDate ? Carbon::instance($displayDate) : null;",
+      "old": "$rawDate = $record->getRawOriginal('for_datetime') ?: $record->for_datetime;\n                $date = $rawDate ? Carbon::parse($rawDate) : null;",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-date-buildMedicalVisitAuditContext",
+      "method": "buildMedicalVisitAuditContext",
+      "new": "$appointmentTime = \\App\\Support\\ClinicAppointmentTime::describe($record);\n                $displayDate = \\App\\Support\\ClinicAppointmentTime::displayDate($record);\n                $date = $displayDate ? Carbon::instance($displayDate) : null;",
+      "old": "$rawDate = $record->getRawOriginal('for_datetime') ?: $record->for_datetime;\n                $date = $rawDate ? Carbon::parse($rawDate) : null;",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-time-data",
+      "method": "buildVisitHistory",
+      "new": "'appointment_time' => $appointmentTime,\n                    'day' => $date?->format('d') ?? '—',",
+      "old": "'day' => $date?->format('d') ?? '—',",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-card-start-label",
+      "method": "buildVisitHistory",
+      "new": "'scheduled_start_label' => $date ? $date->format('d.m.Y в H:i') . ' (' . $appointmentTime['timezone_label'] . ')' : 'Не указана',",
+      "old": "'scheduled_start_label' => $date?->format('d.m.Y в H:i') ?? 'Не указана',",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-time-data",
+      "method": "buildMedicalVisitAuditContext",
+      "new": "'appointment_time' => $appointmentTime,\n                'date' => $date?->format('d.m.Y H:i') ?? 'Не указана',",
+      "old": "'date' => $date?->format('d.m.Y H:i') ?? 'Не указана',",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-order",
+      "method": "buildMedicalVisitAuditContext",
+      "new": "->orderByRaw('COALESCE(registry_records.appointment_starts_at_utc, registry_records.for_datetime) desc')\n            ->orderByDesc('registry_records.id')",
+      "old": "->orderByDesc('for_datetime')\n            ->orderByDesc('id')",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "anchor": "                <div class=\"mc-audit-session__body\">",
+      "kind": "text_insert",
+      "label": "timezone-journal-display",
+      "path": "resources/views/doctors/reception/partials/telemedicine_audit_log.blade.php",
+      "position": "after",
+      "snippet": "                    @include('shared.appointment_timezone_display', ['appointmentTime' => $call['appointment_time']])"
+    },
+    {
+      "anchor": "    @include('doctors.reception.partials.telemedicine_journal_toolbar')",
+      "kind": "text_insert",
+      "label": "timezone-journal-display-control",
+      "path": "resources/views/doctors/reception/partials/telemedicine_audit_log.blade.php",
+      "position": "after",
+      "snippet": "    @include('shared.appointment_timezone_control')"
+    },
+    {
+      "anchor": "        <div class=\"col-12 small text-muted\" id=\"reception_schedule_hint\">",
+      "kind": "text_insert",
+      "label": "timezone-reception-display-control",
+      "path": "resources/views/doctors/reception/partials/reception_schedule_filters.blade.php",
+      "position": "after",
+      "snippet": "            @include('shared.appointment_timezone_control')"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-confirmation-start",
+      "method": "store",
+      "new": "$appointmentStart = \\App\\Support\\ClinicAppointmentTime::displayDate($appointment);\n            if (!$appointmentStart || Carbon::instance($appointmentStart)->isFuture()) {",
+      "old": "$rawStart = $appointment->getRawOriginal('for_datetime') ?: $appointment->for_datetime;\n            if (!$rawStart || Carbon::parse($rawStart)->isFuture()) {",
+      "path": "app/Http/Controllers/Doctors/MedicalVisitConfirmationController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-weekly-data",
+      "method": "indexDoctorScheduleTable",
+      "new": "'clinicScheduleTimezone' => \\App\\Support\\ClinicAppointmentTime::timezone($clinicId),\n                'clinicSchedule' => $clinicSchedule,",
+      "old": "'clinicSchedule' => $clinicSchedule,",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-cabinet-today-weekday",
+      "method": "index",
+      "new": "$todayDayNumber = now(\\App\\Support\\ClinicAppointmentTime::timezone((int) $clinic_id))->isoWeekday();",
+      "old": "$todayDayNumber = now()->isoWeekday();",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-cabinet-vacation-today",
+      "method": "index",
+      "new": "$today = Carbon::today(\\App\\Support\\ClinicAppointmentTime::timezone((int) $clinic_id));",
+      "old": "$today = Carbon::today();",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-districts-today",
+      "method": "districts",
+      "new": "$today = Carbon::today(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId));",
+      "old": "$today = Carbon::today();",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-clinicSchedule-today",
+      "method": "clinicSchedule",
+      "new": "$today = Carbon::today(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId));",
+      "old": "$today = Carbon::today();",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-district-vacation-civil",
+      "method": "districts",
+      "new": "&& $vacation->date_from->toDateString() <= $today->toDateString()\n                                && $vacation->date_to->toDateString() >= $today->toDateString()",
+      "old": "&& $vacation->date_from->lte($today)\n                                && $vacation->date_to->gte($today)",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-clinic-exception-civil",
+      "method": "clinicSchedule",
+      "new": "$exception['date_to'] >= $today->toDateString()",
+      "old": "Carbon::parse($exception['date_to'])\n                        ->endOfDay()\n                        ->gte($today)",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-vacation-year",
+      "method": "vacationSchedule",
+      "new": "$year = (int) $request->integer('year', now(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId))->year);",
+      "old": "$year = (int) $request->integer('year', now()->year);",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-vacation-year-fallback",
+      "method": "vacationSchedule",
+      "new": "$year = now(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId))->year;",
+      "old": "$year = now()->year;",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-vacation-nearest",
+      "method": "vacationSchedule",
+      "new": "$nearestVacationStart = Carbon::today(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId));",
+      "old": "$nearestVacationStart = Carbon::today();",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-vacation-active-civil",
+      "method": "vacationSchedule",
+      "new": "&& $vacation->date_from->toDateString() <= now(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId))->toDateString()\n                        && $vacation->date_to->toDateString() >= now(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId))->toDateString()",
+      "old": "&& now()->betweenIncluded(\n                            $vacation->date_from->startOfDay(),\n                            $vacation->date_to->endOfDay()\n                        )",
+      "path": "app/Http/Controllers/Doctors/CabinetController.php"
+    },
+    {
+      "anchor": "                    <h1 class=\"settings-page-title\">Расписание врачей</h1>",
+      "kind": "text_insert",
+      "label": "timezone-weekly-label",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php",
+      "position": "after",
+      "snippet": "                    <p class=\"small text-muted\">Все дни и смены указаны по часовому поясу клиники: <strong>{{ $clinicScheduleTimezone }}</strong>.</p>"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-script",
+      "new": "@push('scripts')\n    <script src=\"{{ asset('js/clinic-appointment-time.js') }}?v=1.0.0\"></script>\n    <script>",
+      "old": "@push('scripts')\n    <script>",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "anchor": "            const MINUTES_PER_PIXEL = 1;",
+      "kind": "text_insert",
+      "label": "timezone-weekly-clock",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php",
+      "position": "after",
+      "snippet": "            const CLINIC_TIMEZONE = @json($clinicScheduleTimezone);\n            const clinicCivilNow = () => window.ClinicAppointmentTime.civilNow(CLINIC_TIMEZONE);"
+    },
+    {
+      "count": 4,
+      "kind": "text_replace",
+      "label": "timezone-weekly-now",
+      "new": "clinicCivilNow()",
+      "old": "new Date()",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-1",
+      "new": "                const result = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));",
+      "old": "                const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-2",
+      "new": "                const day = result.getUTCDay();",
+      "old": "                const day = result.getDay();",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-3",
+      "new": "                result.setUTCDate(result.getUTCDate() + diff);",
+      "old": "                result.setDate(result.getDate() + diff);",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-4",
+      "new": "                result.setUTCHours(0, 0, 0, 0);",
+      "old": "                result.setHours(0, 0, 0, 0);",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-5",
+      "new": "                result.setUTCDate(result.getUTCDate() + days);",
+      "old": "                result.setDate(result.getDate() + days);",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-6",
+      "new": "                return a.getUTCFullYear() === b.getUTCFullYear()",
+      "old": "                return a.getFullYear() === b.getFullYear()",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-7",
+      "new": "                    && a.getUTCMonth() === b.getUTCMonth()",
+      "old": "                    && a.getMonth() === b.getMonth()",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-8",
+      "new": "                    && a.getUTCDate() === b.getUTCDate();",
+      "old": "                    && a.getDate() === b.getDate();",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-9",
+      "new": "                return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;",
+      "old": "                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-10",
+      "new": "                    return `${rangeStart.getUTCDate()} ${MONTHS_GENITIVE[rangeStart.getUTCMonth()]} ${rangeStart.getUTCFullYear()}`;",
+      "old": "                    return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} ${rangeStart.getFullYear()}`;",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-11",
+      "new": "                    rangeStart.getUTCMonth()",
+      "old": "                    rangeStart.getMonth()",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-12",
+      "new": "                    === rangeEnd.getUTCMonth();",
+      "old": "                    === rangeEnd.getMonth();",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-13",
+      "new": "                    rangeStart.getUTCFullYear()",
+      "old": "                    rangeStart.getFullYear()",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-14",
+      "new": "                    === rangeEnd.getUTCFullYear();",
+      "old": "                    === rangeEnd.getFullYear();",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-15",
+      "new": "                    return `${rangeStart.getUTCDate()}–${rangeEnd.getUTCDate()} ${MONTHS_GENITIVE[rangeEnd.getUTCMonth()]} ${rangeEnd.getUTCFullYear()}`;",
+      "old": "                    return `${rangeStart.getDate()}–${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-16",
+      "new": "                    return `${rangeStart.getUTCDate()} ${MONTHS_GENITIVE[rangeStart.getUTCMonth()]} – ${rangeEnd.getUTCDate()} ${MONTHS_GENITIVE[rangeEnd.getUTCMonth()]} ${rangeEnd.getUTCFullYear()}`;",
+      "old": "                    return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} – ${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-17",
+      "new": "                return `${rangeStart.getUTCDate()} ${MONTHS_GENITIVE[rangeStart.getUTCMonth()]} ${rangeStart.getUTCFullYear()} – ${rangeEnd.getUTCDate()} ${MONTHS_GENITIVE[rangeEnd.getUTCMonth()]} ${rangeEnd.getUTCFullYear()}`;",
+      "old": "                return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} ${rangeStart.getFullYear()} – ${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-18",
+      "new": "                                ${date.getUTCDate()} ${MONTHS_GENITIVE[date.getUTCMonth()]}",
+      "old": "                                ${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]}",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-19",
+      "new": "                overlapModalTitle.textContent = `${WEEK_DAYS[day]}, ${date.getUTCDate()} ${MONTHS_GENITIVE[date.getUTCMonth()]} · ${minutesToTime(group.start)}–${minutesToTime(group.end)}`;",
+      "old": "                overlapModalTitle.textContent = `${WEEK_DAYS[day]}, ${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]} · ${minutesToTime(group.start)}–${minutesToTime(group.end)}`;",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-20",
+      "new": "                let day = now.getUTCDay();",
+      "old": "                let day = now.getDay();",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-weekly-civil-line-21",
+      "new": "                const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();",
+      "old": "                const minutes = now.getHours() * 60 + now.getMinutes();",
+      "path": "resources/views/doctors/settings/doctors_schedule.blade.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-form-context",
+      "method": "decorate",
+      "new": "$oldDoctor = $request->old('telemed_doctor_id', $patient->doctor_id);\n        $selected = is_scalar($oldDoctor) ? (int) $oldDoctor : (int) $patient->doctor_id;\n        $selectedDoctor = $doctors->firstWhere('id', $selected) ?? $doctors->first();\n        $clinicTimezone = \\App\\Support\\ClinicAppointmentTime::timezone($selectedDoctor?->clinic);\n        $defaultDate = now($clinicTimezone)->addMinutes(30)->startOfMinute()->format('Y-m-d\\TH:i');\n        $startsAt = $request->old('telemed_starts_at', $defaultDate);\n        $startsAt = is_string($startsAt) ? $startsAt : '';\n        $duration = $request->old('telemed_duration_minutes', config('doctor_appointment_availability.default_duration_minutes', 30));\n        $duration = is_scalar($duration) ? (string) $duration : '';\n        $requestId = $request->old('telemed_request_id', (string) Str::uuid());\n        $requestId = is_string($requestId) ? $requestId : '';",
+      "old": "$selected = (int) $request->old('telemed_doctor_id', $patient->doctor_id);\n        $defaultDate = now()->addMinutes(30)->startOfMinute()->format('Y-m-d\\TH:i');",
+      "path": "app/Services/TelemedicineJournalService.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-form-values",
+      "method": "decorate",
+      "new": "'starts_at' => $startsAt,\n            'duration_minutes' => $duration,",
+      "old": "'starts_at' => $request->old('telemed_starts_at', $defaultDate),",
+      "path": "app/Services/TelemedicineJournalService.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-form-minimum",
+      "method": "decorate",
+      "new": "'minimum' => now($clinicTimezone)->startOfMinute()->format('Y-m-d\\TH:i'),",
+      "old": "'minimum' => now()->startOfMinute()->format('Y-m-d\\TH:i'),",
+      "path": "app/Services/TelemedicineJournalService.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-form-zone",
+      "method": "decorate",
+      "new": "'timezone' => $clinicTimezone,",
+      "old": "'timezone' => (string) config('app.timezone', 'UTC'),",
+      "path": "app/Services/TelemedicineJournalService.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-form-request-id",
+      "method": "decorate",
+      "new": "'request_id' => $requestId,",
+      "old": "'request_id' => $request->old('telemed_request_id', (string) Str::uuid()),",
+      "path": "app/Services/TelemedicineJournalService.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-deletion-clock",
+      "method": "decision",
+      "new": "$start = \\App\\Support\\ClinicAppointmentTime::startInstant($record)\n            ?? \\App\\Support\\ClinicAppointmentTime::legacyLocal($record);",
+      "old": "$raw = $record->getRawOriginal('for_datetime') ?: $record->for_datetime;\n        try { $start = $raw ? Carbon::parse($raw) : null; } catch (\\Throwable) { $start = null; }",
+      "path": "app/Services/TelemedicineJournalService.php"
+    },
+    {
+      "kind": "method_replace",
+      "label": "timezone-journal-create",
+      "method": "create",
+      "new": "    public function create($user, Patient $patient, array $data): RegistryRecord\n    {\n        $this->authorize($user, $patient);\n        $eventUid = 'tm-schedule-' . strtolower($data['telemed_request_id']);\n        $duration = (int) $data['telemed_duration_minutes'];\n        return DB::transaction(function () use ($user, $patient, $data, $duration, $eventUid) {\n            $lockedPatient = Patient::query()->whereKey($patient->getKey())->lockForUpdate()->firstOrFail();\n            $this->authorize($user, $lockedPatient);\n            $doctor = $this->doctorQuery($lockedPatient)->whereKey($data['telemed_doctor_id'])\n                ->lockForUpdate()->first();\n            if (!$doctor) $this->invalid('Выбранный врач недоступен в клинике пациента.', 'telemed_doctor_id');\n            $clinicId = max(0, (int) $doctor->clinic_id);\n            $start = Carbon::instance(\\App\\Support\\ClinicAppointmentTime::parseLocal(\n                (string) $data['telemed_starts_at'], $clinicId > 0 ? $clinicId : null\n            ));\n            $utc = $start->copy()->setTimezone('UTC');\n            $previous = DB::table('medical_visit_events')->where('event_uid', $eventUid)->first();\n            if ($previous) {\n                $meta = json_decode((string) $previous->details, true) ?: [];\n                abort_unless((int) $previous->patient_id === (int) $patient->getKey()\n                    && (int) $previous->actor_user_id === (int) $user->getKey()\n                    && $previous->event_type === 'session_scheduled'\n                    && (int) ($meta['doctor_id'] ?? 0) === (int) $data['telemed_doctor_id']\n                    && ($meta['starts_at_utc'] ?? null) === $utc->format(\\DateTimeInterface::ATOM)\n                    && ($meta['appointment_timezone'] ?? null) === $start->getTimezone()->getName()\n                    && (int) ($meta['duration_minutes'] ?? 0) === $duration, 409,\n                    'Этот запрос уже использован с другими параметрами. Обновите страницу.');\n                return $this->journalAppointments($user, $lockedPatient)\n                    ->whereKey($previous->registry_record_id)->firstOrFail();\n            }\n            if (!$start->isFuture()) $this->invalid('Укажите дату и время позже текущего момента.', 'telemed_starts_at');\n            if ($clinicId > 0) {\n                if (!$doctor->clinic || !\\App\\Services\\ClinicTelemedicineSettings::enabled($doctor->clinic)) {\n                    $this->invalid('Телемедицинский формат отключён в настройках клиники.', 'telemed_starts_at');\n                }\n                // This path previously checked only the clinic opening time.\n                // Apply the same full doctor shift, vacation and exception check.\n                app(DoctorAppointmentAvailability::class)->assert($doctor, $clinicId, $start, $duration, 'telemedicine');\n            }\n            app(ReceptionController::class)->validateAppointmentWithinClinicSchedule($doctor, $start, appointmentFormat: 'telemedicine');\n            // Preserve the existing same-start conflict policy, with canonical UTC\n            // for known records and the old civil comparison for legacy records.\n            $record = new RegistryRecord();\n            $record->patient_id = $lockedPatient->getKey();\n            $record->doctor_id = $doctor->getKey();\n            $record->clinic_id = $doctor->clinic_id;\n            \\App\\Support\\ClinicAppointmentTime::stamp($record, $start, $clinicId);\n            $storage = $record->getAttributes();\n            $conflict = RegistryRecord::query()->whereNull('deleted_at')\n                ->where(function ($q) use ($storage) {\n                    $q->where('appointment_starts_at_utc', $storage['appointment_starts_at_utc'])\n                        ->orWhere(function ($legacy) use ($storage) {\n                            $legacy->whereNull('appointment_starts_at_utc')->where('for_datetime', $storage['for_datetime']);\n                        });\n                })->where(function ($q) use ($doctor, $lockedPatient) {\n                    $q->where('doctor_id', $doctor->getKey())->orWhere('patient_id', $lockedPatient->getKey());\n                })->exists();\n            if ($conflict) $this->invalid('На это время уже есть запись у врача или пациента.', 'telemed_starts_at');\n            $record->appointment_format = 'telemedicine';\n            $record->appointment = false;\n            $record->setAttribute('appointment_duration_minutes', $duration);\n            $record->save();\n            $this->audit->appendEvent((int) $record->getKey(), (int) $lockedPatient->getKey(),\n                'session_scheduled', 'staff', 'system', (int) $user->getKey(), null,\n                ['doctor_id' => (int) $doctor->getKey(), 'starts_at' => $start->format('Y-m-d H:i:s'),\n                    'starts_at_utc' => $utc->format(\\DateTimeInterface::ATOM),\n                    'appointment_timezone' => $start->getTimezone()->getName(), 'duration_minutes' => $duration],\n                now(), $eventUid);\n            return $record;\n        }, 3);\n    }",
+      "old": "    public function create($user, Patient $patient, array $data): RegistryRecord\n    {\n        $this->authorize($user, $patient);\n        $start = Carbon::createFromFormat('!Y-m-d\\TH:i', $data['telemed_starts_at'], config('app.timezone'));\n        $eventUid = 'tm-schedule-' . strtolower($data['telemed_request_id']);\n        return DB::transaction(function () use ($user, $patient, $data, $start, $eventUid) {\n            $lockedPatient = Patient::query()->whereKey($patient->getKey())->lockForUpdate()->firstOrFail();\n            $this->authorize($user, $lockedPatient);\n            $previous = DB::table('medical_visit_events')->where('event_uid', $eventUid)->first();\n            if ($previous) {\n                $meta = json_decode((string) $previous->details, true) ?: [];\n                abort_unless((int) $previous->patient_id === (int) $patient->getKey()\n                    && (int) $previous->actor_user_id === (int) $user->getKey()\n                    && $previous->event_type === 'session_scheduled'\n                    && (int) ($meta['doctor_id'] ?? 0) === (int) $data['telemed_doctor_id']\n                    && ($meta['starts_at'] ?? null) === $start->format('Y-m-d H:i:s'), 409,\n                    'Этот запрос уже использован с другими параметрами. Обновите страницу.');\n                return $this->journalAppointments($user, $lockedPatient)\n                    ->whereKey($previous->registry_record_id)->firstOrFail();\n            }\n            if (!$start->isFuture()) $this->invalid('Укажите дату и время позже текущего момента.', 'telemed_starts_at');\n            $doctor = $this->doctorQuery($lockedPatient)->whereKey($data['telemed_doctor_id'])\n                ->lockForUpdate()->first();\n            if (!$doctor) $this->invalid('Выбранный врач недоступен в клинике пациента.', 'telemed_doctor_id');\n            // Do not modify patient.doctor_id; the chosen doctor belongs to this appointment only.\n            app(ReceptionController::class)->validateAppointmentWithinClinicSchedule($doctor, $start, appointmentFormat: 'telemedicine');\n            $conflict = RegistryRecord::query()->whereNull('deleted_at')->where('for_datetime', $start)\n                ->where(function ($q) use ($doctor, $lockedPatient) {\n                    $q->where('doctor_id', $doctor->getKey())->orWhere('patient_id', $lockedPatient->getKey());\n                })->exists();\n            if ($conflict) $this->invalid('На это время уже есть запись у врача или пациента.', 'telemed_starts_at');\n            $record = new RegistryRecord();\n            $record->patient_id = $lockedPatient->getKey();\n            $record->doctor_id = $doctor->getKey();\n            $record->clinic_id = $doctor->clinic_id;\n            $record->for_datetime = $start;\n            $record->appointment_format = 'telemedicine';\n            $record->appointment = false;\n            $record->save();\n            $this->audit->appendEvent((int) $record->getKey(), (int) $lockedPatient->getKey(),\n                'session_scheduled', 'staff', 'system', (int) $user->getKey(), null,\n                ['doctor_id' => (int) $doctor->getKey(), 'starts_at' => $start->format('Y-m-d H:i:s')],\n                now(), $eventUid);\n            return $record;\n        }, 3);\n    }",
+      "path": "app/Services/TelemedicineJournalService.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-duration-rule",
+      "method": "store",
+      "new": "'telemed_request_id' => ['required', 'uuid'],\n                'telemed_duration_minutes' => ['bail', 'required', 'integer', 'between:5,480', 'multiple_of:5'],",
+      "old": "'telemed_request_id' => ['required', 'uuid'],",
+      "path": "app/Http/Controllers/Doctors/TelemedicineJournalController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "timezone-journal-duration-messages",
+      "method": "store",
+      "new": "'telemed_request_id.*' => 'Обновите страницу и повторите создание сеанса.',\n                'telemed_duration_minutes.required' => 'Укажите длительность приёма.',\n                'telemed_duration_minutes.integer' => 'Укажите длительность целым числом минут.',\n                'telemed_duration_minutes.between' => 'Длительность приёма должна составлять от 5 до 480 минут.',\n                'telemed_duration_minutes.multiple_of' => 'Укажите длительность с шагом 5 минут.',",
+      "old": "'telemed_request_id.*' => 'Обновите страницу и повторите создание сеанса.',",
+      "path": "app/Http/Controllers/Doctors/TelemedicineJournalController.php"
+    },
+    {
+      "kind": "php_expression",
+      "label": "timezone-journal-duration-old",
+      "method": "store",
+      "new": "$request->only('telemed_doctor_id', 'telemed_starts_at', 'telemed_request_id', 'telemed_duration_minutes')",
+      "old": "$request->only('telemed_doctor_id', 'telemed_starts_at', 'telemed_request_id')",
+      "path": "app/Http/Controllers/Doctors/TelemedicineJournalController.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "timezone-journal-duration-form",
+      "new": "                <div class=\"form-text\">Дата и время вводятся по часовому поясу клиники: {{ $telemedManager['timezone'] }}.</div>\n                <label for=\"mcTmDuration\" class=\"form-label mt-3\">Длительность приёма, мин.</label>\n                <input type=\"number\" class=\"form-control\" id=\"mcTmDuration\" name=\"telemed_duration_minutes\"\n                       value=\"{{ $telemedManager['duration_minutes'] }}\" min=\"5\" max=\"480\" step=\"5\" required>\n                <div class=\"form-text\">Весь приём должен укладываться в рабочую смену врача. График, отпуск и исключения проверяются при сохранении.</div>\n                <div data-appointment-input-zone data-appointment-input-name=\"telemed_starts_at\"\n                     data-clinic-timezone=\"{{ $telemedManager['timezone'] }}\" data-appointment-legacy=\"0\">\n                    <div class=\"small text-muted mt-2\" data-appointment-input-preview role=\"status\" aria-live=\"polite\"></div>\n                    @include('shared.appointment_timezone_control')\n                </div>",
+      "old": "                <div class=\"form-text\">Часовой пояс приложения: {{ $telemedManager['timezone'] }}.</div>",
+      "path": "resources/views/doctors/reception/partials/telemedicine_journal_modals.blade.php"
+    },
+    {
+      "kind": "php_expression",
+      "label": "timezone-acting-current-shift",
+      "method": "explain",
+      "new": "Carbon::now(\\App\\Support\\ClinicAppointmentTime::timezone($clinicId))",
+      "old": "Carbon::now(config('app.timezone', 'UTC'))",
+      "path": "app/Support/TelemedicineJournalAccess.php"
+    },
+    {
+      "kind": "register_provider",
+      "path": "bootstrap/providers.php",
+      "provider": "App\\Providers\\ClinicTelemedicineSessionServiceProvider"
+    },
+    {
+      "kind": "php_replace",
+      "label": "provider-journal-navigation",
+      "method": "index",
+      "new": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );\n        // NORHNAIM_CLINIC_TELEMEDICINE_PROVIDER_V1: navigation only, never create on GET.\n        $visitAuditData = app(\\App\\Services\\TelemedicineProviderSessionService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
+      "old": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "provider-audit-labels",
+      "method": "buildMedicalVisitAuditContext",
+      "new": "            'session_cancelled' => 'Сеанс удалён из расписания',\n            'provider_creation_requested' => 'Запрошено создание встречи',\n            'provider_prepared' => 'Подключение к приёму подготовлено',\n            'provider_prepared_manually' => 'Прикреплена проверенная встреча',\n            'provider_creation_unconfirmed' => 'Результат создания встречи не подтверждён',\n            'provider_opened' => 'Выдана ссылка на видеосвязь',",
+      "old": "            'session_cancelled' => 'Сеанс удалён из расписания',",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
+    },
+    {
+      "anchor": "                    <div class=\"mc-audit-session__timeline-title\">Хронология событий</div>",
+      "kind": "text_insert",
+      "label": "provider-journal-action",
+      "path": "resources/views/doctors/reception/partials/telemedicine_audit_log.blade.php",
+      "position": "before",
+      "snippet": "                    @include('doctors.reception.partials.telemedicine_provider_action')\n"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "provider-audit-source-label",
+      "new": "{{ match ($event['source']) { 'signaling' => 'Сервер WebRTC', 'staff' => 'Управление сеансом', 'patient_link' => 'Приглашение пациента', 'system' => 'Система', default => 'Отметка врача' } }}",
+      "old": "{{ $event['source'] === 'signaling' ? 'Сервер WebRTC' : ($event['source'] === 'staff' ? 'Управление сеансом' : 'Отметка врача') }}",
+      "path": "resources/views/doctors/reception/partials/telemedicine_audit_log.blade.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "provider-gate-claims",
+      "method": "check",
+      "new": "            'registry_record_id' => ['required', 'integer', 'min:1'],\n            'room' => ['nullable', 'string', 'regex:/\\A[A-Za-z0-9_-]{16,100}\\z/'],\n            'appointment_start' => ['nullable', 'integer', 'min:1'],",
+      "old": "            'registry_record_id' => ['required', 'integer', 'min:1'],",
+      "path": "app/Http/Controllers/Doctors/TelemedicineJournalGateController.php"
+    },
+    {
+      "kind": "php_replace",
+      "label": "provider-gate-current-session",
+      "method": "check",
+      "new": "        if ($allowed) {\n            $verified = $validator->validated();\n            $allowed = app(\\App\\Services\\TelemedicineProviderSessionService::class)->signalingAllowed(\n                $record, $verified['room'] ?? null,\n                isset($verified['appointment_start']) ? (int) $verified['appointment_start'] : null\n            );\n        }\n        return response()->json(['allowed' => $allowed])->header('Cache-Control', 'no-store');",
+      "old": "        return response()->json(['allowed' => $allowed])->header('Cache-Control', 'no-store');",
+      "path": "app/Http/Controllers/Doctors/TelemedicineJournalGateController.php"
+    },
+    {
+      "count": 1,
+      "kind": "text_replace",
+      "label": "provider-guard-verified-start-room",
+      "new": "    payload = {'audience': AUDIENCE, 'registry_record_id': appointment_id}\n    # These values came from the verified HMAC invitation, never from browser JSON.\n    appointment_start = claim.get('appointment_start')\n    if appointment_start is not None:\n        room = claim.get('room')\n        if (type(appointment_start) is not int or appointment_start <= 0\n                or not isinstance(room, str) or not 16 <= len(room) <= 100):\n            raise TokenError('Invalid managed appointment invitation')\n        payload['room'] = room\n        payload['appointment_start'] = appointment_start\n    raw = json.dumps(payload, separators=(',', ':')).encode('utf-8')",
+      "old": "    raw = json.dumps({'audience': AUDIENCE, 'registry_record_id': appointment_id},\n                     separators=(',', ':')).encode('utf-8')",
+      "path": "telemedicine/signaling/appointment_guard.py"
+    }
+  ],
+  "prerequisites": [
+    "app/Http/Controllers/Doctors/SettingsBaseController.php",
+    "app/Http/Controllers/Doctors/TelemedicineJournalGateController.php",
+    "app/Http/Middleware/ClinicSettingsAccessMiddleware.php",
+    "app/Http/Middleware/DoctorHardLockMiddleware.php",
+    "app/Services/DoctorAppointmentAvailability.php",
+    "app/Services/MedicalVisitAuditService.php",
+    "app/Services/TelemedicineJournalService.php",
+    "app/Support/HospitalPatientAccess.php",
+    "app/Support/ReceptionAppointmentSchedule.php",
+    "app/Support/TelemedicineJournalAccess.php",
+    "app/Support/ValidatesDoctorAppointmentTime.php",
+    "routes/web.php",
+    "telemedicine/signaling/appointment_guard.py"
+  ],
+  "payload_sha256": "f907c324e2586f41beef89263da6d418bb1f48992f5b21c957ac2b8c5ced90b3",
+  "new_file_sha256": {
+    "app/Http/Controllers/Doctors/ClinicTelemedicineSettingsController.php": "eb1f3a3819780aa1e7ef4a04a555af1aa7d57fe6fdffa68a38bb6761051df792",
+    "app/Http/Controllers/Doctors/TelemedicineProviderSessionController.php": "0dcf9ae77614d9b594ca821db85134c45b5d43c7cb1ea5e8a8278293c3fe0f1e",
+    "app/Http/Controllers/TelemedicineInvitationController.php": "e33b0615f0837f61a78cc8b2d904be94fd7dcd58af945d54b583e227cda37f40",
+    "app/Http/Middleware/EnsureClinicTelemedicineSettings.php": "d5a497cc87855d588f49e92720f5b81ca188ee0e7e9404e19ed6e7573ba45bd6",
+    "app/Providers/ClinicTelemedicineSessionServiceProvider.php": "5091723e499c796badda6a7bf8cefb1f8e7b04da6e93c2fcbdc3d5876d5dd36c",
+    "app/Providers/ClinicTelemedicineSettingsServiceProvider.php": "693263a8d3af2e01d854619b0b981aa8a6de293829a8498f03d58ca19a57d73c",
+    "app/Services/ClinicTelemedicineSettings.php": "020e6655a97a73586e7be81b1047a8cda8eb6f8606bf8fae9464ee552550e94a",
+    "app/Services/TelemedicineProviderSessionService.php": "54cffe929f96c26a9866603182602b325bc8f14498bcd05bee0210b1eab3ee99",
+    "app/Services/TelemedicineProviderTransport.php": "8f95775232fba6d6b5691b8eed535d501aefdf5ddeec0a5616951978e311adcf",
+    "app/Support/ClinicAppointmentTime.php": "696d8c77fe3b6107ea2f782585a58eb6e18bea777aa0a1e0becdda61a3687cae",
+    "app/Support/ClinicTelemedicineSettingsAccess.php": "d2384bb3c21f596e8ceefd11db78c1706a7f402e54d69500303f9887a0f19605",
+    "config/clinic_telemedicine.php": "1db580602f4fead68b74ede909bab5bdb8f7f3444b338059fdf768fedd529d7a",
+    "database/migrations/2026_11_07_000004_add_appointment_timezone_snapshot_to_registry_records_table.php": "f3585c77e6c9eeab54986c47a46360297425a2f84e126093cee1fbe1c7f3a8dd",
+    "database/migrations/2026_11_08_000003_add_telemedicine_settings_and_timezone_to_clinics_table.php": "7d7f834530a86ca8cd7faab3e05f08870a8a623dee455e7276b9442427c2edfa",
+    "database/migrations/2026_11_08_000004_create_telemedicine_provider_sessions_table.php": "0d53fb7c744ebeda91ed17aa86b8d6410c4a137a9578031531c1d809eff628d2",
+    "public/assets/css/clinic_telemedicine_settings.css": "d1ca9e3d817aea5dd841d890cd7d1f828dc92c3b01cf91eb35c13577f18b416c",
+    "public/assets/js/clinic_telemedicine_settings.js": "9125a770e056325ac4ffaf701e378b2ce1b2b8a5d462bb553211fa68bf85b055",
+    "public/css/clinic-telemedicine-session.css": "404eecc9e1fbb10b04f707eff9c71f8bed3b87e31d59a7ef2c50f7a1c0c6822b",
+    "public/js/clinic-appointment-time.js": "51af2865e70a00009ca5de7bd258fb65f3f2590ebab17e7a616f035fe66aab0d",
+    "resources/js/clinic_telemedicine_settings.js": "9125a770e056325ac4ffaf701e378b2ce1b2b8a5d462bb553211fa68bf85b055",
+    "resources/sass/clinic_telemedicine_settings.scss": "d1ca9e3d817aea5dd841d890cd7d1f828dc92c3b01cf91eb35c13577f18b416c",
+    "resources/views/doctors/reception/partials/appointment_timezone_input.blade.php": "ba5c6b0b7f136b89c30c18484c68b63b86a2369c88cb33f688c15cb7f880ab44",
+    "resources/views/doctors/reception/partials/telemedicine_provider_action.blade.php": "96936de91ac6970208b219ca165de1bf4562c2a8908c4c8f8fc95a9d28ab4cbc",
+    "resources/views/doctors/settings/partials/clinic_timezone.blade.php": "bd2a0b963c0a99d11287ea8892a29682aed46bad89adec11942782881c7f370f",
+    "resources/views/doctors/settings/telemedicine.blade.php": "f303fb4b686ed10525400cdf27c62c0554a625eb6aab5ea346eda5fc64128118",
+    "resources/views/doctors/telemedicine/session.blade.php": "89f3bec6f065c9a6d1d6d9d67ec43a7baf56d8f796ded515e9899366ebb1a98b",
+    "resources/views/shared/appointment_timezone_assets.blade.php": "89e23cdac3febdd7c4d2f5bbf0df46616c1baa495323aa8dca777038991000bf",
+    "resources/views/shared/appointment_timezone_control.blade.php": "7fdc1f9a005c5c1997de172b337f52bffa713868d4fcfefb8c95fa23aa640799",
+    "resources/views/shared/appointment_timezone_display.blade.php": "d0faed8c2015abc61041abe8642c3217e5edca472517a0a135ca1b0b355d63a2",
+    "resources/views/telemedicine/invitation.blade.php": "875d30a351af02f134d4ae9f044d307a51d1819de2b9a49342be325c48185305",
+    "resources/views/telemedicine/unavailable.blade.php": "bab8afa85e326f0fb5c5668d2ab47b2fbbc8636ae3c85d90beb64b502a2eba0f",
+    "routes/clinic_telemedicine_sessions.php": "8e96f8f9b6e1cd5208f74e5814ae9c32c14139ec57fa155b650c403396779530",
+    "routes/clinic_telemedicine_settings.php": "f4dc58a4e5abe0ecad097e0a77d695ee282ceb2c87bc79c42c4f8719d71ed6f6"
+  }
+}

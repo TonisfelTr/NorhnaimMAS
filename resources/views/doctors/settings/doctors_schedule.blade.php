@@ -222,6 +222,42 @@
             background: #f1fbfc;
         }
 
+        .doctor-schedule-day-vacations {
+            display: grid;
+            gap: 3px;
+            max-width: 100%;
+            margin-top: 6px;
+        }
+
+        .doctor-schedule-day-vacation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            max-width: 100%;
+            padding: 4px 6px;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            background: #fff1f2;
+            color: #9f2424;
+            font-size: 9px;
+            font-weight: 850;
+            line-height: 1.2;
+        }
+
+        .doctor-schedule-day-vacation span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .doctor-schedule-day-vacation.is-planned {
+            border-color: #f6dfaa;
+            background: #fff9ec;
+            color: #925c0c;
+        }
+
         .doctor-schedule-day-name {
             color: #667085;
             font-size: 11px;
@@ -431,6 +467,81 @@
             cursor: grabbing;
             box-shadow: 0 16px 34px rgba(15, 23, 42, .2);
             transform: none;
+        }
+
+        .doctor-shift-card.is-vacation-planned {
+            outline: 2px dashed #f59e0b;
+            outline-offset: -3px;
+        }
+
+        /* Разовое замещение не должно выглядеть как изменение постоянного графика. */
+        .doctor-shift-card.is-replacement[data-tone] {
+            border-color: #9ecade;
+            border-left-color: #0284c7;
+            background: linear-gradient(135deg, #edf8ff 0%, #fff 100%);
+            cursor: pointer;
+        }
+        .doctor-shift-card.is-replacement.is-manual {
+            border-left-color: #7c3aed;
+        }
+        .doctor-shift-card.is-uncovered[data-tone] {
+            border: 2px dashed #e0a44c;
+            background: #fffaf0;
+            cursor: pointer;
+        }
+        .doctor-shift-card.is-doctor-conflict {
+            outline: 2px solid #f59e0b;
+            outline-offset: -3px;
+        }
+        .doctor-shift-card__replace {
+            position: absolute;
+            top: 5px;
+            right: 34px;
+            display: grid;
+            width: 24px;
+            height: 24px;
+            place-items: center;
+            border: 0;
+            border-radius: 8px;
+            background: rgba(255,255,255,.9);
+            color: #087f8e;
+            font-size: 12px;
+            opacity: 0;
+            z-index: 3;
+        }
+        .doctor-shift-card:hover .doctor-shift-card__replace { opacity: 1; }
+        .doctor-shift-card__replacement-note {
+            overflow: hidden;
+            margin-top: 4px;
+            color: #0369a1;
+            font-size: 10px;
+            font-weight: 800;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .doctor-shift-card.is-manual .doctor-shift-card__replacement-note { color: #6d28d9; }
+        .doctor-shift-card__conflict-note {
+            overflow: hidden;
+            margin-top: 3px;
+            color: #a16207;
+            font-size: 10px;
+            font-weight: 850;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .doctor-replacement-modal-intro {
+            padding: 13px 15px;
+            border: 1px solid #d6ecf0;
+            border-radius: 13px;
+            background: #f4fbfc;
+            color: #344054;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+        .doctor-replacement-manual-hint { margin-top: 10px; color: #64748b; font-size: 12px; }
+        @media (hover:none) {
+            .doctor-shift-card__replace,
+            .doctor-shift-card__edit { opacity: 1; }
         }
 
         .doctor-shift-card[data-tone="blue"] {
@@ -961,6 +1072,9 @@
             <div class="settings-page-header">
                 <div>
                     <h1 class="settings-page-title">Расписание врачей</h1>
+                    {{-- clinic-telemedicine-timezones:timezone-weekly-label:v1:begin --}}
+                    <p class="small text-muted">Все дни и смены указаны по часовому поясу клиники: <strong>{{ $clinicScheduleTimezone }}</strong>.</p>
+                    {{-- clinic-telemedicine-timezones:timezone-weekly-label:v1:end --}}
                     <p class="settings-page-description">
                         Недельный визуальный редактор рабочих смен. Положение блока соответствует времени начала,
                         высота — длительности смены. Одновременные смены раскладываются каскадом — как карты в солитёре, но по горизонтали, поэтому вся неделя остаётся компактной.
@@ -1079,7 +1193,7 @@
                 <div class="doctor-schedule-help">
                     <i class="bi bi-info-circle-fill"></i>
                     <span>
-                        Если несколько сотрудников работают одновременно, их карточки накладываются каскадом со сдвигом вправо. Нажмите на карточку, чтобы поднять её наверх, а на «+N» — чтобы увидеть скрытые смены. Исходные смены загружаются из расписания сотрудников, заданного в кабинетах. Локальные изменения на этой странице пока не записываются в БД.
+                        Значок <i class="bi bi-arrow-left-right"></i> в карточке назначает замещение только на выбранную календарную дату. При утверждённом отпуске И.О. из графика отпусков подставляется автоматически. Редактирование времени обычной смены изменяет повторяющееся недельное расписание, а не один день.
                     </span>
                 </div>
             </section>
@@ -1192,6 +1306,52 @@
         </div>
     </div>
 
+
+    <div class="modal fade doctor-schedule-modal" id="doctorReplacementModal" tabindex="-1"
+         aria-labelledby="doctorReplacementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <div class="settings-panel__subtitle mb-1">Разовое назначение</div>
+                        <h2 class="modal-title" id="doctorReplacementModalLabel">Замещение врача</h2>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="doctor-replacement-modal-intro" id="doctorReplacementDetails"></div>
+                    <div class="mt-3">
+                        <label class="form-label" for="doctorReplacementDoctor">Кто будет принимать пациентов</label>
+                        <select class="form-select" id="doctorReplacementDoctor">
+                            <option value="">Выберите замещающего врача</option>
+                            @foreach(($replacementDoctorOptions ?? []) as $replacementDoctor)
+                                <option value="{{ $replacementDoctor['id'] }}"
+                                        data-speciality="{{ $replacementDoctor['speciality'] }}">
+                                    {{ $replacementDoctor['name'] }} — {{ $replacementDoctor['speciality'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="doctor-replacement-manual-hint" id="doctorReplacementCurrent"></div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label" for="doctorReplacementComment">Комментарий (необязательно)</label>
+                        <textarea class="form-control" id="doctorReplacementComment" maxlength="500"
+                                  rows="2" placeholder="Причина разового замещения"></textarea>
+                    </div>
+                    <div class="alert alert-warning mt-3 mb-0 d-none" id="doctorReplacementWarning"></div>
+                    <div class="alert alert-danger mt-3 mb-0 d-none" id="doctorReplacementError"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger me-auto d-none"
+                            id="doctorReplacementRemove">Снять ручное замещение</button>
+                    <button type="button" class="settings-button settings-button--secondary"
+                            data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="settings-button settings-button--primary"
+                            id="doctorReplacementSave"><i class="bi bi-check2"></i> Назначить</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade doctor-schedule-modal"
          id="doctorOverlapModal"
          tabindex="-1"
@@ -1214,15 +1374,20 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/clinic-appointment-time.js') }}?v=1.0.0"></script>
     <script>
         (() => {
             const MINUTES_PER_PIXEL = 1;
+            {{-- clinic-telemedicine-timezones:timezone-weekly-clock:v1:begin --}}
+            const CLINIC_TIMEZONE = @json($clinicScheduleTimezone);
+            const clinicCivilNow = () => window.ClinicAppointmentTime.civilNow(CLINIC_TIMEZONE);
+            {{-- clinic-telemedicine-timezones:timezone-weekly-clock:v1:end --}}
             const SNAP_MINUTES = 15;
             const DAY_HORIZONTAL_PADDING = 7;
 
             const RAW_CLINIC_SCHEDULE = @json($clinicSchedule ?? []);
             const DOCTOR_SCHEDULE_SAVE_URL =
-                @json(route('doctors.settings.vacation-schedule'));
+                @json(route('doctors.settings.offices.update'));
             const CSRF_TOKEN =
                 document.querySelector('meta[name="csrf-token"]')
                     ?.getAttribute('content')
@@ -1306,8 +1471,15 @@
                 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
             ];
 
-            let currentWeekStart = startOfWeek(new Date());
+            let currentWeekStart = startOfWeek(clinicCivilNow());
             let shifts = @json($doctorShifts ?? []);
+            const doctorVacations = @json($doctorVacations ?? []);
+            const replacementDoctorOptions = @json($replacementDoctorOptions ?? []);
+            const replacementDoctorsById = new Map(
+                replacementDoctorOptions.map(doctor => [Number(doctor.id), doctor])
+            );
+            const manualReplacementReady = @json($manualReplacementReady ?? false);
+            let manualReplacements = @json($manualReplacements ?? []);
             let nextId = Math.max(
                 0,
                 ...shifts.map(item => Number(item.id) || 0)
@@ -1337,6 +1509,18 @@
             const endInput = document.getElementById('doctorShiftEnd');
             const modalError = document.getElementById('doctorShiftError');
             const deleteButton = document.getElementById('deleteDoctorShiftButton');
+            const replacementModalElement = document.getElementById('doctorReplacementModal');
+            const replacementModal = replacementModalElement
+                ? bootstrap.Modal.getOrCreateInstance(replacementModalElement) : null;
+            const replacementDoctorSelect = document.getElementById('doctorReplacementDoctor');
+            const replacementDetails = document.getElementById('doctorReplacementDetails');
+            const replacementCurrent = document.getElementById('doctorReplacementCurrent');
+            const replacementComment = document.getElementById('doctorReplacementComment');
+            const replacementWarning = document.getElementById('doctorReplacementWarning');
+            const replacementError = document.getElementById('doctorReplacementError');
+            const replacementRemove = document.getElementById('doctorReplacementRemove');
+            const replacementSave = document.getElementById('doctorReplacementSave');
+            let replacementTargetShiftId = null;
 
             const overlapModalElement = document.getElementById('doctorOverlapModal');
             const overlapModal = overlapModalElement ? bootstrap.Modal.getOrCreateInstance(overlapModalElement) : null;
@@ -1456,24 +1640,146 @@
             );
 
             function startOfWeek(date) {
-                const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                const day = result.getDay();
+                const result = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+                const day = result.getUTCDay();
                 const diff = day === 0 ? -6 : 1 - day;
-                result.setDate(result.getDate() + diff);
-                result.setHours(0, 0, 0, 0);
+                result.setUTCDate(result.getUTCDate() + diff);
+                result.setUTCHours(0, 0, 0, 0);
                 return result;
             }
 
             function addDays(date, days) {
                 const result = new Date(date);
-                result.setDate(result.getDate() + days);
+                result.setUTCDate(result.getUTCDate() + days);
                 return result;
             }
 
             function isSameDate(a, b) {
-                return a.getFullYear() === b.getFullYear()
-                    && a.getMonth() === b.getMonth()
-                    && a.getDate() === b.getDate();
+                return a.getUTCFullYear() === b.getUTCFullYear()
+                    && a.getUTCMonth() === b.getUTCMonth()
+                    && a.getUTCDate() === b.getUTCDate();
+            }
+
+            function dateKey(date) {
+                return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+            }
+
+            function vacationForDoctor(doctorId, day) {
+                const targetDate = dateKey(addDays(currentWeekStart, day));
+                let plannedVacation = null;
+
+                for (const vacation of doctorVacations) {
+                    if (
+                        Number(vacation.doctor_id) !== Number(doctorId)
+                        || targetDate < vacation.date_from
+                        || targetDate > vacation.date_to
+                    ) {
+                        continue;
+                    }
+
+                    if (vacation.status === 'approved') {
+                        return vacation;
+                    }
+
+                    if (vacation.status === 'planned') {
+                        plannedVacation = vacation;
+                    }
+                }
+
+                return plannedVacation;
+            }
+
+            function vacationForShift(shift) {
+                return vacationForDoctor(shift.doctor_id, Number(shift.day));
+            }
+
+            function manualReplacementForShift(shift) {
+                const date = dateKey(addDays(currentWeekStart, Number(shift.day)));
+                return manualReplacements.find(item =>
+                    item.date === date
+                    && Number(item.office_id) === Number(shift.office_id)
+                    && Number(item.schedule_id) === Number(shift.schedule_id)
+                    && Number(item.base_doctor_id) === Number(shift.doctor_id)
+                ) || null;
+            }
+
+            function projectedShift(base) {
+                const vacation = vacationForShift(base);
+                const manual = manualReplacementForShift(base);
+                let targetDoctorId = 0;
+                let replacementType = '';
+                let substitute = null;
+
+                if (manual) {
+                    targetDoctorId = Number(manual.replacement_doctor_id);
+                    replacementType = 'manual';
+                } else if (vacation?.status === 'approved') {
+                    targetDoctorId = Number(vacation.replacement_id) || 0;
+                    replacementType = 'automatic';
+                }
+
+                if (!replacementType) {
+                    return { ...base, effective_doctor_id: Number(base.doctor_id) };
+                }
+
+                if (replacementType === 'automatic' && targetDoctorId > 0) {
+                    // Автоматический И.О. может не входить в список для ручного выбора.
+                    substitute = replacementDoctorsById.get(targetDoctorId)
+                        || (vacation.replacement ? {
+                            id: targetDoctorId,
+                            name: vacation.replacement,
+                            speciality: vacation.replacement_speciality || base.speciality
+                        } : null);
+                } else {
+                    substitute = replacementDoctorsById.get(targetDoctorId);
+                }
+
+                const substituteVacation = targetDoctorId > 0
+                    ? vacationForDoctor(targetDoctorId, Number(base.day)) : null;
+                if (!targetDoctorId || !substitute || targetDoctorId === Number(base.doctor_id)
+                    || substituteVacation?.status === 'approved') {
+                    return {
+                        ...base,
+                        effective_doctor_id: 0,
+                        is_uncovered: true,
+                        replacement_type: replacementType,
+                        replaced_doctor: base.doctor,
+                        uncovered_reason: substituteVacation?.status === 'approved'
+                            ? 'Назначенный И.О. тоже в отпуске'
+                            : 'Врач в отпуске — замена не назначена'
+                    };
+                }
+
+                return {
+                    ...base,
+                    doctor: substitute.name,
+                    speciality: substitute.speciality || base.speciality,
+                    effective_doctor_id: targetDoctorId,
+                    replacement_type: replacementType,
+                    replaced_doctor: base.doctor,
+                    replacement_comment: manual?.comment || '',
+                    replacement_planned_vacation: substituteVacation?.status === 'planned',
+                };
+            }
+
+            function projectedWeekShifts() {
+                const projected = shifts.map(projectedShift);
+                projected.forEach((shift, index) => {
+                    if (shift.is_uncovered) return;
+                    const overlapping = projected.find((other, otherIndex) =>
+                        index !== otherIndex
+                        && !other.is_uncovered
+                        && Number(other.day) === Number(shift.day)
+                        && Number(other.effective_doctor_id) === Number(shift.effective_doctor_id)
+                        && String(other.office_id) !== String(shift.office_id)
+                        && timeToMinutes(shift.start) < timeToMinutes(other.end)
+                        && timeToMinutes(other.start) < timeToMinutes(shift.end)
+                    );
+                    if (overlapping) {
+                        shift.conflict = `Одновременно работает в каб. ${overlapping.office} (${overlapping.start}–${overlapping.end})`;
+                    }
+                });
+                return projected;
             }
 
             function formatWeekRange(start) {
@@ -1515,26 +1821,26 @@
                     );
 
                 if (sameDate) {
-                    return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} ${rangeStart.getFullYear()}`;
+                    return `${rangeStart.getUTCDate()} ${MONTHS_GENITIVE[rangeStart.getUTCMonth()]} ${rangeStart.getUTCFullYear()}`;
                 }
 
                 const sameMonth =
-                    rangeStart.getMonth()
-                    === rangeEnd.getMonth();
+                    rangeStart.getUTCMonth()
+                    === rangeEnd.getUTCMonth();
 
                 const sameYear =
-                    rangeStart.getFullYear()
-                    === rangeEnd.getFullYear();
+                    rangeStart.getUTCFullYear()
+                    === rangeEnd.getUTCFullYear();
 
                 if (sameMonth && sameYear) {
-                    return `${rangeStart.getDate()}–${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;
+                    return `${rangeStart.getUTCDate()}–${rangeEnd.getUTCDate()} ${MONTHS_GENITIVE[rangeEnd.getUTCMonth()]} ${rangeEnd.getUTCFullYear()}`;
                 }
 
                 if (sameYear) {
-                    return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} – ${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;
+                    return `${rangeStart.getUTCDate()} ${MONTHS_GENITIVE[rangeStart.getUTCMonth()]} – ${rangeEnd.getUTCDate()} ${MONTHS_GENITIVE[rangeEnd.getUTCMonth()]} ${rangeEnd.getUTCFullYear()}`;
                 }
 
-                return `${rangeStart.getDate()} ${MONTHS_GENITIVE[rangeStart.getMonth()]} ${rangeStart.getFullYear()} – ${rangeEnd.getDate()} ${MONTHS_GENITIVE[rangeEnd.getMonth()]} ${rangeEnd.getFullYear()}`;
+                return `${rangeStart.getUTCDate()} ${MONTHS_GENITIVE[rangeStart.getUTCMonth()]} ${rangeStart.getUTCFullYear()} – ${rangeEnd.getUTCDate()} ${MONTHS_GENITIVE[rangeEnd.getUTCMonth()]} ${rangeEnd.getUTCFullYear()}`;
             }
 
             function timeToMinutes(value) {
@@ -1715,7 +2021,7 @@
                     .querySelectorAll('.doctor-schedule-day-column')
                     .forEach(node => node.remove());
 
-                const today = new Date();
+                const today = clinicCivilNow();
 
                 /*
                  * Закрытые дни вообще не участвуют в сетке:
@@ -1756,6 +2062,7 @@
 
                     head.className =
                         `doctor-schedule-day-head${isToday ? ' is-today' : ''}`;
+                    head.dataset.day = String(day);
 
                     head.innerHTML = `
                         <div>
@@ -1764,7 +2071,7 @@
                             </div>
 
                             <div class="doctor-schedule-day-date">
-                                ${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]}
+                                ${date.getUTCDate()} ${MONTHS_GENITIVE[date.getUTCMonth()]}
                             </div>
 
                             <div class="doctor-schedule-day-hours">
@@ -1852,13 +2159,72 @@
                 const speciality = specialityFilter.value;
                 const office = officeFilter.value;
 
-                const haystack = `${shift.doctor} ${shift.speciality} ${shift.office}`.toLowerCase();
+                const haystack = `${shift.doctor} ${shift.replaced_doctor || ''} ${shift.speciality} ${shift.office}`.toLowerCase();
 
                 if (query && !haystack.includes(query)) return false;
                 if (speciality && shift.speciality !== speciality) return false;
                 if (office && shift.office !== office) return false;
 
                 return true;
+            }
+
+            function shiftIsAvailable(shift) {
+                return matchesFilters(shift) && !shift.is_uncovered;
+            }
+
+            function renderVacationDayHeaders() {
+                scheduleHeader
+                    .querySelectorAll('.doctor-schedule-day-vacations')
+                    .forEach(node => node.remove());
+
+                for (let day = 0; day < 7; day++) {
+                    const head = scheduleHeader.querySelector(
+                        `.doctor-schedule-day-head[data-day="${day}"]`
+                    );
+                    if (!head) continue;
+
+                    const notedDoctors = new Set();
+                    const notes = [];
+                    shifts.forEach(shift => {
+                        if (Number(shift.day) !== day || !matchesFilters(shift)) return;
+                        const vacation = vacationForShift(shift);
+                        const doctorKey = String(shift.doctor_id);
+                        if (!vacation || notedDoctors.has(doctorKey)) return;
+                        notedDoctors.add(doctorKey);
+                        notes.push({ shift, vacation });
+                    });
+                    if (!notes.length) continue;
+
+                    const container = document.createElement('div');
+                    container.className = 'doctor-schedule-day-vacations';
+                    notes.slice(0, 2).forEach(({ shift, vacation }) => {
+                        const chip = document.createElement('div');
+                        const approved = vacation.status === 'approved';
+                        chip.className = 'doctor-schedule-day-vacation'
+                            + (approved ? '' : ' is-planned');
+                        const symbol = document.createElement('i');
+                        symbol.className = approved ? 'bi bi-suitcase2' : 'bi bi-calendar-event';
+                        const name = document.createElement('span');
+                        name.textContent = `${shift.doctor} — ${approved ? 'в отпуске' : 'отпуск запланирован'}`;
+                        const effective = projectedShift(shift);
+                        chip.title = `${shift.doctor}: ${vacation.date_from} — ${vacation.date_to}`
+                            + (effective.replacement_type && !effective.is_uncovered
+                                ? `; принимает: ${effective.doctor} (${effective.replacement_type === 'manual' ? 'вручную' : 'автоматически'})`
+                                : '; замещение не назначено');
+                        chip.append(symbol, name);
+                        container.appendChild(chip);
+                    });
+
+                    if (notes.length > 2) {
+                        const extra = document.createElement('div');
+                        extra.className = 'doctor-schedule-day-vacation';
+                        extra.textContent = `Ещё сотрудников в отпуске: ${notes.length - 2}`;
+                        extra.title = notes.slice(2).map(item => item.shift.doctor).join(', ');
+                        container.appendChild(extra);
+                    }
+
+                    head.firstElementChild?.appendChild(container);
+                }
             }
 
             function shortDoctorName(fullName) {
@@ -1875,14 +2241,21 @@
 
 
             function createCard(shift, layout = null) {
-                const dayStartMinutes = TIMELINE_START_MINUTES;
-                const top = (timeToMinutes(shift.start) - dayStartMinutes) / MINUTES_PER_PIXEL;
+                const top = (timeToMinutes(shift.start) - TIMELINE_START_MINUTES) / MINUTES_PER_PIXEL;
                 const height = (timeToMinutes(shift.end) - timeToMinutes(shift.start)) / MINUTES_PER_PIXEL;
                 const hasLayout = !!layout;
                 const left = hasLayout ? layout.left : DAY_HORIZONTAL_PADDING;
-                const widthPx = hasLayout
-                    ? layout.width
+                const widthPx = hasLayout ? layout.width
                     : `calc(100% - ${DAY_HORIZONTAL_PADDING * 2}px)`;
+                const widthValue = typeof widthPx === 'number' ? widthPx : 220;
+                const compact = widthValue < 124;
+                const tiny = widthValue < 94;
+                const hideSpeciality = widthValue < 120 || height < 56;
+                const hideMeta = widthValue < 104 || height < 48;
+                const doctorClass = tiny
+                    ? 'doctor-shift-card__doctor doctor-shift-card__doctor--tiny'
+                    : compact ? 'doctor-shift-card__doctor doctor-shift-card__doctor--compact'
+                        : 'doctor-shift-card__doctor';
 
                 const card = document.createElement('article');
                 card.className = `doctor-shift-card${hasLayout ? ' is-stacked' : ''}`;
@@ -1896,69 +2269,110 @@
                     card.style.zIndex = String(layout.zIndex);
                 }
 
-                if (
-                    hasLayout
-                    && activeShiftId === Number(shift.id)
-                ) {
+                if (shift.is_uncovered) {
+                    card.classList.add('is-uncovered');
+                    card.innerHTML = `
+                        <button type="button" class="doctor-shift-card__edit" title="Назначить замещающего врача">
+                            <i class="bi bi-person-plus"></i>
+                        </button>
+                        <div class="doctor-shift-card__body">
+                            <div class="doctor-shift-card__doctor">${escapeHtml(shift.replaced_doctor)}</div>
+                            <div class="doctor-shift-card__replacement-note" style="color:#a16207">
+                                <i class="bi bi-exclamation-triangle"></i> ${escapeHtml(shift.uncovered_reason)}
+                            </div>
+                            <div class="doctor-shift-card__meta">
+                                <span>каб. ${escapeHtml(shift.office)}</span>
+                                <span>${escapeHtml(shift.start)}–${escapeHtml(shift.end)}</span>
+                            </div>
+                        </div>`;
+                    card.querySelector('.doctor-shift-card__edit').addEventListener('click', event => {
+                        event.stopPropagation();
+                        openReplacementModal(shift.id);
+                    });
+                    card.addEventListener('click', () => openReplacementModal(shift.id));
+                    card.addEventListener('dblclick', event => event.stopPropagation());
+                    return card;
+                }
+
+                const isReplacement = Boolean(shift.replacement_type);
+                if (isReplacement) {
+                    card.classList.add('is-replacement');
+                    if (shift.replacement_type === 'manual') card.classList.add('is-manual');
+                } else {
+                    const planned = vacationForShift(shift);
+                    if (planned?.status === 'planned') {
+                        card.classList.add('is-vacation-planned');
+                        card.title = `Запланирован отпуск: ${planned.date_from} — ${planned.date_to}`;
+                    }
+                }
+                if (shift.replacement_planned_vacation) {
+                    card.classList.add('is-vacation-planned');
+                    card.title = 'У замещающего врача запланирован отпуск на эту дату.';
+                }
+                if (shift.conflict) {
+                    card.classList.add('is-doctor-conflict');
+                    card.title = shift.conflict;
+                }
+                if (hasLayout && activeShiftId === Number(shift.id)) {
                     card.classList.add('is-active');
                     card.style.zIndex = '100';
                 }
 
-                const widthValue = typeof widthPx === 'number' ? widthPx : 220;
-                const compact = widthValue < 124;
-                const tiny = widthValue < 94;
-                const hideSpeciality = widthValue < 120 || height < 56;
-                const hideMeta = widthValue < 104 || height < 48;
-                const doctorClass = tiny
-                    ? 'doctor-shift-card__doctor doctor-shift-card__doctor--tiny'
-                    : compact
-                        ? 'doctor-shift-card__doctor doctor-shift-card__doctor--compact'
-                        : 'doctor-shift-card__doctor';
-
                 card.innerHTML = `
-                    <button type="button" class="doctor-shift-card__edit" title="Редактировать">
-                        <i class="bi bi-pencil"></i>
+                    <button type="button" class="doctor-shift-card__edit"
+                            title="${isReplacement ? 'Редактировать замещение' : 'Изменить постоянную смену'}">
+                        <i class="bi ${isReplacement ? 'bi-arrow-left-right' : 'bi-pencil'}"></i>
                     </button>
+                    ${isReplacement ? '' : `<button type="button" class="doctor-shift-card__replace"
+                        title="Назначить замещение только на ${dateKey(addDays(currentWeekStart, shift.day))}">
+                        <i class="bi bi-arrow-left-right"></i></button>`}
                     <div class="doctor-shift-card__body">
                         <div class="${doctorClass}">${escapeHtml(compact ? shortDoctorName(shift.doctor) : shift.doctor)}</div>
                         <div class="doctor-shift-card__speciality${hideSpeciality ? ' is-hidden' : ''}">${escapeHtml(shift.speciality)}</div>
+                        ${isReplacement ? `<div class="doctor-shift-card__replacement-note">
+                            <i class="bi bi-person-check"></i> Замещает ${escapeHtml(shift.replaced_doctor)} · ${shift.replacement_type === 'manual' ? 'вручную' : 'по отпуску'}
+                        </div>` : ''}
                         <div class="doctor-shift-card__meta${hideMeta ? ' is-hidden' : ''}">
                             <span><i class="bi bi-door-open"></i> каб. ${escapeHtml(shift.office)}</span>
-                            <span class="doctor-shift-card__time"><i class="bi bi-clock"></i> ${shift.start}–${shift.end}</span>
+                            <span class="doctor-shift-card__time"><i class="bi bi-clock"></i> ${escapeHtml(shift.start)}–${escapeHtml(shift.end)}</span>
                         </div>
+                        ${shift.conflict ? `<div class="doctor-shift-card__conflict-note">
+                            <i class="bi bi-exclamation-triangle"></i> ${escapeHtml(shift.conflict)}
+                        </div>` : ''}
                     </div>
-                    <div class="doctor-shift-card__resize" title="Изменить длительность"></div>
+                    ${isReplacement ? '' : '<div class="doctor-shift-card__resize" title="Изменить длительность"></div>'}
                 `;
 
                 card.querySelector('.doctor-shift-card__edit').addEventListener('click', event => {
                     event.stopPropagation();
-
                     if (hasLayout) {
                         activeShiftId = Number(shift.id);
                         elevateStackCard(card);
                     }
-
-                    openEditModal(shift.id);
+                    if (isReplacement) openReplacementModal(shift.id);
+                    else openEditModal(shift.id);
                 });
-
+                card.querySelector('.doctor-shift-card__replace')?.addEventListener('click', event => {
+                    event.stopPropagation();
+                    openReplacementModal(shift.id);
+                });
                 card.addEventListener('dblclick', event => {
                     if (!event.target.closest('.doctor-shift-card__resize')) {
-                        openEditModal(shift.id);
+                        if (isReplacement) openReplacementModal(shift.id);
+                        else openEditModal(shift.id);
                     }
                 });
-
                 card.addEventListener('click', event => {
                     event.stopPropagation();
-
                     if (hasLayout) {
                         activeShiftId = Number(shift.id);
                         elevateStackCard(card);
                     }
                 });
-
-                card.addEventListener('pointerdown', startDrag);
-                card.querySelector('.doctor-shift-card__resize').addEventListener('pointerdown', startResize);
-
+                if (!isReplacement) {
+                    card.addEventListener('pointerdown', startDrag);
+                    card.querySelector('.doctor-shift-card__resize')?.addEventListener('pointerdown', startResize);
+                }
                 return card;
             }
 
@@ -2006,7 +2420,7 @@
                 if (!overlapModal || !overlapList) return;
 
                 const date = addDays(currentWeekStart, day);
-                overlapModalTitle.textContent = `${WEEK_DAYS[day]}, ${date.getDate()} ${MONTHS_GENITIVE[date.getMonth()]} · ${minutesToTime(group.start)}–${minutesToTime(group.end)}`;
+                overlapModalTitle.textContent = `${WEEK_DAYS[day]}, ${date.getUTCDate()} ${MONTHS_GENITIVE[date.getUTCMonth()]} · ${minutesToTime(group.start)}–${minutesToTime(group.end)}`;
 
                 overlapList.innerHTML = group.shifts
                     .slice()
@@ -2174,8 +2588,9 @@
 
             function renderShifts() {
                 document.querySelectorAll('.doctor-shift-card, .doctor-shift-cluster, .doctor-schedule-empty-day').forEach(node => node.remove());
+                renderVacationDayHeaders();
 
-                const visibleShifts = shifts.filter(matchesFilters);
+                const visibleShifts = projectedWeekShifts().filter(matchesFilters);
                 const visibleByDay = Array.from({ length: 7 }, () => 0);
 
                 for (let day = 0; day < 7; day++) {
@@ -2202,7 +2617,14 @@
                     const empty = document.createElement('div');
                     empty.className = 'doctor-schedule-empty-day';
 
-                    empty.textContent = 'Нет смен';
+                    const absentHere = shifts.some(shift =>
+                        Number(shift.day) === day
+                        && matchesFilters(shift)
+                        && vacationForShift(shift)?.status === 'approved'
+                    );
+                    empty.textContent = absentHere
+                        ? 'Нет доступных смен — отпуск'
+                        : 'Нет смен';
                     column.appendChild(empty);
                 });
 
@@ -2213,14 +2635,14 @@
             function renderCurrentTimeLine() {
                 document.querySelectorAll('.doctor-schedule-now-line').forEach(node => node.remove());
 
-                const now = new Date();
+                const now = clinicCivilNow();
                 const weekStart = startOfWeek(now);
                 if (!isSameDate(weekStart, currentWeekStart)) return;
 
-                let day = now.getDay();
+                let day = now.getUTCDay();
                 day = day === 0 ? 6 : day - 1;
 
-                const minutes = now.getHours() * 60 + now.getMinutes();
+                const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
                 const work = clinicDaySchedule(day);
 
                 if (
@@ -2241,8 +2663,8 @@
             }
 
             function updateStats() {
-                const visible = shifts.filter(matchesFilters);
-                const doctors = new Set(visible.map(item => item.doctor));
+                const visible = projectedWeekShifts().filter(shiftIsAvailable);
+                const doctors = new Set(visible.map(item => item.effective_doctor_id));
                 const offices = new Set(visible.map(item => item.office));
                 const minutes = visible.reduce((sum, item) => sum + timeToMinutes(item.end) - timeToMinutes(item.start), 0);
 
@@ -2363,6 +2785,153 @@
                 );
             }
 
+            function showReplacementError(message) {
+                if (!replacementError) return;
+                replacementError.textContent = String(message || 'Не удалось сохранить замещение.');
+                replacementError.classList.remove('d-none');
+            }
+
+            function replacementCandidateWarning() {
+                if (!replacementWarning) return;
+                replacementWarning.classList.add('d-none');
+                replacementWarning.textContent = '';
+
+                const base = shifts.find(item => Number(item.id) === replacementTargetShiftId);
+                const candidateId = Number(replacementDoctorSelect?.value || 0);
+                if (!base || !candidateId) return;
+
+                let message = '';
+                if (candidateId === Number(base.doctor_id)) {
+                    message = 'Врач не может замещать самого себя.';
+                } else if (vacationForDoctor(candidateId, Number(base.day))?.status === 'approved') {
+                    message = 'Выбранный врач находится в утверждённом отпуске на эту дату.';
+                } else {
+                    const conflict = projectedWeekShifts().find(shift =>
+                        Number(shift.id) !== Number(base.id)
+                        && Number(shift.day) === Number(base.day)
+                        && !shift.is_uncovered
+                        && Number(shift.effective_doctor_id) === candidateId
+                        && timeToMinutes(shift.start) < timeToMinutes(base.end)
+                        && timeToMinutes(base.start) < timeToMinutes(shift.end)
+                    );
+                    if (conflict) {
+                        message = `Врач уже работает в каб. ${conflict.office} (${conflict.start}–${conflict.end}). Совпадающее назначение не сохранится.`;
+                    }
+                }
+                if (message) {
+                    replacementWarning.textContent = message;
+                    replacementWarning.classList.remove('d-none');
+                }
+            }
+
+            function openReplacementModal(id) {
+                if (!manualReplacementReady) {
+                    showScheduleNotice('Сначала выполните миграцию таблицы разовых замещений: php artisan migrate.', 'error');
+                    return;
+                }
+                const base = shifts.find(item => Number(item.id) === Number(id));
+                if (!base || !base.schedule_id || !base.office_id) {
+                    showScheduleNotice('Не найдена исходная смена для замещения.', 'error');
+                    return;
+                }
+                replacementTargetShiftId = Number(base.id);
+                const dayDate = addDays(currentWeekStart, Number(base.day));
+                const vacation = vacationForShift(base);
+                const manual = manualReplacementForShift(base);
+
+                if (replacementDetails) {
+                    replacementDetails.textContent = `${base.doctor} · кабинет №${base.office} · ${dayDate.toLocaleDateString('ru-RU')} · ${base.start}–${base.end}. Замещение будет действовать только в этот день.`;
+                }
+                if (replacementCurrent) {
+                    replacementCurrent.textContent = manual
+                        ? 'Сейчас действует ручное замещение. Его можно изменить или снять.'
+                        : vacation?.status === 'approved'
+                            ? (vacation.replacement
+                                ? `По утверждённому отпуску автоматически назначен И.О.: ${vacation.replacement}.`
+                                : 'Отпуск утверждён, И.О. не назначен.')
+                            : 'Разовое замещение не влияет на постоянный график этого врача.';
+                }
+                if (replacementDoctorSelect) {
+                    replacementDoctorSelect.value = manual
+                        ? String(manual.replacement_doctor_id)
+                        : '';
+                    replacementDoctorSelect.querySelectorAll('option').forEach(option => {
+                        option.disabled = option.value !== ''
+                            && Number(option.value) === Number(base.doctor_id);
+                    });
+                }
+                if (replacementComment) replacementComment.value = manual?.comment || '';
+                replacementRemove?.classList.toggle('d-none', !manual);
+                replacementError?.classList.add('d-none');
+                replacementCandidateWarning();
+                replacementModal?.show();
+            }
+
+            async function persistManualReplacement(action) {
+                const base = shifts.find(item => Number(item.id) === replacementTargetShiftId);
+                if (!base) return;
+                replacementError?.classList.add('d-none');
+                const doctorId = Number(replacementDoctorSelect?.value || 0);
+                if (action === 'replacement-save' && (!doctorId || doctorId === Number(base.doctor_id))) {
+                    showReplacementError('Выберите другого врача из списка.');
+                    return;
+                }
+                replacementSave.disabled = true;
+                replacementRemove.disabled = true;
+                const shiftDate = dateKey(addDays(currentWeekStart, Number(base.day)));
+                try {
+                    const response = await fetch(DOCTOR_SCHEDULE_SAVE_URL, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': CSRF_TOKEN,
+                        },
+                        body: JSON.stringify({
+                            _schedule_editor: 'doctor-shift-v1', action,
+                            office_id: base.office_id,
+                            schedule_id: base.schedule_id,
+                            shift_date: shiftDate,
+                            replacement_doctor_id: doctorId || null,
+                            comment: replacementComment?.value || '',
+                        }),
+                    });
+                    const payload = await response.json().catch(() => ({}));
+                    if (!response.ok) throw new Error(scheduleErrorMessage(payload));
+
+                    manualReplacements = manualReplacements.filter(item =>
+                        !(Number(item.office_id) === Number(base.office_id)
+                            && item.date === shiftDate)
+                    );
+                    if (action === 'replacement-save') {
+                        manualReplacements.push({
+                            office_id: base.office_id,
+                            schedule_id: base.schedule_id,
+                            base_doctor_id: base.doctor_id,
+                            replacement_doctor_id: doctorId,
+                            date: shiftDate,
+                            comment: replacementComment?.value || '',
+                        });
+                    }
+                    replacementModal?.hide();
+                    renderShifts();
+                    showScheduleNotice(action === 'replacement-delete'
+                        ? 'Ручное замещение снято. Действует график отпусков или обычный график.'
+                        : 'Разовое замещение сохранено на выбранную дату.');
+                } catch (error) {
+                    showReplacementError(error?.message || 'Не удалось сохранить замещение.');
+                } finally {
+                    replacementSave.disabled = false;
+                    replacementRemove.disabled = false;
+                }
+            }
+
+            replacementDoctorSelect?.addEventListener('change', replacementCandidateWarning);
+            replacementSave?.addEventListener('click', () => persistManualReplacement('replacement-save'));
+            replacementRemove?.addEventListener('click', () => persistManualReplacement('replacement-delete'));
+
             async function persistScheduleShift(
                 shift,
                 action = 'save'
@@ -2379,6 +2948,7 @@
                             'X-CSRF-TOKEN': CSRF_TOKEN
                         },
                         body: JSON.stringify({
+                            _schedule_editor: 'doctor-shift-v1',
                             action,
                             schedule_id:
                                 shift?.schedule_id
@@ -2392,6 +2962,9 @@
                             day:
                                 shift?.day
                                 ?? null,
+                            date: action === 'delete'
+                                ? null
+                                : dateKey(addDays(currentWeekStart, Number(shift.day))),
                             start:
                                 shift?.start
                                 || null,
@@ -2615,6 +3188,14 @@
                     end
                 };
 
+                const overlappingVacation = vacationForShift(payload);
+                if (overlappingVacation?.status === 'approved') {
+                    modalError.textContent =
+                        `Утверждённый отпуск с ${overlappingVacation.date_from} по ${overlappingVacation.date_to}. На эту дату смену назначить нельзя.`;
+                    modalError.classList.remove('d-none');
+                    return;
+                }
+
                 modalError.classList.add(
                     'd-none'
                 );
@@ -2808,6 +3389,7 @@
 
                     if (
                         candidateSchedule.enabled
+                        && vacationForDoctor(dragging.shift.doctor_id, candidateDay)?.status !== 'approved'
                         && dragging.duration
                             <= candidateSchedule.to - candidateSchedule.from
                     ) {
@@ -3161,7 +3743,7 @@
             });
 
             document.getElementById('todayWeekButton')?.addEventListener('click', () => {
-                currentWeekStart = startOfWeek(new Date());
+                currentWeekStart = startOfWeek(clinicCivilNow());
                 renderAll();
             });
 

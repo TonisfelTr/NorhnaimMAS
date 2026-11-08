@@ -335,6 +335,15 @@
             background: #f7fafc;
         }
 
+        .district-doctor-vacation.is-approved {
+            border-color: #b7e4cf;
+            background: #f1fbf6;
+        }
+
+        .district-doctor-vacation.is-approved .district-doctor-vacation__status {
+            color: #24724e;
+        }
+
         .district-doctor-vacation__status {
             display: flex;
             align-items: center;

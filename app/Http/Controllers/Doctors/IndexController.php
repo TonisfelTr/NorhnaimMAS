@@ -78,9 +78,17 @@ class IndexController extends Controller
         // Для врача режим всегда задаёт clinic_type его клиники.
         // Только специальный debug-admin может переключать рабочий стол,
         // поскольку у него нет собственной клиники.
-        $workbenchMode = $isAdmin
-            ? ($input['mode'] ?? 'inpatient')
-            : ($isInpatient ? 'inpatient' : 'outpatient');
+        $workbenchMode = $isInpatient ? 'inpatient' : 'outpatient';
+
+        if ($isAdmin) {
+            // Специальный debug-admin может выбирать оба рабочих стола.
+            // Его последний выбор сохраняется в серверной Laravel-сессии.
+            $savedMode = $request->session()->get('norhnaim.doctors.workbench_mode');
+            $workbenchMode = $input['mode']
+                ?? (in_array($savedMode, ['inpatient', 'outpatient'], true) ? $savedMode : 'outpatient');
+
+            $request->session()->put('norhnaim.doctors.workbench_mode', $workbenchMode);
+        }
 
         // Администратор-отладчик не привязан к одной клинике: выбирает клинику
         // для каждого действия в модальном окне; это не назначение врача.
@@ -123,6 +131,14 @@ class IndexController extends Controller
         // Амбулаторный рабочий стол не делает запросов к госпитализациям.
         // Его собственные показатели будут реализованы отдельно.
         if ($workbenchMode === 'outpatient') {
+            $outpatientDashboard = app(\App\Support\OutpatientDashboard::class)->build(
+                $request,
+                $isAdmin,
+                $doctor,
+                $clinicId,
+                $quickActionOutpatientClinics
+            );
+
             return view('doctors.index', [
                 'isAdmin' => $isAdmin,
                 'isInpatient' => $isInpatient,
@@ -130,10 +146,7 @@ class IndexController extends Controller
                 'tab' => 'overview',
                 'quickActionInpatientClinics' => $quickActionInpatientClinics,
                 'quickActionOutpatientClinics' => $quickActionOutpatientClinics,
-                'workbenchClinicName' => $workbenchClinicName,
-                'workbenchParentName' => $workbenchParentName,
-                'workbenchInstitutionTitle' => $workbenchInstitutionTitle,
-                'workbenchInstitutionParent' => $workbenchInstitutionParent,
+                'outpatientDashboard' => $outpatientDashboard,
             ]);
         }
 

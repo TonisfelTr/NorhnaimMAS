@@ -3,52 +3,37 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use App\Jobs\BalanceTransactionJob;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
-    protected function beforeSave(): void
+    protected ?bool $hasDatabaseTransactions = true;
+
+    private array $doctorFormData = [];
+
+    protected function mutateFormDataBeforeFill(array $data): array
     {
-        if (!empty($this->data['password'])) {
-            $this->data['password'] = Hash::make($this->data['password']);
-        } else {
-            unset($this->data['password']);
-        }
-
-        $originalBalance = $this->record->balance;
-        $newBalance = $this->data['balance'] ?? $originalBalance;
-
-        if ($newBalance != $originalBalance) {
-            DB::transaction(function () use ($originalBalance, $newBalance) {
-                DB::table('balance_transactions')->insert([
-                    'user_id' => $this->record->id,
-                    'reason' => "Изменение баланса администратором " . (Auth::user()->login ?? 'Admin'),
-                    'old_balance' => $originalBalance,
-                    'new_balance' => $newBalance,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-
-                Log::info("Транзакция баланса записана напрямую: $originalBalance -> $newBalance");
-            });
-        } else {
-            Log::info("Баланс не изменился, транзакция не записана.");
-        }
+        return array_merge($data, UserResource::doctorFormValues($this->record));
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $this->doctorFormData = UserResource::pullDoctorFields($data);
+
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        // Updating the existing user's doctor profile. Does not create duplicates.
+        UserResource::saveDoctorProfile($this->record, $this->doctorFormData);
+    }
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        return [Actions\DeleteAction::make()];
     }
 }

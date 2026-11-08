@@ -1,0 +1,164 @@
+/* Paper form 148-1/у-04(л), Appendix 2 to Ministry of Health Order 1094н.
+   Browser print markup; no simulated signatures, seals or barcode. */
+:root {
+    color-scheme: light;
+    --bp-page-width: 287mm;
+    --bp-page-height: 199mm;
+    --bp-column-gap: 5mm;
+    --bp-font-size: 8pt;
+}
+* { box-sizing: border-box; }
+body.bp-print-document { margin: 0; background: #e9edf1; color: #111; }
+.bp-toolbar { max-width: 1200px; margin: 24px auto; padding: 22px 26px; border: 1px solid #cad3dc; border-radius: 10px; background: white; font: 15px/1.45 Arial, sans-serif; }
+.bp-toolbar h1 { margin: 0 0 6px; font-size: 21px; }
+.bp-toolbar p { margin: 6px 0; }
+.bp-toolbar__heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.bp-print-button { flex-shrink: 0; border: 1px solid #006b7f; border-radius: 6px; padding: 11px 18px; background: #007d91; color: white; font: 600 15px Arial, sans-serif; cursor: pointer; }
+.bp-print-button:disabled { opacity: .5; cursor: not-allowed; }
+.bp-print-button:focus-visible, .bp-print-settings select:focus-visible { outline: 3px solid #3fa5d4; outline-offset: 3px; }
+.bp-print-settings { margin-top: 18px; padding-top: 15px; border-top: 1px solid #dfe4e8; }
+.bp-print-settings label { margin-right: 8px; font-weight: 600; }
+.bp-print-settings select { padding: 7px; border: 1px solid #9ba9b4; border-radius: 4px; background: white; font: inherit; }
+.bp-toolbar__note { font-size: 13px; color: #46515c; }
+.bp-print-notice { padding: 11px 14px; background: #fff3d5; border: 1px solid #d6a239; border-radius: 5px; }
+.bp-print-notice[hidden] { display: none; }
+.bp-pages { margin: 0 auto 30px; width: 297mm; }
+.bp-sheet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--bp-column-gap); width: 297mm; height: 210mm; margin: 0 auto 24px; padding: 5mm; background: #fff; box-shadow: 0 2px 9px #0002; }
+.bp-form { min-width: 0; width: 100%; height: var(--bp-page-height); font: var(--bp-font-size)/1.12 "Times New Roman", "Liberation Serif", serif; }
+.bp-form__content { display: flow-root; width: 100%; overflow-wrap: anywhere; }
+.bp-heading { display: grid; grid-template-columns: 1fr .6fr 1.4fr; align-items: start; column-gap: 2mm; margin-bottom: 1.2mm; font-size: 7.25pt; }
+.bp-approval { text-align: center; }
+.bp-barcode-space { min-height: 10mm; text-align: center; padding-top: 2mm; font-size: 7pt; }
+.bp-stamp-block { margin-top: .5mm; }
+.bp-stamp-line { display: flex; justify-content: space-between; align-items: center; gap: 1mm; }
+.bp-stamp-code { display: inline-flex; align-items: center; gap: 1mm; flex-shrink: 0; }
+.bp-organization-name { font-weight: bold; margin-top: .4mm; }
+.bp-organization-details { font-size: 7.5pt; }
+.bp-ogrn-line { display: flex; align-items: center; gap: 1mm; margin-top: .5mm; }
+.bp-ogrn-label { min-width: 11mm; font-size: 7pt; }
+.bp-cells { display: inline-flex; border-left: .2mm solid #111; border-top: .2mm solid #111; border-bottom: .2mm solid #111; vertical-align: middle; }
+.bp-cell { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; min-width: 3.4mm; min-height: 3.6mm; padding: .1mm .25mm; border-right: .2mm solid #111; font: 8pt/1 "Courier New", monospace; }
+.bp-cells--small .bp-cell { min-width: 3mm; min-height: 3mm; font-size: 7.5pt; }
+.bp-form-code { text-align: right; font-size: 7pt; margin: 0 0 .8mm; }
+.bp-benefit-codes { border-collapse: collapse; width: 100%; table-layout: fixed; margin-bottom: 1mm; font-size: 7.5pt; }
+.bp-benefit-codes td { border: .2mm solid #111; padding: 1mm; vertical-align: top; }
+.bp-col-category { width: 19%; }
+.bp-col-diagnosis { width: 22%; }
+.bp-col-funding { width: 37%; }
+.bp-col-payment { width: 22%; }
+.bp-benefit-codes .bp-cells { display: flex; width: max-content; max-width: 100%; margin-top: 3mm; }
+.bp-benefit-codes .bp-cell { min-width: 0; width: 3.8mm; }
+.bp-cells--category .bp-cell { width: 5mm; }
+.bp-cells--diagnosis .bp-cell { width: 3.6mm; }
+.bp-underlined { text-decoration: underline; text-decoration-thickness: .3mm; text-underline-offset: .4mm; font-weight: bold; }
+.bp-recipe-number { display: flex; align-items: baseline; justify-content: space-between; gap: 1mm; margin: 1.4mm 0; }
+.bp-recipe-number > strong { font-size: 9pt; }
+.bp-recipe-number > span { min-width: 0; }
+.bp-line-value { display: inline; border-bottom: .2mm solid #111; padding: 0 .6mm; white-space: pre-wrap; }
+.bp-patient-line { display: flex; align-items: flex-end; gap: 2mm; margin-bottom: .8mm; }
+.bp-patient-name { flex: 1; min-width: 0; }
+.bp-birth-date { flex: 0 0 25mm; }
+.bp-value-line { display: block; min-height: 3.5mm; border-bottom: .2mm solid #111; padding: .2mm 0; }
+.bp-inline-field { display: flex; align-items: center; gap: 2mm; margin: .5mm 0; }
+.bp-inline-field .bp-value-line { flex: 1; min-width: 0; }
+.bp-cells--oms .bp-cell { min-width: 3.2mm; }
+.bp-demographic-line { margin: .5mm 0; }
+.bp-prescription-body { display: flex; border-top: .2mm solid #111; border-bottom: .2mm solid #111; margin-top: 1.4mm; min-height: 20mm; }
+.bp-price-columns { display: grid; grid-template-columns: 1fr 1fr; width: 14mm; flex: 0 0 14mm; }
+.bp-price-columns > span { padding: 1mm .6mm; border-right: .2mm solid #111; white-space: nowrap; font-size: 7pt; }
+.bp-prescription-text { flex: 1; min-width: 0; padding: 1mm 0 1mm 1.5mm; }
+.bp-prescription-line { display: flex; align-items: baseline; gap: 1.2mm; margin-bottom: .8mm; }
+.bp-prescription-line > b { flex-shrink: 0; }
+.bp-prescription-line > div { flex: 1; min-width: 0; white-space: pre-wrap; }
+.bp-prescription-line--rp { min-height: 6mm; }
+.bp-prescription-line--signa { min-height: 7mm; margin-bottom: 0; }
+.bp-signatures { display: flex; justify-content: space-between; align-items: center; min-height: 9mm; gap: 3mm; margin-top: 1mm; }
+.bp-signatures > div:first-child { flex: 1; }
+.bp-signature-line { display: inline-block; width: 29mm; border-bottom: .2mm solid #111; margin-left: 1.5mm; }
+.bp-seal { flex: 0 0 26mm; padding: 3mm 0; text-align: center; }
+.bp-validity { text-align: center; margin: .5mm 0 1mm; }
+.bp-validity-hint { display: block; font-size: 7pt; }
+.bp-divider { display: flex; align-items: center; justify-content: center; gap: 1.3mm; margin: .8mm 0; font-size: 7pt; text-align: center; }
+.bp-divider::before, .bp-divider::after { content: ""; flex: 1; min-width: 3mm; border-top: .2mm dashed #111; }
+.bp-pharmacy { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2mm 2mm; }
+.bp-blank-line { display: block; min-height: 2.8mm; border-bottom: .2mm solid #111; }
+.bp-pharmacy-signatures { display: flex; justify-content: space-between; gap: 1mm; margin: 1.5mm 0; }
+.bp-divider--tear { margin: 1.4mm 0 .8mm; }
+.bp-stub { display: grid; grid-template-columns: .9fr 1.1fr; gap: 2mm; }
+.bp-stub > div + div { border-left: .2mm solid #111; padding-left: 2mm; }
+.bp-stub-value { min-height: 4mm; font-weight: bold; margin: .6mm 0; white-space: pre-wrap; }
+.bp-stub-value--signa { font-weight: normal; }
+.bp-footnote { border-top: .2mm solid #111; margin-top: 1.5mm; padding-top: .5mm; font-size: 6.5pt; }
+.bp-back-title { text-align: right; margin: 2mm 0 5mm; }
+.bp-back-table { border-collapse: collapse; table-layout: fixed; width: 100%; }
+.bp-back-table td { border: .2mm solid #111; padding: 2mm; vertical-align: top; }
+.bp-back-table td.bp-back-empty { width: 33.333%; }
+.bp-commission-note { height: 90mm; }
+.bp-back-signature-headings td { height: 8mm; }
+.bp-back-signature-spaces td { height: 28mm; }
+.bp-print-blocked-message { display: none; }
+
+/* The larger fallback preserves all wording when an A5-size front is too small. */
+.bp-layout-large { --bp-page-width: 190mm; --bp-page-height: 276mm; --bp-font-size: 10pt; }
+.bp-layout-large .bp-pages { width: 210mm; }
+.bp-layout-large .bp-pages > .bp-form { width: 210mm; height: 296mm; margin-bottom: 24px; padding: 10mm; background: #fff; box-shadow: 0 2px 9px #0002; }
+.bp-layout-large .bp-form__content { min-height: 0; }
+.bp-layout-large .bp-heading, .bp-layout-large .bp-barcode-space, .bp-layout-large .bp-organization-details,
+.bp-layout-large .bp-form-code, .bp-layout-large .bp-benefit-codes { font-size: 9pt; }
+.bp-layout-large .bp-cell { min-width: 4mm; min-height: 4.2mm; font-size: 10pt; }
+.bp-layout-large .bp-cells--small .bp-cell { min-width: 3.6mm; min-height: 3.6mm; font-size: 9pt; }
+.bp-layout-large .bp-benefit-codes .bp-cell { width: 4.8mm; }
+.bp-layout-large .bp-recipe-number { margin: 2.5mm 0; }
+.bp-layout-large .bp-recipe-number > strong { font-size: 11pt; }
+.bp-layout-large .bp-birth-date { flex-basis: 32mm; }
+.bp-layout-large .bp-value-line { min-height: 4.4mm; }
+.bp-layout-large .bp-inline-field, .bp-layout-large .bp-demographic-line { margin: 1.2mm 0; }
+.bp-layout-large .bp-cells--oms .bp-cell { min-width: 3.8mm; }
+.bp-layout-large .bp-prescription-body { min-height: 34mm; }
+.bp-layout-large .bp-price-columns { width: 19mm; flex-basis: 19mm; }
+.bp-layout-large .bp-price-columns > span { font-size: 9pt; }
+.bp-layout-large .bp-prescription-line { margin-bottom: 1.4mm; }
+.bp-layout-large .bp-prescription-line--signa { min-height: 12mm; }
+.bp-layout-large .bp-signatures { min-height: 13mm; }
+.bp-layout-large .bp-validity-hint, .bp-layout-large .bp-divider { font-size: 8.5pt; }
+.bp-layout-large .bp-pharmacy { gap: 2mm 3mm; }
+.bp-layout-large .bp-pharmacy-signatures { margin: 2.4mm 0; }
+.bp-layout-large .bp-blank-line { min-height: 4mm; }
+.bp-layout-large .bp-stub-value { min-height: 6mm; }
+.bp-layout-large .bp-footnote { font-size: 8pt; }
+.bp-layout-large .bp-commission-note { height: 140mm; }
+.bp-layout-large .bp-back-signature-spaces td { height: 40mm; }
+
+/* A bounded dense layout is used only when the complete long text needs it.
+   It keeps prescription text at 8.5pt and never clips or shortens a value. */
+.bp-layout-large.bp-layout-tight { --bp-font-size: 8.5pt; }
+.bp-layout-tight .bp-heading, .bp-layout-tight .bp-barcode-space, .bp-layout-tight .bp-organization-details,
+.bp-layout-tight .bp-form-code, .bp-layout-tight .bp-benefit-codes { font-size: 8pt; }
+.bp-layout-tight .bp-prescription-body { min-height: 28mm; }
+.bp-layout-tight .bp-inline-field, .bp-layout-tight .bp-demographic-line { margin: .7mm 0; }
+.bp-layout-tight .bp-signatures { min-height: 10mm; }
+.bp-layout-tight .bp-pharmacy-signatures { margin: 1.5mm 0; }
+.bp-layout-tight .bp-recipe-number { margin: 1.4mm 0; }
+
+@page bp-compact { size: A4 landscape; margin: 5mm; }
+@page bp-large { size: A4 portrait; margin: 10mm; }
+@media print {
+    html, body.bp-print-document { margin: 0; padding: 0; background: #fff; }
+    .bp-toolbar { display: none !important; }
+    .bp-pages { width: auto; margin: 0; }
+    .bp-sheet { page: bp-compact; width: var(--bp-page-width); height: var(--bp-page-height); margin: 0; padding: 0; box-shadow: none; break-inside: avoid; break-after: page; }
+    .bp-sheet:last-child { break-after: auto; }
+    .bp-form { break-inside: avoid; }
+    .bp-layout-large .bp-pages { width: auto; }
+    .bp-layout-large .bp-pages > .bp-form { page: bp-large; width: var(--bp-page-width); height: var(--bp-page-height); padding: 0; margin: 0; box-shadow: none; break-after: page; }
+    .bp-layout-large .bp-pages > .bp-form:last-child { break-after: auto; }
+    body:not(.bp-layout-ready) .bp-pages, .bp-layout-overflow .bp-pages { display: none !important; }
+    body:not(.bp-layout-ready) .bp-print-blocked-message, .bp-layout-overflow .bp-print-blocked-message { display: block; font: 14pt/1.5 Arial, sans-serif; padding: 12mm; }
+}
+@media screen and (max-width: 800px) {
+    .bp-toolbar { margin: 12px; padding: 18px; }
+    .bp-toolbar__heading { display: block; }
+    .bp-print-button { margin-top: 12px; }
+    .bp-print-settings select { max-width: 100%; margin: 8px 0; }
+    .bp-pages { margin-left: 12px; }
+}

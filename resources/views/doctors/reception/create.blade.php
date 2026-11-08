@@ -687,14 +687,11 @@
                                            type="datetime-local"
                                            id="appointment_datetime"
                                            name="appointment_datetime"
-                                           value="{{ old('appointment_datetime') }}"
+                                           value="{{ $appointmentTimeContext['value'] }}"
                                            required>
-                                    <div class="appointment-schedule-hint"
-                                         id="appointment_schedule_hint">
-                                        <i class="bi bi-clock-history"></i>
-                                        <span>Время записи проверяется по графику клиники.</span>
-                                    </div>
+                                    
                                 </div>
+                                @include('doctors.reception.partials.doctor_appointment_availability')
                             </div>
                         </div>
 
@@ -1975,19 +1972,8 @@
                 });
             });
 
-            const appointmentInput = document.getElementById('appointment_datetime');
-
-            function setAppointmentValidity(message = '') {
-                appointmentInput.setCustomValidity(message);
-
-                if (appointmentInput._receptionCalendar && appointmentInput._receptionCalendar.altInput) {
-                    appointmentInput._receptionCalendar.altInput.setCustomValidity(message);
-                }
-            }
+            // Working-hour UI is in doctor-appointment-availability.js.
             const doctorSelect = document.getElementById('doctor_id');
-            const appointmentScheduleHint = document.getElementById('appointment_schedule_hint');
-            const doctorClinicIds = @json($doctorClinicIds ?? []);
-            const clinicWorkSchedules = @json($clinicWorkSchedules ?? []);
             const doctorAppointmentFormats = @json($doctorAppointmentFormats ?? []);
             const defaultAppointmentFormat = @json($defaultAppointmentFormat ?? 'in_person');
             const appointmentFormatInputs = Array.from(document.querySelectorAll('input[name="appointment_format"]'));
@@ -2039,128 +2025,13 @@
                 }
             }
 
-            function setAppointmentHint(message, state = '') {
-                appointmentScheduleHint.classList.remove(
-                    'is-success',
-                    'is-warning',
-                    'is-error'
-                );
-
-                if (state) {
-                    appointmentScheduleHint.classList.add(`is-${state}`);
-                }
-
-                appointmentScheduleHint.querySelector('span').textContent = message;
-            }
-
-            function setMinAppointmentDateTime() {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-
-                const minimumDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-                appointmentInput.min = minimumDateTime;
-
-                if (appointmentInput._receptionCalendar) {
-                    appointmentInput._receptionCalendar.set('minDate', minimumDateTime);
-                }
-            }
-
-            function validateAppointmentByClinicSchedule() {
-                setAppointmentValidity('');
-
-                if (!appointmentInput.value) {
-                    setAppointmentHint(
-                        'Время записи проверяется по графику клиники.'
-                    );
-
-                    return;
-                }
-
-                const doctorId = String(doctorSelect.value || '');
-                const clinicId = doctorClinicIds[doctorId];
-
-                if (clinicId === null || clinicId === undefined || Number(clinicId) <= 0) {
-                    setAppointmentHint(
-                        'Для частной практики график клиники не применяется.',
-                        'warning'
-                    );
-
-                    return;
-                }
-
-                const clinicSchedule = clinicWorkSchedules[String(clinicId)]
-                    ?? clinicWorkSchedules[clinicId]
-                    ?? null;
-
-                if (!clinicSchedule || Object.keys(clinicSchedule).length === 0) {
-                    setAppointmentHint(
-                        'График клиники ещё не заполнен в настройках.',
-                        'warning'
-                    );
-
-                    return;
-                }
-
-                const datePart = appointmentInput.value.slice(0, 10);
-                const timePart = appointmentInput.value.slice(11, 16);
-                const date = new Date(`${datePart}T12:00:00`);
-                const jsDay = date.getDay();
-                const dayNumber = jsDay === 0 ? 7 : jsDay;
-
-                const daySchedule = clinicSchedule[String(dayNumber)]
-                    ?? clinicSchedule[dayNumber]
-                    ?? null;
-
-                if (!daySchedule || !daySchedule.enabled) {
-                    const message = 'В выбранный день клиника не работает.';
-
-                    setAppointmentValidity(message);
-                    setAppointmentHint(message, 'error');
-
-                    return;
-                }
-
-                if (!daySchedule.start_time || !daySchedule.end_time) {
-                    const message = 'Для выбранного дня не задано рабочее время клиники.';
-
-                    setAppointmentValidity(message);
-                    setAppointmentHint(message, 'error');
-
-                    return;
-                }
-
-                if (
-                    timePart < daySchedule.start_time
-                    || timePart > daySchedule.end_time
-                ) {
-                    const message = `В этот день клиника работает с ${daySchedule.start_time} до ${daySchedule.end_time}.`;
-
-                    setAppointmentValidity(message);
-                    setAppointmentHint(message, 'error');
-
-                    return;
-                }
-
-                setAppointmentHint(
-                    `Рабочее время клиники в этот день: ${daySchedule.start_time}–${daySchedule.end_time}.`,
-                    'success'
-                );
-            }
-
             appointmentFormatInputs.forEach(input => {
                 input.addEventListener('change', function () {
                     syncDoctorOptionsForFormat();
-                    validateAppointmentByClinicSchedule();
+                    doctorSelect.dispatchEvent(new Event('change', {bubbles: true}));
                 });
             });
 
-            doctorSelect.addEventListener('change', validateAppointmentByClinicSchedule);
-            appointmentInput.addEventListener('input', validateAppointmentByClinicSchedule);
-            appointmentInput.addEventListener('change', validateAppointmentByClinicSchedule);
 
             syncPatientAgeMode(false);
 
@@ -2168,13 +2039,8 @@
                 loadExistingPatient(patientIdInput.value, true);
             }
 
-            setMinAppointmentDateTime();
             syncDoctorOptionsForFormat();
-            validateAppointmentByClinicSchedule();
-            setInterval(function () {
-                setMinAppointmentDateTime();
-                validateAppointmentByClinicSchedule();
-            }, 30000);
+            doctorSelect.dispatchEvent(new Event('change', {bubbles: true}));
         });
     </script>
 @endsection

@@ -1,0 +1,65 @@
+{
+  "ops": [
+    {
+      "kind": "register_provider",
+      "path": "bootstrap/providers.php",
+      "provider": "App\\Providers\\ClinicTelemedicineSessionServiceProvider"
+    },
+    {
+      "kind": "php_replace",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php",
+      "method": "index",
+      "old": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
+      "new": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );\n        // NORHNAIM_CLINIC_TELEMEDICINE_PROVIDER_V1: navigation only, never create on GET.\n        $visitAuditData = app(\\App\\Services\\TelemedicineProviderSessionService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
+      "label": "provider-journal-navigation"
+    },
+    {
+      "kind": "php_replace",
+      "path": "app/Http/Controllers/Doctors/MedicalCardController.php",
+      "method": "buildMedicalVisitAuditContext",
+      "old": "            'session_cancelled' => 'Сеанс удалён из расписания',",
+      "new": "            'session_cancelled' => 'Сеанс удалён из расписания',\n            'provider_creation_requested' => 'Запрошено создание встречи',\n            'provider_prepared' => 'Подключение к приёму подготовлено',\n            'provider_prepared_manually' => 'Прикреплена проверенная встреча',\n            'provider_creation_unconfirmed' => 'Результат создания встречи не подтверждён',\n            'provider_opened' => 'Выдана ссылка на видеосвязь',",
+      "label": "provider-audit-labels"
+    },
+    {
+      "kind": "text_insert",
+      "path": "resources/views/doctors/reception/partials/telemedicine_audit_log.blade.php",
+      "anchor": "                    <div class=\"mc-audit-session__timeline-title\">Хронология событий</div>",
+      "snippet": "                    @include('doctors.reception.partials.telemedicine_provider_action')\n",
+      "position": "before",
+      "label": "provider-journal-action"
+    },
+    {
+      "kind": "text_replace",
+      "path": "resources/views/doctors/reception/partials/telemedicine_audit_log.blade.php",
+      "old": "{{ $event['source'] === 'signaling' ? 'Сервер WebRTC' : ($event['source'] === 'staff' ? 'Управление сеансом' : 'Отметка врача') }}",
+      "new": "{{ match ($event['source']) { 'signaling' => 'Сервер WebRTC', 'staff' => 'Управление сеансом', 'patient_link' => 'Приглашение пациента', 'system' => 'Система', default => 'Отметка врача' } }}",
+      "count": 1,
+      "label": "provider-audit-source-label"
+    },
+    {
+      "kind": "php_replace",
+      "path": "app/Http/Controllers/Doctors/TelemedicineJournalGateController.php",
+      "method": "check",
+      "old": "            'registry_record_id' => ['required', 'integer', 'min:1'],",
+      "new": "            'registry_record_id' => ['required', 'integer', 'min:1'],\n            'room' => ['nullable', 'string', 'regex:/\\A[A-Za-z0-9_-]{16,100}\\z/'],\n            'appointment_start' => ['nullable', 'integer', 'min:1'],",
+      "label": "provider-gate-claims"
+    },
+    {
+      "kind": "php_replace",
+      "path": "app/Http/Controllers/Doctors/TelemedicineJournalGateController.php",
+      "method": "check",
+      "old": "        return response()->json(['allowed' => $allowed])->header('Cache-Control', 'no-store');",
+      "new": "        if ($allowed) {\n            $verified = $validator->validated();\n            $allowed = app(\\App\\Services\\TelemedicineProviderSessionService::class)->signalingAllowed(\n                $record, $verified['room'] ?? null,\n                isset($verified['appointment_start']) ? (int) $verified['appointment_start'] : null\n            );\n        }\n        return response()->json(['allowed' => $allowed])->header('Cache-Control', 'no-store');",
+      "label": "provider-gate-current-session"
+    },
+    {
+      "kind": "text_replace",
+      "path": "telemedicine/signaling/appointment_guard.py",
+      "old": "    raw = json.dumps({'audience': AUDIENCE, 'registry_record_id': appointment_id},\n                     separators=(',', ':')).encode('utf-8')",
+      "new": "    payload = {'audience': AUDIENCE, 'registry_record_id': appointment_id}\n    # These values came from the verified HMAC invitation, never from browser JSON.\n    appointment_start = claim.get('appointment_start')\n    if appointment_start is not None:\n        room = claim.get('room')\n        if (type(appointment_start) is not int or appointment_start <= 0\n                or not isinstance(room, str) or not 16 <= len(room) <= 100):\n            raise TokenError('Invalid managed appointment invitation')\n        payload['room'] = room\n        payload['appointment_start'] = appointment_start\n    raw = json.dumps(payload, separators=(',', ':')).encode('utf-8')",
+      "count": 1,
+      "label": "provider-guard-verified-start-room"
+    }
+  ]
+}

@@ -2743,6 +2743,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>
 
+                    {{-- RECEPTION-SCHEDULE-1 --}}
+                    @include('doctors.reception.partials.reception_schedule_filters')
+
                     <div class="reception-search-actions">
                         <a href="{{ $receptionPage['reset_url'] }}" class="reception-btn-light">
                             Сбросить
@@ -2827,6 +2830,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         <tr>
                             <th>ID</th>
                             <th>Пациент</th>
+                            @if(!$receptionPage['is_inpatient'])
+                                <th>Приём</th>
+                            @endif
                             <th>Дата рождения</th>
                             @if($receptionPage['is_inpatient'])
                                 <th>Размещение</th>
@@ -2862,6 +2868,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                         </div>
                                     </div>
                                 </td>
+
+                                @if(!$receptionPage['is_inpatient'])
+                                    <td>
+                                        @include('doctors.reception.partials.reception_schedule_cell')
+                                    </td>
+                                @endif
 
                                 <td>
                                     @if($receptionRow['birth_date'])
@@ -3006,6 +3018,43 @@ document.addEventListener('DOMContentLoaded', function () {
                                         @endif
 
                                         @if(!$receptionPage['is_inpatient'] && ($receptionRow['can_modify'] ?? false))
+
+                                                                                        {{-- NORHNAIM_REGISTRY_APPOINTMENT_ARRIVAL_V1 --}}
+                                            @if(
+                                                ($receptionRow['appointment_format'] ?? 'in_person') === 'in_person'
+                                                && !($receptionRow['appointment'] ?? false)
+                                            )
+                                                <span class="d-inline-block"
+                                                      @if(!($receptionRow['arrival_can_confirm'] ?? false))
+                                                          title="Кнопка станет доступна за 1 час до начала приёма"
+                                                      @else
+                                                          title="Подтвердить, что пациент пришёл"
+                                                      @endif>
+                                                    <form method="post"
+                                                          action="{{ route('doctors.reception.arrival.confirm', ['registryRecord' => $receptionRow['id']]) }}"
+                                                          class="d-inline"
+                                                          @if($receptionRow['arrival_can_confirm'] ?? false)
+                                                              onsubmit="return confirm('Подтвердить, что пациент пришёл? После этого консультация будет считаться состоявшейся.');"
+                                                          @endif>
+                                                        @csrf
+                                                        <button type="submit"
+                                                                class="table-action-btn"
+                                                                @disabled(!($receptionRow['arrival_can_confirm'] ?? false))
+                                                                aria-label="Пациент пришёл">
+                                                            <i class="bi bi-person-check"></i>
+                                                        </button>
+                                                    </form>
+                                                </span>
+                                            @elseif(
+                                                ($receptionRow['appointment_format'] ?? 'in_person') === 'in_person'
+                                                && ($receptionRow['appointment'] ?? false)
+                                            )
+                                                <span class="badge rounded-pill text-bg-success"
+                                                      title="Пациент пришёл, консультация состоялась">
+                                                    <i class="bi bi-person-check me-1"></i>
+                                                    Состоялся
+                                                </span>
+                                            @endif
                                             @if($receptionRow['edit_url'])
                                                 <a href="{{ $receptionRow['edit_url'] }}"
                                                    class="table-action-btn"

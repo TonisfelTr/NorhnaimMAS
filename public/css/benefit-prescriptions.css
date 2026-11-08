@@ -1,0 +1,125 @@
+/* Scoped additions to the existing medical-card prescription UI. */
+#benefitPrescriptionModule,
+.benefit-rx-panel,
+.benefit-rx-list,
+.benefit-rx-actions {
+    --benefit-ink: #173b57;
+    --benefit-muted: #637d91;
+    --benefit-line: #dce8f1;
+    --benefit-teal: #007f94;
+    --benefit-tint: #eef8fa;
+    color: var(--benefit-ink);
+}
+#benefitPrescriptionModule [hidden],
+.benefit-rx-panel [hidden],
+.benefit-rx-list [hidden],
+.benefit-rx-actions [hidden],
+#benefitPrescriptionPanel[hidden],
+#benefitPrescriptionActions[hidden] { display: none !important; }
+#patientPrescriptionForm.benefit-mode-active #printRecipeButton_modal,
+#patientPrescriptionForm.benefit-mode-active #prescriptionSubmitButton,
+#patientPrescriptionForm.benefit-mode-active #validity_block_modal { display: none !important; }
+#patientPrescriptionForm.benefit-clinical-readonly .benefit-rx-legacy-section,
+#patientPrescriptionForm.benefit-clinical-readonly #prescriptionSuggestionsCard { display: none !important; }
+#patientPrescriptionForm.benefit-clinical-readonly .presc-layout { grid-template-columns: minmax(0, 1fr); }
+#patientPrescriptionForm.benefit-mode-active .modal-body { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; }
+.benefit-rx-mode { padding: 14px 16px; border: 1px solid var(--benefit-line); border-radius: 14px; background: #f8fbfe; }
+.benefit-rx-mode__label { display: flex; align-items: center; gap: 12px; width: 100%; margin: 0; cursor: pointer; }
+.benefit-rx-mode__icon { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 11px; background: #e1f1f5; color: var(--benefit-teal); font-size: 1.15rem; }
+.benefit-rx-mode__text { display: flex; flex-direction: column; flex: 1; gap: 2px; line-height: 1.4; }
+.benefit-rx-mode__text strong { font-size: .96rem; }
+.benefit-rx-mode__text > span { color: var(--benefit-muted); font-size: .8rem; }
+.benefit-rx-mode .form-check-input { width: 2.5em; height: 1.35em; cursor: pointer; }
+.benefit-rx-mode:has(input:checked) { border-color: #9dd4df; background: var(--benefit-tint); }
+.benefit-rx-panel { margin-top: 16px; min-width: 0; }
+.benefit-rx-fieldset { margin: 0; padding: 0; min-width: 0; border: 0; }
+.benefit-rx-panel__head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 12px; }
+.benefit-rx-eyebrow { margin-bottom: 3px; color: var(--benefit-teal); font-size: .73rem; font-weight: 700; letter-spacing: .04em; }
+.benefit-rx-heading { margin: 0; color: var(--benefit-ink); font-size: 1.05rem; font-weight: 750; line-height: 1.45; }
+.benefit-rx-badge { display: inline-flex; padding: 5px 9px; border: 1px solid var(--benefit-line); border-radius: 8px; color: var(--benefit-muted); background: #f6f9fc; font-size: .73rem; font-weight: 600; white-space: nowrap; }
+.benefit-rx-context { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 12px; color: var(--benefit-muted); font-size: .8rem; }
+.benefit-rx-context > span { display: inline-flex; gap: 5px; align-items: baseline; overflow-wrap: anywhere; }
+.benefit-rx-help { color: var(--benefit-muted); font-size: .78rem; line-height: 1.55; }
+.benefit-rx-notice { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 14px; padding: 11px 12px; background: #f0f7fc; border: 1px solid #d9e8f3; border-radius: 10px; color: #476681; font-size: .79rem; line-height: 1.55; }
+.benefit-rx-notice > i { flex-shrink: 0; margin-top: 1px; }
+.benefit-rx-notice strong { color: var(--benefit-ink); font-weight: 650; }
+.benefit-rx-notice div > span { display: block; }
+.benefit-rx-notice--amber { background: #fff9ef; border-color: #efdcb8; color: #805819; }
+.benefit-rx-section { margin-bottom: 12px; border: 1px solid var(--benefit-line); border-radius: 12px; background: #fff; }
+.benefit-rx-section > summary { display: flex; align-items: center; gap: 9px; padding: 13px 14px; color: var(--benefit-ink); font-size: .87rem; font-weight: 700; cursor: pointer; list-style: none; }
+.benefit-rx-section > summary::-webkit-details-marker { display: none; }
+.benefit-rx-section > summary::after { content: ''; display: block; width: 7px; height: 7px; margin-left: auto; margin-right: 3px; flex-shrink: 0; border-right: 1.7px solid var(--benefit-muted); border-bottom: 1.7px solid var(--benefit-muted); transform: rotate(45deg); }
+.benefit-rx-section[open] > summary::after { transform: rotate(225deg); }
+.benefit-rx-section[open] > summary { border-bottom: 1px solid #eef3f7; }
+.benefit-rx-step { display: grid; place-items: center; flex: 0 0 23px; height: 23px; border-radius: 7px; background: var(--benefit-tint); color: var(--benefit-teal); font-size: .73rem; font-weight: 750; }
+.benefit-rx-section__body { padding: 14px; }
+.benefit-rx-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 14px; }
+.benefit-rx-grid--three { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 13px; margin-bottom: 9px; }
+.benefit-rx-field { min-width: 0; }
+.benefit-rx-field--wide { grid-column: 1 / -1; }
+.benefit-rx-field .form-label { margin-bottom: 5px; color: var(--benefit-ink); font-size: .79rem; font-weight: 650; }
+.benefit-rx-field .form-control,
+.benefit-rx-field .form-select { min-height: 37px; border-color: #d2e1ed; border-radius: 8px; font-size: .83rem; }
+.benefit-rx-field textarea.form-control { min-height: 62px; resize: vertical; }
+.benefit-rx-field .form-control:focus,
+.benefit-rx-field .form-select:focus { border-color: #6daec2; box-shadow: 0 0 0 3px rgb(0 127 148 / 11%); }
+.benefit-rx-field .benefit-rx-help { margin-top: 4px; font-size: .73rem; }
+.benefit-rx-label-row { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: baseline; gap: 3px 10px; }
+.benefit-rx-text-button { padding: 0; border: 0; background: transparent; color: #087a93; font-size: .73rem; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+.benefit-rx-check { display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; color: #3b566f; font-size: .79rem; line-height: 1.55; cursor: pointer; }
+.benefit-rx-check .form-check-input { flex: 0 0 16px; height: 16px; margin: 3px 0 0; border-color: #a8bfce; }
+.benefit-rx-check--final { margin: 14px 0 11px; padding: 12px; border: 1px solid #c7dfe8; border-radius: 10px; background: #f3fafb; }
+.benefit-rx-feedback,
+.benefit-rx-errors,
+.benefit-rx-saved { margin-bottom: 13px; padding: 12px 14px; border-radius: 10px; font-size: .82rem; line-height: 1.55; overflow-wrap: anywhere; }
+.benefit-rx-feedback { border: 1px solid #bcded5; color: #276453; background: #f0faf6; }
+.benefit-rx-feedback a { color: #0a6f59; }
+.benefit-rx-feedback a.btn-primary { color: #fff; }
+.benefit-rx-errors { border: 1px solid #efc5c5; color: #963a3a; background: #fff5f4; }
+.benefit-rx-error-link { padding: 0; border: 0; color: inherit; background: transparent; font: inherit; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+.benefit-rx-saved { border: 1px solid #cbdce9; background: #f5f9fd; }
+.benefit-rx-saved > strong { display: block; margin-bottom: 5px; font-size: .95rem; }
+.benefit-rx-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.benefit-rx-busy { display: inline-flex; gap: 7px; align-items: center; color: var(--benefit-muted); font-size: .79rem; }
+.benefit-rx-text-link { font-size: .8rem; font-weight: 650; text-underline-offset: 2px; }
+.benefit-rx-list { margin: 16px 0 24px; padding: 18px; border: 1px solid #d9e7ef; border-radius: 16px; background: #fff; }
+.benefit-rx-list__head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+.benefit-rx-list__records { display: grid; gap: 10px; }
+.benefit-rx-list__empty { display: flex; align-items: center; gap: 11px; padding: 14px; border: 1px dashed #c6d8e5; border-radius: 10px; background: #f8fbfd; color: var(--benefit-muted); font-size: .83rem; line-height: 1.55; }
+.benefit-rx-list__empty > i { flex-shrink: 0; color: var(--benefit-teal); font-size: 1.3rem; }
+.benefit-rx-record { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 18px; padding: 14px; border: 1px solid #e0eaf2; border-radius: 11px; background: #fbfdff; }
+.benefit-rx-record__main { flex: 1 1 280px; min-width: 0; }
+.benefit-rx-record__tags { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 10px; margin-bottom: 7px; }
+.benefit-rx-status { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 6px; font-size: .69rem; font-weight: 700; line-height: 1.5; }
+.benefit-rx-status--draft { color: #765716; background: #fff1d4; }
+.benefit-rx-status--issued { color: #126455; background: #e1f3ec; }
+.benefit-rx-status--void { color: #6a6e77; background: #e9edf1; }
+.benefit-rx-record__number { color: var(--benefit-muted); font-size: .74rem; overflow-wrap: anywhere; }
+.benefit-rx-record__name { margin: 0 0 6px; font-size: .9rem; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.benefit-rx-record__meta { display: flex; flex-wrap: wrap; gap: 4px 15px; color: var(--benefit-muted); font-size: .75rem; line-height: 1.5; }
+.benefit-rx-record__actions { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+.benefit-rx-record__actions .btn { font-size: .74rem; border-radius: 7px; }
+.benefit-rx-void { flex: 0 0 100%; padding-top: 12px; margin-top: 3px; border-top: 1px solid #e1e8f0; }
+.benefit-rx-void .form-label { font-size: .8rem; font-weight: 650; }
+.benefit-rx-void textarea { font-size: .83rem; }
+.benefit-rx-pagination { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-top: 14px; }
+.benefit-rx-pagination nav { display: flex; gap: 7px; margin-left: auto; }
+.benefit-rx-panel :focus-visible,
+.benefit-rx-mode :focus-visible,
+.benefit-rx-list :focus-visible { outline: 2px solid #078aab; outline-offset: 3px; }
+@media (max-width: 680px) {
+    .benefit-rx-grid,
+    .benefit-rx-grid--three { grid-template-columns: minmax(0, 1fr); }
+    .benefit-rx-panel__head { align-items: flex-start; }
+    .benefit-rx-badge { white-space: normal; text-align: center; }
+    .benefit-rx-section__body { padding: 12px; }
+    .benefit-rx-list { padding: 13px; }
+    .benefit-rx-record { padding: 12px; }
+    .benefit-rx-record__actions { width: 100%; }
+    .benefit-rx-actions { width: 100%; }
+    .benefit-rx-actions > button { flex: 1 1 170px; }
+    #patientPrescriptionForm.benefit-mode-active .modal-body { max-height: 66vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .benefit-rx-panel *, .benefit-rx-list * { scroll-behavior: auto !important; }
+}

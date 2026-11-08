@@ -1548,6 +1548,40 @@ class PrescriptionsController extends Controller
         );
     }
 
+    // NORHNAIM_BENEFIT_PRESCRIPTIONS_V1
+    // Paper benefits are a separate immutable document; the existing queue stays unchanged.
+    public function storeBenefit(Request $request, Patient $patient, \App\Services\BenefitPrescriptionService $service)
+    {
+        return response()->json($service->save($request, $patient))
+            ->withHeaders(['Cache-Control' => 'no-store, private', 'Pragma' => 'no-cache']);
+    }
+
+    public function benefitDrug(Request $request, Patient $patient, \App\Services\BenefitPrescriptionService $service)
+    {
+        return response()->json($service->drug($request, $patient))
+            ->withHeaders(['Cache-Control' => 'no-store, private', 'Pragma' => 'no-cache']);
+    }
+
+    public function editBenefit(Request $request, Patient $patient, string $benefit, \App\Services\BenefitPrescriptionService $service)
+    {
+        return response()->json($service->edit($request, $patient, $benefit))
+            ->withHeaders(['Cache-Control' => 'no-store, private', 'Pragma' => 'no-cache']);
+    }
+
+    public function printBenefit(Request $request, Patient $patient, string $benefit, \App\Services\BenefitPrescriptionService $service)
+    {
+        $document = $service->printable($request, $patient, $benefit);
+        return response()->view('doctors.prescriptions.benefit_148_04', compact('document'))
+            ->withHeaders(['Cache-Control' => 'no-store, private', 'Pragma' => 'no-cache',
+                'X-Content-Type-Options' => 'nosniff', 'Referrer-Policy' => 'no-referrer']);
+    }
+
+    public function voidBenefit(Request $request, Patient $patient, string $benefit, \App\Services\BenefitPrescriptionService $service)
+    {
+        return response()->json($service->void($request, $patient, $benefit))
+            ->withHeaders(['Cache-Control' => 'no-store, private', 'Pragma' => 'no-cache']);
+    }
+
     public function repeatPrescription(MedicalPrescription $prescription): RedirectResponse
     {
         $prescription->replicate()->save();

@@ -211,6 +211,19 @@ class CabinetController extends SettingsBaseController
 
             $cabinet->save();
 
+            // Разовые замещения привязаны к конкретному врачу кабинета.
+            // При перепривязке кабинета старые замещения больше не действуют.
+            if (Schema::hasTable('doctor_schedule_replacements')) {
+                $replacements = DB::table('doctor_schedule_replacements')
+                    ->where('clinic_id', $clinic_id)
+                    ->where('clinic_cabinet_id', (int) $cabinet->id);
+                if ($cabinet->doctor_id) {
+                    $replacements->where('base_doctor_id', '<>', (int) $cabinet->doctor_id);
+                }
+                $replacements->delete();
+            }
+
+
             /*
              * Убираем только точное встречное замещение.
              *
@@ -1033,7 +1046,8 @@ class CabinetController extends SettingsBaseController
         ClinicDistrict $district,
         iterable $incomingTransfers = [],
         bool $transferSchemaReady = false,
-        iterable $additionalDoctors = []
+        iterable $additionalDoctors = [],
+        array $doctorVacationsById = []
     ): array {
         $rules = collect($district->address_rules ?? [])
             ->values();
@@ -1183,6 +1197,12 @@ class CabinetController extends SettingsBaseController
                 : '',
             'home_visit_initials' =>
                 $this->doctorInitials($homeDoctor),
+            'doctor_vacation' => $district->doctor_id
+                ? ($doctorVacationsById[(int) $district->doctor_id] ?? null)
+                : null,
+            'home_visit_vacation' => $district->home_visit_doctor_id
+                ? ($doctorVacationsById[(int) $district->home_visit_doctor_id] ?? null)
+                : null,
             'additional_doctors' => $additionalDoctorCards,
             'transfer' => $transfer,
             'is_transferred' => $isTransferred,
@@ -2463,6 +2483,44 @@ class CabinetController extends SettingsBaseController
         ]);
     }
 
+    /**
+     * Проверяем отсутствие на КОНКРЕТНУЮ дату, не изменяя постоянный
+     * недельный шаблон сотрудника (employee_work_schedules).
+     */
+    private function ensureDoctorNotOnApprovedVacation(
+        int $clinicId,
+        int $doctorId,
+        string $date
+    ): void {
+        if (!Schema::hasTable('employee_vacations')) {
+            return;
+        }
+
+        $vacation = EmployeeVacation::query()
+            ->where('clinic_id', $clinicId)
+            ->where('employee_type', 'doctor')
+            ->where('employee_id', $doctorId)
+            ->where('status', 'approved')
+            ->whereDate('date_from', '<=', $date)
+            ->whereDate('date_to', '>=', $date)
+            ->first(['id', 'date_from', 'date_to']);
+
+        if (!$vacation) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'date' => sprintf(
+                'На %s врач находится в утверждённом отпуске (%s — %s). ' .
+                'Назначение смены на эту дату запрещено. ' .
+                'Чтобы изменить постоянный недельный график, перейдите на неделю без отпуска.',
+                Carbon::parse($date)->format('d.m.Y'),
+                $vacation->date_from->format('d.m.Y'),
+                $vacation->date_to->format('d.m.Y')
+            ),
+        ]);
+    }
+
     private function vacationEmployeesForClinic(int $clinicId)
     {
         $doctorRows = Doctor::query()
@@ -2986,7 +3044,9 @@ class CabinetController extends SettingsBaseController
             ->get()
             ->groupBy('employee_id');
 
-        $todayDayNumber = now()->isoWeekday();
+// clinic-telemedicine-timezones:timezone-cabinet-today-weekday:v1:begin
+$todayDayNumber = now(\App\Support\ClinicAppointmentTime::timezone((int) $clinic_id))->isoWeekday();
+// clinic-telemedicine-timezones:timezone-cabinet-today-weekday:v1:end
 
         $todayDoctorSchedules = $doctorScheduleRows
             ->map(
@@ -3575,7 +3635,9 @@ class CabinetController extends SettingsBaseController
          * clinic_cabinets.replace_* здесь не изменяем: у этих полей нет
          * периода действия, а отпуск ограничен date_from/date_to.
          */
-        $today = Carbon::today();
+// clinic-telemedicine-timezones:timezone-cabinet-vacation-today:v1:begin
+$today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone((int) $clinic_id));
+// clinic-telemedicine-timezones:timezone-cabinet-vacation-today:v1:end
         $activeVacations = collect();
 
         if (Schema::hasTable('employee_vacations')) {
@@ -4281,6 +4343,13 @@ class CabinetController extends SettingsBaseController
                     ->procedureSchedules()
                     ->delete();
 
+                if (Schema::hasTable('doctor_schedule_replacements')) {
+                    DB::table('doctor_schedule_replacements')
+                        ->where('clinic_id', $clinicId)
+                        ->where('clinic_cabinet_id', (int) $cabinet->id)
+                        ->delete();
+                }
+
                 $cabinet->delete();
             }
         );
@@ -4319,18 +4388,34 @@ class CabinetController extends SettingsBaseController
         return $this->saveOffice($request);
     }
 
-    public function clinicDoctorUpdate(
-        ClinicOfficeStoreRequest $request
-    ) {
+    public function clinicDoctorUpdate(Request $request)
+    {
         /*
-         * Аналогично, маршрут update всегда означает редактирование.
-         * Принудительно синхронизируем mode с вызванным endpoint.
+         * Используем существующий POST doctors.settings.offices.update:
+         * обычные запросы редактируют кабинет, JSON из недельного
+         * редактора обновляет только расписание врача.
+         * Новых маршрутов не требуется.
          */
-        $request->merge([
-            'mode' => 'edit',
-        ]);
+        if (
+            $request->expectsJson()
+            && $request->input('_schedule_editor') === 'doctor-shift-v1'
+        ) {
+            if (in_array((string) $request->input('action'), ['replacement-save', 'replacement-delete'], true)) {
+                return $this->updateDoctorShiftReplacement($request);
+            }
 
-        return $this->saveOffice($request);
+            return $this->updateDoctorScheduleShift($request);
+        }
+
+        /*
+         * Для стандартного редактирования кабинета сохраняем исходную
+         * авторизацию и валидацию ClinicOfficeStoreRequest.
+         * FormRequest создаётся через контейнер Laravel, поэтому
+         * authorize() и rules() выполняются штатно.
+         */
+        $request->merge(['mode' => 'edit']);
+
+        return $this->saveOffice(app(ClinicOfficeStoreRequest::class));
     }
 
     public function districts()
@@ -4373,6 +4458,56 @@ class CabinetController extends SettingsBaseController
             $clinicId
         );
 
+        // Одним запросом готовим данные для плашек отпусков на участках.
+        $districtDoctorIds = $records
+            ->pluck('doctor_id')
+            ->merge($records->pluck('home_visit_doctor_id'))
+            ->filter()
+            ->unique()
+            ->values();
+
+// clinic-telemedicine-timezones:timezone-districts-today:v1:begin
+$today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId));
+// clinic-telemedicine-timezones:timezone-districts-today:v1:end
+        $districtVacationsByDoctor = Schema::hasTable('employee_vacations')
+            && $districtDoctorIds->isNotEmpty()
+                ? EmployeeVacation::query()
+                    ->where('clinic_id', $clinicId)
+                    ->where('employee_type', 'doctor')
+                    ->whereIn('employee_id', $districtDoctorIds)
+                    ->whereIn('status', ['planned', 'approved'])
+                    ->whereDate('date_to', '>=', $today->toDateString())
+                    ->with('replaceDoctor:id,name,surname,patronym,status,profession')
+                    ->orderBy('date_from')
+                    ->get()
+                    ->groupBy('employee_id')
+                    ->map(static function ($items) use ($today): array {
+                        $active = $items->first(
+                            static fn (EmployeeVacation $vacation): bool =>
+                                $vacation->status === 'approved'
+// clinic-telemedicine-timezones:timezone-district-vacation-civil:v1:begin
+&& $vacation->date_from->toDateString() <= $today->toDateString()
+                                && $vacation->date_to->toDateString() >= $today->toDateString()
+// clinic-telemedicine-timezones:timezone-district-vacation-civil:v1:end
+                        );
+                        $vacation = $active ?: $items->first();
+                        $isActive = (bool) $active;
+                        $approved = $vacation->status === 'approved';
+
+                        return [
+                            'active' => $isActive,
+                            'approved' => $approved,
+                            'label' => $isActive
+                                ? 'Сейчас в отпуске'
+                                : ($approved ? 'Утверждённый отпуск' : 'Отпуск запланирован'),
+                            'dates' => $vacation->date_from->format('d.m.Y')
+                                . ' — ' . $vacation->date_to->format('d.m.Y'),
+                            'replacement_doctor' => $vacation->replaceDoctor?->full_name ?: '',
+                        ];
+                    })
+                    ->all()
+                : [];
+
         $incomingTransfers = collect();
 
         if ($transferSchemaReady) {
@@ -4400,7 +4535,8 @@ class CabinetController extends SettingsBaseController
                         $additionalDoctorsByDistrict->get(
                             (int) $district->id,
                             collect()
-                        )
+                        ),
+                        $districtVacationsByDoctor
                     )
             )
             ->all();
@@ -4562,6 +4698,83 @@ class CabinetController extends SettingsBaseController
                 ->orderBy('start_time')
                 ->get()
                 ->groupBy('employee_id');
+
+        /*
+         * Периоды отсутствия являются исключениями из повторяющегося
+         * графика. Передаём их в календарь для проверки выбранной недели.
+         * Не отключаем EmployeeWorkSchedule: иначе пострадают другие недели.
+         */
+        // Включаем также отпуска потенциальных И.О., которые сами не
+        // закреплены за кабинетом. Нельзя подставлять врача в его отпуск.
+        $doctorVacations = Schema::hasTable('employee_vacations')
+            ? EmployeeVacation::query()
+                ->where('clinic_id', $clinicId)
+                ->where('employee_type', 'doctor')
+                ->whereIn('status', ['approved', 'planned'])
+                ->with('replaceDoctor:id,name,surname,patronym')
+                ->orderBy('date_from')
+                ->get()
+                ->map(static function (EmployeeVacation $vacation): array {
+                    return [
+                        'id' => (int) $vacation->id,
+                        'doctor_id' => (int) $vacation->employee_id,
+                        'date_from' => $vacation->date_from->format('Y-m-d'),
+                        'date_to' => $vacation->date_to->format('Y-m-d'),
+                        'status' => (string) $vacation->status,
+                        'replacement_id' => $vacation->replace_doctor_id
+                            ? (int) $vacation->replace_doctor_id : null,
+                        'replacement' => $vacation->replaceDoctor?->full_name ?: '',
+                        'replacement_speciality' => (string) (
+                            $vacation->replaceDoctor?->status
+                            ?: $vacation->replaceDoctor?->profession
+                            ?: ''
+                        ),
+                    ];
+                })
+                ->values()
+                ->all()
+            : [];
+
+        // Для разового замещения доступны врачи текущей клиники, кроме
+        // персонала стационара и закреплённых за выездами на дом.
+        $homeDoctorIds = $this->homeVisitDoctorIdsForClinic($clinicId);
+        $replacementDoctorOptions = $this->clinicDoctorsQuery($clinicId)
+            ->when($homeDoctorIds !== [], static fn ($query) =>
+                $query->whereNotIn('id', $homeDoctorIds))
+            ->orderBy('surname')
+            ->orderBy('name')
+            ->get(['id', 'name', 'surname', 'patronym', 'status', 'profession'])
+            ->map(function (Doctor $doctor): array {
+                $speciality = $this->cleanDoctorSpeciality((string) ($doctor->status ?? ''));
+                return [
+                    'id' => (int) $doctor->id,
+                    'name' => $doctor->full_name ?: ('Врач #' . $doctor->id),
+                    'speciality' => $speciality ?: (string) ($doctor->profession ?: 'Врач'),
+                ];
+            })
+            ->values()
+            ->all();
+
+        // Ручные замещения всегда привязаны к конкретной дате и кабинету.
+        $manualReplacementReady = Schema::hasTable('doctor_schedule_replacements');
+        $manualReplacements = $manualReplacementReady
+            ? DB::table('doctor_schedule_replacements')
+                ->where('clinic_id', $clinicId)
+                ->get([
+                    'clinic_cabinet_id', 'schedule_id', 'base_doctor_id',
+                    'replacement_doctor_id', 'shift_date', 'comment',
+                ])
+                ->map(static fn ($row): array => [
+                    'office_id' => (int) $row->clinic_cabinet_id,
+                    'schedule_id' => (int) $row->schedule_id,
+                    'base_doctor_id' => (int) $row->base_doctor_id,
+                    'replacement_doctor_id' => (int) $row->replacement_doctor_id,
+                    'date' => substr((string) $row->shift_date, 0, 10),
+                    'comment' => (string) ($row->comment ?? ''),
+                ])
+                ->values()
+                ->all()
+            : [];
 
         $doctorShifts = collect();
         $shiftId = 1;
@@ -4726,13 +4939,254 @@ class CabinetController extends SettingsBaseController
         return $this->settingsView(
             'doctors.settings.doctors_schedule',
             [
+// clinic-telemedicine-timezones:timezone-weekly-data:v1:begin
+'clinicScheduleTimezone' => \App\Support\ClinicAppointmentTime::timezone($clinicId),
                 'clinicSchedule' => $clinicSchedule,
+// clinic-telemedicine-timezones:timezone-weekly-data:v1:end
                 'doctorShifts' => $doctorShifts->values()->all(),
+                'doctorVacations' => $doctorVacations,
+                'manualReplacements' => $manualReplacements,
+                'manualReplacementReady' => $manualReplacementReady,
+                'replacementDoctorOptions' => $replacementDoctorOptions,
                 'doctorOptions' => $doctorOptions,
                 'specialityOptions' => $specialityOptions,
                 'officeOptions' => $officeOptions,
             ]
         );
+    }
+
+    /**
+     * Разовое ручное замещение в конкретном кабинете и на конкретную дату.
+     * Не переписывает employee_work_schedules и не меняет отпуск.
+     * Использует существующий POST doctors.settings.offices.update.
+     */
+    private function updateDoctorShiftReplacement(Request $request)
+    {
+        abort_unless(
+            Schema::hasTable('doctor_schedule_replacements'),
+            503,
+            'Таблица разовых замещений не создана. Выполните php artisan migrate.'
+        );
+
+        $clinicId = (int) auth()->user()->doctor->clinic_id;
+        $data = Validator::make($request->all(), [
+            'action' => ['required', Rule::in(['replacement-save', 'replacement-delete'])],
+            'office_id' => ['required', 'integer', 'min:1'],
+            'schedule_id' => ['required', 'integer', 'min:1'],
+            'shift_date' => ['required', 'date_format:Y-m-d'],
+            'replacement_doctor_id' => ['nullable', 'integer', 'min:1'],
+            'comment' => ['nullable', 'string', 'max:500'],
+        ])->validate();
+
+        $date = (string) $data['shift_date'];
+        $officeId = (int) $data['office_id'];
+        $scheduleId = (int) $data['schedule_id'];
+        $isDelete = $data['action'] === 'replacement-delete';
+
+        $response = DB::transaction(function () use (
+            $clinicId, $date, $officeId, $scheduleId, $isDelete, $data
+        ): array {
+            // Одинаковые проверки для конкурирующих запросов внутри клиники.
+            DB::table('clinics')->where('id', $clinicId)->lockForUpdate()->first();
+
+            $cabinet = ClinicCabinet::query()
+                ->where('clinic_id', $clinicId)
+                ->where('enabled', true)
+                ->whereNotNull('doctor_id')
+                ->findOrFail($officeId);
+
+            $schedule = EmployeeWorkSchedule::query()
+                ->where('clinic_id', $clinicId)
+                ->where('employee_type', 'doctor')
+                ->where('employee_id', (int) $cabinet->doctor_id)
+                ->where('enabled', true)
+                ->whereNotNull('start_time')
+                ->whereNotNull('end_time')
+                ->findOrFail($scheduleId);
+
+            if (Carbon::parse($date)->isoWeekday() !== (int) $schedule->day_number) {
+                throw ValidationException::withMessages([
+                    'shift_date' => 'Дата не соответствует дню недели исходной смены.',
+                ]);
+            }
+
+            $identity = [
+                'clinic_id' => $clinicId,
+                'clinic_cabinet_id' => $officeId,
+                'shift_date' => $date,
+            ];
+
+            if ($isDelete) {
+                DB::table('doctor_schedule_replacements')->where($identity)->delete();
+                return ['ok' => true, 'deleted' => true];
+            }
+
+            $replacementDoctorId = (int) ($data['replacement_doctor_id'] ?? 0);
+            if ($replacementDoctorId <= 0
+                || $replacementDoctorId === (int) $cabinet->doctor_id) {
+                throw ValidationException::withMessages([
+                    'replacement_doctor_id' => 'Выберите другого врача для замещения.',
+                ]);
+            }
+
+            $allowed = $this->clinicDoctorsQuery($clinicId)
+                ->where('id', $replacementDoctorId)
+                ->exists();
+            if (!$allowed || in_array(
+                $replacementDoctorId,
+                $this->homeVisitDoctorIdsForClinic($clinicId),
+                true
+            )) {
+                throw ValidationException::withMessages([
+                    'replacement_doctor_id' => 'Врач недоступен для амбулаторного замещения в этой клинике.',
+                ]);
+            }
+
+            $this->ensureReplacementDoctorAvailableForDate(
+                $clinicId,
+                $replacementDoctorId,
+                $date,
+                (int) $cabinet->id,
+                (int) $schedule->id,
+                substr((string) $schedule->start_time, 0, 5),
+                substr((string) $schedule->end_time, 0, 5)
+            );
+
+            DB::table('doctor_schedule_replacements')->updateOrInsert(
+                $identity,
+                [
+                    'schedule_id' => (int) $schedule->id,
+                    'base_doctor_id' => (int) $cabinet->doctor_id,
+                    'replacement_doctor_id' => $replacementDoctorId,
+                    'comment' => trim((string) ($data['comment'] ?? '')) ?: null,
+                    'updated_at' => now(),
+                    // Установка created_at при первой вставке ниже не требуется
+                    // при наличии DB default CURRENT_TIMESTAMP в миграции.
+                ]
+            );
+
+            return [
+                'ok' => true,
+                'office_id' => (int) $cabinet->id,
+                'schedule_id' => (int) $schedule->id,
+                'base_doctor_id' => (int) $cabinet->doctor_id,
+                'replacement_doctor_id' => $replacementDoctorId,
+                'date' => $date,
+                'comment' => trim((string) ($data['comment'] ?? '')),
+            ];
+        }, 3);
+
+        return response()->json($response);
+    }
+
+    /**
+     * Проверяем, что И.О. не в отпуске и не занят в другом кабинете.
+     * Учитываем уже сохранённые разовые замещения и автоматические И.О.
+     * из утверждённых отпусков.
+     */
+    private function ensureReplacementDoctorAvailableForDate(
+        int $clinicId,
+        int $doctorId,
+        string $date,
+        int $targetOfficeId,
+        int $targetScheduleId,
+        string $targetFrom,
+        string $targetTo
+    ): void {
+        if (Schema::hasTable('employee_vacations')) {
+            $onVacation = EmployeeVacation::query()
+                ->where('clinic_id', $clinicId)
+                ->where('employee_type', 'doctor')
+                ->where('employee_id', $doctorId)
+                ->where('status', 'approved')
+                ->whereDate('date_from', '<=', $date)
+                ->whereDate('date_to', '>=', $date)
+                ->exists();
+
+            if ($onVacation) {
+                throw ValidationException::withMessages([
+                    'replacement_doctor_id' => 'Выбранный врач сам находится в утверждённом отпуске в этот день.',
+                ]);
+            }
+        }
+
+        $weekday = Carbon::parse($date)->isoWeekday();
+        $cabinets = ClinicCabinet::query()
+            ->where('clinic_id', $clinicId)
+            ->where('enabled', true)
+            ->whereNotNull('doctor_id')
+            ->get(['id', 'doctor_id', 'cabinet']);
+
+        $schedules = EmployeeWorkSchedule::query()
+            ->where('clinic_id', $clinicId)
+            ->where('employee_type', 'doctor')
+            ->where('day_number', $weekday)
+            ->where('enabled', true)
+            ->whereNotNull('start_time')
+            ->whereNotNull('end_time')
+            ->get()
+            ->keyBy('employee_id');
+
+        $manual = DB::table('doctor_schedule_replacements')
+            ->where('clinic_id', $clinicId)
+            ->where('shift_date', $date)
+            ->get()
+            ->keyBy('clinic_cabinet_id');
+
+        $vacations = Schema::hasTable('employee_vacations')
+            ? EmployeeVacation::query()
+                ->where('clinic_id', $clinicId)
+                ->where('employee_type', 'doctor')
+                ->where('status', 'approved')
+                ->whereDate('date_from', '<=', $date)
+                ->whereDate('date_to', '>=', $date)
+                ->get()
+                ->keyBy('employee_id')
+            : collect();
+
+        foreach ($cabinets as $cabinet) {
+            $schedule = $schedules->get((int) $cabinet->doctor_id);
+            if (!$schedule) {
+                continue;
+            }
+
+            if ((int) $cabinet->id === $targetOfficeId
+                && (int) $schedule->id === $targetScheduleId) {
+                continue;
+            }
+
+            $from = substr((string) $schedule->start_time, 0, 5);
+            $to = substr((string) $schedule->end_time, 0, 5);
+            if ($from >= $targetTo || $to <= $targetFrom) {
+                continue;
+            }
+
+            $override = $manual->get((int) $cabinet->id);
+            $validOverride = $override
+                && (int) $override->schedule_id === (int) $schedule->id
+                && (int) $override->base_doctor_id === (int) $cabinet->doctor_id;
+
+            if ($validOverride) {
+                $effectiveDoctor = (int) $override->replacement_doctor_id;
+            } else {
+                $vacation = $vacations->get((int) $cabinet->doctor_id);
+                $effectiveDoctor = $vacation
+                    ? (int) $vacation->replace_doctor_id
+                    : (int) $cabinet->doctor_id;
+            }
+
+            if ($effectiveDoctor === $doctorId) {
+                throw ValidationException::withMessages([
+                    'replacement_doctor_id' => sprintf(
+                        'Врач уже занят в кабинете №%s (%s–%s) %s.',
+                        (string) $cabinet->cabinet,
+                        $from,
+                        $to,
+                        Carbon::parse($date)->format('d.m.Y')
+                    ),
+                ]);
+            }
+        }
     }
 
     public function updateDoctorScheduleShift(
@@ -4773,6 +5227,10 @@ class CabinetController extends SettingsBaseController
                 'end' => [
                     'nullable',
                     'date_format:H:i',
+                ],
+                'date' => [
+                    'nullable',
+                    'date_format:Y-m-d',
                 ],
             ],
             [
@@ -4822,6 +5280,12 @@ class CabinetController extends SettingsBaseController
                             ->lockForUpdate()
                             ->firstOrFail();
 
+                    if (Schema::hasTable('doctor_schedule_replacements')) {
+                        DB::table('doctor_schedule_replacements')
+                            ->where('clinic_id', $clinicId)
+                            ->where('schedule_id', (int) $schedule->id)
+                            ->delete();
+                    }
                     $schedule->enabled = false;
                     $schedule->start_time = null;
                     $schedule->end_time = null;
@@ -4848,6 +5312,22 @@ class CabinetController extends SettingsBaseController
 
         $dayIndex = (int) $data['day'];
         $dayNumber = $dayIndex + 1;
+
+        // Недельный редактор обязан сообщить дату отображаемой недели.
+        // Иначе невозможно проверить дату на пересечение с отпуском.
+        if (empty($data['date'])) {
+            throw ValidationException::withMessages([
+                'date' => 'Не передана календарная дата смены. Обновите страницу расписания.',
+            ]);
+        }
+
+        $shiftDate = (string) $data['date'];
+        if (Carbon::parse($shiftDate)->isoWeekday() !== $dayNumber) {
+            throw ValidationException::withMessages([
+                'date' => 'Дата смены не соответствует выбранному дню недели.',
+            ]);
+        }
+
         $start = (string) $data['start'];
         $end = (string) $data['end'];
 
@@ -4892,6 +5372,7 @@ class CabinetController extends SettingsBaseController
                 $scheduleId,
                 $data,
                 $dayNumber,
+                $shiftDate,
                 $start,
                 $end
             ): EmployeeWorkSchedule {
@@ -4926,6 +5407,12 @@ class CabinetController extends SettingsBaseController
                             'Не удалось определить врача.',
                     ]);
                 }
+
+                $this->ensureDoctorNotOnApprovedVacation(
+                    $clinicId,
+                    $doctorId,
+                    $shiftDate
+                );
 
                 $doctorCabinet =
                     ClinicCabinet::query()
@@ -5434,14 +5921,16 @@ class CabinetController extends SettingsBaseController
             )
             ->values();
 
-        $today = Carbon::today();
+// clinic-telemedicine-timezones:timezone-clinicSchedule-today:v1:begin
+$today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId));
+// clinic-telemedicine-timezones:timezone-clinicSchedule-today:v1:end
 
         $nearestException = $visibleExceptions
             ->filter(
                 static fn (array $exception): bool =>
-                    Carbon::parse($exception['date_to'])
-                        ->endOfDay()
-                        ->gte($today)
+// clinic-telemedicine-timezones:timezone-clinic-exception-civil:v1:begin
+$exception['date_to'] >= $today->toDateString()
+// clinic-telemedicine-timezones:timezone-clinic-exception-civil:v1:end
             )
             ->sortBy(
                 static fn (array $exception): string =>
@@ -5953,10 +6442,14 @@ class CabinetController extends SettingsBaseController
     public function vacationSchedule(Request $request)
     {
         $clinicId = (int) auth()->user()->doctor->clinic_id;
-        $year = (int) $request->integer('year', now()->year);
+// clinic-telemedicine-timezones:timezone-vacation-year:v1:begin
+$year = (int) $request->integer('year', now(\App\Support\ClinicAppointmentTime::timezone($clinicId))->year);
+// clinic-telemedicine-timezones:timezone-vacation-year:v1:end
 
         if ($year < 2020 || $year > 2100) {
-            $year = now()->year;
+// clinic-telemedicine-timezones:timezone-vacation-year-fallback:v1:begin
+$year = now(\App\Support\ClinicAppointmentTime::timezone($clinicId))->year;
+// clinic-telemedicine-timezones:timezone-vacation-year-fallback:v1:end
         }
 
         $employees = $this->vacationEmployeesForClinic($clinicId);
@@ -6040,7 +6533,9 @@ class CabinetController extends SettingsBaseController
 
         $vacations->each($decorateVacation);
 
-        $nearestVacationStart = Carbon::today();
+// clinic-telemedicine-timezones:timezone-vacation-nearest:v1:begin
+$nearestVacationStart = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId));
+// clinic-telemedicine-timezones:timezone-vacation-nearest:v1:end
         $nearestVacationEnd = $nearestVacationStart
             ->copy()
             ->addMonthsNoOverflow(6)
@@ -6080,10 +6575,10 @@ class CabinetController extends SettingsBaseController
                 ->filter(
                     static fn (EmployeeVacation $vacation): bool =>
                         $vacation->status === 'approved'
-                        && now()->betweenIncluded(
-                            $vacation->date_from->startOfDay(),
-                            $vacation->date_to->endOfDay()
-                        )
+// clinic-telemedicine-timezones:timezone-vacation-active-civil:v1:begin
+&& $vacation->date_from->toDateString() <= now(\App\Support\ClinicAppointmentTime::timezone($clinicId))->toDateString()
+                        && $vacation->date_to->toDateString() >= now(\App\Support\ClinicAppointmentTime::timezone($clinicId))->toDateString()
+// clinic-telemedicine-timezones:timezone-vacation-active-civil:v1:end
                 )
                 ->count(),
         ];
@@ -6155,8 +6650,8 @@ class CabinetController extends SettingsBaseController
             'clinic_id' => $clinicId,
             'employee_type' => $employeeType,
             'employee_id' => $employeeId,
-            'replacement_doctor_id' => $replaceDoctorId,
-            'replacement_nurse_id' => $replaceNurseId,
+            'replace_doctor_id' => $replaceDoctorId,
+            'replace_nurse_id' => $replaceNurseId,
             'vacation_type' => $data['vacation_type'],
             'date_from' => $data['date_from'],
             'date_to' => $data['date_to'],
@@ -6178,6 +6673,10 @@ class CabinetController extends SettingsBaseController
             ->user()
             ->doctor
             ->clinic_id;
+
+        // Route Model Binding без проверки клиники не должен открывать
+        // изменение чужих отпусков по идентификатору.
+        abort_unless((int) $vacation->clinic_id === $clinicId, 404);
 
         $data = $request->validated();
         $employeeType = (string) $data['employee_type'];
@@ -6237,6 +6736,9 @@ class CabinetController extends SettingsBaseController
         VacationScheduleDeleteRequest $request,
         EmployeeVacation $vacation
     ) {
+        $clinicId = (int) auth()->user()->doctor->clinic_id;
+        abort_unless((int) $vacation->clinic_id === $clinicId, 404);
+
         $vacation->delete();
 
         return back()->with(

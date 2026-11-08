@@ -526,6 +526,7 @@
 
             <div class="collapse navbar-collapse" id="settingsNavbar">
                 <ul class="navbar-nav settings-navbar__menu">
+                    {{-- clinic-telemedicine-timezones:settings-nav:v1:end --}}
                     @if(auth()->user()?->doctor)
                     <li class="nav-item">
                         <a class="settings-navbar__link {{ is_route('doctors.settings.index') ? 'active' : '' }}"
@@ -592,6 +593,17 @@
                                href="{{ route('doctors.settings.districts') }}">
                                 <i class="bi bi-geo-alt"></i>
                                 Участки
+                            </a>
+                        </li>
+                    @endif
+
+                    {{-- clinic-telemedicine-timezones:settings-nav:v1:begin --}}
+                    @if ($clinicTelemedicineNavigation['visible'] ?? false)
+                        <li class="nav-item">
+                            <a class="settings-navbar__link {{ $clinicTelemedicineNavigation['active'] ? 'active' : '' }}"
+                               href="{{ $clinicTelemedicineNavigation['url'] }}">
+                                <i class="bi bi-camera-video" aria-hidden="true"></i>
+                                Телемедицина
                             </a>
                         </li>
                     @endif
