@@ -746,3 +746,56 @@ Route::prefix('laboratory')->as('laboratory.')->group(function (): void {
                 ->name('logout');
         });
 });
+
+// NORHNAIM_AI_MEDICAL_DOCUMENT_QUEUE_V1
+Route::middleware([
+    'auth',
+    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
+])
+    ->prefix('doctors/patients/{patient:id}/ai-document-tasks')
+    ->name('doctors.patients.ai-document-tasks.')
+    ->group(function (): void {
+        Route::post(
+            '/',
+            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'store']
+        )->name('store');
+
+        Route::get(
+            '/{task}',
+            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'show']
+        )->whereUuid('task')->name('show');
+
+        Route::post(
+            '/{task}/cancel',
+            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'cancel']
+        )->whereUuid('task')->name('cancel');
+
+        Route::post(
+            '/{task}/anamneses/confirm',
+            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'confirmAnamneses']
+        )->whereUuid('task')->name('anamneses.confirm');
+    });
+
+// NORHNAIM_EPICRISIS_FORM_CONTEXT_V1
+Route::middleware([
+    'auth',
+    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
+])
+    ->get(
+        '/doctors/patients/{patient:id}/epicrisis-form-context',
+        [\App\Http\Controllers\Doctors\EpicrisisFormContextController::class, 'show']
+    )
+    ->whereNumber('patient')
+    ->name('doctors.patients.epicrisis.form-context');
+
+// NORHNAIM_CERTIFICATE_PRINT_CONTEXT_V1
+Route::middleware([
+    'auth',
+    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
+])
+    ->get(
+        '/doctors/patients/{patient:id}/certificate/print-context',
+        [\App\Http\Controllers\Doctors\CertificatePrintContextController::class, 'show']
+    )
+    ->whereNumber('patient')
+    ->name('doctors.patients.certificate.print-context');

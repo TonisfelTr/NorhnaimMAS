@@ -88,7 +88,7 @@ services:
             - artisan
             - queue:work
             - rabbitmq
-            - "--queue=${RABBITMQ_QUEUE:-default}"
+            - "--queue=${AI_DOCUMENT_QUEUE:-ai-documents},${RABBITMQ_QUEUE:-default}"
             - "--sleep=3"
             - "--tries=3"
             - "--backoff=5"

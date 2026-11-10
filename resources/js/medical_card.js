@@ -8057,6 +8057,416 @@ function initMedicalCardCertificatesUi() {
         }
     }
 
+    // NORHNAIM_CERTIFICATE_PRINT_POLISH_V1
+    async function loadCertificatePrintContext(modal) {
+        if (
+            modal.dataset.certificatePrintContextLoaded === '1'
+        ) {
+            return;
+        }
+
+        const patientId = String(
+            modal.dataset.certPatientId || ''
+        ).trim();
+
+        if (!patientId) {
+            return;
+        }
+
+        modal.dataset.certificatePrintContextLoaded = '1';
+
+        try {
+            const response = await fetch(
+                `/doctors/patients/${encodeURIComponent(patientId)}/certificate/print-context`,
+                {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            const data = await response
+                .json()
+                .catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(
+                    data?.message || `HTTP ${response.status}`
+                );
+            }
+
+            const organization = query(
+                modal,
+                '[data-cert-organization]'
+            );
+
+            if (
+                organization
+                && !String(organization.value || '').trim()
+                && data.organization
+            ) {
+                organization.value = String(data.organization);
+                organization.defaultValue = String(data.organization);
+                organization.dispatchEvent(
+                    new Event('input', {bubbles: true})
+                );
+            }
+
+            const doctor = query(
+                modal,
+                '[data-cert-doctor]'
+            );
+
+            if (
+                doctor
+                && !String(doctor.value || '').trim()
+                && data.doctor_name
+            ) {
+                doctor.value = String(data.doctor_name);
+                doctor.defaultValue = String(data.doctor_name);
+                doctor.dispatchEvent(
+                    new Event('input', {bubbles: true})
+                );
+            }
+
+            modal.dataset.certDoctorLabel =
+                String(data.doctor_label || data.doctor_name || '');
+            modal.dataset.certOrganization =
+                String(data.organization || '');
+        } catch (error) {
+            modal.dataset.certificatePrintContextLoaded = '0';
+
+            console.warn(
+                '[certificate-print-context]',
+                error
+            );
+        }
+    }
+
+    function appendConfiguredDocumentHeader(
+        fragment,
+        modal
+    ) {
+        const headerUrl = String(
+            modal.dataset.certHeaderUrl || ''
+        ).trim();
+
+        if (headerUrl) {
+            const header = document.createElement('div');
+            header.className = 'mc-cert-paper__clinic-header';
+            header.style.cssText = [
+                'width:100%',
+                'max-width:100%',
+                'margin:0 0 7mm',
+                'text-align:center',
+                'break-inside:avoid'
+            ].join(';');
+
+            const image = document.createElement('img');
+            image.src = headerUrl;
+            image.alt = 'Шапка медицинской организации';
+            image.style.cssText = [
+                'display:block',
+                'width:100%',
+                'max-width:100%',
+                'height:auto',
+                'margin:0 auto',
+                'object-fit:contain'
+            ].join(';');
+
+            header.append(image);
+            fragment.append(header);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    function appendDoctorSignatureAndStamp(
+        fragment,
+        modal,
+        doctorOverride = ''
+    ) {
+        const doctor = String(
+            doctorOverride
+            || query(modal, '[data-cert-doctor]')?.value
+            || modal.dataset.certDoctorLabel
+            || ''
+        ).trim();
+
+        const block = document.createElement('section');
+        block.className = 'mc-cert-paper__doctor-signature';
+        block.style.cssText = [
+            'display:grid',
+            'grid-template-columns:minmax(0,1fr) 34mm',
+            'gap:12mm',
+            'align-items:end',
+            'margin-top:12mm',
+            'padding-top:5mm',
+            'border-top:1px solid #cfd5da',
+            'break-inside:avoid'
+        ].join(';');
+
+        const left = document.createElement('div');
+
+        const label = document.createElement('div');
+        label.style.cssText =
+            'font-size:9.5pt;margin-bottom:8mm;';
+        label.textContent = 'Врач';
+
+        const line = document.createElement('div');
+        line.style.cssText = [
+            'display:grid',
+            'grid-template-columns:minmax(45mm,1fr) auto',
+            'gap:6mm',
+            'align-items:end'
+        ].join(';');
+
+        const signatureLine = document.createElement('div');
+        signatureLine.style.cssText =
+            'border-bottom:1px solid #333;height:8mm;';
+
+        const name = document.createElement('div');
+        name.style.cssText =
+            'min-width:45mm;font-size:9.5pt;text-align:center;';
+        name.textContent = doctor || '________________________';
+
+        const hints = document.createElement('div');
+        hints.style.cssText = [
+            'display:grid',
+            'grid-template-columns:minmax(45mm,1fr) auto',
+            'gap:6mm',
+            'margin-top:2px',
+            'color:#666',
+            'font-size:7.5pt'
+        ].join(';');
+
+        const signatureHint = document.createElement('div');
+        signatureHint.style.textAlign = 'center';
+        signatureHint.textContent = 'подпись';
+
+        const nameHint = document.createElement('div');
+        nameHint.style.cssText =
+            'min-width:45mm;text-align:center;';
+        nameHint.textContent = 'Ф.И.О.';
+
+        line.append(signatureLine, name);
+        hints.append(signatureHint, nameHint);
+        left.append(label, line, hints);
+
+        const stamp = document.createElement('div');
+        stamp.style.cssText = [
+            'width:32mm',
+            'height:32mm',
+            'border:1px dashed #777',
+            'border-radius:50%',
+            'display:flex',
+            'align-items:center',
+            'justify-content:center',
+            'padding:4mm',
+            'box-sizing:border-box',
+            'text-align:center',
+            'font-size:7.5pt',
+            'line-height:1.25',
+            'color:#666'
+        ].join(';');
+        stamp.textContent = 'Место для личной печати врача';
+
+        block.append(left, stamp);
+        fragment.append(block);
+    }
+
+    function extractComplaintsFallback(anamnesis) {
+        const text = String(anamnesis || '').trim();
+
+        if (!text) {
+            return '';
+        }
+
+        const sentences = text
+            .split(/(?<=[.!?])\s+/u)
+            .map(value => value.trim())
+            .filter(Boolean);
+
+        const complaintPattern =
+            /(жалоб|жалует|беспоко|раздраж|тревог|страх|бессон|сон|настроен|апат|агресс|концентрац|вниман|галлюцина|голос|бред|навязчив|паник|утом|энерги)/iu;
+
+        const picked = sentences
+            .filter(sentence => complaintPattern.test(sentence))
+            .slice(0, 5);
+
+        return picked.join(' ');
+    }
+
+    function appendPsychiatristSection(
+        fragment,
+        title,
+        value,
+        {
+            keepEmpty = false
+        } = {}
+    ) {
+        const text = String(value || '').trim();
+
+        if (!text && !keepEmpty) {
+            return;
+        }
+
+        const section = document.createElement('section');
+        section.style.cssText =
+            'margin:14px 0 0;break-inside:auto;';
+
+        const heading = document.createElement('h3');
+        heading.textContent = title;
+        heading.style.cssText = [
+            'margin:0 0 6px',
+            'padding-bottom:4px',
+            'border-bottom:1px solid #cfd5da',
+            'font-size:10.8pt',
+            'font-weight:700',
+            'text-align:left',
+            'break-after:avoid'
+        ].join(';');
+
+        const content = document.createElement('p');
+        content.style.cssText = [
+            'margin:0',
+            'white-space:pre-wrap',
+            'line-height:1.48',
+            'font-size:10.6pt',
+            'overflow-wrap:anywhere'
+        ].join(';');
+        content.textContent =
+            text || '____________________________';
+
+        section.append(heading, content);
+        fragment.append(section);
+    }
+
+    function renderPsychiatristConclusionPreview(modal) {
+        const paper = query(modal, '[data-cert-paper]');
+        const fragment = document.createDocumentFragment();
+
+        const hasHeader = appendConfiguredDocumentHeader(
+            fragment,
+            modal
+        );
+
+        const organization = String(
+            query(modal, '[data-cert-organization]')?.value
+            || modal.dataset.certOrganization
+            || ''
+        ).trim();
+
+        if (!hasHeader && organization) {
+            const org = document.createElement('div');
+            org.style.cssText = [
+                'margin:0 0 8mm',
+                'font-size:10pt',
+                'font-weight:600',
+                'text-align:center'
+            ].join(';');
+            org.textContent = organization;
+            fragment.append(org);
+        }
+
+        const title = document.createElement('h2');
+        title.textContent =
+            modal.dataset.certTitle || 'Заключение психиатра';
+        title.style.cssText = [
+            'margin:0 0 14px',
+            'text-align:center',
+            'font-size:15pt',
+            'font-weight:700'
+        ].join(';');
+        fragment.append(title);
+
+        const meta = (label, value) => {
+            const p = document.createElement('p');
+            p.style.cssText =
+                'margin:0 0 4px;font-size:10.4pt;line-height:1.4;';
+
+            const strong = document.createElement('strong');
+            strong.textContent = label + ': ';
+
+            p.append(
+                strong,
+                document.createTextNode(
+                    String(value || '').trim()
+                    || '____________________'
+                )
+            );
+
+            fragment.append(p);
+        };
+
+        meta(
+            'Дата',
+            dateText(
+                query(modal, '[data-cert-issued-date]')?.value
+            )
+        );
+        meta('Пациент', modal.dataset.certPatient);
+        meta('Дата рождения', modal.dataset.certBirth);
+        meta('Номер медицинской карты', modal.dataset.certCard);
+
+        appendPsychiatristSection(
+            fragment,
+            'Жалобы',
+            query(modal, '#cert-psychiatrist-complaints')?.value
+        );
+
+        appendPsychiatristSection(
+            fragment,
+            'Анамнез',
+            query(modal, '#cert-psychiatrist-anamnesis')?.value
+        );
+
+        appendPsychiatristSection(
+            fragment,
+            'Психический статус',
+            query(modal, '#cert-psychiatrist-mental_status')?.value
+        );
+
+        appendPsychiatristSection(
+            fragment,
+            'Заключение психиатра',
+            query(modal, '#cert-psychiatrist-conclusion')?.value
+        );
+
+        appendPsychiatristSection(
+            fragment,
+            'Терапия',
+            query(modal, '#cert-psychiatrist-therapy')?.value
+        );
+
+        appendPsychiatristSection(
+            fragment,
+            'Рекомендации',
+            query(modal, '#cert-psychiatrist-recommendations')?.value
+        );
+
+        // Диагноз намеренно внизу после клинического заключения.
+        appendPsychiatristSection(
+            fragment,
+            'Диагноз',
+            query(modal, '#cert-psychiatrist-diagnosis')?.value
+        );
+
+        appendDoctorSignatureAndStamp(
+            fragment,
+            modal
+        );
+
+        paper.replaceChildren(fragment);
+
+        return modal.dataset.certTitle || 'Заключение психиатра';
+    }
+
     function validatePreview(modal) {
         showError(modal);
         const from = query(modal, '[data-cert-period-from]');
@@ -8080,7 +8490,899 @@ function initMedicalCardCertificatesUi() {
         return true;
     }
 
+
+    // NORHNAIM_EPICRISIS_CDA_LAYOUT_V1
+    // NORHNAIM_EPICRISIS_CDA_LAYOUT_POLISH_V101
+    function epicrisisField(
+        id,
+        label,
+        {
+            type = 'textarea',
+            rows = 3,
+            value = '',
+            options = null,
+            col = 'col-12'
+        } = {}
+    ) {
+        const wrapper = document.createElement('div');
+        wrapper.className = col;
+
+        const labelNode = document.createElement('label');
+        labelNode.className = 'form-label';
+        labelNode.htmlFor = id;
+        labelNode.textContent = label;
+        wrapper.append(labelNode);
+
+        let control;
+
+        if (type === 'select') {
+            control = document.createElement('select');
+            control.className = 'form-select';
+
+            (options || []).forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.value;
+                option.textContent = item.label;
+                control.append(option);
+            });
+        } else if (type === 'input') {
+            control = document.createElement('input');
+            control.className = 'form-control';
+            control.type = 'text';
+        } else if (type === 'datetime-local') {
+            control = document.createElement('input');
+            control.className = 'form-control';
+            control.type = 'datetime-local';
+        } else {
+            control = document.createElement('textarea');
+            control.className = 'form-control';
+            control.rows = rows;
+        }
+
+        control.id = id;
+        control.name = id.replaceAll('-', '_');
+        control.maxLength = 20000;
+        control.dataset.certField = '';
+        control.dataset.certLabel = label;
+
+        if (value !== null && value !== undefined) {
+            control.value = String(value);
+            control.defaultValue = String(value);
+        }
+
+        wrapper.append(control);
+
+        return wrapper;
+    }
+
+    // NORHNAIM_EPICRISIS_FORM_CONTEXT_V1
+    async function loadEpicrisisFormContext(modal) {
+        if (
+            modal.dataset.certAiMode !== 'epicrisis'
+            || modal.dataset.epicrisisFormContextLoaded === '1'
+        ) {
+            return;
+        }
+
+        const patientId = String(
+            modal.dataset.certPatientId || ''
+        ).trim();
+
+        if (!patientId) {
+            return;
+        }
+
+        modal.dataset.epicrisisFormContextLoaded = '1';
+
+        try {
+            const response = await fetch(
+                `/doctors/patients/${encodeURIComponent(patientId)}/epicrisis-form-context`,
+                {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }
+            );
+
+            const data = await response
+                .json()
+                .catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(
+                    data?.message
+                    || `HTTP ${response.status}`
+                );
+            }
+
+            const mapping = {
+                sex: '#cert-epicrisis-sex',
+                visit_type: '#cert-epicrisis-visit-type',
+                place: '#cert-epicrisis-place',
+                benefit_category:
+                    '#cert-epicrisis-benefit-category',
+                service_datetime:
+                    '#cert-epicrisis-service-datetime',
+                service_name:
+                    '#cert-epicrisis-service-name',
+                medical_worker:
+                    '#cert-epicrisis-service-worker',
+                document_author:
+                    '#cert-epicrisis-document-author',
+                document_verifier:
+                    '#cert-epicrisis-document-verifier'
+            };
+
+            Object.entries(mapping).forEach(
+                ([key, selector]) => {
+                    const control = query(
+                        modal,
+                        selector
+                    );
+
+                    const value = String(
+                        data?.[key] || ''
+                    ).trim();
+
+                    if (
+                        !control
+                        || !value
+                        || String(control.value || '').trim() !== ''
+                    ) {
+                        return;
+                    }
+
+                    control.value = value;
+                    control.defaultValue = value;
+
+                    if (control.tagName === 'SELECT') {
+                        Array.from(control.options)
+                            .forEach(option => {
+                                option.defaultSelected =
+                                    option.value === value;
+                            });
+                    }
+
+                    control.dispatchEvent(
+                        new Event(
+                            'input',
+                            {bubbles: true}
+                        )
+                    );
+
+                    control.dispatchEvent(
+                        new Event(
+                            'change',
+                            {bubbles: true}
+                        )
+                    );
+                }
+            );
+        } catch (error) {
+            modal.dataset.epicrisisFormContextLoaded = '0';
+
+            console.warn(
+                '[epicrisis-form-context]',
+                error
+            );
+        }
+    }
+
+    function ensureEpicrisisCdaFields(modal) {
+        if (
+            modal.dataset.certAiMode !== 'epicrisis'
+            || modal.dataset.epicrisisCdaFieldsReady === '1'
+        ) {
+            return;
+        }
+
+        const editor = query(modal, '[data-cert-editor]');
+        if (!editor) return;
+
+        modal.dataset.epicrisisCdaFieldsReady = '1';
+
+        const doctorName =
+            query(modal, '[data-cert-doctor]')?.value?.trim()
+            || '';
+
+        const section = document.createElement('section');
+        section.className = 'mc-cert-section mt-3';
+        section.dataset.epicrisisCdaFields = '1';
+
+        const title = document.createElement('h3');
+        title.textContent = 'Сведения для печатной формы';
+        section.append(title);
+
+        const hint = document.createElement('p');
+        hint.className = 'text-muted small mb-3';
+        hint.textContent =
+            'Дополнительные поля приведены к структуре протокола консультации. '
+            + 'Они используются только в предварительной печатной форме.';
+        section.append(hint);
+
+        const row = document.createElement('div');
+        row.className = 'row g-3';
+
+        row.append(
+            epicrisisField(
+                'cert-epicrisis-sex',
+                'Пол',
+                {
+                    type: 'select',
+                    col: 'col-sm-4',
+                    options: [
+                        {value: '', label: 'Не указан'},
+                        {value: 'Мужской', label: 'Мужской'},
+                        {value: 'Женский', label: 'Женский'}
+                    ]
+                }
+            ),
+            epicrisisField(
+                'cert-epicrisis-visit-type',
+                'Вид обращения',
+                {type: 'input', col: 'col-sm-4'}
+            ),
+            epicrisisField(
+                'cert-epicrisis-place',
+                'Место проведения',
+                {type: 'input', col: 'col-sm-4'}
+            ),
+            epicrisisField(
+                'cert-epicrisis-benefit-category',
+                'Льготная категория',
+                {type: 'input'}
+            ),
+            epicrisisField(
+                'cert-epicrisis-complaints',
+                'Жалобы'
+            ),
+            epicrisisField(
+                'cert-epicrisis-anamnesis-life',
+                'Анамнез жизни',
+                {rows: 4}
+            ),
+            epicrisisField(
+                'cert-epicrisis-disability',
+                'Инвалидность',
+                {rows: 3}
+            ),
+            epicrisisField(
+                'cert-epicrisis-social-anamnesis',
+                'Социальный анамнез',
+                {rows: 3}
+            ),
+            epicrisisField(
+                'cert-epicrisis-service-datetime',
+                'Дата и время оказания услуги',
+                {type: 'datetime-local', col: 'col-sm-4'}
+            ),
+            epicrisisField(
+                'cert-epicrisis-service-name',
+                'Оказанная медицинская услуга',
+                {type: 'input', col: 'col-sm-8'}
+            ),
+            epicrisisField(
+                'cert-epicrisis-service-worker',
+                'Медицинский работник',
+                {type: 'input', value: doctorName}
+            ),
+            epicrisisField(
+                'cert-epicrisis-document-author',
+                'Документ составил',
+                {type: 'input', value: doctorName, col: 'col-sm-6'}
+            ),
+            epicrisisField(
+                'cert-epicrisis-document-verifier',
+                'Документ заверил',
+                {type: 'input', value: doctorName, col: 'col-sm-6'}
+            )
+        );
+
+        section.append(row);
+        editor.append(section);
+
+        void loadEpicrisisFormContext(modal);
+    }
+
+    function epicrisisValue(modal, selector) {
+        return String(query(modal, selector)?.value || '').trim();
+    }
+
+    function epicrisisAge(birthText, issuedText) {
+        const birthParts = String(birthText || '')
+            .match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+
+        if (!birthParts) return '';
+
+        const issuedParts = String(issuedText || '')
+            .match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+
+        const birth = {
+            day: Number(birthParts[1]),
+            month: Number(birthParts[2]),
+            year: Number(birthParts[3])
+        };
+
+        let issued;
+
+        if (issuedParts) {
+            issued = {
+                day: Number(issuedParts[1]),
+                month: Number(issuedParts[2]),
+                year: Number(issuedParts[3])
+            };
+        } else {
+            const now = new Date();
+            issued = {
+                day: now.getDate(),
+                month: now.getMonth() + 1,
+                year: now.getFullYear()
+            };
+        }
+
+        let age = issued.year - birth.year;
+
+        if (
+            issued.month < birth.month
+            || (
+                issued.month === birth.month
+                && issued.day < birth.day
+            )
+        ) {
+            age -= 1;
+        }
+
+        return age >= 0 && age < 130
+            ? String(age)
+            : '';
+    }
+
+    function epicrisisAppendHeader(fragment, modal) {
+        const headerUrl =
+            String(modal.dataset.certHeaderUrl || '').trim();
+
+        if (!headerUrl) return;
+
+        const header = document.createElement('div');
+        header.className = 'mc-cert-paper__clinic-header';
+        header.style.cssText = [
+            'width:100%',
+            'max-width:100%',
+            'margin:0 0 7mm',
+            'text-align:center',
+            'break-inside:avoid'
+        ].join(';');
+
+        const image = document.createElement('img');
+        image.src = headerUrl;
+        image.alt = 'Шапка медицинской организации';
+        image.style.cssText = [
+            'display:block',
+            'width:100%',
+            'max-width:100%',
+            'height:auto',
+            'margin:0 auto',
+            'object-fit:contain'
+        ].join(';');
+
+        header.append(image);
+        fragment.append(header);
+    }
+
+    function epicrisisAppendMeta(fragment, label, value) {
+        const row = document.createElement('p');
+        row.className = 'mc-cert-paper__meta';
+        row.style.cssText = [
+            'margin:0 0 4px',
+            'line-height:1.4',
+            'font-size:10.4pt'
+        ].join(';');
+
+        const strong = document.createElement('strong');
+        strong.textContent = label + ': ';
+        row.append(strong);
+
+        row.append(
+            document.createTextNode(
+                value || '____________________'
+            )
+        );
+
+        fragment.append(row);
+    }
+
+    function epicrisisAppendSection(
+        fragment,
+        title,
+        body,
+        {
+            keepWhenEmpty = false,
+            strongPrefix = null
+        } = {}
+    ) {
+        const normalized = String(body || '').trim();
+
+        if (!normalized && !keepWhenEmpty) {
+            return;
+        }
+
+        const section = document.createElement('section');
+        section.className =
+            'mc-cert-paper__section mc-cert-paper__epicrisis-section';
+        section.style.cssText = [
+            'margin:14px 0 0',
+            'break-inside:auto',
+            'max-width:100%'
+        ].join(';');
+
+        const heading = document.createElement('h3');
+        heading.textContent = title;
+        heading.style.cssText = [
+            'margin:0 0 6px',
+            'padding:0 0 4px',
+            'border-bottom:1px solid #cfd5da',
+            'text-align:left',
+            'font-size:10.8pt',
+            'font-weight:700',
+            'text-decoration:none',
+            'line-height:1.3',
+            'break-after:avoid'
+        ].join(';');
+
+        section.append(heading);
+
+        if (normalized || strongPrefix) {
+            const content = document.createElement('p');
+            content.style.cssText = [
+                'margin:0',
+                'white-space:pre-wrap',
+                'line-height:1.48',
+                'font-size:10.6pt',
+                'overflow-wrap:anywhere',
+                'word-break:normal',
+                'max-width:100%'
+            ].join(';');
+
+            if (strongPrefix) {
+                const strong = document.createElement('strong');
+                strong.textContent = strongPrefix;
+                content.append(strong);
+            }
+
+            content.append(
+                document.createTextNode(
+                    normalized || ''
+                )
+            );
+
+            section.append(content);
+        }
+
+        fragment.append(section);
+    }
+
+    function epicrisisAppendServicesTable(fragment, modal) {
+        const date = epicrisisValue(
+            modal,
+            '#cert-epicrisis-service-datetime'
+        );
+        const service = epicrisisValue(
+            modal,
+            '#cert-epicrisis-service-name'
+        );
+        const worker = epicrisisValue(
+            modal,
+            '#cert-epicrisis-service-worker'
+        );
+
+        if (!date && !service && !worker) {
+            return;
+        }
+
+        const section = document.createElement('section');
+        section.style.cssText =
+            'margin:20px 0 0;break-inside:avoid;';
+
+        const heading = document.createElement('h3');
+        heading.textContent = 'Оказанные услуги';
+        heading.style.cssText = [
+            'margin:0 0 7px',
+            'padding:0 0 4px',
+            'border-bottom:1px solid #cfd5da',
+            'text-align:left',
+            'font-size:10.8pt',
+            'font-weight:700',
+            'text-decoration:none'
+        ].join(';');
+
+        const table = document.createElement('table');
+        table.style.cssText = [
+            'width:100%',
+            'table-layout:fixed',
+            'border-collapse:collapse',
+            'font-size:9.8pt',
+            'line-height:1.35'
+        ].join(';');
+
+        const columnWidths = ['23%', '44%', '33%'];
+
+        const headers = [
+            'Дата оказания услуги',
+            'Оказанная медицинская услуга',
+            'Медицинский работник'
+        ];
+
+        const values = [
+            date ? date.replace('T', ' ') : '',
+            service,
+            worker
+        ];
+
+        const headRow = document.createElement('tr');
+        headers.forEach((label, index) => {
+            const cell = document.createElement('th');
+            cell.textContent = label;
+            cell.style.cssText = [
+                'width:' + columnWidths[index],
+                'border:1px solid #aeb7bd',
+                'padding:5px 6px',
+                'text-align:left',
+                'vertical-align:top',
+                'background:#f3f5f6',
+                'font-weight:700',
+                'overflow-wrap:anywhere'
+            ].join(';');
+            headRow.append(cell);
+        });
+
+        const bodyRow = document.createElement('tr');
+        values.forEach((value, index) => {
+            const cell = document.createElement('td');
+            cell.textContent = value || '—';
+            cell.style.cssText = [
+                'width:' + columnWidths[index],
+                'border:1px solid #aeb7bd',
+                'padding:6px',
+                'text-align:left',
+                'vertical-align:top',
+                'white-space:pre-wrap',
+                'overflow-wrap:anywhere',
+                'word-break:normal'
+            ].join(';');
+            bodyRow.append(cell);
+        });
+
+        table.append(headRow, bodyRow);
+        section.append(heading, table);
+        fragment.append(section);
+    }
+
+    function renderEpicrisisPreview(modal) {
+        ensureEpicrisisCdaFields(modal);
+
+        const paper = query(modal, '[data-cert-paper]');
+        const fragment = document.createDocumentFragment();
+
+        epicrisisAppendHeader(fragment, modal);
+
+        const kind =
+            query(modal, '[data-cert-document-kind]')
+                ?.selectedOptions?.[0]
+                ?.textContent
+                ?.trim()
+            || modal.dataset.certTitle
+            || 'Этапный эпикриз';
+
+        const issued = dateText(
+            query(modal, '[data-cert-issued-date]')?.value
+        );
+
+        const title = document.createElement('h2');
+        title.textContent = kind;
+        title.style.cssText = [
+            'margin:0 0 14px',
+            'text-align:center',
+            'font-size:15pt',
+            'font-weight:700',
+            'line-height:1.25'
+        ].join(';');
+        fragment.append(title);
+
+        const birth =
+            String(modal.dataset.certBirth || '').trim();
+        const age = epicrisisAge(birth, issued);
+
+        epicrisisAppendMeta(fragment, 'Дата', issued);
+        epicrisisAppendMeta(
+            fragment,
+            'ФИО',
+            modal.dataset.certPatient
+        );
+
+        const sex =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-sex'
+            );
+
+        if (sex || birth) {
+            const line = document.createElement('div');
+            line.style.cssText = [
+                'display:grid',
+                'grid-template-columns:.75fr 1.25fr',
+                'gap:16px',
+                'margin:0 0 4px',
+                'font-size:10.4pt',
+                'line-height:1.4'
+            ].join(';');
+
+            const sexBlock = document.createElement('div');
+            const sexStrong = document.createElement('strong');
+            sexStrong.textContent = 'Пол: ';
+            sexBlock.append(
+                sexStrong,
+                document.createTextNode(
+                    sex || '____________________'
+                )
+            );
+
+            const birthBlock = document.createElement('div');
+            const birthStrong = document.createElement('strong');
+            birthStrong.textContent = 'Дата рождения: ';
+            birthBlock.append(
+                birthStrong,
+                document.createTextNode(
+                    birth
+                    ? birth + (age ? ` (${age} лет)` : '')
+                    : '____________________'
+                )
+            );
+
+            line.append(sexBlock, birthBlock);
+            fragment.append(line);
+        }
+
+        epicrisisAppendMeta(
+            fragment,
+            'Номер медицинской карты',
+            modal.dataset.certCard
+        );
+
+        const visitType =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-visit-type'
+            );
+        const place =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-place'
+            );
+        const benefit =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-benefit-category'
+            );
+
+        if (visitType) {
+            epicrisisAppendMeta(
+                fragment,
+                'Вид обращения',
+                visitType
+            );
+        }
+
+        if (place) {
+            epicrisisAppendMeta(
+                fragment,
+                'Место проведения',
+                place
+            );
+        }
+
+        if (benefit) {
+            epicrisisAppendMeta(
+                fragment,
+                'Льготная категория',
+                benefit
+            );
+        }
+
+        epicrisisAppendSection(
+            fragment,
+            'Жалобы',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-complaints'
+            )
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Анамнез заболевания',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-anamnesis'
+            )
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Анамнез жизни',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-anamnesis-life'
+            )
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Инвалидность',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-disability'
+            )
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Социальный анамнез',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-social-anamnesis'
+            )
+        );
+
+        const condition =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-condition'
+            );
+        const conclusion =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-conclusion'
+            );
+
+        const consultationLines = [];
+
+        if (condition) {
+            consultationLines.push(
+                'Состояние пациента: ' + condition
+            );
+        }
+
+        if (conclusion) {
+            consultationLines.push(
+                'Заключение консультации: ' + conclusion
+            );
+        }
+
+        epicrisisAppendSection(
+            fragment,
+            'Сведения о консультации',
+            consultationLines.join('\n\n')
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Обследования и исследования',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-researches'
+            ),
+            {keepWhenEmpty: false}
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Проведённое лечение',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-treatment'
+            ),
+            {keepWhenEmpty: false}
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Диагноз',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-diagnosis'
+            ),
+            {
+                strongPrefix:
+                    'Основное заболевание: '
+            }
+        );
+
+        epicrisisAppendSection(
+            fragment,
+            'Рекомендации по дальнейшему наблюдению, дообследованию и лечению',
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-recommendations'
+            )
+        );
+
+        epicrisisAppendServicesTable(
+            fragment,
+            modal
+        );
+
+        const author =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-document-author'
+            );
+        const verifier =
+            epicrisisValue(
+                modal,
+                '#cert-epicrisis-document-verifier'
+            );
+
+        const sign = document.createElement('div');
+        sign.style.cssText = [
+            'margin-top:20px',
+            'padding-top:10px',
+            'border-top:1px solid #cfd5da',
+            'line-height:1.5',
+            'font-size:10.4pt',
+            'break-inside:avoid'
+        ].join(';');
+
+        if (author) {
+            const line = document.createElement('p');
+            line.style.margin = '0 0 8px';
+            const strong = document.createElement('strong');
+            strong.textContent = 'Документ составил: ';
+            line.append(
+                strong,
+                document.createTextNode(author)
+            );
+            sign.append(line);
+        }
+
+        if (verifier) {
+            const line = document.createElement('p');
+            line.style.margin = '0';
+            const strong = document.createElement('strong');
+            strong.textContent = 'Документ заверил: ';
+            line.append(
+                strong,
+                document.createTextNode(verifier)
+            );
+            sign.append(line);
+        }
+
+        if (sign.childNodes.length) {
+            fragment.append(sign);
+        }
+
+        appendDoctorSignatureAndStamp(
+            fragment,
+            modal,
+            author || verifier || ''
+        );
+
+        paper.replaceChildren(fragment);
+
+        return kind;
+    }
+
     function renderPreview(modal) {
+        if (modal.dataset.certAiMode === 'psychiatrist_conclusion') {
+            return renderPsychiatristConclusionPreview(modal);
+        }
+
+        if (modal.dataset.certAiMode === 'epicrisis') {
+            return renderEpicrisisPreview(modal);
+        }
+
         const paper = query(modal, '[data-cert-paper]');
         const kind = query(modal, '[data-cert-document-kind]');
         const title = kind?.selectedOptions[0]?.textContent.trim() || modal.dataset.certTitle;
@@ -8149,7 +9451,7 @@ fragment.append(node('h2', '', title));
             section.append(node('p', '', control.value.trim() || '____________________'));
             fragment.append(section);
         });
-        fragment.append(node('div', 'mc-cert-paper__sign', `Врач: ${doctor || '____________________'}\nПодпись: ____________________`));
+        appendDoctorSignatureAndStamp(fragment, modal);
         paper.replaceChildren(fragment);
         return title;
     }
@@ -8264,6 +9566,472 @@ fragment.append(node('h2', '', title));
         tests: 'тестов',
     };
 
+    // NORHNAIM_AI_MEDICAL_DOCUMENT_QUEUE_V1
+    const activeCertificateAiTasks = new Map();
+
+    function sleep(ms) {
+        return new Promise(resolve => window.setTimeout(resolve, ms));
+    }
+
+    function aiTaskStorageKey(id) {
+        return `norhnaim:ai-document-task:${id}`;
+    }
+
+    function rememberCertificateAiTask(task) {
+        try {
+            sessionStorage.setItem(
+                aiTaskStorageKey(task.id),
+                JSON.stringify({
+                    id: task.id,
+                    cancel_url: task.cancel_url
+                })
+            );
+        } catch (_) {
+        }
+    }
+
+    function forgetCertificateAiTask(task) {
+        if (!task?.id) return;
+
+        try {
+            sessionStorage.removeItem(
+                aiTaskStorageKey(task.id)
+            );
+        } catch (_) {
+        }
+    }
+
+    function cancelCertificateAiTaskBeacon(task) {
+        if (
+            !task?.cancel_url
+            || task.done
+        ) {
+            return false;
+        }
+
+        const token = csrf();
+
+        try {
+            const body = new FormData();
+            body.append('_token', token);
+
+            const sent = navigator.sendBeacon(
+                task.cancel_url,
+                body
+            );
+
+            if (sent) {
+                task.done = true;
+            }
+
+            return sent;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    async function cancelCertificateAiTask(task) {
+        if (!task?.cancel_url || task.done) return;
+
+        if (cancelCertificateAiTaskBeacon(task)) {
+            return;
+        }
+
+        try {
+            await fetch(task.cancel_url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                keepalive: true,
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrf()
+                }
+            });
+
+            task.done = true;
+        } catch (_) {
+        }
+    }
+
+    function cancelStaleCertificateAiTasks() {
+        const prefix = 'norhnaim:ai-document-task:';
+
+        try {
+            const stale = [];
+
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+
+                if (
+                    key
+                    && key.startsWith(prefix)
+                ) {
+                    stale.push(key);
+                }
+            }
+
+            stale.forEach(key => {
+                let task = null;
+
+                try {
+                    task = JSON.parse(
+                        sessionStorage.getItem(key)
+                        || '{}'
+                    );
+                } catch (_) {
+                }
+
+                sessionStorage.removeItem(key);
+
+                if (!task?.cancel_url) {
+                    return;
+                }
+
+                void fetch(task.cancel_url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    keepalive: true,
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf()
+                    }
+                }).catch(() => {});
+            });
+        } catch (_) {
+        }
+    }
+
+    cancelStaleCertificateAiTasks();
+    async function runQueuedCertificateAi(modal, payload, statusNode) {
+        const patientId = modal.dataset.certPatientId;
+
+        if (!patientId) {
+            throw new Error('Не определён пациент для AI-задачи.');
+        }
+
+        const startUrl =
+            `/doctors/patients/${encodeURIComponent(patientId)}/ai-document-tasks`;
+
+        const startResponse = await fetch(startUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrf()
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const startData = await startResponse
+            .json()
+            .catch(() => ({}));
+
+        if (!startResponse.ok) {
+            const validationMessage = startData?.errors
+                ? Object.values(startData.errors)
+                    .flat()
+                    .filter(Boolean)
+                    .join(' ')
+                : '';
+
+            throw new Error(
+                validationMessage
+                || startData?.message
+                || `Не удалось поставить задачу в очередь: HTTP ${startResponse.status}`
+            );
+        }
+
+        const task = {
+            id: startData.id,
+            poll_url: startData.poll_url,
+            cancel_url: startData.cancel_url,
+            anamneses_confirm_url: startData.anamneses_confirm_url,
+            done: false
+        };
+
+        activeCertificateAiTasks.set(task.id, task);
+        modal.dataset.activeCertificateAiTask = task.id;
+        rememberCertificateAiTask(task);
+
+        if (statusNode) {
+            statusNode.textContent =
+                startData.message || 'Задача поставлена в очередь.';
+        }
+
+        while (!task.done) {
+            await sleep(900);
+
+            const response = await fetch(task.poll_url, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response
+                .json()
+                .catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(
+                    data?.message
+                    || `Ошибка проверки AI-задачи: HTTP ${response.status}`
+                );
+            }
+
+            if (statusNode) {
+                const progress = Number(data.progress || 0);
+                statusNode.textContent =
+                    `${data.message || 'ИИ обрабатывает запрос'}`
+                    + (progress > 0 ? ` · ${progress}%` : '');
+            }
+
+            if (data.status === 'completed') {
+                task.done = true;
+                activeCertificateAiTasks.delete(task.id);
+                forgetCertificateAiTask(task);
+                delete modal.dataset.activeCertificateAiTask;
+
+                return {
+                    ...(data.result || {}),
+                    anamneses_confirm_url:
+                        data.anamneses_confirm_url
+                        || task.anamneses_confirm_url
+                };
+            }
+
+            if (data.status === 'cancelled') {
+                task.done = true;
+                activeCertificateAiTasks.delete(task.id);
+                forgetCertificateAiTask(task);
+                delete modal.dataset.activeCertificateAiTask;
+
+                throw new Error('Генерация отменена.');
+            }
+
+            if (data.status === 'failed') {
+                task.done = true;
+                activeCertificateAiTasks.delete(task.id);
+                forgetCertificateAiTask(task);
+                delete modal.dataset.activeCertificateAiTask;
+
+                throw new Error(
+                    data.message || 'ИИ-задача завершилась ошибкой.'
+                );
+            }
+        }
+
+        throw new Error('Генерация отменена.');
+    }
+
+    function renderStructuredAnamnesisSuggestions(
+        modal,
+        items,
+        confirmUrl
+    ) {
+        let panel = modal.querySelector(
+            '[data-ai-structured-anamneses]'
+        );
+
+        if (!Array.isArray(items) || items.length === 0) {
+            panel?.remove();
+            return;
+        }
+
+        if (!panel) {
+            panel = document.createElement('section');
+            panel.className = 'mc-cert-section mt-3';
+            panel.dataset.aiStructuredAnamneses = '1';
+
+            const editor = query(modal, '[data-cert-editor]');
+            editor?.prepend(panel);
+        }
+
+        panel.replaceChildren();
+
+        const title = document.createElement('h3');
+        title.textContent = 'ИИ распределил анамнез';
+        panel.append(title);
+
+        const hint = document.createElement('p');
+        hint.className = 'text-muted small';
+        hint.textContent =
+            'Проверьте предложенные записи. '
+            + 'Сохранение выполняется только после вашего подтверждения.';
+        panel.append(hint);
+
+        const list = document.createElement('div');
+        list.className = 'd-grid gap-2';
+
+        items.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'border rounded-3 p-3 bg-light';
+            card.dataset.structuredAnamnesisItem = String(index);
+            card.dataset.category = String(item.category || 'other');
+            card.dataset.period = String(item.period || '');
+
+            const top = document.createElement('div');
+            top.className =
+                'd-flex align-items-start justify-content-between gap-2 mb-2';
+
+            const checkWrap = document.createElement('label');
+            checkWrap.className =
+                'd-flex align-items-center gap-2 fw-semibold';
+
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'form-check-input mt-0';
+            check.checked = true;
+            check.dataset.structuredAnamnesisSelected = '1';
+
+            const label = document.createElement('span');
+            label.textContent = String(
+                item.title || 'Предложенный анамнез'
+            );
+
+            checkWrap.append(check, label);
+
+            const confidence = document.createElement('span');
+            confidence.className = 'badge text-bg-light border';
+            confidence.textContent =
+                `${Math.round(Number(item.confidence || 0) * 100)}%`;
+
+            top.append(checkWrap, confidence);
+
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.className = 'form-control form-control-sm mb-2';
+            titleInput.value = String(
+                item.title || 'Предложенный анамнез'
+            );
+            titleInput.dataset.structuredAnamnesisTitle = '1';
+
+            const text = document.createElement('textarea');
+            text.className = 'form-control';
+            text.rows = 5;
+            text.value = String(item.text || '');
+            text.dataset.structuredAnamnesisText = '1';
+
+            card.append(top, titleInput, text);
+
+            if (item.period) {
+                const period = document.createElement('div');
+                period.className = 'small text-muted mt-2';
+                period.textContent = `Период: ${item.period}`;
+                card.append(period);
+            }
+
+            list.append(card);
+        });
+
+        panel.append(list);
+
+        const footer = document.createElement('div');
+        footer.className =
+            'd-flex align-items-center justify-content-between gap-2 mt-3';
+
+        const state = document.createElement('div');
+        state.className = 'small text-muted';
+        state.dataset.structuredAnamnesisState = '1';
+        state.textContent =
+            'Ничего не будет записано в медкарту без нажатия кнопки.';
+
+        const save = document.createElement('button');
+        save.type = 'button';
+        save.className = 'btn btn-outline-primary btn-sm';
+        save.textContent = 'Сохранить выбранные анамнезы';
+
+        save.addEventListener('click', async () => {
+            const selected = Array.from(
+                panel.querySelectorAll(
+                    '[data-structured-anamnesis-item]'
+                )
+            )
+                .filter(card =>
+                    card.querySelector(
+                        '[data-structured-anamnesis-selected]'
+                    )?.checked
+                )
+                .map(card => ({
+                    category: card.dataset.category || 'other',
+                    period: card.dataset.period || '',
+                    title: card.querySelector(
+                        '[data-structured-anamnesis-title]'
+                    )?.value?.trim() || '',
+                    text: card.querySelector(
+                        '[data-structured-anamnesis-text]'
+                    )?.value?.trim() || ''
+                }))
+                .filter(item => item.title && item.text);
+
+            if (!selected.length) {
+                state.textContent =
+                    'Выберите хотя бы один анамнез для сохранения.';
+                return;
+            }
+
+            save.disabled = true;
+            state.textContent = 'Сохраняем…';
+
+            try {
+                const response = await fetch(confirmUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrf()
+                    },
+                    body: JSON.stringify({
+                        items: selected
+                    })
+                });
+
+                const data = await response
+                    .json()
+                    .catch(() => ({}));
+
+                if (!response.ok) {
+                    const message = data?.errors
+                        ? Object.values(data.errors)
+                            .flat()
+                            .filter(Boolean)
+                            .join(' ')
+                        : data?.message;
+
+                    throw new Error(
+                        message || `HTTP ${response.status}`
+                    );
+                }
+
+                state.textContent =
+                    `Сохранено анамнезов: ${Number(data.count || selected.length)}.`;
+                save.textContent = 'Сохранено';
+            } catch (error) {
+                save.disabled = false;
+                state.textContent =
+                    error?.message
+                    || 'Не удалось сохранить предложенные анамнезы.';
+            }
+        });
+
+        footer.append(state, save);
+        panel.append(footer);
+    }
+
+    window.addEventListener('pagehide', () => {
+        activeCertificateAiTasks.forEach(task => {
+            cancelCertificateAiTaskBeacon(task);
+        });
+    });
+
     async function generateCertificateAiDraft(modal, button) {
         const apiUrl = modal.dataset.certAiUrl;
         const patientId = modal.dataset.certPatientId;
@@ -8349,25 +10117,19 @@ fragment.append(node('h2', '', title));
         }
 
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf(),
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify(payload),
-            });
+            const queuedResult = await runQueuedCertificateAi(
+                modal,
+                payload,
+                status
+            );
 
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                const validationMessage = data?.errors
-                    ? Object.values(data.errors).flat().filter(Boolean).join(' ')
-                    : '';
-                throw new Error(validationMessage || data?.message || `Ошибка ИИ-анализатора: HTTP ${response.status}`);
-            }
+            const data = queuedResult?.document || {};
+
+            renderStructuredAnamnesisSuggestions(
+                modal,
+                queuedResult?.structured_anamneses || [],
+                queuedResult?.anamneses_confirm_url || ''
+            );
 
             const draft = data?.draft || {};
             const mappings = {
@@ -8390,7 +10152,11 @@ fragment.append(node('h2', '', title));
                 },
                 epicrisis: {
                     diagnosis: '#cert-epicrisis-diagnosis',
+                    complaints: '#cert-epicrisis-complaints',
                     anamnesis: '#cert-epicrisis-anamnesis',
+                    anamnesis_life: '#cert-epicrisis-anamnesis-life',
+                    disability: '#cert-epicrisis-disability',
+                    social_anamnesis: '#cert-epicrisis-social-anamnesis',
                     condition: '#cert-epicrisis-condition',
                     researches: '#cert-epicrisis-researches',
                     treatment: '#cert-epicrisis-treatment',
@@ -8418,6 +10184,40 @@ fragment.append(node('h2', '', title));
                 control.value = String(draft[key] ?? '');
                 control.dispatchEvent(new Event('input', { bubbles: true }));
             });
+
+            if (mode === 'psychiatrist_conclusion') {
+                const complaintsControl = query(
+                    modal,
+                    '#cert-psychiatrist-complaints'
+                );
+                const anamnesisControl = query(
+                    modal,
+                    '#cert-psychiatrist-anamnesis'
+                );
+
+                if (
+                    complaintsControl
+                    && !String(complaintsControl.value || '').trim()
+                    && anamnesisControl
+                ) {
+                    const fallbackComplaints =
+                        extractComplaintsFallback(
+                            anamnesisControl.value
+                        );
+
+                    if (fallbackComplaints) {
+                        complaintsControl.value =
+                            fallbackComplaints;
+
+                        complaintsControl.dispatchEvent(
+                            new Event(
+                                'input',
+                                {bubbles: true}
+                            )
+                        );
+                    }
+                }
+            }
 
             if (mode === 'medical_certificate' && query(modal, '[data-cert-include-diagnosis]')?.checked) {
                 const diagnosisControl = query(modal, '#cert-certificate-diagnosis');
@@ -8464,6 +10264,8 @@ fragment.append(node('h2', '', title));
         });
 
     certificateModals.forEach(modal => {
+        ensureEpicrisisCdaFields(modal);
+
         const fields = all(modal, '[data-cert-editor] input, [data-cert-editor] select, [data-cert-editor] textarea');
         fields.forEach(control => {
             control.addEventListener('input', () => {
@@ -8518,6 +10320,7 @@ fragment.append(node('h2', '', title));
 
         // Закрытие не стирает введённое. Данные живут только в DOM до обновления страницы.
         modal.addEventListener('show.bs.modal', () => {
+            void loadCertificatePrintContext(modal);
             setMode(modal, false);
             showError(modal);
             query(modal, '.modal-body').scrollTop = 0;

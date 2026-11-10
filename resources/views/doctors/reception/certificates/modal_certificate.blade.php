@@ -27,33 +27,7 @@
                     <div><span>Дата рождения</span><strong>{{ $certificateUiContext['birth_date'] ?: 'Не указана' }}</strong></div>
                     <div><span>Медкарта</span><strong>{{ $certificateUiContext['card_number'] ?: 'Не указана' }}</strong></div>
                 </div>
-                <section class="mc-cert-section mb-3" aria-labelledby="certCertificateAiTitle">
-                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
-                        <div>
-                            <div class="mc-certificates__eyebrow">Способ заполнения</div>
-                            <h3 id="certCertificateAiTitle" class="mb-1">Сформировать по медицинской карте</h3>
-                            <p class="text-muted small mb-0">
-                                ИИ использует только подтверждённые сведения пациента и учитывает выбранный вид справки.
-                                Диагноз включается только если врач отдельно разрешил это переключателем ниже.
-                            </p>
-                        </div>
-                        <button type="button" class="btn mc-cert-btn-primary" data-cert-ai-generate>
-                            <i class="bi bi-stars" aria-hidden="true"></i>
-                            Сформировать ИИ
-                        </button>
-                    </div>
-                    <div class="mt-3 d-flex flex-wrap gap-2" aria-label="Источники анализа">
-                        <span class="badge text-bg-light border">Наблюдение</span>
-                        <span class="badge text-bg-light border">Анамнезы</span>
-                        <span class="badge text-bg-light border">Эпикризы</span>
-                        <span class="badge text-bg-light border">Терапия</span>
-                        <span class="badge text-bg-light border">Исследования</span>
-                    </div>
-                    <div class="small text-muted mt-2" data-cert-ai-status>
-                        Справку можно заполнить вручную либо сформировать черновик ИИ и затем отредактировать.
-                    </div>
-                </section>
-
+                {{-- NORHNAIM_MEDICAL_CERTIFICATE_NO_AI_V1 --}}
                 <div class="mc-cert-mode" role="group" aria-label="Режим просмотра">
                     <button type="button" class="is-active" data-cert-edit aria-pressed="true" aria-controls="certCertificateModalEditor">
                         <i class="bi bi-pencil-square" aria-hidden="true"></i> Заполнение
