@@ -50,6 +50,43 @@
         </style>
     @endif
 
+
+<style>
+    /* NORHNAIM_DOCTOR_ACCOUNT_DROPDOWN_FIX_V1 */
+    .doctor-sidebar__account-dropdown {
+        position: relative;
+        overflow: visible !important;
+    }
+
+    .doctor-sidebar__account-dropdown > .doctor-sidebar__dropdown {
+        position: absolute !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: calc(100% + 8px) !important;
+        left: 0 !important;
+        transform: none !important;
+        z-index: 1095 !important;
+    }
+
+    .doctor-sidebar__account-dropdown > .doctor-sidebar__dropdown:not(.show) {
+        display: none !important;
+    }
+
+    .doctor-sidebar__account-dropdown > .doctor-sidebar__dropdown.show {
+        display: block !important;
+    }
+
+    @media (max-width: 991.98px) {
+        .doctor-sidebar__account-dropdown > .doctor-sidebar__dropdown {
+            position: fixed !important;
+            right: 12px !important;
+            bottom: 12px !important;
+            left: 12px !important;
+            width: auto !important;
+            max-width: none !important;
+        }
+    }
+</style>
 </head>
 <body class="d-flex{{ session(\App\Http\Controllers\Doctors\HospitalImpersonationController::SESSION_KEY) ? ' hospital-login-as-active' : '' }}">
 
@@ -228,10 +265,10 @@
 
         <div class="dropdown dropup doctor-sidebar__account-dropdown">
             <button class="doctor-sidebar__account" type="button"
-                    id="doctorSidebarAccount" data-bs-toggle="dropdown"
+                    id="doctorSidebarAccount"
                     aria-expanded="false" aria-label="Меню пользователя {{ auth()->user()->login }}"
                     title="Аккаунт: {{ auth()->user()->login }}">
-                <span class="doctor-sidebar__avatar">{{ mb_strtoupper(mb_substr(auth()->user()->login ?? 'В', 0, 1)) }}</span>
+                <span class="doctor-sidebar__avatar">{{ auth()->user()?->doctor?->initials ?? 'ВР' }}</span>
                 <span class="doctor-sidebar__account-copy">
                     <strong>{{ auth()->user()->login }}</strong>
                     <small>Личный кабинет</small>
@@ -239,13 +276,25 @@
                 <i class="doctor-sidebar__account-chevron bi bi-three-dots" aria-hidden="true"></i>
             </button>
             <ul class="dropdown-menu doctor-sidebar__dropdown" aria-labelledby="doctorSidebarAccount">
-                <li><a class="dropdown-item" href="{{ route('main.index') }}"><i class="bi bi-house-door" aria-hidden="true"></i> Главная</a></li>
-                @if(\App\Http\Middleware\ClinicSettingsAccessMiddleware::allows(auth()->user()))
-                <li><a class="dropdown-item" href="{{ route('doctors.settings.index') }}"><i class="bi bi-gear" aria-hidden="true"></i> Настройки</a></li>
-                @endif
-                <li><a class="dropdown-item" href="#"><i class="bi bi-person" aria-hidden="true"></i> Профиль</a></li>
+                <li>
+                    <a class="dropdown-item" href="{{ route('main.index') }}">
+                        <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                        На сайт
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{{ route('doctors.profile.index') }}">
+                        <i class="bi bi-person-badge" aria-hidden="true"></i>
+                        Личный кабинет
+                    </a>
+                </li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item doctor-sidebar__logout" href="{{ route('actions.logout') }}"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Выход</a></li>
+                <li>
+                    <a class="dropdown-item doctor-sidebar__logout" href="{{ route('actions.logout') }}">
+                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+                        Выход
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -282,6 +331,92 @@
     @yield('main')
 </div>
 @stack('scripts')
+<script>
+(() => {
+    // NORHNAIM_DOCTOR_ACCOUNT_DROPDOWN_FIX_V1
+    const toggle = document.getElementById('doctorSidebarAccount');
+
+    if (!toggle) {
+        return;
+    }
+
+    const wrapper = toggle.closest(
+        '.doctor-sidebar__account-dropdown, .dropdown'
+    );
+
+    const menu = wrapper?.querySelector(
+        '.doctor-sidebar__dropdown, .dropdown-menu'
+    );
+
+    if (!wrapper || !menu) {
+        return;
+    }
+
+    /*
+     * Этот dropdown управляем сами.
+     * Так Bootstrap Data API и общий app.js не смогут
+     * дважды переключить одно и то же меню.
+     */
+    toggle.removeAttribute('data-bs-toggle');
+    toggle.removeAttribute('data-toggle');
+
+    const setOpen = (open) => {
+        menu.classList.toggle('show', open);
+        wrapper.classList.toggle('show', open);
+        toggle.setAttribute(
+            'aria-expanded',
+            open ? 'true' : 'false'
+        );
+    };
+
+    const isOpen = () => menu.classList.contains('show');
+
+    toggle.addEventListener(
+        'click',
+        (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            setOpen(!isOpen());
+        },
+        true
+    );
+
+    menu.addEventListener('click', (event) => {
+        /*
+         * Ссылкам внутри меню даём выполниться нормально.
+         * Не позволяем внешнему dropdown handler закрыть меню
+         * раньше обработки самого клика.
+         */
+        event.stopPropagation();
+    });
+
+    document.addEventListener('click', (event) => {
+        if (
+            event.target === toggle
+            || toggle.contains(event.target)
+            || menu.contains(event.target)
+        ) {
+            return;
+        }
+
+        setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || !isOpen()) {
+            return;
+        }
+
+        setOpen(false);
+        toggle.focus();
+    });
+
+    setOpen(false);
+})();
+</script>
+
 @if(session(\App\Http\Controllers\Doctors\HospitalImpersonationController::SESSION_KEY)
     && request()->routeIs('doctors.settings.departments', 'doctors.settings.rooms'))
 <script>

@@ -799,3 +799,64 @@ Route::middleware([
     )
     ->whereNumber('patient')
     ->name('doctors.patients.certificate.print-context');
+
+// NORHNAIM_DOCTOR_PERSONAL_CABINET_V2
+Route::middleware([
+    'auth',
+    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
+])
+    ->prefix('doctors/profile')
+    ->name('doctors.profile.')
+    ->group(function (): void {
+        Route::get(
+            '/',
+            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'index']
+        )->name('index');
+
+        Route::post(
+            '/photo',
+            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'photo']
+        )->name('photo');
+
+        Route::post(
+            '/credentials',
+            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'credentialStore']
+        )->name('credentials.store');
+
+        Route::post(
+            '/credentials/{credential}/verify',
+            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'credentialVerify']
+        )
+            ->whereNumber('credential')
+            ->name('credentials.verify');
+
+        Route::get(
+            '/credentials/{credential}/download',
+            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'credentialDownload']
+        )
+            ->whereNumber('credential')
+            ->name('credentials.download');
+    });
+
+
+// NORHNAIM_DOCTOR_PROFILE_UPDATE_ROUTE_V2
+Route::patch(
+    '/doctors/profile',
+    [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'update']
+)
+    ->middleware([
+        'auth',
+        \App\Http\Middleware\DoctorOrHospitalAdmin::class,
+    ])
+    ->name('doctors.profile.update');
+
+// NORHNAIM_DOCTOR_PROFILE_PHOTO_DELETE_ROUTE_V21
+Route::delete(
+    '/doctors/profile/photo',
+    [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'photoDestroy']
+)
+    ->middleware([
+        'auth',
+        \App\Http\Middleware\DoctorOrHospitalAdmin::class,
+    ])
+    ->name('doctors.profile.photo.destroy');

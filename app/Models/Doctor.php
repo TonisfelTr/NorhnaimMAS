@@ -18,9 +18,21 @@ class Doctor extends Model implements HasMedia
 
     protected $casts = [
         'birth_at' => 'date:d.m.Y',
+        'accreditation_valid_from' => 'date',
+        'accreditation_valid_until' => 'date',
+        'professional_verified_at' => 'datetime',
+        'professional_verification_payload' => 'array',
     ];
 
     protected $appends = ['photo_url', 'experience'];
+
+    protected static function booted(): void
+    {
+        static::updated(static function (self $doctor): void {
+            app(\App\Services\DoctorProfileAuditService::class)
+                ->recordDoctorChanges($doctor);
+        });
+    }
 
     public function clinic(): BelongsTo
     {
@@ -40,6 +52,16 @@ class Doctor extends Model implements HasMedia
     public function pricelists(): HasMany
     {
         return $this->hasMany(DoctorPricelist::class);
+    }
+
+    public function credentials(): HasMany
+    {
+        return $this->hasMany(DoctorCredential::class);
+    }
+
+    public function profileEvents(): HasMany
+    {
+        return $this->hasMany(DoctorProfileEvent::class);
     }
 
     public function militaryCommissionDocuments(): HasMany
@@ -134,5 +156,26 @@ class Doctor extends Model implements HasMedia
     {
         $media = $this->getFirstMedia('photos');
         return $media ? $media->getUrl('webp') : asset('assets/images/backgrounds/feedback_placeholder.webp');
+    }
+
+
+    public function getInitialsAttribute(): string
+    {
+        $name = trim((string) $this->name);
+        $surname = trim((string) $this->surname);
+
+        $nameInitial = $name !== ''
+            ? mb_strtoupper(mb_substr($name, 0, 1))
+            : '';
+
+        $surnameInitial = $surname !== ''
+            ? mb_strtoupper(mb_substr($surname, 0, 1))
+            : '';
+
+        $initials = $nameInitial . $surnameInitial;
+
+        return $initials !== ''
+            ? $initials
+            : 'ВР';
     }
 }
