@@ -1,6 +1,7 @@
 <div class="modal fade mc-cert-modal" id="certPsychiatristModal" tabindex="-1"
      aria-labelledby="certPsychiatristModalTitle" aria-describedby="certPsychiatristModalDescription" aria-hidden="true"
-     data-cert-modal data-cert-title="Заключение психиатра"
+     data-cert-modal
+     data-cert-header-url="{{ route('doctors.patients.certificate-header.image', ['patient' => $patient->id]) }}" data-cert-title="Заключение психиатра"
      data-cert-patient="{{ $certificateUiContext['patient_name'] }}"
      data-cert-birth="{{ $certificateUiContext['birth_date'] }}"
      data-cert-card="{{ $certificateUiContext['card_number'] }}"
@@ -120,12 +121,12 @@
                     </section>
                 </div>
                 <div id="certPsychiatristModalPreview" class="mc-cert-preview" data-cert-preview-panel hidden>
-                    <div class="mc-cert-preview__notice"><i class="bi bi-info-circle" aria-hidden="true"></i> Макет для проверки. Не сохранён в медицинской карте.</div>
+                    <div class="mc-cert-preview__notice"><i class="bi bi-info-circle" aria-hidden="true"></i> Предварительный просмотр печатной формы.</div>
                     <article class="mc-cert-paper" data-cert-paper aria-label="Предварительный документ"></article>
                 </div>
             </div>
             <div class="modal-footer">
-                <div class="mc-cert-modal__footer-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Без сохранения в медкарту</div>
+                <div class="mc-cert-modal__footer-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Печатная форма</div>
                 <button type="button" class="btn mc-cert-btn-light" data-cert-reset>Сбросить форму</button>
                 <button type="button" class="btn mc-cert-btn-light" data-bs-dismiss="modal">Закрыть</button>
                 <button type="button" class="btn mc-cert-btn-primary" data-cert-preview><i class="bi bi-eye" aria-hidden="true"></i> Предпросмотр</button>

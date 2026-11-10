@@ -5,8 +5,11 @@ use App\Http\Controllers\Doctors\AnamnesisController;
 use App\Http\Controllers\Doctors\CabinetController;
 use App\Http\Controllers\Doctors\CardMedicalDocumentController;
 use App\Http\Controllers\Doctors\ClinicAffiliationController;
+use App\Http\Controllers\Doctors\ClinicCertificateHeaderController;
+use App\Http\Controllers\Doctors\ClinicTelemedicineSettingsController;
 use App\Http\Controllers\Doctors\ConsiliumController;
 use App\Http\Controllers\Doctors\ContactController;
+use App\Http\Controllers\Doctors\DoctorAppointmentTimezoneController;
 use App\Http\Controllers\Doctors\DoctorDestinationController;
 use App\Http\Controllers\Doctors\DocumentController;
 use App\Http\Controllers\Doctors\DriverCommissionController;
@@ -25,19 +28,27 @@ use App\Http\Controllers\Doctors\InstrumentalResearchController;
 use App\Http\Controllers\Doctors\MedicalCardController;
 use App\Http\Controllers\Doctors\PatientDoctorTransferController;
 use App\Http\Controllers\Doctors\MedicalEncounterController;
+use App\Http\Controllers\Doctors\MedicalVisitConfirmationController;
 use App\Http\Controllers\Doctors\MedicalComissionController;
 use App\Http\Controllers\Doctors\MilitaryCommissionDocumentController;
 use App\Http\Controllers\Doctors\MseReferralController;
 use App\Http\Controllers\Doctors\NeuralNetworkController;
 use App\Http\Controllers\Doctors\PatientDisabilityController;
+use App\Http\Controllers\Doctors\PatientDisabilityVerificationController;
 use App\Http\Controllers\Doctors\PatientTestingController;
 use App\Http\Controllers\Doctors\PrescriptionsController;
 use App\Http\Controllers\Doctors\ReceptionController;
+use App\Http\Controllers\Doctors\ReceptionArrivalController;
 use App\Http\Controllers\Doctors\ResearchController;
 use App\Http\Controllers\Doctors\SettingsController;
 use App\Http\Controllers\Doctors\TestPanelController;
 use App\Http\Controllers\Doctors\TestsController;
 use App\Http\Controllers\Doctors\TestSessionController;
+use App\Http\Controllers\Doctors\TelemedicineAvailableSlotsController;
+use App\Http\Controllers\Doctors\TelemedicineEventIngestController;
+use App\Http\Controllers\Doctors\TelemedicineJournalController;
+use App\Http\Controllers\Doctors\TelemedicineJournalGateController;
+use App\Http\Controllers\Doctors\TelemedicineProviderSessionController;
 use App\Http\Controllers\Main\ArticleController;
 use App\Http\Controllers\Main\BlogController;
 use App\Http\Controllers\Main\ClinicController;
@@ -46,15 +57,23 @@ use App\Http\Controllers\Main\FeedbackController;
 use App\Http\Controllers\Main\IndexController as MainIndexController;
 use App\Http\Controllers\Main\JurisprudenceController;
 use App\Http\Controllers\Main\MedicineController;
+use App\Http\Controllers\Laboratory\AuthController as LaboratoryAuthController;
+use App\Http\Controllers\Laboratory\RealtimeFragmentController;
+use App\Http\Controllers\Laboratory\WorkspaceController as LaboratoryWorkspaceController;
+use App\Http\Controllers\TelemedicineInvitationController;
 use App\Http\Controllers\UserController;
 
 use App\Http\Middleware\CardDocumentPrivateResponse;
 use App\Http\Middleware\ClinicSettingsAccessMiddleware;
 use App\Http\Middleware\DoctorHardLockMiddleware;
 use App\Http\Middleware\DoctorOrHospitalAdmin;
+use App\Http\Middleware\EnsureClinicTelemedicineSettings;
+use App\Http\Middleware\EnsureLaboratoryAccess;
 use App\Http\Middleware\HospitalRoomContextMiddleware;
 use App\Http\Middleware\LockClinicTypeMiddleware;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -148,6 +167,25 @@ Route::middleware(['auth', DoctorOrHospitalAdmin::class])->prefix('doctors')->as
     Route::get('/patients/{patient:id}/visits/{registryRecord}/protocol', [MedicalEncounterController::class, 'printProtocol'])
         ->whereNumber('registryRecord')
         ->name('patients.visits.protocol.print');
+
+    // Подтверждение документа МСЭ: тот же входной guard, что и у медкарты.
+    Route::post(
+        '/patients/{patient:id}/disability/verify-document',
+        [PatientDisabilityVerificationController::class, 'verify']
+    )
+        ->whereNumber('patient')
+        ->middleware('throttle:10,1')
+        ->name('patients.disability.verify-document');
+
+    // Свободные слоты телемедицины для выбранного пациента.
+    Route::get(
+        '/patients/{patient:id}/telemedicine/available-slots',
+        TelemedicineAvailableSlotsController::class
+    )
+        ->whereNumber('patient')
+        ->middleware('throttle:60,1')
+        ->name('patients.telemedicine.available-slots');
+
     Route::post('/workbench/assignments/{assignment}/attending', [DoctorsIndexController::class, 'updateAttendingDoctor'])->whereNumber('assignment')->name('workbench.attending.update');
 });
 
@@ -400,6 +438,24 @@ Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLock
         Route::post('/', [SettingsController::class, 'update'])->middleware(LockClinicTypeMiddleware::class)->name('index.update');
         Route::post('/employees/update', [SettingsController::class, 'updateEmployee'])->name('employees.update');
 
+        // Единая шапка документов клиники и всей её группы учреждений.
+        Route::prefix('/certificate-header')->as('certificate-header.')->group(function (): void {
+            Route::get('/', [ClinicCertificateHeaderController::class, 'index'])->name('index');
+            Route::post('/', [ClinicCertificateHeaderController::class, 'store'])->name('store');
+            Route::delete('/', [ClinicCertificateHeaderController::class, 'destroy'])->name('destroy');
+            Route::get('/image', [ClinicCertificateHeaderController::class, 'settingsImage'])->name('image');
+        });
+
+        // Настройки телемедицины клиники. Базовые auth/settings middleware уже у родительской группы.
+        Route::middleware(EnsureClinicTelemedicineSettings::class)
+            ->prefix('/telemedicine')
+            ->as('telemedicine.')
+            ->group(function (): void {
+                Route::get('/', [ClinicTelemedicineSettingsController::class, 'index'])->name('index');
+                Route::post('/', [ClinicTelemedicineSettingsController::class, 'update'])->name('update');
+            });
+
+
         Route::prefix('/offices')->group(function (): void {
             Route::get('/', [CabinetController::class, 'index'])->name('offices');
             Route::post('/store', [CabinetController::class, 'store'])->name('offices.store');
@@ -474,22 +530,219 @@ Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLock
         });
     });
 });
-require_once __DIR__ . '/laboratory.php';
 
-// NORHNAIM: medical visit attestation and telemedicine audit.
-require __DIR__ . '/medical_visit_audit.php';
+/*
+|--------------------------------------------------------------------------
+| Дополнительные маршруты, ранее вынесенные в отдельные routes/*.php
+|--------------------------------------------------------------------------
+|
+| web.php уже загружается с middleware-группой "web", поэтому здесь не
+| дублируем middleware "web". Специальные auth/guard/throttle оставлены
+| только там, где они действительно нужны по бизнес-логике.
+|
+*/
 
-// NORHNAIM_BENEFIT_PRESCRIPTIONS_ROUTES_V1
-require __DIR__ . '/benefit_prescriptions.php';
+// Льготные рецепты. Тонкая проверка пациента/права выполняется контроллером.
+Route::middleware('auth')
+    ->prefix('doctors/patients/{patient}/benefit-prescriptions')
+    ->name('doctors.prescriptions.benefit.')
+    ->group(function (): void {
+        Route::get('drug', [PrescriptionsController::class, 'benefitDrug'])->name('drug');
+        Route::post('/', [PrescriptionsController::class, 'storeBenefit'])->name('store');
+        Route::get('{benefit}/edit', [PrescriptionsController::class, 'editBenefit'])
+            ->whereUuid('benefit')
+            ->name('edit');
+        Route::get('{benefit}/print', [PrescriptionsController::class, 'printBenefit'])
+            ->whereUuid('benefit')
+            ->name('print');
+        Route::post('{benefit}/void', [PrescriptionsController::class, 'voidBenefit'])
+            ->whereUuid('benefit')
+            ->name('void');
+    });
 
-// NORHNAIM_REGISTRY_APPOINTMENT_ARRIVAL_ROUTES_V1
-require __DIR__ . '/reception_arrival.php';
+// Факт явки пациента. Оставлен auth-only: доступ к конкретной записи проверяет контроллер.
+Route::middleware('auth')
+    ->post(
+        '/doctors/reception/records/{registryRecord}/arrived',
+        [ReceptionArrivalController::class, 'confirm']
+    )
+    ->whereNumber('registryRecord')
+    ->name('doctors.reception.arrival.confirm');
 
-// NORHNAIM_DISABILITY_VERIFICATION_ACTION_ROUTES_V1
-require __DIR__ . '/patient_disability_verification.php';
+// Подтверждение результата медицинского визита.
+Route::middleware('auth')
+    ->post(
+        '/doctors/patients/{patient}/visits/{registryRecord}/confirm',
+        [MedicalVisitConfirmationController::class, 'store']
+    )
+    ->whereNumber('registryRecord')
+    ->name('doctors.patients.visits.confirm');
 
-// NORHNAIM_TELEMED_AVAILABLE_SLOTS_ROUTES_V1
-require __DIR__ . '/telemedicine_available_slots.php';
+// Журнал телемедицины: отдельная политика TelemedicineJournalAccess внутри сервиса.
+Route::middleware(['auth', 'throttle:30,1'])->group(function (): void {
+    Route::post(
+        '/doctors/patients/{patient}/telemedicine-journal',
+        [TelemedicineJournalController::class, 'store']
+    )
+        ->whereNumber('patient')
+        ->name('doctors.patients.telemedicine-journal.store');
 
-// NORHNAIM_DOCTOR_APPOINTMENT_TIMEZONE_ROUTES_V1
-require __DIR__ . '/doctor_appointment_timezone.php';
+    Route::delete(
+        '/doctors/patients/{patient}/telemedicine-journal/{registryRecord}',
+        [TelemedicineJournalController::class, 'destroy']
+    )
+        ->whereNumber(['patient', 'registryRecord'])
+        ->name('doctors.patients.telemedicine-journal.destroy');
+});
+
+// Часовой пояс врача: clinic_admin либо сам врач — проверяется контроллером.
+Route::middleware('auth')
+    ->put(
+        '/doctors/settings/doctors/{doctor}/appointment-timezone',
+        [DoctorAppointmentTimezoneController::class, 'update']
+    )
+    ->whereNumber('doctor')
+    ->middleware('throttle:30,1')
+    ->name('doctors.settings.doctor-appointment-timezone.update');
+
+// Изображение шапки печатной формы пациента.
+// HospitalPatientAccess/clinic_admin проверяются в ClinicCertificateHeaderController.
+Route::middleware('auth')
+    ->get(
+        '/doctors/patients/{patient:id}/certificate-header',
+        [ClinicCertificateHeaderController::class, 'patientImage']
+    )
+    ->whereNumber('patient')
+    ->name('doctors.patients.certificate-header.image');
+
+// WebRTC / Яндекс.Телемост: действия врача.
+Route::middleware(['auth', DoctorHardLockMiddleware::class, 'throttle:30,1'])
+    ->group(function (): void {
+        $telemedicineConnectionPath =
+            '/doctors/patients/{patient}/telemedicine-connection/{recordId}';
+
+        Route::get(
+            $telemedicineConnectionPath,
+            [TelemedicineProviderSessionController::class, 'show']
+        )
+            ->whereNumber(['patient', 'recordId'])
+            ->name('doctors.telemedicine-session.show');
+
+        Route::post(
+            $telemedicineConnectionPath . '/prepare',
+            [TelemedicineProviderSessionController::class, 'prepare']
+        )
+            ->whereNumber(['patient', 'recordId'])
+            ->name('doctors.telemedicine-session.prepare');
+
+        Route::post(
+            $telemedicineConnectionPath . '/recover',
+            [TelemedicineProviderSessionController::class, 'recover']
+        )
+            ->whereNumber(['patient', 'recordId'])
+            ->name('doctors.telemedicine-session.recover');
+
+        Route::post(
+            $telemedicineConnectionPath . '/doctor-join',
+            [TelemedicineProviderSessionController::class, 'doctorJoin']
+        )
+            ->whereNumber(['patient', 'recordId'])
+            ->name('doctors.telemedicine-session.doctor-join');
+    });
+
+// Подписанная пациентская ссылка на телемедицинский сеанс.
+Route::middleware(['signed', 'throttle:30,1'])->group(function (): void {
+    Route::get(
+        '/telemedicine/invitation/{meeting}',
+        [TelemedicineInvitationController::class, 'show']
+    )
+        ->whereUuid('meeting')
+        ->name('telemedicine.invitation.show');
+
+    Route::post(
+        '/telemedicine/invitation/{meeting}/join',
+        [TelemedicineInvitationController::class, 'join']
+    )
+        ->whereUuid('meeting')
+        ->name('telemedicine.invitation.join');
+});
+
+// Signaling -> Laravel: HMAC-аутентификация выполняется контроллером по raw body.
+Route::post(
+    '/internal/telemedicine/audit/events',
+    [TelemedicineEventIngestController::class, 'store']
+)
+    ->middleware('throttle:120,1')
+    ->withoutMiddleware([
+        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+        \App\Http\Middleware\VerifyCsrfToken::class,
+    ])
+    ->name('internal.telemedicine.audit.events');
+
+// Signaling -> Laravel: проверка допуска к комнате телемедицины.
+Route::post(
+    '/internal/telemedicine/journal/authorize',
+    [TelemedicineJournalGateController::class, 'check']
+)
+    ->middleware('throttle:120,1')
+    ->withoutMiddleware([
+        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+        \App\Http\Middleware\VerifyCsrfToken::class,
+    ])
+    ->name('internal.telemedicine.journal.authorize');
+
+/*
+|--------------------------------------------------------------------------
+| Лаборатория
+|--------------------------------------------------------------------------
+|
+| Это обычные web-маршруты. Broadcast channel authorization остаётся
+| в routes/channels.php -> routes/laboratory-channels.php.
+|
+*/
+Route::prefix('laboratory')->as('laboratory.')->group(function (): void {
+    Route::middleware('guest')->group(function (): void {
+        Route::get('/login', [LaboratoryAuthController::class, 'create'])
+            ->name('login');
+
+        Route::post('/login', [LaboratoryAuthController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('login.submit');
+    });
+
+    Route::middleware(['auth', EnsureLaboratoryAccess::class])
+        ->group(function (): void {
+            Route::get('/', [LaboratoryWorkspaceController::class, 'index'])
+                ->name('index');
+
+            Route::get('/researches/fragment', RealtimeFragmentController::class)
+                ->middleware('throttle:120,1')
+                ->name('researches.fragment');
+
+            Route::post('/broadcasting/auth', static function (Request $request) {
+                return Broadcast::auth($request);
+            })
+                ->middleware('throttle:120,1')
+                ->name('broadcasting.auth');
+
+            Route::get(
+                '/researches/{research}',
+                [LaboratoryWorkspaceController::class, 'edit']
+            )
+                ->whereNumber('research')
+                ->name('researches.edit');
+
+            Route::put(
+                '/researches/{research}',
+                [LaboratoryWorkspaceController::class, 'update']
+            )
+                ->whereNumber('research')
+                ->middleware('throttle:30,1')
+                ->name('researches.update');
+
+            Route::post('/logout', [LaboratoryAuthController::class, 'destroy'])
+                ->name('logout');
+        });
+});

@@ -8085,13 +8085,42 @@ function initMedicalCardCertificatesUi() {
         const kind = query(modal, '[data-cert-document-kind]');
         const title = kind?.selectedOptions[0]?.textContent.trim() || modal.dataset.certTitle;
         const doctor = query(modal, '[data-cert-doctor]')?.value.trim() || '';
-        const organization = query(modal, '[data-cert-organization]')?.value.trim() || '';
-        const issued = dateText(query(modal, '[data-cert-issued-date]')?.value);
+const issued = dateText(query(modal, '[data-cert-issued-date]')?.value);
         const fragment = document.createDocumentFragment();
 
-        fragment.append(node('div', 'mc-cert-paper__draft', 'МАКЕТ · НЕ СОХРАНЁН В МЕДИЦИНСКОЙ КАРТЕ'));
-        fragment.append(node('div', 'mc-cert-paper__organization', organization || 'Медицинская организация: ____________________'));
-        fragment.append(node('h2', '', title));
+        // NORHNAIM_CLINIC_CERTIFICATE_HEADER_SPATIE_JS_V1
+        const headerUrl = String(modal.dataset.certHeaderUrl || '').trim();
+
+        if (headerUrl) {
+            const header = node(
+                'div',
+                'mc-cert-paper__clinic-header'
+            );
+            // NORHNAIM_CLINIC_CERTIFICATE_HEADER_LAYOUT_V3
+            // NORHNAIM_CLINIC_CERTIFICATE_HEADER_FULLWIDTH_V124
+            header.style.cssText = [
+                'width:100%',
+                'max-width:100%',
+                'margin:0 auto 18px',
+                'text-align:center',
+                'break-inside:avoid'
+            ].join(';');
+            const image = document.createElement('img');
+            image.src = headerUrl;
+            image.alt = 'Шапка медицинской организации';
+            image.style.cssText = [
+                'display:block',
+                'width:100%',
+                'max-width:100%',
+                'height:auto',
+                'max-height:none',
+                'margin:0 auto',
+                'object-fit:contain'
+            ].join(';');
+            header.append(image);
+            fragment.append(header);
+        }
+fragment.append(node('h2', '', title));
 
         const meta = (label, value) => {
             const line = node('p', 'mc-cert-paper__meta');
@@ -8168,7 +8197,8 @@ function initMedicalCardCertificatesUi() {
                 @page { size: A4; margin: 18mm; }
                 body { margin: 0; color: #000; font: 12pt/1.5 'Times New Roman', serif; }
                 .mc-cert-paper { overflow-wrap: anywhere; }
-                .mc-cert-paper__draft { margin-bottom: 18px; padding: 6px; border: 1px dashed #999; text-align: center; font: 8pt sans-serif; }
+                .mc-cert-paper__clinic-header { width: 100%; max-width: 100%; margin: 0 0 6mm; text-align: center; break-inside: avoid; }
+                .mc-cert-paper__clinic-header img { display: block; width: 100%; max-width: 100%; height: auto; max-height: none; margin: 0 auto; object-fit: contain; }
                 .mc-cert-paper__organization { text-align: center; font-weight: bold; margin-bottom: 20px; white-space: pre-wrap; }
                 h2 { margin: 0 0 20px; text-align: center; font-size: 16pt; }
                 h3 { margin: 0 0 5px; font-size: 12pt; break-after: avoid; }
@@ -8180,6 +8210,29 @@ function initMedicalCardCertificatesUi() {
             `;
             printDocument.head.append(style);
             printDocument.body.append(printDocument.importNode(query(modal, '[data-cert-paper]'), true));
+
+            const printImages = Array.from(printDocument.images || []);
+
+            await Promise.all(printImages.map(image => {
+                if (image.complete) {
+                    return Promise.resolve();
+                }
+
+                return new Promise(resolve => {
+                    const timer = window.setTimeout(resolve, 5000);
+
+                    image.addEventListener('load', () => {
+                        window.clearTimeout(timer);
+                        resolve();
+                    }, { once: true });
+
+                    image.addEventListener('error', () => {
+                        window.clearTimeout(timer);
+                        resolve();
+                    }, { once: true });
+                });
+            }));
+
             if (printDocument.fonts?.ready) await printDocument.fonts.ready;
             await new Promise(resolve => window.setTimeout(resolve, 100));
             printWindow.addEventListener('afterprint', () => {

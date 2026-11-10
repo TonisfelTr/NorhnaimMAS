@@ -1190,7 +1190,7 @@
 
                     <div class="modal fade mc-modal-ui mc-modal-ui--teal" id="modalUploadDocument" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
-                            <form class="modal-content" method="post" enctype="multipart/form-data">
+                            <form class="modal-content" method="post" enctype="multipart/form-data" action="{{ route('doctors.patients.documents.upload', [$patient->id]) }}">
                                 <div class="modal-header">
                                     @csrf
                                     <input type="file" id="document-upload__upload" name="document_upload" hidden>

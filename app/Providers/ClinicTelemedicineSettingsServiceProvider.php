@@ -13,8 +13,6 @@ final class ClinicTelemedicineSettingsServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->loadRoutesFrom(base_path('routes/clinic_telemedicine_settings.php'));
-
         View::composer('doctors.settings', static function (RenderedView $view): void {
             $view->with('clinicTelemedicineNavigation',
                 ClinicTelemedicineSettingsAccess::navigation(request()));

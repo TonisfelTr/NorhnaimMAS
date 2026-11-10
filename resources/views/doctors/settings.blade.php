@@ -536,6 +536,20 @@
                         </a>
                     </li>
 
+                    @if(
+                        auth()->check()
+                        && \App\Http\Middleware\ClinicSettingsAccessMiddleware::isDebugTester(auth()->user())
+                    )
+                        <li class="nav-item">
+                            <a class="settings-navbar__link { request()->routeIs('doctors.settings.certificate-header.*') ? 'active' : '' }"
+                               href="{{ route('doctors.settings.certificate-header.index') }}">
+                                <i class="bi bi-file-earmark-image"></i>
+                                Шапка документов
+                            </a>
+                        </li>
+                    @endif
+
+
                     @endif
 
                     {{-- Принадлежность стационаров настраивается только из амбулатории.
