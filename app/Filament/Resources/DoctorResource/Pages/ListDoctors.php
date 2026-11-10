@@ -13,7 +13,13 @@ class ListDoctors extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Добавить врача'),
         ];
+    }
+
+    public function getTitle(): string
+    {
+        return 'Врачи';
     }
 }

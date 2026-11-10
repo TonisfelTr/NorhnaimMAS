@@ -1458,93 +1458,123 @@ $today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId))-
             ->get();
     }
 
-    private function doctorAppointmentFormats(
-        $doctors,
-        array $appointmentFormats,
-        array $doctorCabinetIds
-    ): array {
-        return $doctors
-            ->mapWithKeys(
-                static function (Doctor $doctor) use (
-                    $appointmentFormats,
-                    $doctorCabinetIds
-                ): array {
-                    $formats = [];
-                    $doctorId = (string) $doctor->id;
+private function doctorAppointmentFormats(
+    $doctors,
+    array $appointmentFormats,
+    array $doctorCabinetIds
+): array {
+    $telemedicineEligibility = app(
+        \App\Support\DoctorTelemedicineEligibility::class
+    );
 
-                    if (in_array(
+    return $doctors
+        ->mapWithKeys(
+            static function (Doctor $doctor) use (
+                $appointmentFormats,
+                $doctorCabinetIds,
+                $telemedicineEligibility
+            ): array {
+                $formats = [];
+                $doctorId = (string) $doctor->id;
+
+                if (
+                    in_array(
                         self::APPOINTMENT_FORMAT_TELEMEDICINE,
                         $appointmentFormats,
                         true
-                    )) {
-                        $formats[] = self::APPOINTMENT_FORMAT_TELEMEDICINE;
-                    }
-
-                    if (
-                        in_array(
-                            self::APPOINTMENT_FORMAT_IN_PERSON,
-                            $appointmentFormats,
-                            true
-                        )
-                        && !empty($doctorCabinetIds[$doctorId] ?? [])
-                    ) {
-                        $formats[] = self::APPOINTMENT_FORMAT_IN_PERSON;
-                    }
-
-                    return [$doctorId => $formats];
+                    )
+                    && $telemedicineEligibility->allows($doctor)
+                ) {
+                    $formats[] =
+                        self::APPOINTMENT_FORMAT_TELEMEDICINE;
                 }
-            )
-            ->all();
+
+                if (
+                    in_array(
+                        self::APPOINTMENT_FORMAT_IN_PERSON,
+                        $appointmentFormats,
+                        true
+                    )
+                    && !empty(
+                        $doctorCabinetIds[$doctorId]
+                        ?? []
+                    )
+                ) {
+                    $formats[] =
+                        self::APPOINTMENT_FORMAT_IN_PERSON;
+                }
+
+                return [
+                    $doctorId => $formats,
+                ];
+            }
+        )
+        ->all();
+}
+
+private function assertDoctorAvailableForReception(
+    Doctor $doctor,
+    ?int $clinicId,
+    string $appointmentFormat = self::APPOINTMENT_FORMAT_IN_PERSON
+): void {
+    if (
+        !$clinicId
+        || (int) $doctor->clinic_id
+            !== (int) $clinicId
+    ) {
+        throw ValidationException::withMessages([
+            'doctor_id' =>
+                'Выбранный врач не работает в текущей клинике.',
+        ]);
     }
 
-    private function assertDoctorAvailableForReception(
-        Doctor $doctor,
-        ?int $clinicId,
-        string $appointmentFormat = self::APPOINTMENT_FORMAT_IN_PERSON
-    ): void {
-        if (
-            !$clinicId
-            || (int) $doctor->clinic_id !== (int) $clinicId
-        ) {
-            throw ValidationException::withMessages([
-                'doctor_id' =>
-                    'Выбранный врач не работает в текущей клинике.',
-            ]);
-        }
+    if (
+        $appointmentFormat
+        === self::APPOINTMENT_FORMAT_TELEMEDICINE
+    ) {
+        app(
+            \App\Support\DoctorTelemedicineEligibility::class
+        )->assertAllowed($doctor);
 
-        if ($appointmentFormat === self::APPOINTMENT_FORMAT_TELEMEDICINE) {
-            return;
-        }
-
-        $hasCabinet = ClinicCabinet::query()
-            ->where('clinic_id', $clinicId)
-            ->where('enabled', true)
-            ->where(
-                'cabinet_type',
-                ClinicCabinet::TYPE_DOCTOR
-            )
-            ->where(
-                function ($query) use ($doctor): void {
-                    $query
-                        ->where(
-                            'doctor_id',
-                            $doctor->id
-                        )
-                        ->orWhere(
-                            'replace_doctor_id',
-                            $doctor->id
-                        );
-                }
-            )
-            ->exists();
-
-        if (!$hasCabinet) {
-            throw ValidationException::withMessages([
-                'doctor_id' =>
-                    'Для очного приёма у выбранного врача должен быть активный кабинет в текущей клинике.',
-            ]);
-        }
+        return;
     }
+
+    $hasCabinet = ClinicCabinet::query()
+        ->where(
+            'clinic_id',
+            $clinicId
+        )
+        ->where(
+            'enabled',
+            true
+        )
+        ->where(
+            'cabinet_type',
+            ClinicCabinet::TYPE_DOCTOR
+        )
+        ->where(
+            function ($query) use ($doctor): void {
+                $query
+                    ->where(
+                        'doctor_id',
+                        $doctor->id
+                    )
+                    ->orWhere(
+                        'replace_doctor_id',
+                        $doctor->id
+                    );
+            }
+        )
+        ->exists();
+
+    if (!$hasCabinet) {
+        throw ValidationException::withMessages([
+            'doctor_id' =>
+                'Для очного приёма у выбранного врача должен быть '
+                . 'активный кабинет в текущей клинике.',
+        ]);
+    }
+}
 
     private function clinicWorkSchedulesForDoctors($doctors): array
     {

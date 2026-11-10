@@ -13,7 +13,13 @@ class ListClinics extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Добавить клинику'),
         ];
+    }
+
+    public function getTitle(): string
+    {
+        return 'Клиники';
     }
 }

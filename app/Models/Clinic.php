@@ -27,6 +27,8 @@ class Clinic extends Model implements HasMedia
         'created_at' => 'datetime:d.m.Y H:i:s',
         'inpatient_working_hours' => 'array',
         'inpatient_visiting_hours' => 'array',
+        'phones' => 'array',
+        'services' => 'array',
     ];
 
     // Форматированная дата создания
@@ -94,7 +96,7 @@ class Clinic extends Model implements HasMedia
     // Регистрация коллекций медиа
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('photos')->singleFile();
+        $this->addMediaCollection('photos');
 
         $this->addMediaCollection('certificate_header')
             ->singleFile()
