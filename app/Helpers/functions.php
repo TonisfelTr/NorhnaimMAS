@@ -79,3 +79,8 @@ function ageWord(int $age): string
 
     return 'лет';
 }
+
+function is_debug(): bool
+{
+    return env('APP_DEBUG', false) == true;
+}

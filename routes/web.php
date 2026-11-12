@@ -122,7 +122,25 @@ Route::prefix('jurisprudence')->group(function (): void {
 
 Route::prefix('log')->group(function (): void {
     Route::get('out', [UserController::class, 'logout'])->name('actions.logout');
-    Route::post('in', [UserController::class, 'login'])->name('actions.login');
+
+    Route::post('in', [UserController::class, 'login'])
+        ->middleware('throttle:10,1')
+        ->name('actions.login');
+
+    Route::post('register', [UserController::class, 'register'])
+        ->middleware('throttle:5,1')
+        ->name('actions.register');
+
+    Route::post('forgot-password', [UserController::class, 'forgotPassword'])
+        ->middleware('throttle:3,1')
+        ->name('password.email');
+
+    Route::get('reset-password/{token}', [UserController::class, 'showResetPassword'])
+        ->name('password.reset');
+
+    Route::post('reset-password', [UserController::class, 'resetPassword'])
+        ->middleware('throttle:5,1')
+        ->name('password.update');
 });
 
 Route::prefix('api')->group(function (): void {

@@ -87,18 +87,22 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                             @endcan
+                            @hasanyrole('doctors|clinic_admin')
                             <li>
                                 <a class="dropdown-item" href="{{ route('doctors.main') }}">
                                     <i class="bi bi-hospital"></i>
                                     <span>Панель доктора</span>
                                 </a>
                             </li>
+                            @endhasanyrole
+                            @role('patients')
                             <li>
                                 <a class="dropdown-item" href="#">
                                     <i class="bi bi-file-medical"></i>
                                     <span>Панель пациента</span>
                                 </a>
                             </li>
+                            @endrole
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" href="{{ route('actions.logout') }}">
