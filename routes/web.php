@@ -3,7 +3,7 @@
 use App\Http\Controllers\Doctors\AnalysesPanelController;
 use App\Http\Controllers\Doctors\AnamnesisController;
 use App\Http\Controllers\Doctors\CabinetController;
-use App\Http\Controllers\Doctors\CardMedicalDocumentController;
+use App\Http\Controllers\Doctors\CertificatePrintContextController;
 use App\Http\Controllers\Doctors\ClinicAffiliationController;
 use App\Http\Controllers\Doctors\ClinicCertificateHeaderController;
 use App\Http\Controllers\Doctors\ClinicTelemedicineSettingsController;
@@ -11,9 +11,11 @@ use App\Http\Controllers\Doctors\ConsiliumController;
 use App\Http\Controllers\Doctors\ContactController;
 use App\Http\Controllers\Doctors\DoctorAppointmentTimezoneController;
 use App\Http\Controllers\Doctors\DoctorDestinationController;
+use App\Http\Controllers\Doctors\DoctorProfileController;
 use App\Http\Controllers\Doctors\DocumentController;
 use App\Http\Controllers\Doctors\DriverCommissionController;
 use App\Http\Controllers\Doctors\EpicrisisController;
+use App\Http\Controllers\Doctors\EpicrisisFormContextController;
 use App\Http\Controllers\Doctors\HospitalDepartmentController;
 use App\Http\Controllers\Doctors\HospitalDischargeController;
 use App\Http\Controllers\Doctors\HospitalDutyController;
@@ -26,19 +28,20 @@ use App\Http\Controllers\Doctors\InpatientAdmissionController;
 use App\Http\Controllers\Doctors\InpatientSettingsWorkspaceController;
 use App\Http\Controllers\Doctors\InstrumentalResearchController;
 use App\Http\Controllers\Doctors\MedicalCardController;
-use App\Http\Controllers\Doctors\PatientDoctorTransferController;
+use App\Http\Controllers\Doctors\MedicalComissionController;
+use App\Http\Controllers\Doctors\MedicalDocumentAiTaskController;
 use App\Http\Controllers\Doctors\MedicalEncounterController;
 use App\Http\Controllers\Doctors\MedicalVisitConfirmationController;
-use App\Http\Controllers\Doctors\MedicalComissionController;
 use App\Http\Controllers\Doctors\MilitaryCommissionDocumentController;
 use App\Http\Controllers\Doctors\MseReferralController;
 use App\Http\Controllers\Doctors\NeuralNetworkController;
 use App\Http\Controllers\Doctors\PatientDisabilityController;
 use App\Http\Controllers\Doctors\PatientDisabilityVerificationController;
+use App\Http\Controllers\Doctors\PatientDoctorTransferController;
 use App\Http\Controllers\Doctors\PatientTestingController;
 use App\Http\Controllers\Doctors\PrescriptionsController;
-use App\Http\Controllers\Doctors\ReceptionController;
 use App\Http\Controllers\Doctors\ReceptionArrivalController;
+use App\Http\Controllers\Doctors\ReceptionController;
 use App\Http\Controllers\Doctors\ResearchController;
 use App\Http\Controllers\Doctors\SettingsController;
 use App\Http\Controllers\Doctors\TestPanelController;
@@ -49,6 +52,9 @@ use App\Http\Controllers\Doctors\TelemedicineEventIngestController;
 use App\Http\Controllers\Doctors\TelemedicineJournalController;
 use App\Http\Controllers\Doctors\TelemedicineJournalGateController;
 use App\Http\Controllers\Doctors\TelemedicineProviderSessionController;
+use App\Http\Controllers\Laboratory\AuthController as LaboratoryAuthController;
+use App\Http\Controllers\Laboratory\RealtimeFragmentController;
+use App\Http\Controllers\Laboratory\WorkspaceController as LaboratoryWorkspaceController;
 use App\Http\Controllers\Main\ArticleController;
 use App\Http\Controllers\Main\BlogController;
 use App\Http\Controllers\Main\ClinicController;
@@ -57,13 +63,9 @@ use App\Http\Controllers\Main\FeedbackController;
 use App\Http\Controllers\Main\IndexController as MainIndexController;
 use App\Http\Controllers\Main\JurisprudenceController;
 use App\Http\Controllers\Main\MedicineController;
-use App\Http\Controllers\Laboratory\AuthController as LaboratoryAuthController;
-use App\Http\Controllers\Laboratory\RealtimeFragmentController;
-use App\Http\Controllers\Laboratory\WorkspaceController as LaboratoryWorkspaceController;
+use App\Http\Controllers\Patients\DashboardController as PatientDashboardController;
 use App\Http\Controllers\TelemedicineInvitationController;
 use App\Http\Controllers\UserController;
-
-use App\Http\Middleware\CardDocumentPrivateResponse;
 use App\Http\Middleware\ClinicSettingsAccessMiddleware;
 use App\Http\Middleware\DoctorHardLockMiddleware;
 use App\Http\Middleware\DoctorOrHospitalAdmin;
@@ -71,11 +73,9 @@ use App\Http\Middleware\EnsureClinicTelemedicineSettings;
 use App\Http\Middleware\EnsureLaboratoryAccess;
 use App\Http\Middleware\HospitalRoomContextMiddleware;
 use App\Http\Middleware\LockClinicTypeMiddleware;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
-
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 
@@ -89,7 +89,6 @@ if (config('app.debug')) {
 }
 
 Route::prefix('dictionary')->group(function (): void {
-
     Route::prefix('clinics')->group(function (): void {
         Route::get('/', [ClinicController::class, 'list'])->name('main.clinics');
         Route::get('/{clinic_id}', [ClinicController::class, 'index'])->name('main.clinics.form');
@@ -104,6 +103,7 @@ Route::prefix('dictionary')->group(function (): void {
 
 Route::prefix('blog')->group(function (): void {
     Route::get('/', [BlogController::class, 'list'])->name('main.blog');
+
     Route::prefix('category')->group(function (): void {
         Route::get('/{category_id}', [BlogController::class, 'list'])->name('main.blog.category');
     });
@@ -143,78 +143,103 @@ Route::prefix('log')->group(function (): void {
         ->name('password.update');
 });
 
+Route::middleware(['auth', RoleMiddleware::class . ':patients'])
+    ->prefix('patient')
+    ->name('patients.')
+    ->group(function (): void {
+        Route::get('/', PatientDashboardController::class)->name('dashboard');
+    });
+
 Route::prefix('api')->group(function (): void {
     require __DIR__ . '/api.php';
 });
 
-// Shared endpoints for clinical users and authorized admins, including medical encounter routes.
-// For doctors, DoctorOrHospitalAdmin invokes the existing DoctorHardLockMiddleware.
-// Admins must also have explicit permissions and authorized clinic records.
-Route::middleware(['auth', DoctorOrHospitalAdmin::class])->prefix('doctors')->as('doctors.')->group(function (): void {
-    Route::get('/', [DoctorsIndexController::class, 'index'])->name('main');
-    Route::get('/patients/{patient:id}', [MedicalCardController::class, 'index'])->whereNumber('patient')->name('patients.medical_card');
+Route::middleware(['auth', DoctorOrHospitalAdmin::class])
+    ->prefix('doctors')
+    ->as('doctors.')
+    ->group(function (): void {
+        Route::get('/', [DoctorsIndexController::class, 'index'])->name('main');
+        Route::get('/patients/{patient:id}', [MedicalCardController::class, 'index'])->whereNumber('patient')->name('patients.medical_card');
 
-    // PATIENT_DOCTOR_TRANSFER_ROUTES_START
-    Route::get('/patients/{patient:id}/doctor-transfer/candidates', [PatientDoctorTransferController::class, 'candidates'])
-        ->whereNumber('patient')->middleware('throttle:60,1')
-        ->name('patients.doctor-transfer.candidates');
-    Route::post('/patients/{patient:id}/doctor-transfer', [PatientDoctorTransferController::class, 'store'])
-        ->whereNumber('patient')->middleware('throttle:10,1')
-        ->name('patients.doctor-transfer.store');
-    // PATIENT_DOCTOR_TRANSFER_ROUTES_END
+        Route::get('/patients/{patient:id}/doctor-transfer/candidates', [PatientDoctorTransferController::class, 'candidates'])
+            ->whereNumber('patient')->middleware('throttle:60,1')
+            ->name('patients.doctor-transfer.candidates');
+        Route::post('/patients/{patient:id}/doctor-transfer', [PatientDoctorTransferController::class, 'store'])
+            ->whereNumber('patient')->middleware('throttle:10,1')
+            ->name('patients.doctor-transfer.store');
 
+        Route::post('/patients/{patient:id}/disability', [PatientDisabilityController::class, 'save'])
+            ->whereNumber('patient')->middleware('throttle:20,1')
+            ->name('patients.disability.save');
 
-    // Отдельные сведения об инвалидности: ручное внесение и проверка документа.
-    // Те же auth / DoctorOrHospitalAdmin, что и при открытии медкарты.
-    // PatientDisabilityController дополнительно проверяет canRead + canEdit для пациента.
-    Route::post('/patients/{patient:id}/disability', [PatientDisabilityController::class, 'save'])
-        ->whereNumber('patient')->middleware('throttle:20,1')
-        ->name('patients.disability.save');
+        Route::post('/patients/{patient:id}/disability/verification', [PatientDisabilityController::class, 'verification'])
+            ->whereNumber('patient')->middleware('throttle:10,1')
+            ->name('patients.disability.verification');
 
-    Route::post('/patients/{patient:id}/disability/verification', [PatientDisabilityController::class, 'verification'])
-        ->whereNumber('patient')->middleware('throttle:10,1')
-        ->name('patients.disability.verification');
+        Route::post('/patients/{patient:id}/visits/{registryRecord}/encounter', [MedicalEncounterController::class, 'save'])
+            ->whereNumber('registryRecord')
+            ->middleware('throttle:30,1')
+            ->name('patients.visits.encounter.save');
 
-    // Приёмы и телемедицина: те же auth / DoctorOrHospitalAdmin, что и у медицинской карты.
-    // Проверка доступа к конкретному пациенту и клинике выполняется в MedicalEncounterController.
-    Route::post('/patients/{patient:id}/visits/{registryRecord}/encounter', [MedicalEncounterController::class, 'save'])
-        ->whereNumber('registryRecord')
-        ->middleware('throttle:30,1')
-        ->name('patients.visits.encounter.save');
+        Route::get('/patients/{patient:id}/visits/{registryRecord}/protocol', [MedicalEncounterController::class, 'printProtocol'])
+            ->whereNumber('registryRecord')
+            ->name('patients.visits.protocol.print');
 
-    Route::get('/patients/{patient:id}/visits/{registryRecord}/protocol', [MedicalEncounterController::class, 'printProtocol'])
-        ->whereNumber('registryRecord')
-        ->name('patients.visits.protocol.print');
+        Route::post(
+            '/patients/{patient:id}/disability/verify-document',
+            [PatientDisabilityVerificationController::class, 'verify']
+        )
+            ->whereNumber('patient')
+            ->middleware('throttle:10,1')
+            ->name('patients.disability.verify-document');
 
-    // Подтверждение документа МСЭ: тот же входной guard, что и у медкарты.
-    Route::post(
-        '/patients/{patient:id}/disability/verify-document',
-        [PatientDisabilityVerificationController::class, 'verify']
-    )
-        ->whereNumber('patient')
-        ->middleware('throttle:10,1')
-        ->name('patients.disability.verify-document');
+        Route::get(
+            '/patients/{patient:id}/telemedicine/available-slots',
+            TelemedicineAvailableSlotsController::class
+        )
+            ->whereNumber('patient')
+            ->middleware('throttle:60,1')
+            ->name('patients.telemedicine.available-slots');
 
-    // Свободные слоты телемедицины для выбранного пациента.
-    Route::get(
-        '/patients/{patient:id}/telemedicine/available-slots',
-        TelemedicineAvailableSlotsController::class
-    )
-        ->whereNumber('patient')
-        ->middleware('throttle:60,1')
-        ->name('patients.telemedicine.available-slots');
+        Route::post('/workbench/assignments/{assignment}/attending', [DoctorsIndexController::class, 'updateAttendingDoctor'])->whereNumber('assignment')->name('workbench.attending.update');
 
-    Route::post('/workbench/assignments/{assignment}/attending', [DoctorsIndexController::class, 'updateAttendingDoctor'])->whereNumber('assignment')->name('workbench.attending.update');
-});
+        Route::prefix('patients/{patient:id}/ai-document-tasks')
+            ->name('patients.ai-document-tasks.')
+            ->group(function (): void {
+                Route::post('/', [MedicalDocumentAiTaskController::class, 'store'])->name('store');
+                Route::get('/{task}', [MedicalDocumentAiTaskController::class, 'show'])->whereUuid('task')->name('show');
+                Route::post('/{task}/cancel', [MedicalDocumentAiTaskController::class, 'cancel'])->whereUuid('task')->name('cancel');
+                Route::post('/{task}/anamneses/confirm', [MedicalDocumentAiTaskController::class, 'confirmAnamneses'])->whereUuid('task')->name('anamneses.confirm');
+            });
 
-Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class])->group(function (): void {
-    Route::get('doctors/settings/clinic-affiliations', [ClinicAffiliationController::class, 'index'])->name('doctors.settings.clinic-affiliations.index');
+        Route::get(
+            'patients/{patient:id}/epicrisis-form-context',
+            [EpicrisisFormContextController::class, 'show']
+        )
+            ->whereNumber('patient')
+            ->name('patients.epicrisis.form-context');
 
-    Route::post('doctors/settings/clinic-affiliations', [ClinicAffiliationController::class, 'update'])->name('doctors.settings.clinic-affiliations.update');
+        Route::get(
+            'patients/{patient:id}/certificate/print-context',
+            [CertificatePrintContextController::class, 'show']
+        )
+            ->whereNumber('patient')
+            ->name('patients.certificate.print-context');
 
-    // Новый стационар: доступ проверяется в ClinicAffiliationController::store.
-    Route::post('doctors/settings/clinic-affiliations/create', [ClinicAffiliationController::class, 'store'])->name('doctors.settings.clinic-affiliations.store');
-});
+        Route::prefix('profile')->name('profile.')->group(function (): void {
+            Route::get('/', [DoctorProfileController::class, 'index'])->name('index');
+            Route::post('/photo', [DoctorProfileController::class, 'photo'])->name('photo');
+            Route::post('/credentials', [DoctorProfileController::class, 'credentialStore'])->name('credentials.store');
+            Route::post('/credentials/{credential}/verify', [DoctorProfileController::class, 'credentialVerify'])
+                ->whereNumber('credential')
+                ->name('credentials.verify');
+            Route::get('/credentials/{credential}/download', [DoctorProfileController::class, 'credentialDownload'])
+                ->whereNumber('credential')
+                ->name('credentials.download');
+            Route::patch('/', [DoctorProfileController::class, 'update'])->name('update');
+            Route::delete('/photo', [DoctorProfileController::class, 'photoDestroy'])->name('photo.destroy');
+        });
+    });
 
 Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|doctors' : ':doctors'), DoctorHardLockMiddleware::class])->prefix('doctors')->as('doctors.')->group(function (): void {
 
@@ -360,13 +385,11 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
         Route::post('/store', [ConsiliumController::class, 'store'])->name('store');
     });
 
-    // -------------------- Врачебная комиссия --------------------
     Route::prefix('commissions')->as('commissions.')->group(function (): void {
         Route::get('/', [MedicalComissionController::class, 'index'])->name('index');
         Route::get('/create', [MedicalComissionController::class, 'create'])->name('create');
         Route::post('/', [MedicalComissionController::class, 'store'])->name('store');
 
-        // -------------------- Военкомат / ВВК --------------------
         Route::prefix('military')->as('military.')->group(function (): void {
             Route::get('/', [MilitaryCommissionDocumentController::class, 'index'])->name('index');
             Route::get('/create', [MilitaryCommissionDocumentController::class, 'create'])->name('create');
@@ -378,7 +401,6 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
             Route::get('/{militaryDocument}/print', [MilitaryCommissionDocumentController::class, 'print'])->whereNumber('militaryDocument')->name('print');
         });
 
-        // -------------------- МСЭ / форма 088/у --------------------
         Route::prefix('mse')->as('mse.')->group(function (): void {
             Route::get('/', [MseReferralController::class, 'index'])->name('index');
             Route::get('/create', [MseReferralController::class, 'create'])->name('create');
@@ -393,7 +415,6 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
             Route::get('/{mseReferral}/consent-document', [MseReferralController::class, 'consentDocument'])->whereNumber('mseReferral')->name('consent-document');
         });
 
-        // -------------------- Водительская комиссия / психиатр --------------------
         Route::prefix('driver')->as('driver.')->group(function (): void {
             Route::get('/', [DriverCommissionController::class, 'index'])->name('index');
             Route::get('/create', [DriverCommissionController::class, 'create'])->name('create');
@@ -407,8 +428,6 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
         });
     });
 
-    // Госпитализация: список размещений, варианты и сохранение переноса пациента.
-    // Наследует middleware и префикс doctors. от родительской группы.
     Route::prefix('inpatient/admissions')->as('inpatient.admissions.')->group(function (): void {
         Route::get('/', [InpatientAdmissionController::class, 'index'])->name('index');
         Route::get('/options', [InpatientAdmissionController::class, 'options'])->name('options');
@@ -428,35 +447,45 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
 
 });
 
-// Временное администрирование стационара под текущим clinic_admin (v3).
-// Авторизация пользователя не переключается; контекст и права проверяют контроллер и web guard.
-Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class])->post('doctors/settings/clinic-affiliations/hospitals/{hospital}/login-as', [HospitalImpersonationController::class, 'enter'])->whereNumber('hospital')->name('doctors.hospital-impersonation.enter');
+Route::middleware([
+    'auth',
+    ClinicSettingsAccessMiddleware::class,
+    DoctorHardLockMiddleware::class,
+])->prefix('doctors')->as('doctors.')->group(function (): void {
 
-Route::middleware('auth')->group(function (): void {
-    Route::get('doctors/hospital-impersonation/bridge', [HospitalImpersonationController::class, 'bridge'])->name('doctors.hospital-impersonation.bridge');
-    Route::post('doctors/hospital-impersonation/leave', [HospitalImpersonationController::class, 'leave'])->name('doctors.hospital-impersonation.leave');
-    Route::get('doctors/hospital-impersonation/hospitals/{hospital}/settings', [InpatientSettingsWorkspaceController::class, 'show'])->whereNumber('hospital')->name('doctors.hospital-impersonation.workspace');
-    Route::post('doctors/hospital-impersonation/hospitals/{hospital}/settings', [InpatientSettingsWorkspaceController::class, 'save'])->whereNumber('hospital')->name('doctors.hospital-impersonation.workspace.save');
-});
+    Route::post(
+        'settings/clinic-affiliations/hospitals/{hospital}/login-as',
+        [HospitalImpersonationController::class, 'enter']
+    )
+        ->whereNumber('hospital')
+        ->name('hospital-impersonation.enter');
 
-// ПОЛНЫЙ конструктор палат выбранного стационара, отдельно от настроек амбулатории.
-// Не требует второго администратора; каждый запрос заново проверяет госпитальный контекст.
-Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class, HospitalRoomContextMiddleware::class])->prefix('doctors/hospital-impersonation/hospitals/{hospital}/rooms')->as('doctors.hospital-impersonation.rooms.')->group(function (): void {
-    Route::get('/', [HospitalRoomController::class, 'index'])->name('index');
-    Route::get('/data', [HospitalRoomController::class, 'data'])->name('data');
-    Route::post('/', [HospitalRoomController::class, 'store'])->name('store');
-    Route::post('/{room}/layout', [HospitalRoomController::class, 'saveLayout'])->whereNumber('room')->name('layout');
-    Route::post('/{room}/delete', [HospitalRoomController::class, 'destroy'])->whereNumber('room')->name('delete');
-    Route::post('/{room}', [HospitalRoomController::class, 'update'])->whereNumber('room')->name('update');
-});
+    Route::middleware(HospitalRoomContextMiddleware::class)
+        ->prefix('hospital-impersonation/hospitals/{hospital}/rooms')
+        ->name('hospital-impersonation.rooms.')
+        ->group(function (): void {
+            Route::get('/', [HospitalRoomController::class, 'index'])->name('index');
+            Route::get('/data', [HospitalRoomController::class, 'data'])->name('data');
+            Route::post('/', [HospitalRoomController::class, 'store'])->name('store');
+            Route::post('/{room}/layout', [HospitalRoomController::class, 'saveLayout'])->whereNumber('room')->name('layout');
+            Route::post('/{room}/delete', [HospitalRoomController::class, 'destroy'])->whereNumber('room')->name('delete');
+            Route::post('/{room}', [HospitalRoomController::class, 'update'])->whereNumber('room')->name('update');
+        });
 
-Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLockMiddleware::class])->prefix('doctors')->as('doctors.')->group(function (): void {
     Route::prefix('settings')->as('settings.')->group(function (): void {
+        Route::get('clinic-affiliations', [ClinicAffiliationController::class, 'index'])
+            ->name('clinic-affiliations.index');
+
+        Route::post('clinic-affiliations', [ClinicAffiliationController::class, 'update'])
+            ->name('clinic-affiliations.update');
+
+        Route::post('clinic-affiliations/create', [ClinicAffiliationController::class, 'store'])
+            ->name('clinic-affiliations.store');
+
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::post('/', [SettingsController::class, 'update'])->middleware(LockClinicTypeMiddleware::class)->name('index.update');
         Route::post('/employees/update', [SettingsController::class, 'updateEmployee'])->name('employees.update');
 
-        // Единая шапка документов клиники и всей её группы учреждений.
         Route::prefix('/certificate-header')->as('certificate-header.')->group(function (): void {
             Route::get('/', [ClinicCertificateHeaderController::class, 'index'])->name('index');
             Route::post('/', [ClinicCertificateHeaderController::class, 'store'])->name('store');
@@ -464,7 +493,6 @@ Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLock
             Route::get('/image', [ClinicCertificateHeaderController::class, 'settingsImage'])->name('image');
         });
 
-        // Настройки телемедицины клиники. Базовые auth/settings middleware уже у родительской группы.
         Route::middleware(EnsureClinicTelemedicineSettings::class)
             ->prefix('/telemedicine')
             ->as('telemedicine.')
@@ -472,7 +500,6 @@ Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLock
                 Route::get('/', [ClinicTelemedicineSettingsController::class, 'index'])->name('index');
                 Route::post('/', [ClinicTelemedicineSettingsController::class, 'update'])->name('update');
             });
-
 
         Route::prefix('/offices')->group(function (): void {
             Route::get('/', [CabinetController::class, 'index'])->name('offices');
@@ -549,177 +576,142 @@ Route::middleware(['auth', ClinicSettingsAccessMiddleware::class, DoctorHardLock
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Дополнительные маршруты, ранее вынесенные в отдельные routes/*.php
-|--------------------------------------------------------------------------
-|
-| web.php уже загружается с middleware-группой "web", поэтому здесь не
-| дублируем middleware "web". Специальные auth/guard/throttle оставлены
-| только там, где они действительно нужны по бизнес-логике.
-|
-*/
+Route::middleware('auth')->prefix('doctors')->as('doctors.')->group(function (): void {
+    Route::prefix('patients/{patient}/benefit-prescriptions')
+        ->name('prescriptions.benefit.')
+        ->group(function (): void {
+            Route::get('drug', [PrescriptionsController::class, 'benefitDrug'])->name('drug');
+            Route::post('/', [PrescriptionsController::class, 'storeBenefit'])->name('store');
+            Route::get('{benefit}/edit', [PrescriptionsController::class, 'editBenefit'])
+                ->whereUuid('benefit')
+                ->name('edit');
+            Route::get('{benefit}/print', [PrescriptionsController::class, 'printBenefit'])
+                ->whereUuid('benefit')
+                ->name('print');
+            Route::post('{benefit}/void', [PrescriptionsController::class, 'voidBenefit'])
+                ->whereUuid('benefit')
+                ->name('void');
+        });
 
-// Льготные рецепты. Тонкая проверка пациента/права выполняется контроллером.
-Route::middleware('auth')
-    ->prefix('doctors/patients/{patient}/benefit-prescriptions')
-    ->name('doctors.prescriptions.benefit.')
-    ->group(function (): void {
-        Route::get('drug', [PrescriptionsController::class, 'benefitDrug'])->name('drug');
-        Route::post('/', [PrescriptionsController::class, 'storeBenefit'])->name('store');
-        Route::get('{benefit}/edit', [PrescriptionsController::class, 'editBenefit'])
-            ->whereUuid('benefit')
-            ->name('edit');
-        Route::get('{benefit}/print', [PrescriptionsController::class, 'printBenefit'])
-            ->whereUuid('benefit')
-            ->name('print');
-        Route::post('{benefit}/void', [PrescriptionsController::class, 'voidBenefit'])
-            ->whereUuid('benefit')
-            ->name('void');
-    });
-
-// Факт явки пациента. Оставлен auth-only: доступ к конкретной записи проверяет контроллер.
-Route::middleware('auth')
-    ->post(
-        '/doctors/reception/records/{registryRecord}/arrived',
+    Route::post(
+        'reception/records/{registryRecord}/arrived',
         [ReceptionArrivalController::class, 'confirm']
     )
-    ->whereNumber('registryRecord')
-    ->name('doctors.reception.arrival.confirm');
+        ->whereNumber('registryRecord')
+        ->name('reception.arrival.confirm');
 
-// Подтверждение результата медицинского визита.
-Route::middleware('auth')
-    ->post(
-        '/doctors/patients/{patient}/visits/{registryRecord}/confirm',
+    Route::post(
+        'patients/{patient}/visits/{registryRecord}/confirm',
         [MedicalVisitConfirmationController::class, 'store']
     )
-    ->whereNumber('registryRecord')
-    ->name('doctors.patients.visits.confirm');
+        ->whereNumber('registryRecord')
+        ->name('patients.visits.confirm');
 
-// Журнал телемедицины: отдельная политика TelemedicineJournalAccess внутри сервиса.
-Route::middleware(['auth', 'throttle:30,1'])->group(function (): void {
-    Route::post(
-        '/doctors/patients/{patient}/telemedicine-journal',
-        [TelemedicineJournalController::class, 'store']
-    )
-        ->whereNumber('patient')
-        ->name('doctors.patients.telemedicine-journal.store');
-
-    Route::delete(
-        '/doctors/patients/{patient}/telemedicine-journal/{registryRecord}',
-        [TelemedicineJournalController::class, 'destroy']
-    )
-        ->whereNumber(['patient', 'registryRecord'])
-        ->name('doctors.patients.telemedicine-journal.destroy');
-});
-
-// Часовой пояс врача: clinic_admin либо сам врач — проверяется контроллером.
-Route::middleware('auth')
-    ->put(
-        '/doctors/settings/doctors/{doctor}/appointment-timezone',
-        [DoctorAppointmentTimezoneController::class, 'update']
-    )
-    ->whereNumber('doctor')
-    ->middleware('throttle:30,1')
-    ->name('doctors.settings.doctor-appointment-timezone.update');
-
-// Изображение шапки печатной формы пациента.
-// HospitalPatientAccess/clinic_admin проверяются в ClinicCertificateHeaderController.
-Route::middleware('auth')
-    ->get(
-        '/doctors/patients/{patient:id}/certificate-header',
-        [ClinicCertificateHeaderController::class, 'patientImage']
-    )
-    ->whereNumber('patient')
-    ->name('doctors.patients.certificate-header.image');
-
-// WebRTC / Яндекс.Телемост: действия врача.
-Route::middleware(['auth', DoctorHardLockMiddleware::class, 'throttle:30,1'])
-    ->group(function (): void {
-        $telemedicineConnectionPath =
-            '/doctors/patients/{patient}/telemedicine-connection/{recordId}';
-
-        Route::get(
-            $telemedicineConnectionPath,
-            [TelemedicineProviderSessionController::class, 'show']
-        )
-            ->whereNumber(['patient', 'recordId'])
-            ->name('doctors.telemedicine-session.show');
-
+    Route::middleware('throttle:30,1')->group(function (): void {
         Route::post(
-            $telemedicineConnectionPath . '/prepare',
-            [TelemedicineProviderSessionController::class, 'prepare']
+            'patients/{patient}/telemedicine-journal',
+            [TelemedicineJournalController::class, 'store']
         )
-            ->whereNumber(['patient', 'recordId'])
-            ->name('doctors.telemedicine-session.prepare');
+            ->whereNumber('patient')
+            ->name('patients.telemedicine-journal.store');
 
-        Route::post(
-            $telemedicineConnectionPath . '/recover',
-            [TelemedicineProviderSessionController::class, 'recover']
+        Route::delete(
+            'patients/{patient}/telemedicine-journal/{registryRecord}',
+            [TelemedicineJournalController::class, 'destroy']
         )
-            ->whereNumber(['patient', 'recordId'])
-            ->name('doctors.telemedicine-session.recover');
-
-        Route::post(
-            $telemedicineConnectionPath . '/doctor-join',
-            [TelemedicineProviderSessionController::class, 'doctorJoin']
-        )
-            ->whereNumber(['patient', 'recordId'])
-            ->name('doctors.telemedicine-session.doctor-join');
+            ->whereNumber(['patient', 'registryRecord'])
+            ->name('patients.telemedicine-journal.destroy');
     });
 
-// Подписанная пациентская ссылка на телемедицинский сеанс.
-Route::middleware(['signed', 'throttle:30,1'])->group(function (): void {
-    Route::get(
-        '/telemedicine/invitation/{meeting}',
-        [TelemedicineInvitationController::class, 'show']
+    Route::put(
+        'settings/doctors/{doctor}/appointment-timezone',
+        [DoctorAppointmentTimezoneController::class, 'update']
     )
-        ->whereUuid('meeting')
-        ->name('telemedicine.invitation.show');
+        ->whereNumber('doctor')
+        ->middleware('throttle:30,1')
+        ->name('settings.doctor-appointment-timezone.update');
+
+    Route::get(
+        'patients/{patient:id}/certificate-header',
+        [ClinicCertificateHeaderController::class, 'patientImage']
+    )
+        ->whereNumber('patient')
+        ->name('patients.certificate-header.image');
+
+    Route::get('hospital-impersonation/bridge', [HospitalImpersonationController::class, 'bridge'])
+        ->name('hospital-impersonation.bridge');
+
+    Route::post('hospital-impersonation/leave', [HospitalImpersonationController::class, 'leave'])
+        ->name('hospital-impersonation.leave');
+
+    Route::get(
+        'hospital-impersonation/hospitals/{hospital}/settings',
+        [InpatientSettingsWorkspaceController::class, 'show']
+    )
+        ->whereNumber('hospital')
+        ->name('hospital-impersonation.workspace');
 
     Route::post(
-        '/telemedicine/invitation/{meeting}/join',
-        [TelemedicineInvitationController::class, 'join']
+        'hospital-impersonation/hospitals/{hospital}/settings',
+        [InpatientSettingsWorkspaceController::class, 'save']
     )
-        ->whereUuid('meeting')
-        ->name('telemedicine.invitation.join');
+        ->whereNumber('hospital')
+        ->name('hospital-impersonation.workspace.save');
+
+    Route::middleware([DoctorHardLockMiddleware::class, 'throttle:30,1'])->group(function (): void {
+        $telemedicineConnectionPath = 'patients/{patient}/telemedicine-connection/{recordId}';
+
+        Route::get($telemedicineConnectionPath, [TelemedicineProviderSessionController::class, 'show'])
+            ->whereNumber(['patient', 'recordId'])
+            ->name('telemedicine-session.show');
+
+        Route::post($telemedicineConnectionPath . '/prepare', [TelemedicineProviderSessionController::class, 'prepare'])
+            ->whereNumber(['patient', 'recordId'])
+            ->name('telemedicine-session.prepare');
+
+        Route::post($telemedicineConnectionPath . '/recover', [TelemedicineProviderSessionController::class, 'recover'])
+            ->whereNumber(['patient', 'recordId'])
+            ->name('telemedicine-session.recover');
+
+        Route::post($telemedicineConnectionPath . '/doctor-join', [TelemedicineProviderSessionController::class, 'doctorJoin'])
+            ->whereNumber(['patient', 'recordId'])
+            ->name('telemedicine-session.doctor-join');
+    });
 });
 
-// Signaling -> Laravel: HMAC-аутентификация выполняется контроллером по raw body.
-Route::post(
-    '/internal/telemedicine/audit/events',
-    [TelemedicineEventIngestController::class, 'store']
-)
-    ->middleware('throttle:120,1')
-    ->withoutMiddleware([
-        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-        \App\Http\Middleware\VerifyCsrfToken::class,
-    ])
-    ->name('internal.telemedicine.audit.events');
+Route::middleware(['signed', 'throttle:30,1'])
+    ->prefix('telemedicine')
+    ->name('telemedicine.')
+    ->group(function (): void {
+        Route::get('invitation/{meeting}', [TelemedicineInvitationController::class, 'show'])
+            ->whereUuid('meeting')
+            ->name('invitation.show');
 
-// Signaling -> Laravel: проверка допуска к комнате телемедицины.
-Route::post(
-    '/internal/telemedicine/journal/authorize',
-    [TelemedicineJournalGateController::class, 'check']
-)
-    ->middleware('throttle:120,1')
-    ->withoutMiddleware([
-        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-        \App\Http\Middleware\VerifyCsrfToken::class,
-    ])
-    ->name('internal.telemedicine.journal.authorize');
+        Route::post('invitation/{meeting}/join', [TelemedicineInvitationController::class, 'join'])
+            ->whereUuid('meeting')
+            ->name('invitation.join');
+    });
 
-/*
-|--------------------------------------------------------------------------
-| Лаборатория
-|--------------------------------------------------------------------------
-|
-| Это обычные web-маршруты. Broadcast channel authorization остаётся
-| в routes/channels.php -> routes/laboratory-channels.php.
-|
-*/
+Route::prefix('internal/telemedicine')
+    ->middleware('throttle:120,1')
+    ->group(function (): void {
+        Route::post('audit/events', [TelemedicineEventIngestController::class, 'store'])
+            ->withoutMiddleware([
+                \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+                \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+                \App\Http\Middleware\VerifyCsrfToken::class,
+            ])
+            ->name('internal.telemedicine.audit.events');
+
+        Route::post('journal/authorize', [TelemedicineJournalGateController::class, 'check'])
+            ->withoutMiddleware([
+                \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+                \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+                \App\Http\Middleware\VerifyCsrfToken::class,
+            ])
+            ->name('internal.telemedicine.journal.authorize');
+    });
+
 Route::prefix('laboratory')->as('laboratory.')->group(function (): void {
     Route::middleware('guest')->group(function (): void {
         Route::get('/login', [LaboratoryAuthController::class, 'create'])
@@ -764,117 +756,3 @@ Route::prefix('laboratory')->as('laboratory.')->group(function (): void {
                 ->name('logout');
         });
 });
-
-// NORHNAIM_AI_MEDICAL_DOCUMENT_QUEUE_V1
-Route::middleware([
-    'auth',
-    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
-])
-    ->prefix('doctors/patients/{patient:id}/ai-document-tasks')
-    ->name('doctors.patients.ai-document-tasks.')
-    ->group(function (): void {
-        Route::post(
-            '/',
-            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'store']
-        )->name('store');
-
-        Route::get(
-            '/{task}',
-            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'show']
-        )->whereUuid('task')->name('show');
-
-        Route::post(
-            '/{task}/cancel',
-            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'cancel']
-        )->whereUuid('task')->name('cancel');
-
-        Route::post(
-            '/{task}/anamneses/confirm',
-            [\App\Http\Controllers\Doctors\MedicalDocumentAiTaskController::class, 'confirmAnamneses']
-        )->whereUuid('task')->name('anamneses.confirm');
-    });
-
-// NORHNAIM_EPICRISIS_FORM_CONTEXT_V1
-Route::middleware([
-    'auth',
-    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
-])
-    ->get(
-        '/doctors/patients/{patient:id}/epicrisis-form-context',
-        [\App\Http\Controllers\Doctors\EpicrisisFormContextController::class, 'show']
-    )
-    ->whereNumber('patient')
-    ->name('doctors.patients.epicrisis.form-context');
-
-// NORHNAIM_CERTIFICATE_PRINT_CONTEXT_V1
-Route::middleware([
-    'auth',
-    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
-])
-    ->get(
-        '/doctors/patients/{patient:id}/certificate/print-context',
-        [\App\Http\Controllers\Doctors\CertificatePrintContextController::class, 'show']
-    )
-    ->whereNumber('patient')
-    ->name('doctors.patients.certificate.print-context');
-
-// NORHNAIM_DOCTOR_PERSONAL_CABINET_V2
-Route::middleware([
-    'auth',
-    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
-])
-    ->prefix('doctors/profile')
-    ->name('doctors.profile.')
-    ->group(function (): void {
-        Route::get(
-            '/',
-            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'index']
-        )->name('index');
-
-        Route::post(
-            '/photo',
-            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'photo']
-        )->name('photo');
-
-        Route::post(
-            '/credentials',
-            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'credentialStore']
-        )->name('credentials.store');
-
-        Route::post(
-            '/credentials/{credential}/verify',
-            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'credentialVerify']
-        )
-            ->whereNumber('credential')
-            ->name('credentials.verify');
-
-        Route::get(
-            '/credentials/{credential}/download',
-            [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'credentialDownload']
-        )
-            ->whereNumber('credential')
-            ->name('credentials.download');
-    });
-
-
-// NORHNAIM_DOCTOR_PROFILE_UPDATE_ROUTE_V2
-Route::patch(
-    '/doctors/profile',
-    [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'update']
-)
-    ->middleware([
-        'auth',
-        \App\Http\Middleware\DoctorOrHospitalAdmin::class,
-    ])
-    ->name('doctors.profile.update');
-
-// NORHNAIM_DOCTOR_PROFILE_PHOTO_DELETE_ROUTE_V21
-Route::delete(
-    '/doctors/profile/photo',
-    [\App\Http\Controllers\Doctors\DoctorProfileController::class, 'photoDestroy']
-)
-    ->middleware([
-        'auth',
-        \App\Http\Middleware\DoctorOrHospitalAdmin::class,
-    ])
-    ->name('doctors.profile.photo.destroy');
