@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
@@ -40,6 +41,29 @@ class Clinic extends Model implements HasMedia
     public function doctor(): HasMany
     {
         return $this->HasMany(Doctor::class);
+    }
+
+    public function patientMemberships(): HasMany
+    {
+        return $this->hasMany(PatientClinic::class);
+    }
+
+    public function patients(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Patient::class,
+            'patient_clinics',
+            'clinic_id',
+            'patient_id'
+        )
+            ->withPivot([
+                'doctor_id',
+                'is_primary',
+                'is_active',
+                'attached_at',
+                'detached_at',
+            ])
+            ->withTimestamps();
     }
 
     // Отношение к отзывам

@@ -171,4 +171,27 @@ class Patient extends Model
             ->where('is_primary', true)
             ->where('is_active', true);
     }
+
+    public function clinicMemberships(): HasMany
+    {
+        return $this->hasMany(PatientClinic::class);
+    }
+
+    public function clinics(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Clinic::class,
+            'patient_clinics',
+            'patient_id',
+            'clinic_id'
+        )
+            ->withPivot([
+                'doctor_id',
+                'is_primary',
+                'is_active',
+                'attached_at',
+                'detached_at',
+            ])
+            ->withTimestamps();
+    }
 }

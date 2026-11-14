@@ -3801,3 +3801,36 @@
 
 .mc-document-medical
     color: #15803d
+
+// DOCTOR_MEDICAL_CARD_PROVENANCE_V1
+.mc-clinical-origin
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 5px 10px
+    margin-top: 7px
+    padding: 7px 9px
+    border: 1px solid #d9e8e3
+    border-radius: 9px
+    background: #f6fbf9
+    color: #49645e
+    font-size: 11px
+    line-height: 1.35
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 5px
+
+    i
+        color: #198b82
+
+    &.is-legacy
+        border-style: dashed
+        background: #fbfbfa
+        color: #6f7d79
+
+.mc-clinical-origin__legacy
+    color: #8a6d28
+    font-size: 10px
+    font-weight: 600

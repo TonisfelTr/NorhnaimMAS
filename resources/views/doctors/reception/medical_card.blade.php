@@ -155,6 +155,9 @@
                 Основной диагноз
             </span>
                                 </div>
+                                @include('doctors.reception.partials.clinical_origin', [
+                                    'origin' => $currentDiagnosisOrigin ?? null,
+                                ])
                             @else
                                 <div class="is-warning fw-semibold">
                                     Диагноз не установлен
@@ -1141,6 +1144,9 @@
                                                     <div
                                                         class="fw-semibold">{{ $document->name ?? $document->title ?? 'Документ' }}</div>
                                                     <div class="small mc-document-medical">{{ $document->medical_file ? 'Медицинский документ' : '' }}</div>
+                                                    @include('doctors.reception.partials.clinical_origin', [
+                                                        'origin' => $document->clinical_origin ?? null,
+                                                    ])
                                                 </td>
                                                 <td>{{ $document->description ?? '—' }}</td>
                                                 <td class="text-nowrap">{{ $document->created_at?->format('d.m.Y H:i') }}</td>
@@ -1296,11 +1302,10 @@
                                             <i class="bi bi-pencil"></i> Ручное заполнение
                                         @endif
                                     </div>
-                                    <div class="text-muted small mb-1">
-                                        Автор:
-                                        {{ $a->doctor_name ?? '—' }}
-                                    </div>
-                                    <div>{{ $a->preview ?? '—' }}</div>
+                                    @include('doctors.reception.partials.clinical_origin', [
+                                        'origin' => $a->clinical_origin ?? null,
+                                    ])
+                                    <div class="mt-2">{{ $a->preview ?? '—' }}</div>
                                 </div>
                                 <div class="d-flex align-items-start gap-2">
                                     <a href="{{ route('doctors.patients.anamneses.show', [$patient->id, $a->id]) }}"
@@ -1402,6 +1407,9 @@
                                                             <div class="small text-muted">
                                                                 {{ $research->sample_type ?: 'Материал не указан' }}
                                                             </div>
+                                                            @include('doctors.reception.partials.clinical_origin', [
+                                                                'origin' => $research->clinical_origin ?? null,
+                                                            ])
                                                         </td>
 
                                                         <td class="text-nowrap">
@@ -1596,6 +1604,9 @@
                                                                             С контрастированием
                                                                         </div>
                                                                     @endif
+                                                                    @include('doctors.reception.partials.clinical_origin', [
+                                                                        'origin' => $instrumentalResearch->clinical_origin ?? null,
+                                                                    ])
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -2104,8 +2115,10 @@
                                                     </div>
 
                                                     <div class="col-md-4">
-                                                        <div class="small text-muted mb-1">Кто выписал</div>
-                                                        <div>{{ $prescription->doctor_name }}</div>
+                                                        <div class="small text-muted mb-1">Происхождение назначения</div>
+                                                        @include('doctors.reception.partials.clinical_origin', [
+                                                            'origin' => $prescription->clinical_origin ?? null,
+                                                        ])
                                                     </div>
                                                 </div>
                                             </div>
@@ -2218,6 +2231,10 @@
                                                     {{ $epicrisis->date_full }}
                                                 </span>
                                             </div>
+
+                                            @include('doctors.reception.partials.clinical_origin', [
+                                                'origin' => $epicrisis->clinical_origin ?? null,
+                                            ])
 
                                             @if($epicrisis->mkb10 || $epicrisis->diagnosis_title_display)
                                                 <div class="epicrisis-diagnosis-line">

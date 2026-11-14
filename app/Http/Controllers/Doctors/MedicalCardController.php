@@ -252,6 +252,8 @@ class MedicalCardController extends Controller
                 );
             });
 
+        $originService = app(\App\Services\ClinicalRecordOriginService::class);
+
         $anamneses = $patient->anamneses()
             ->with('doctor')
             ->orderByDesc('created_at')
@@ -288,12 +290,15 @@ class MedicalCardController extends Controller
                 return $anamnesis;
             });
 
+        $originService->decorate($anamneses);
+
         $documents = $patient->documents()
             ->orderBy('created_at', 'desc')
             ->paginate();
         $documents->getCollection()->each(static function ($document): void {
             $document->setAttribute('card_file_extension', $document->fileExtension());
         });
+        $originService->decorate($documents->getCollection());
 
         $medicalFilesCount = $patient->documents()
             ->medicalFile()
@@ -336,6 +341,7 @@ class MedicalCardController extends Controller
 
                 return $research;
             });
+        $originService->decorate($researches);
 
         $psyTests = $patient->testSessions()
             ->orderBy('created_at', 'desc')
@@ -379,6 +385,8 @@ class MedicalCardController extends Controller
             ->groupBy(function ($prescription) {
                 return Carbon::parse($prescription->created_at)->format('Y-m-d');
             });
+
+        $originService->decorate($prescriptions->flatten(1));
 
         $prescriptionDateLabels = $prescriptions->mapWithKeys(
             static fn ($group, $date): array => [
@@ -506,6 +514,7 @@ class MedicalCardController extends Controller
                         })->values(),
                 ]);
             });
+        $originService->decorate($instrumentalResearches);
 
         $instrumentalResearchTypes = InstrumentalResearch::TYPES;
         $instrumentalResearchStatuses = InstrumentalResearch::STATUSES;
@@ -567,6 +576,10 @@ class MedicalCardController extends Controller
         LengthAwarePaginator $documents
     ): array {
         $patient->loadMissing(['doctor', 'epicrises']);
+
+        $originService = app(\App\Services\ClinicalRecordOriginService::class);
+        $originService->decorate($patient->epicrises);
+        $currentDiagnosisOrigin = $originService->currentDiagnosisOrigin($patient);
 
         $assignedDoctor = $patient->doctor;
         $assignedDoctorName = $assignedDoctor
@@ -781,6 +794,7 @@ class MedicalCardController extends Controller
             'primaryRepresentativeFullName', 'patientIdentityIssuedLabel',
             'primaryRepresentativeBirthLabel', 'representativeIdentityIssuedLabel',
             'representativeAuthorityIssuedLabel', 'currentDiagnosisCode', 'currentDiagnosisTitle',
+            'currentDiagnosisOrigin',
             'patientAvatarInitials', 'medicalCardTitle', 'patientDocumentsCount', 'lastPatientDocumentUpdateLabel',
             'epicrisesCount', 'epicrisesWithDiagnosisCount', 'lastEpicrisisDateLabel',
             'prescriptionPatientName', 'prescriptionPatientInitials', 'prescriptionBirthDate',
@@ -1304,9 +1318,54 @@ $appointmentTime = \App\Support\ClinicAppointmentTime::describe($record);
         $userIds = $confirmed->pluck('confirmed_by_user_id')
             ->merge($historyEvents->flatten(1)->pluck('actor_user_id'))
             ->filter()->unique()->all();
-        $userLabels = $userIds
-            ? \App\Models\User::query()->whereIn('id', $userIds)->pluck('name', 'id')
-            : collect();
+                $userLabels = collect();
+
+                if ($userIds) {
+                    $doctorLabels = \App\Models\Doctor::query()
+                        ->whereIn('user_id', $userIds)
+                        ->get(['user_id', 'surname', 'name', 'patronym'])
+                        ->mapWithKeys(static function (\App\Models\Doctor $profile): array {
+                            $fullName = trim(implode(' ', array_filter([
+                                $profile->surname,
+                                $profile->name,
+                                $profile->patronym,
+                            ])));
+
+                            return [$profile->user_id => $fullName];
+                        });
+
+                    $patientLabels = \App\Models\Patient::query()
+                        ->whereIn('user_id', $userIds)
+                        ->get(['user_id', 'surname', 'name', 'patronym'])
+                        ->mapWithKeys(static function (\App\Models\Patient $profile): array {
+                            $fullName = trim(implode(' ', array_filter([
+                                $profile->surname,
+                                $profile->name,
+                                $profile->patronym,
+                            ])));
+
+                            return [$profile->user_id => $fullName];
+                        });
+
+                    $nurseLabels = \App\Models\Nurse::query()
+                        ->whereIn('user_id', $userIds)
+                        ->get(['user_id', 'surname', 'name', 'patronym'])
+                        ->mapWithKeys(static function (\App\Models\Nurse $profile): array {
+                            $fullName = trim(implode(' ', array_filter([
+                                $profile->surname,
+                                $profile->name,
+                                $profile->patronym,
+                            ])));
+
+                            return [$profile->user_id => $fullName];
+                        });
+
+                    // Приоритет: врач, затем пациент, затем медсестра.
+                    // Учетные записи без профиля останутся с fallback "Сотрудник #ID".
+                    $userLabels = $doctorLabels
+                        ->union($patientLabels)
+                        ->union($nurseLabels);
+                }
 
         $history->setCollection($history->getCollection()->map(static function (array $visit) use (
             $confirmed, $userLabels, $ready, $canEdit, $doctorId, $historyEvents
@@ -1429,9 +1488,52 @@ $appointmentTime = \App\Support\ClinicAppointmentTime::describe($record);
         ];
         $roleLabels = ['doctor' => 'Врач', 'patient' => 'Пациент', 'system' => 'Сервер'];
         $actorIds = $confirmations->pluck('confirmed_by_user_id')->filter()->unique()->all();
-        $actorNames = $actorIds
-            ? \App\Models\User::query()->whereIn('id', $actorIds)->pluck('name', 'id')
-            : collect();
+        $actorNames = collect();
+
+        if ($actorIds) {
+            $actorDoctorLabels = \App\Models\Doctor::query()
+                ->whereIn('user_id', $actorIds)
+                ->get(['user_id', 'surname', 'name', 'patronym'])
+                ->mapWithKeys(static function (\App\Models\Doctor $profile): array {
+                    $fullName = trim(implode(' ', array_filter([
+                        $profile->surname,
+                        $profile->name,
+                        $profile->patronym,
+                    ])));
+
+                    return [$profile->user_id => $fullName];
+                });
+
+            $actorPatientLabels = \App\Models\Patient::query()
+                ->whereIn('user_id', $actorIds)
+                ->get(['user_id', 'surname', 'name', 'patronym'])
+                ->mapWithKeys(static function (\App\Models\Patient $profile): array {
+                    $fullName = trim(implode(' ', array_filter([
+                        $profile->surname,
+                        $profile->name,
+                        $profile->patronym,
+                    ])));
+
+                    return [$profile->user_id => $fullName];
+                });
+
+            $actorNurseLabels = \App\Models\Nurse::query()
+                ->whereIn('user_id', $actorIds)
+                ->get(['user_id', 'surname', 'name', 'patronym'])
+                ->mapWithKeys(static function (\App\Models\Nurse $profile): array {
+                    $fullName = trim(implode(' ', array_filter([
+                        $profile->surname,
+                        $profile->name,
+                        $profile->patronym,
+                    ])));
+
+                    return [$profile->user_id => $fullName];
+                });
+
+            $actorNames = $actorDoctorLabels
+                ->union($actorPatientLabels)
+                ->union($actorNurseLabels);
+        }
 
         $appointments->setCollection($appointments->getCollection()->map(static function ($record) use (
             $patient, $confirmations, $technicalLabels, $roleLabels, $actorNames,
@@ -1500,19 +1602,15 @@ $appointmentTime = \App\Support\ClinicAppointmentTime::describe($record);
             $name = trim(implode(' ', array_filter([
                 $doctor?->surname, $doctor?->name, $doctor?->patronym,
             ], static fn ($value) => filled($value))));
-// clinic-telemedicine-timezones:timezone-card-date-buildMedicalVisitAuditContext:v1:begin
 $appointmentTime = \App\Support\ClinicAppointmentTime::describe($record);
                 $displayDate = \App\Support\ClinicAppointmentTime::displayDate($record);
                 $date = $displayDate ? Carbon::instance($displayDate) : null;
-// clinic-telemedicine-timezones:timezone-card-date-buildMedicalVisitAuditContext:v1:end
             $deleted = $record->deleted_at !== null;
 
             return [
                 'id' => $appointmentId,
-// clinic-telemedicine-timezones:timezone-journal-time-data:v1:begin
-'appointment_time' => $appointmentTime,
+                'appointment_time' => $appointmentTime,
                 'date' => $date?->format('d.m.Y H:i') ?? 'Не указана',
-// clinic-telemedicine-timezones:timezone-journal-time-data:v1:end
                 'doctor' => $name ?: 'Врач не указан',
                 'deleted' => $deleted,
                 'confirmation_outcome' => $confirmation?->outcome,

@@ -97,7 +97,7 @@
                             @endhasanyrole
                             @role('patients')
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('patients.dashboard') }}">
                                     <i class="bi bi-file-medical"></i>
                                     <span>Панель пациента</span>
                                 </a>

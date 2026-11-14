@@ -1,0 +1,3071 @@
+$patient-ink: #19312f
+$patient-muted: #758582
+$patient-border: #dde6e2
+$patient-bg: #f4f6f3
+$patient-surface: #ffffff
+$patient-accent: #1f746d
+$patient-accent-soft: #e7f3f0
+$patient-blue: #396f8f
+$patient-blue-soft: #eaf3f7
+$patient-sidebar: #17302e
+
+*
+    box-sizing: border-box
+
+html
+    scroll-behavior: smooth
+
+body.patient-panel-body
+    margin: 0
+    min-height: 100vh
+    background: $patient-bg
+    color: $patient-ink
+    font-family: 'Manrope', sans-serif
+
+.patient-sidebar
+    position: fixed
+    inset: 0 auto 0 0
+    z-index: 1040
+    width: 268px
+    display: flex
+    flex-direction: column
+    background: $patient-sidebar
+    color: #fff
+    border-right: 1px solid rgba(255,255,255,.06)
+
+.patient-sidebar__top
+    display: flex
+    align-items: center
+    min-height: 82px
+    padding: 18px 18px 14px
+    border-bottom: 1px solid rgba(255,255,255,.08)
+
+.patient-sidebar__brand
+    min-width: 0
+    display: flex
+    align-items: center
+    gap: 12px
+    color: #fff
+    text-decoration: none
+
+.patient-sidebar__brand-icon,
+.patient-mobile-header__symbol
+    width: 38px
+    height: 38px
+    flex: 0 0 38px
+    display: grid
+    place-items: center
+    border-radius: 12px
+    background: rgba(255,255,255,.11)
+    color: #aee1d7
+    font-size: 18px
+
+.patient-sidebar__brand-copy
+    min-width: 0
+    display: flex
+    flex-direction: column
+
+    strong
+        font-family: 'Montserrat', sans-serif
+        font-size: 17px
+        line-height: 1.1
+        letter-spacing: -.02em
+
+    small
+        margin-top: 5px
+        color: rgba(255,255,255,.55)
+        font-size: 8px
+        font-weight: 700
+        letter-spacing: .14em
+
+.patient-sidebar__close
+    display: none
+    margin-left: auto
+    width: 36px
+    height: 36px
+    border: 0
+    border-radius: 10px
+    background: rgba(255,255,255,.08)
+    color: #fff
+
+.patient-sidebar__scroll
+    min-height: 0
+    flex: 1 1 auto
+    overflow-y: auto
+    padding: 18px 12px
+
+.patient-sidebar__group + .patient-sidebar__group
+    margin-top: 26px
+
+.patient-sidebar__heading
+    padding: 0 12px 9px
+    color: rgba(255,255,255,.42)
+    font-size: 9px
+    font-weight: 700
+    letter-spacing: .14em
+    text-transform: uppercase
+
+.patient-sidebar__nav
+    display: grid
+    gap: 4px
+    margin: 0
+    padding: 0
+    list-style: none
+
+.patient-sidebar__link
+    min-height: 44px
+    display: flex
+    align-items: center
+    gap: 11px
+    padding: 9px 11px
+    border-radius: 11px
+    color: rgba(255,255,255,.72)
+    text-decoration: none
+    font-size: 13px
+    font-weight: 600
+    transition: .18s ease
+
+    &:hover
+        color: #fff
+        background: rgba(255,255,255,.07)
+
+    &.is-active
+        color: #fff
+        background: rgba(174,225,215,.14)
+
+        .patient-sidebar__link-icon
+            color: #b9e9df
+            background: rgba(174,225,215,.12)
+
+    &.is-disabled
+        cursor: default
+        opacity: .48
+
+        &:hover
+            color: rgba(255,255,255,.72)
+            background: transparent
+
+    small
+        margin-left: auto
+        color: rgba(255,255,255,.42)
+        font-size: 8px
+        text-transform: uppercase
+        letter-spacing: .08em
+
+.patient-sidebar__link-icon
+    width: 28px
+    height: 28px
+    display: grid
+    place-items: center
+    flex: 0 0 28px
+    border-radius: 8px
+    color: rgba(255,255,255,.58)
+    background: rgba(255,255,255,.05)
+    font-size: 14px
+
+.patient-sidebar__footer
+    padding: 12px
+    border-top: 1px solid rgba(255,255,255,.08)
+
+.patient-sidebar__account
+    display: flex
+    align-items: center
+    gap: 10px
+    min-width: 0
+    padding: 10px
+
+.patient-sidebar__avatar
+    width: 36px
+    height: 36px
+    flex: 0 0 36px
+    display: grid
+    place-items: center
+    border-radius: 50%
+    background: #d9eee8
+    color: #245e58
+    font-size: 13px
+    font-weight: 800
+
+.patient-sidebar__account-copy
+    min-width: 0
+    display: flex
+    flex-direction: column
+
+    strong
+        overflow: hidden
+        color: #fff
+        font-size: 12px
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    small
+        margin-top: 2px
+        overflow: hidden
+        color: rgba(255,255,255,.45)
+        font-size: 9px
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.patient-sidebar__footer-actions
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 6px
+    margin-top: 6px
+
+    a
+        display: flex
+        align-items: center
+        justify-content: center
+        gap: 6px
+        padding: 8px
+        border-radius: 9px
+        color: rgba(255,255,255,.62)
+        text-decoration: none
+        font-size: 10px
+
+        &:hover
+            color: #fff
+            background: rgba(255,255,255,.06)
+
+.patient-main
+    min-height: 100vh
+    margin-left: 268px
+
+.patient-page
+    width: min(1540px, 100%)
+    margin: 0 auto
+    padding: 34px 34px 48px
+
+.patient-page-header
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 28px
+    margin-bottom: 26px
+
+    h1
+        margin: 4px 0 7px
+        font-family: 'Montserrat', sans-serif
+        font-size: clamp(25px, 3vw, 36px)
+        font-weight: 600
+        letter-spacing: -.04em
+
+    p
+        margin: 0
+        color: $patient-muted
+        font-size: 13px
+
+.patient-page-header__eyebrow,
+.patient-section-label
+    color: $patient-accent
+    font-size: 9px
+    font-weight: 800
+    letter-spacing: .13em
+    text-transform: uppercase
+
+.patient-page-header__date
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    margin-top: 4px
+    padding: 9px 12px
+    border: 1px solid $patient-border
+    border-radius: 10px
+    background: rgba(255,255,255,.7)
+    color: $patient-muted
+    font-size: 11px
+    white-space: nowrap
+
+.patient-link-warning
+    display: flex
+    align-items: flex-start
+    gap: 14px
+    margin-bottom: 22px
+    padding: 16px 18px
+    border: 1px solid #ecd9ae
+    border-radius: 14px
+    background: #fff9ed
+    color: #715b2f
+
+    strong
+        display: block
+        margin-bottom: 4px
+        font-size: 13px
+
+    p
+        margin: 0
+        font-size: 11px
+        line-height: 1.55
+
+.patient-link-warning__icon
+    width: 38px
+    height: 38px
+    flex: 0 0 38px
+    display: grid
+    place-items: center
+    border-radius: 11px
+    background: #f6e8c6
+    font-size: 17px
+
+.patient-summary-grid
+    display: grid
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+    gap: 14px
+    margin-bottom: 18px
+
+.patient-summary-card
+    min-width: 0
+    display: flex
+    align-items: flex-start
+    gap: 13px
+    padding: 18px
+    border: 1px solid $patient-border
+    border-radius: 15px
+    background: $patient-surface
+    box-shadow: 0 8px 24px rgba(35,64,59,.035)
+
+    &--primary
+        border-color: #cae3dd
+        background: linear-gradient(135deg, #f5fbf9, #ffffff)
+
+.patient-summary-card__icon
+    width: 40px
+    height: 40px
+    flex: 0 0 40px
+    display: grid
+    place-items: center
+    border-radius: 12px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-size: 17px
+
+.patient-summary-card__body
+    min-width: 0
+
+    > span
+        display: block
+        margin-bottom: 5px
+        color: $patient-muted
+        font-size: 9px
+        font-weight: 700
+        letter-spacing: .08em
+        text-transform: uppercase
+
+    strong
+        display: block
+        overflow: hidden
+        color: $patient-ink
+        font-size: 14px
+        font-weight: 700
+        text-overflow: ellipsis
+
+    p
+        margin: 4px 0 0
+        color: $patient-muted
+        font-size: 10px
+
+.patient-dashboard-grid
+    display: grid
+    grid-template-columns: minmax(0, 1fr) 330px
+    gap: 18px
+    align-items: start
+
+.patient-calendar-card,
+.patient-upcoming-card
+    border: 1px solid $patient-border
+    border-radius: 17px
+    background: $patient-surface
+    box-shadow: 0 10px 28px rgba(35,64,59,.035)
+
+.patient-calendar-card
+    overflow: hidden
+
+.patient-calendar-card__header,
+.patient-upcoming-card__header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 16px
+    padding: 19px 20px
+    border-bottom: 1px solid $patient-border
+
+    h2
+        margin: 4px 0 0
+        font-family: 'Montserrat', sans-serif
+        font-size: 18px
+        font-weight: 600
+        letter-spacing: -.03em
+
+.patient-calendar-nav
+    display: flex
+    align-items: center
+    gap: 6px
+
+.patient-calendar-nav__button,
+.patient-calendar-nav__today
+    height: 34px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    border: 1px solid $patient-border
+    border-radius: 9px
+    background: #fff
+    color: $patient-ink
+    text-decoration: none
+    font-size: 11px
+
+.patient-calendar-nav__button
+    width: 34px
+
+.patient-calendar-nav__today
+    padding: 0 11px
+
+.patient-calendar-nav__button:hover,
+.patient-calendar-nav__today:hover
+    border-color: #b9d4ce
+    background: $patient-accent-soft
+    color: $patient-accent
+
+.patient-calendar
+    min-width: 690px
+
+.patient-calendar__weekdays,
+.patient-calendar__week
+    display: grid
+    grid-template-columns: repeat(7, minmax(0, 1fr))
+
+.patient-calendar__weekdays
+    border-bottom: 1px solid $patient-border
+    background: #fafcfb
+
+    span
+        padding: 10px
+        color: $patient-muted
+        font-size: 9px
+        font-weight: 800
+        text-align: center
+        text-transform: uppercase
+
+.patient-calendar__week
+    border-bottom: 1px solid $patient-border
+
+    &:last-child
+        border-bottom: 0
+
+.patient-calendar-day
+    position: relative
+    min-width: 0
+    min-height: 104px
+    padding: 9px
+    border-right: 1px solid $patient-border
+    background: #fff
+
+    &:last-child
+        border-right: 0
+
+    &.is-outside
+        background: #fafbfa
+
+        .patient-calendar-day__number
+            color: #b8c1bf
+
+    &.is-today
+        box-shadow: inset 0 0 0 1px #79b9ae
+
+        .patient-calendar-day__number
+            width: 27px
+            height: 27px
+            display: grid
+            place-items: center
+            border-radius: 50%
+            background: $patient-accent
+            color: #fff
+
+.patient-calendar-day__number
+    color: #546663
+    font-size: 11px
+    font-weight: 800
+
+.patient-calendar-day__events
+    display: grid
+    gap: 4px
+    margin-top: 7px
+
+.patient-calendar-event
+    min-width: 0
+    padding: 5px 6px
+    border-radius: 7px
+    background: $patient-accent-soft
+    color: #235d57
+    font-size: 9px
+    line-height: 1.25
+
+    &.is-telemedicine
+        background: $patient-blue-soft
+        color: $patient-blue
+
+    span
+        display: block
+        font-weight: 800
+
+    small
+        display: block
+        margin-top: 2px
+        overflow: hidden
+        font-size: 8px
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.patient-calendar-day__more
+    color: $patient-muted
+    font-size: 8px
+    font-weight: 700
+
+.patient-calendar-legend
+    display: flex
+    align-items: center
+    gap: 18px
+    padding: 12px 18px
+    border-top: 1px solid $patient-border
+    background: #fafcfb
+    color: $patient-muted
+    font-size: 9px
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 6px
+
+.patient-calendar-legend__dot
+    width: 9px
+    height: 9px
+    border-radius: 50%
+    background: #8fc8bc
+
+    &.is-telemedicine
+        background: #8ab5cc
+
+.patient-upcoming-card
+    overflow: hidden
+
+.patient-upcoming-card__count
+    min-width: 28px
+    height: 28px
+    display: grid
+    place-items: center
+    border-radius: 9px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-size: 10px
+    font-weight: 800
+
+.patient-upcoming-list
+    display: grid
+
+.patient-upcoming-item
+    display: flex
+    gap: 13px
+    padding: 16px 18px
+    border-bottom: 1px solid $patient-border
+
+    &:last-child
+        border-bottom: 0
+
+.patient-upcoming-item__date
+    width: 42px
+    height: 48px
+    flex: 0 0 42px
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    border-radius: 11px
+    background: #f0f5f3
+
+    strong
+        font-family: 'Montserrat', sans-serif
+        font-size: 16px
+        line-height: 1
+
+    span
+        margin-top: 4px
+        color: $patient-muted
+        font-size: 7px
+        font-weight: 800
+        letter-spacing: .08em
+
+.patient-upcoming-item__body
+    min-width: 0
+    flex: 1 1 auto
+
+    > strong
+        display: block
+        margin-top: 2px
+        overflow: hidden
+        font-size: 11px
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    p
+        margin: 2px 0 7px
+        overflow: hidden
+        color: $patient-muted
+        font-size: 9px
+        text-overflow: ellipsis
+        white-space: nowrap
+
+.patient-upcoming-item__time
+    color: $patient-accent
+    font-size: 10px
+    font-weight: 800
+
+    span
+        color: $patient-muted
+        font-weight: 600
+
+.patient-upcoming-item__format
+    display: inline-flex
+    align-items: center
+    gap: 5px
+    padding: 4px 7px
+    border-radius: 999px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-size: 8px
+    font-weight: 700
+
+    &.is-telemedicine
+        background: $patient-blue-soft
+        color: $patient-blue
+
+.patient-upcoming-empty
+    padding: 38px 25px
+    color: $patient-muted
+    text-align: center
+
+    strong
+        display: block
+        margin-top: 12px
+        color: $patient-ink
+        font-size: 12px
+
+    p
+        margin: 6px 0 0
+        font-size: 10px
+        line-height: 1.55
+
+.patient-upcoming-empty__icon
+    width: 46px
+    height: 46px
+    display: grid
+    place-items: center
+    margin: 0 auto
+    border-radius: 14px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-size: 20px
+
+.patient-mobile-header
+    display: none
+
+.patient-sidebar-backdrop
+    display: none
+
+@media (max-width: 1199.98px)
+    .patient-dashboard-grid
+        grid-template-columns: 1fr
+
+    .patient-upcoming-card
+        .patient-upcoming-list
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+
+        .patient-upcoming-item
+            &:nth-last-child(2):nth-child(odd)
+                border-bottom: 0
+
+@media (max-width: 991.98px)
+    body.patient-panel-body
+        padding-top: 62px
+
+    .patient-mobile-header
+        position: fixed
+        inset: 0 0 auto 0
+        z-index: 1035
+        height: 62px
+        display: flex
+        align-items: center
+        gap: 12px
+        padding: 0 16px
+        border-bottom: 1px solid $patient-border
+        background: rgba(255,255,255,.96)
+        backdrop-filter: blur(12px)
+
+    .patient-mobile-header__menu
+        width: 38px
+        height: 38px
+        display: grid
+        place-items: center
+        border: 1px solid $patient-border
+        border-radius: 10px
+        background: #fff
+        color: $patient-ink
+        font-size: 18px
+
+    .patient-mobile-header__brand
+        display: flex
+        align-items: center
+        gap: 9px
+        color: $patient-ink
+        text-decoration: none
+        font-family: 'Montserrat', sans-serif
+        font-size: 13px
+        font-weight: 700
+
+        small
+            display: block
+            margin-top: 2px
+            color: $patient-muted
+            font-family: 'Manrope', sans-serif
+            font-size: 8px
+            font-weight: 600
+            text-transform: uppercase
+            letter-spacing: .08em
+
+    .patient-mobile-header__symbol
+        width: 34px
+        height: 34px
+        flex-basis: 34px
+        background: $patient-accent-soft
+        color: $patient-accent
+
+    .patient-sidebar
+        width: min(286px, calc(100vw - 34px))
+        transform: translateX(-102%)
+        transition: transform .22s ease
+
+    .patient-sidebar__close
+        display: grid
+        place-items: center
+
+    .patient-sidebar-open
+        overflow: hidden
+
+        .patient-sidebar
+            transform: translateX(0)
+
+        .patient-sidebar-backdrop
+            display: block
+            position: fixed
+            inset: 0
+            z-index: 1038
+            background: rgba(12,26,24,.48)
+
+    .patient-main
+        margin-left: 0
+
+    .patient-page
+        padding: 24px 18px 38px
+
+@media (max-width: 767.98px)
+    .patient-page-header
+        display: block
+
+    .patient-page-header__date
+        margin-top: 14px
+
+    .patient-summary-grid
+        grid-template-columns: 1fr
+
+    .patient-calendar-card
+        overflow-x: auto
+
+    .patient-calendar-card__header
+        position: sticky
+        left: 0
+        min-width: 690px
+
+    .patient-calendar-legend
+        min-width: 690px
+
+    .patient-upcoming-card
+        .patient-upcoming-list
+            grid-template-columns: 1fr
+
+    .patient-upcoming-item
+        border-bottom: 1px solid $patient-border !important
+
+// PATIENT_PROFILE_STYLES_V1
+.patient-profile-page
+    .patient-profile-hero
+        display: flex
+        align-items: center
+        justify-content: space-between
+        gap: 22px
+        margin-bottom: 22px
+        padding: 22px 24px
+        border: 1px solid #d9e7e2
+        border-radius: 18px
+        background: linear-gradient(125deg, #fff 0%, #f7fbf9 68%, #e8f4ef 100%)
+        box-shadow: 0 9px 28px rgba(35,64,59,.04)
+
+    .patient-profile-hero__identity
+        min-width: 0
+        display: flex
+        align-items: center
+        gap: 17px
+
+        h1
+            margin: 4px 0 5px
+            font-family: 'Montserrat', sans-serif
+            font-size: clamp(22px, 2.5vw, 30px)
+            font-weight: 650
+            letter-spacing: -.035em
+
+        p
+            margin: 0
+            color: $patient-muted
+            font-size: 11px
+
+    .patient-profile-avatar
+        width: 76px
+        height: 76px
+        flex: 0 0 76px
+        display: grid
+        place-items: center
+        overflow: hidden
+        border: 3px solid #fff
+        border-radius: 22px
+        background: $patient-accent-soft
+        box-shadow: 0 0 0 1px $patient-border, 0 7px 18px rgba(35,64,59,.08)
+
+        img
+            width: 100%
+            height: 100%
+            object-fit: cover
+
+        span
+            color: $patient-accent
+            font-family: 'Montserrat', sans-serif
+            font-size: 25px
+            font-weight: 800
+
+    .patient-profile-back
+        display: inline-flex
+        align-items: center
+        gap: 8px
+        flex: 0 0 auto
+        padding: 9px 12px
+        border: 1px solid $patient-border
+        border-radius: 10px
+        background: #fff
+        color: $patient-ink
+        text-decoration: none
+        font-size: 10px
+        font-weight: 700
+
+        &:hover
+            border-color: #b9d4ce
+            color: $patient-accent
+
+    .patient-profile-tabs
+        display: flex
+        gap: 5px
+        overflow-x: auto
+        margin-bottom: 18px
+        padding: 5px
+        border: 1px solid $patient-border
+        border-radius: 13px
+        background: rgba(255,255,255,.82)
+
+        a
+            min-height: 39px
+            display: inline-flex
+            align-items: center
+            justify-content: center
+            gap: 8px
+            padding: 8px 13px
+            border-radius: 9px
+            color: $patient-muted
+            text-decoration: none
+            font-size: 10px
+            font-weight: 750
+            white-space: nowrap
+
+            &:hover
+                background: #f3f8f6
+                color: $patient-accent
+
+            &.is-active
+                background: $patient-accent
+                color: #fff
+
+            span
+                min-width: 18px
+                height: 18px
+                display: grid
+                place-items: center
+                padding: 0 5px
+                border-radius: 999px
+                background: rgba(255,255,255,.2)
+                font-size: 8px
+
+    .patient-profile-grid
+        display: grid
+        grid-template-columns: minmax(0, 1fr) 300px
+        gap: 17px
+        align-items: start
+
+        &--security
+            grid-template-columns: minmax(0, 1fr) 330px
+
+    .patient-profile-main,
+    .patient-profile-side
+        display: grid
+        gap: 17px
+        min-width: 0
+
+    .patient-profile-card
+        overflow: hidden
+        border: 1px solid $patient-border
+        border-radius: 16px
+        background: #fff
+        box-shadow: 0 8px 25px rgba(35,64,59,.035)
+
+    .patient-profile-card__header
+        display: flex
+        align-items: flex-start
+        justify-content: space-between
+        gap: 15px
+        padding: 17px 19px
+        border-bottom: 1px solid #e9efec
+
+        h2
+            margin: 0
+            color: $patient-ink
+            font-size: 14px
+            font-weight: 800
+
+        p
+            margin: 4px 0 0
+            color: $patient-muted
+            font-size: 10px
+            line-height: 1.5
+
+        > i
+            width: 32px
+            height: 32px
+            display: grid
+            place-items: center
+            flex: 0 0 32px
+            border-radius: 9px
+            background: $patient-accent-soft
+            color: $patient-accent
+            font-size: 15px
+
+    .patient-profile-card__body
+        padding: 19px
+
+        .form-label
+            margin-bottom: 6px
+            color: #405854
+            font-size: 10px
+            font-weight: 750
+
+        .form-control,
+        .form-select
+            min-height: 42px
+            border-color: #d8e3de
+            border-radius: 9px
+            color: $patient-ink
+            font-size: 11px
+            box-shadow: none
+
+            &:focus
+                border-color: #80b9ae
+                box-shadow: 0 0 0 3px rgba(31,116,109,.09)
+
+        textarea.form-control
+            min-height: 74px
+            resize: vertical
+
+    .patient-profile-form-section + .patient-profile-form-section
+        margin-top: 22px
+        padding-top: 20px
+        border-top: 1px solid #eaf0ed
+
+    .patient-profile-form-section h3
+        margin: 0 0 14px
+        color: $patient-ink
+        font-size: 11px
+        font-weight: 850
+
+    .patient-profile-hint
+        margin-top: 5px
+        color: $patient-muted
+        font-size: 9px
+        line-height: 1.45
+
+    .patient-profile-savebar
+        position: sticky
+        bottom: 12px
+        z-index: 5
+        display: flex
+        align-items: center
+        justify-content: space-between
+        gap: 14px
+        margin-top: 22px
+        padding: 11px 12px 11px 15px
+        border: 1px solid #d6e5df
+        border-radius: 12px
+        background: rgba(255,255,255,.95)
+        box-shadow: 0 9px 24px rgba(35,64,59,.1)
+        backdrop-filter: blur(10px)
+
+        > span
+            color: $patient-muted
+            font-size: 9px
+
+    .patient-profile-primary,
+    .patient-profile-secondary,
+    .patient-profile-danger
+        min-height: 39px
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        gap: 7px
+        padding: 9px 13px
+        border: 0
+        border-radius: 9px
+        font-size: 10px
+        font-weight: 800
+        text-decoration: none
+
+    .patient-profile-primary
+        background: $patient-accent
+        color: #fff
+
+        &:hover
+            background: #185f59
+            color: #fff
+
+    .patient-profile-secondary
+        border: 1px solid #d4e4de
+        background: #f5faf8
+        color: $patient-accent
+
+        &:hover
+            background: $patient-accent-soft
+            color: $patient-accent
+
+    .patient-profile-danger
+        border: 1px solid #f0d7d9
+        background: #fff7f7
+        color: #a94d56
+
+        &:hover
+            background: #ffeded
+            color: #923943
+
+    .patient-profile-photo-preview
+        width: 118px
+        height: 118px
+        display: grid
+        place-items: center
+        overflow: hidden
+        margin: 0 auto 17px
+        border: 4px solid #fff
+        border-radius: 25px
+        background: $patient-accent-soft
+        box-shadow: 0 0 0 1px $patient-border, 0 9px 22px rgba(35,64,59,.08)
+
+        img
+            width: 100%
+            height: 100%
+            object-fit: cover
+
+        span
+            color: $patient-accent
+            font-family: 'Montserrat', sans-serif
+            font-size: 34px
+            font-weight: 800
+
+    .patient-profile-info-row
+        display: flex
+        justify-content: space-between
+        gap: 14px
+        padding: 10px 0
+        border-bottom: 1px solid #edf2ef
+        font-size: 10px
+
+        &:last-child
+            border-bottom: 0
+
+        span
+            color: $patient-muted
+
+        strong
+            max-width: 62%
+            overflow-wrap: anywhere
+            color: $patient-ink
+            text-align: right
+            font-weight: 750
+
+    .patient-profile-text-link
+        display: inline-flex
+        align-items: center
+        gap: 7px
+        margin-top: 13px
+        color: $patient-accent
+        text-decoration: none
+        font-size: 10px
+        font-weight: 800
+
+    .patient-profile-note
+        display: flex
+        align-items: flex-start
+        gap: 8px
+        padding: 11px 12px
+        border: 1px solid #dbe9e3
+        border-radius: 10px
+        background: #f5faf7
+        color: #617872
+        font-size: 9px
+        line-height: 1.55
+
+        i
+            flex: 0 0 auto
+            color: $patient-accent
+
+    .patient-profile-card--notice
+        display: flex
+        align-items: flex-start
+        gap: 13px
+        padding: 20px
+        border-color: #eadcb9
+        background: #fffaf0
+
+        h2
+            margin: 0 0 5px
+            color: #6e592d
+            font-size: 13px
+            font-weight: 800
+
+        p
+            margin: 0
+            color: #88764e
+            font-size: 10px
+            line-height: 1.55
+
+    .patient-profile-notice-icon
+        width: 37px
+        height: 37px
+        display: grid
+        place-items: center
+        flex: 0 0 37px
+        border-radius: 10px
+        background: #f5e9cb
+        color: #8c713a
+        font-size: 17px
+
+    .patient-profile-empty
+        padding: 35px 18px
+        color: $patient-muted
+        text-align: center
+        font-size: 10px
+
+        > i
+            display: block
+            margin-bottom: 10px
+            color: #9bbab0
+            font-size: 25px
+
+        strong
+            display: block
+            color: $patient-ink
+            font-size: 12px
+
+        p
+            margin: 5px 0 0
+
+    .patient-profile-documents
+        display: grid
+        gap: 11px
+
+    .patient-profile-document
+        display: flex
+        align-items: flex-start
+        gap: 13px
+        padding: 14px
+        border: 1px solid #e1eae5
+        border-radius: 12px
+        background: #fcfefd
+
+    .patient-profile-document__icon
+        width: 38px
+        height: 38px
+        display: grid
+        place-items: center
+        flex: 0 0 38px
+        border-radius: 10px
+        background: $patient-accent-soft
+        color: $patient-accent
+        font-size: 16px
+
+    .patient-profile-document__body
+        min-width: 0
+        flex: 1 1 auto
+
+    .patient-profile-document__title
+        display: flex
+        align-items: center
+        flex-wrap: wrap
+        gap: 7px
+        color: $patient-ink
+        font-size: 11px
+        font-weight: 800
+
+        span
+            padding: 3px 6px
+            border-radius: 999px
+            background: $patient-accent-soft
+            color: $patient-accent
+            font-size: 8px
+
+            &.is-muted
+                background: #f0f2f1
+                color: #7a8783
+
+    .patient-profile-document__meta
+        display: grid
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        gap: 5px 14px
+        margin-top: 8px
+        color: $patient-muted
+        font-size: 9px
+        overflow-wrap: anywhere
+
+    .patient-profile-history
+        display: grid
+        gap: 0
+
+    .patient-profile-history__item
+        position: relative
+        display: flex
+        gap: 13px
+        padding: 0 0 20px
+
+        &:last-child
+            padding-bottom: 0
+
+    .patient-profile-history__dot
+        width: 10px
+        height: 10px
+        flex: 0 0 10px
+        margin: 4px 0 0 2px
+        border: 2px solid #fff
+        border-radius: 50%
+        background: $patient-accent
+        box-shadow: 0 0 0 1px #9bc9bd
+
+    .patient-profile-history__content
+        min-width: 0
+        flex: 1 1 auto
+
+        > small
+            display: block
+            margin-top: 7px
+            color: $patient-muted
+            font-size: 8px
+
+    .patient-profile-history__top
+        display: flex
+        justify-content: space-between
+        flex-wrap: wrap
+        gap: 7px
+
+        strong
+            color: $patient-ink
+            font-size: 11px
+
+        time
+            color: $patient-muted
+            font-size: 9px
+
+    .patient-profile-history__changes
+        display: grid
+        gap: 6px
+        margin-top: 9px
+        padding: 10px
+        border-radius: 9px
+        background: #f7faf8
+
+        > div
+            display: flex
+            justify-content: space-between
+            gap: 12px
+            font-size: 9px
+
+        span
+            color: $patient-muted
+
+        strong
+            max-width: 70%
+            overflow-wrap: anywhere
+            color: #435b55
+            text-align: right
+            font-weight: 650
+
+        i
+            margin: 0 4px
+            color: $patient-accent
+
+    @media (max-width: 1100px)
+        .patient-profile-grid,
+        .patient-profile-grid--security
+            grid-template-columns: 1fr
+
+        .patient-profile-side
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+
+    @media (max-width: 767.98px)
+        .patient-profile-hero
+            align-items: flex-start
+            flex-direction: column
+            padding: 17px
+
+        .patient-profile-hero__identity
+            align-items: flex-start
+
+        .patient-profile-avatar
+            width: 60px
+            height: 60px
+            flex-basis: 60px
+            border-radius: 17px
+
+        .patient-profile-side
+            grid-template-columns: 1fr
+
+        .patient-profile-card__body
+            padding: 15px
+
+        .patient-profile-savebar
+            align-items: stretch
+            flex-direction: column
+
+        .patient-profile-savebar > span
+            line-height: 1.5
+
+        .patient-profile-primary
+            width: 100%
+
+        .patient-profile-document__meta
+            grid-template-columns: 1fr
+
+        .patient-profile-history__changes > div
+            align-items: flex-start
+            flex-direction: column
+
+        .patient-profile-history__changes strong
+            max-width: 100%
+            text-align: left
+
+// PATIENT_IDENTITY_PROFILE_V2
+.patient-profile-tab-status
+    width: 8px
+    height: 8px
+    display: inline-block
+    border-radius: 50%
+    &.is-linked
+        background: #24956e
+    &.is-pending
+        background: #d5a34b
+
+.patient-profile-readonly-grid
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 12px
+    > div
+        min-width: 0
+        padding: 11px 12px
+        border: 1px solid #e3ece7
+        border-radius: 10px
+        background: #fafcfb
+    span
+        display: block
+        margin-bottom: 5px
+        color: #758582
+        font-size: 9px
+    strong
+        display: block
+        color: #19312f
+        font-size: 11px
+        overflow-wrap: anywhere
+    .span-2
+        grid-column: span 2
+
+.patient-identity-page
+    .patient-identity-card
+        overflow: hidden
+        margin-bottom: 15px
+        border: 1px solid #dde6e2
+        border-radius: 15px
+        background: #fff
+        box-shadow: 0 8px 24px rgba(35,64,59,.035)
+    .patient-identity-card__header
+        display: flex
+        align-items: flex-start
+        justify-content: space-between
+        gap: 12px
+        padding: 16px 18px
+        border-bottom: 1px solid #e9efec
+        h2
+            margin: 0
+            font-size: 13px
+            font-weight: 800
+        p
+            margin: 4px 0 0
+            color: #758582
+            font-size: 10px
+        > i
+            width: 32px
+            height: 32px
+            display: grid
+            place-items: center
+            border-radius: 9px
+            background: #e7f3f0
+            color: #1f746d
+    .patient-identity-card__body
+        padding: 18px
+        .form-label
+            margin-bottom: 6px
+            color: #405854
+            font-size: 10px
+            font-weight: 750
+        .form-control,.form-select
+            min-height: 41px
+            border-color: #d8e3de
+            border-radius: 9px
+            font-size: 11px
+            box-shadow: none
+        textarea.form-control
+            min-height: 70px
+    .patient-identity-status
+        display: flex
+        align-items: flex-start
+        gap: 12px
+        margin-bottom: 16px
+        padding: 15px 17px
+        border: 1px solid #d7e6df
+        border-radius: 13px
+        background: #f5faf7
+        strong
+            display: block
+            color: #19312f
+            font-size: 12px
+        p
+            margin: 4px 0 0
+            color: #627771
+            font-size: 10px
+            line-height: 1.55
+        span
+            display: inline-block
+            margin-top: 5px
+            color: #1f746d
+            font-size: 9px
+            font-weight: 750
+        &.is-pending
+            border-color: #e9dfc7
+            background: #fffaf0
+            .patient-identity-status__icon
+                background: #f5ebd4
+                color: #9b7837
+        &.is-rejected
+            border-color: #efd8d8
+            background: #fff7f7
+            .patient-identity-status__icon
+                background: #f8e4e4
+                color: #a94d56
+    .patient-identity-status__icon
+        width: 37px
+        height: 37px
+        display: grid
+        place-items: center
+        flex: 0 0 37px
+        border-radius: 10px
+        background: #e3f2ec
+        color: #1f746d
+        font-size: 16px
+    .patient-identity-code-row
+        display: flex
+        align-items: center
+        gap: 12px
+        max-width: 520px
+        input
+            max-width: 220px
+            min-height: 44px
+            font-size: 18px
+            font-weight: 800
+            letter-spacing: .2em
+            text-align: center
+    .patient-identity-document
+        display: flex
+        align-items: center
+        justify-content: space-between
+        gap: 12px
+        padding: 12px 0
+        border-top: 1px solid #edf2ef
+        strong,span
+            display: block
+            font-size: 10px
+        span
+            margin-top: 3px
+            color: #758582
+    .patient-identity-document__badge
+        padding: 4px 8px
+        border-radius: 999px
+        background: #e7f3f0
+        color: #1f746d !important
+        font-size: 8px !important
+        font-weight: 800
+    .patient-identity-summary
+        display: grid
+        grid-template-columns: repeat(3,minmax(0,1fr))
+        gap: 9px
+        margin-bottom: 18px
+        > div
+            padding: 11px
+            border: 1px solid #e3ece7
+            border-radius: 10px
+            background: #fafcfb
+        span
+            display: block
+            margin-bottom: 5px
+            color: #758582
+            font-size: 9px
+        strong
+            display: block
+            overflow-wrap: anywhere
+            color: #19312f
+            font-size: 10px
+    .patient-identity-consent
+        display: flex
+        align-items: flex-start
+        gap: 8px
+        margin: 4px 0 14px
+        padding: 11px 13px
+        border: 1px solid #dce9e3
+        border-radius: 10px
+        background: #f7fbf9
+        color: #647973
+        font-size: 9px
+        line-height: 1.5
+        i
+            color: #1f746d
+    .patient-identity-change-details
+        margin-top: 16px
+        border: 1px solid #d9e7e2
+        border-radius: 14px
+        background: #fff
+        > summary
+            display: flex
+            align-items: center
+            justify-content: space-between
+            gap: 12px
+            padding: 15px 18px
+            color: #1f746d
+            cursor: pointer
+            font-size: 12px
+            font-weight: 800
+            list-style: none
+        > summary::-webkit-details-marker
+            display: none
+        &[open] > summary
+            border-bottom: 1px solid #e9efec
+        form
+            padding: 16px
+    .patient-identity-targets
+        display: grid
+        grid-template-columns: repeat(2,minmax(0,1fr))
+        gap: 10px
+        label
+            display: flex
+            align-items: flex-start
+            gap: 9px
+            padding: 12px
+            border: 1px solid #dce6e2
+            border-radius: 10px
+            cursor: pointer
+        input
+            margin-top: 3px
+        strong,small
+            display: block
+        strong
+            font-size: 10px
+        small
+            margin-top: 4px
+            color: #758582
+            font-size: 9px
+            line-height: 1.4
+
+@media (max-width: 767.98px)
+    .patient-profile-readonly-grid
+        grid-template-columns: 1fr
+        .span-2
+            grid-column: auto
+    .patient-identity-summary
+        grid-template-columns: 1fr
+    .patient-identity-code-row
+        align-items: stretch !important
+        flex-direction: column
+        input
+            max-width: none !important
+    .patient-identity-targets
+        grid-template-columns: 1fr
+
+// PATIENT_PROFILE_AUTOCOMPLETE_V1
+.patient-profile-autocomplete-wrap
+    position: relative
+    min-width: 0
+
+.patient-profile-autocomplete-suggest
+    position: absolute
+    z-index: 1080
+    top: calc(100% + 6px)
+    left: 0
+    right: 0
+    display: none
+    max-height: 260px
+    overflow-y: auto
+    border: 1px solid #dbe7f6
+    border-radius: 12px
+    background: #fff
+    box-shadow: 0 12px 26px rgba(15, 23, 42, .12)
+
+    &.is-visible
+        display: block
+
+.patient-profile-autocomplete-suggest__item
+    display: block
+    width: 100%
+    padding: 10px 12px
+    border: 0
+    background: #fff
+    color: #344054
+    text-align: left
+    font: inherit
+    font-size: 11px
+    line-height: 1.4
+    cursor: pointer
+
+    & + &
+        border-top: 1px solid #eef2f7
+
+    &:hover,
+    &:focus
+        outline: none
+        background: #f2f7ff
+        color: #0b5ed7
+
+.patient-profile-autocomplete-suggest__meta
+    display: block
+    margin-top: 3px
+    color: #84909f
+    font-size: 9px
+    line-height: 1.35
+
+.patient-identity-form
+    .js-mask-snils,
+    .js-mask-phone,
+    .js-mask-policy,
+    .js-mask-department-code
+        font-variant-numeric: tabular-nums\n\n// PATIENT_UPCOMING_CARD_TYPOGRAPHY_V1
+.patient-upcoming-card
+    .patient-upcoming-card__header
+        h2
+            font-size: 20px
+            line-height: 1.25
+
+    .patient-upcoming-item
+        align-items: flex-start
+        gap: 14px
+        min-width: 0
+
+    .patient-upcoming-item__date
+        width: 48px
+        height: 54px
+        flex: 0 0 48px
+
+        strong
+            font-size: 18px
+
+        span
+            font-size: 8px
+
+    .patient-upcoming-item__body
+        min-width: 0
+        flex: 1 1 0
+        overflow-wrap: anywhere
+
+        > strong
+            display: block
+            margin-top: 3px
+            overflow: visible
+            font-size: 13px
+            line-height: 1.35
+            text-overflow: clip
+            white-space: normal
+            overflow-wrap: anywhere
+
+        p
+            margin: 4px 0 8px
+            overflow: visible
+            color: $patient-muted
+            font-size: 11px
+            line-height: 1.45
+            text-overflow: clip
+            white-space: normal
+            overflow-wrap: anywhere
+
+    .patient-upcoming-item__time
+        font-size: 11px
+        line-height: 1.4
+
+    .patient-upcoming-item__format
+        gap: 6px
+        padding: 5px 8px
+        font-size: 9px
+        line-height: 1.35
+
+@media (max-width: 767.98px)
+    .patient-upcoming-card
+        .patient-upcoming-item
+            gap: 12px
+            padding: 15px 14px
+
+        .patient-upcoming-item__body
+            > strong
+                font-size: 12.5px
+
+            p
+                font-size: 10.5px\n
+
+// PATIENT_APPOINTMENT_OUTCOMES_AND_DOCTOR_TOOLTIPS_V1
+.patient-calendar-event
+    &.is-not-held
+        border: 1px solid #f1b5b5
+        background: #fff0f0
+        color: #b42318
+
+        span,
+        small
+            color: #b42318
+
+    &.is-missed
+        background: #ffe5e5
+        box-shadow: inset 3px 0 0 #d92d20
+
+.patient-calendar-legend__dot
+    &.is-not-held
+        background: #d92d20
+
+.patient-upcoming-item
+    &.is-not-held
+        border-left: 3px solid #d92d20
+        background: #fffafa
+
+    &.is-missed
+        .patient-upcoming-item__date
+            background: #ffe8e8
+            color: #b42318
+
+            strong
+                color: #b42318
+
+            span
+                color: #b42318
+
+.patient-upcoming-item__status
+    display: inline
+    color: #b42318 !important
+    font-size: 9px
+    font-weight: 800
+    line-height: 1.45
+    white-space: normal
+
+.patient-doctor-tooltip-trigger
+    display: inline
+    border-bottom: 1px dotted rgba(31,116,109,.55)
+    color: inherit
+    cursor: help
+    text-decoration: none
+    text-decoration-thickness: 1px
+    text-underline-offset: 3px
+
+    &:hover,
+    &:focus
+        color: $patient-accent
+        outline: none
+        border-bottom-color: $patient-accent
+
+.patient-doctor-tooltip
+    position: fixed
+    z-index: 3000
+    display: none
+    width: min(300px, calc(100vw - 24px))
+    align-items: flex-start
+    gap: 12px
+    padding: 14px
+    border: 1px solid #d8e7e2
+    border-radius: 14px
+    background: #fff
+    box-shadow: 0 14px 38px rgba(22,54,48,.18)
+    color: $patient-ink
+    pointer-events: none
+
+    &.is-visible
+        display: flex
+
+.patient-doctor-tooltip__avatar
+    width: 42px
+    height: 42px
+    flex: 0 0 42px
+    display: grid
+    place-items: center
+    border-radius: 13px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-family: 'Montserrat', sans-serif
+    font-size: 15px
+    font-weight: 800
+
+.patient-doctor-tooltip__content
+    min-width: 0
+    flex: 1 1 auto
+
+.patient-doctor-tooltip__name
+    display: block
+    margin: 0 0 9px
+    color: $patient-ink
+    font-family: 'Montserrat', sans-serif
+    font-size: 12px
+    font-weight: 750
+    line-height: 1.4
+    overflow-wrap: anywhere
+
+.patient-doctor-tooltip__row
+    display: grid
+    grid-template-columns: 82px minmax(0, 1fr)
+    gap: 8px
+    padding-top: 5px
+    color: $patient-muted
+    font-size: 9px
+    line-height: 1.4
+
+    b
+        color: #34524d
+        font-size: 9px
+        font-weight: 750
+        overflow-wrap: anywhere
+
+@media (max-width: 767.98px)
+    .patient-doctor-tooltip
+        width: min(280px, calc(100vw - 20px))
+        padding: 12px
+
+// PATIENT_CALENDAR_OUTCOME_STATES_V2
+.patient-calendar-event
+    &.is-held
+        border: 1px solid #b9e3ca
+        background: #effaf3
+        color: #24764b
+
+        span,
+        small
+            color: #24764b
+
+    &.is-arrived
+        border: 1px solid #b8d8f4
+        background: #eff7ff
+        color: #2368a4
+
+        span,
+        small
+            color: #2368a4
+
+    &.is-status-unknown
+        border: 1px solid #efd58f
+        background: #fff8e7
+        color: #8b681b
+
+        span,
+        small
+            color: #8b681b
+
+.patient-calendar-legend__dot
+    &.is-held
+        background: #27945c
+
+    &.is-arrived
+        background: #3987c7
+
+    &.is-status-unknown
+        background: #d6a52e
+
+.patient-upcoming-item
+    &.is-held
+        border-left: 3px solid #27945c
+        background: #f8fcf9
+
+    &.is-arrived
+        border-left: 3px solid #3987c7
+        background: #f8fbff
+
+    &.is-status-unknown
+        border-left: 3px solid #d6a52e
+        background: #fffdf6
+
+.patient-upcoming-item__status
+    &.is-held
+        color: #24764b !important
+
+    &.is-arrived
+        color: #2368a4 !important
+
+    &.is-unknown
+        color: #8b681b !important
+
+// PATIENT_DOCTOR_TOOLTIP_CONTACT_V1
+.patient-doctor-tooltip__row
+    &[hidden]
+        display: none
+
+// PATIENT_CALENDAR_BOOKING_V1
+.patient-booking-page .patient-eyebrow
+    display: inline-block
+    color: $patient-accent
+    font-size: 8px
+    font-weight: 800
+    letter-spacing: .12em
+    line-height: 1.4
+
+.patient-booking-page
+    .patient-page-header
+        margin-bottom: 20px
+
+.patient-booking-back
+    display: inline-flex
+    align-items: center
+    gap: 8px
+    padding: 10px 13px
+    border: 1px solid $patient-border
+    border-radius: 11px
+    background: #fff
+    color: $patient-ink
+    text-decoration: none
+    font-size: 11px
+    font-weight: 700
+
+.patient-booking-layout
+    display: grid
+    grid-template-columns: minmax(0, 1.65fr) minmax(270px, .8fr)
+    gap: 16px
+    align-items: start
+
+.patient-booking-card,
+.patient-booking-blocked
+    min-width: 0
+    border: 1px solid $patient-border
+    border-radius: 17px
+    background: #fff
+    box-shadow: 0 10px 28px rgba(26, 58, 53, .045)
+
+.patient-booking-card
+    padding: 20px
+
+.patient-booking-card__header
+    display: flex
+    justify-content: space-between
+    align-items: flex-start
+    gap: 16px
+    margin-bottom: 18px
+    padding-bottom: 16px
+    border-bottom: 1px solid $patient-border
+
+    h2
+        margin: 4px 0
+        color: $patient-ink
+        font-family: 'Montserrat', sans-serif
+        font-size: 19px
+        font-weight: 700
+
+    p
+        margin: 0
+        color: $patient-muted
+        font-size: 10px
+        line-height: 1.5
+
+.patient-booking-duration,
+.patient-booking-count
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 8px 10px
+    border-radius: 10px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-size: 10px
+    font-weight: 800
+    white-space: nowrap
+
+.patient-booking-controls
+    display: grid
+    grid-template-columns: minmax(200px, 1.25fr) minmax(220px, 1fr) minmax(145px, .7fr)
+    gap: 12px
+    margin-bottom: 18px
+
+.patient-booking-field
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: 7px
+
+    > span
+        color: $patient-muted
+        font-size: 10px
+        font-weight: 700
+
+    select,
+    input
+        width: 100%
+        min-height: 42px
+        padding: 9px 11px
+        border: 1px solid $patient-border
+        border-radius: 10px
+        outline: 0
+        background: #fff
+        color: $patient-ink
+        font: inherit
+        font-size: 11px
+
+        &:focus
+            border-color: $patient-accent
+            box-shadow: 0 0 0 3px rgba(31,116,109,.09)
+
+.patient-booking-format-switch
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: 5px
+    min-height: 42px
+
+    button
+        min-width: 0
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        gap: 6px
+        padding: 8px 9px
+        border: 1px solid $patient-border
+        border-radius: 10px
+        background: #fff
+        color: $patient-muted
+        font: inherit
+        font-size: 10px
+        font-weight: 700
+        cursor: pointer
+
+        &.is-active
+            border-color: $patient-accent
+            background: $patient-accent-soft
+            color: $patient-accent
+
+        &:disabled
+            opacity: .35
+            cursor: not-allowed
+
+.patient-booking-week-nav
+    display: flex
+    justify-content: space-between
+    align-items: center
+    gap: 12px
+    margin-bottom: 12px
+
+    > div:first-child
+        display: flex
+        flex-direction: column
+        gap: 3px
+
+        strong
+            color: $patient-ink
+            font-size: 12px
+
+        span
+            color: $patient-muted
+            font-size: 9px
+
+    > div:last-child
+        display: flex
+        gap: 6px
+
+    button
+        width: 34px
+        height: 34px
+        border: 1px solid $patient-border
+        border-radius: 9px
+        background: #fff
+        color: $patient-ink
+        cursor: pointer
+
+.patient-booking-week
+    display: grid
+    grid-template-columns: repeat(7, minmax(105px, 1fr))
+    gap: 8px
+    overflow-x: auto
+    padding-bottom: 6px
+
+.patient-booking-day
+    min-width: 105px
+    min-height: 195px
+    border: 1px solid $patient-border
+    border-radius: 12px
+    background: #fbfdfc
+    overflow: hidden
+
+.patient-booking-day__header
+    display: flex
+    flex-direction: column
+    gap: 3px
+    padding: 10px 9px
+    border-bottom: 1px solid $patient-border
+    background: #f5faf8
+
+    span
+        color: $patient-muted
+        font-size: 8px
+        font-weight: 800
+        text-transform: uppercase
+
+    strong
+        color: $patient-ink
+        font-size: 12px
+
+.patient-booking-day__hours
+    padding: 8px 8px 0
+    color: $patient-muted
+    font-size: 8px
+    line-height: 1.45
+
+.patient-booking-day__slots
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 5px
+    padding: 8px
+
+.patient-booking-slot
+    min-height: 31px
+    padding: 5px 3px
+    border: 1px solid #cde5de
+    border-radius: 7px
+    background: #fff
+    color: $patient-accent
+    font-size: 9px
+    font-weight: 800
+    cursor: pointer
+    transition: .15s ease
+
+    &:hover,
+    &.is-selected
+        border-color: $patient-accent
+        background: $patient-accent
+        color: #fff
+
+.patient-booking-day__empty
+    grid-column: 1 / -1
+    margin: 0
+    padding: 8px 2px
+    color: $patient-muted
+    font-size: 8px
+    line-height: 1.45
+
+.patient-booking-loading,
+.patient-booking-empty
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: 10px
+    min-height: 120px
+    color: $patient-muted
+    font-size: 11px
+    text-align: center
+
+.patient-booking-spinner
+    width: 16px
+    height: 16px
+    flex: 0 0 16px
+    border: 2px solid $patient-border
+    border-top-color: $patient-accent
+    border-radius: 50%
+    animation: patient-booking-spin .7s linear infinite
+
+@keyframes patient-booking-spin
+    to
+        transform: rotate(360deg)
+
+.patient-booking-selection
+    display: flex
+    align-items: center
+    gap: 12px
+    margin-top: 16px
+    padding: 13px
+    border: 1px solid #cce5dc
+    border-radius: 12px
+    background: #f2faf6
+
+    &[hidden]
+        display: none
+
+.patient-booking-selection__icon
+    width: 38px
+    height: 38px
+    flex: 0 0 38px
+    display: grid
+    place-items: center
+    border-radius: 11px
+    background: #dff2e9
+    color: #25845b
+    font-size: 17px
+
+.patient-booking-selection__body
+    min-width: 0
+    flex: 1 1 auto
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+    strong
+        color: $patient-ink
+        font-size: 11px
+
+    span
+        color: $patient-muted
+        font-size: 9px
+        line-height: 1.45
+
+.patient-booking-primary
+    min-height: 40px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 8px
+    padding: 9px 14px
+    border: 0
+    border-radius: 10px
+    background: $patient-accent
+    color: #fff
+    font: inherit
+    font-size: 10px
+    font-weight: 800
+    text-decoration: none
+    cursor: pointer
+
+    &:hover
+        color: #fff
+
+.patient-booking-aside
+    display: grid
+    gap: 14px
+
+.patient-booking-info
+    h2
+        margin: 5px 0 14px
+        font-family: 'Montserrat', sans-serif
+        font-size: 16px
+
+    ol
+        display: grid
+        gap: 12px
+        margin: 0
+        padding: 0
+        list-style: none
+
+        li
+            display: flex
+            align-items: center
+            gap: 9px
+            color: $patient-muted
+            font-size: 10px
+            line-height: 1.45
+
+            span
+                width: 23px
+                height: 23px
+                flex: 0 0 23px
+                display: grid
+                place-items: center
+                border-radius: 8px
+                background: $patient-accent-soft
+                color: $patient-accent
+                font-size: 9px
+                font-weight: 800
+
+.patient-booking-info__note
+    display: flex
+    gap: 8px
+    margin-top: 16px
+    padding: 10px
+    border-radius: 10px
+    background: #f5faf8
+    color: $patient-muted
+    font-size: 9px
+    line-height: 1.5
+
+    i
+        flex: 0 0 auto
+        color: $patient-accent
+
+.patient-booking-upcoming
+    .patient-booking-card__header
+        align-items: center
+        margin-bottom: 10px
+
+.patient-booking-upcoming__item
+    display: flex
+    gap: 10px
+    align-items: center
+    padding: 11px 0
+    border-bottom: 1px solid $patient-border
+
+    &:last-child
+        border-bottom: 0
+
+    > div:last-child
+        min-width: 0
+        display: flex
+        flex-direction: column
+        gap: 4px
+
+        strong
+            color: $patient-ink
+            font-size: 10px
+            overflow-wrap: anywhere
+
+        span
+            color: $patient-muted
+            font-size: 9px
+
+.patient-booking-upcoming__date
+    width: 64px
+    flex: 0 0 64px
+    display: flex
+    flex-direction: column
+    gap: 3px
+    padding: 8px
+    border-radius: 9px
+    background: $patient-accent-soft
+
+    strong
+        color: $patient-accent
+        font-size: 10px
+
+    span
+        color: $patient-muted
+        font-size: 9px
+
+.patient-booking-upcoming__empty
+    display: flex
+    align-items: center
+    gap: 9px
+    padding: 16px 0
+    color: $patient-muted
+    font-size: 10px
+
+    i
+        color: $patient-accent
+        font-size: 17px
+
+    p
+        margin: 0
+
+.patient-booking-alert
+    display: flex
+    gap: 10px
+    align-items: flex-start
+    margin-bottom: 14px
+    padding: 12px 14px
+    border: 1px solid $patient-border
+    border-radius: 11px
+    background: #fff
+    font-size: 10px
+    line-height: 1.5
+
+    > i
+        margin-top: 1px
+        font-size: 15px
+
+    &.is-success
+        border-color: #c9e8d8
+        background: #f3fbf6
+        color: #28774f
+
+    &.is-error
+        border-color: #f0d1d1
+        background: #fff7f7
+        color: #a33d3d
+
+    ul
+        margin: 5px 0 0
+        padding-left: 17px
+
+.patient-booking-blocked
+    display: flex
+    align-items: flex-start
+    gap: 16px
+    max-width: 760px
+    padding: 24px
+
+    h2
+        margin: 0 0 6px
+        font-family: 'Montserrat', sans-serif
+        font-size: 17px
+
+    p
+        margin: 0 0 14px
+        color: $patient-muted
+        font-size: 11px
+        line-height: 1.6
+
+.patient-booking-blocked__icon
+    width: 44px
+    height: 44px
+    flex: 0 0 44px
+    display: grid
+    place-items: center
+    border-radius: 13px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-size: 19px
+
+@media (max-width: 1199.98px)
+    .patient-booking-layout
+        grid-template-columns: 1fr
+
+    .patient-booking-aside
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+@media (max-width: 767.98px)
+    .patient-booking-controls
+        grid-template-columns: 1fr
+
+    .patient-booking-week
+        grid-template-columns: repeat(2, minmax(125px, 1fr))
+
+    .patient-booking-aside
+        grid-template-columns: 1fr
+
+    .patient-booking-selection
+        align-items: flex-start
+        flex-wrap: wrap
+
+    .patient-booking-selection form
+        width: 100%
+
+    .patient-booking-selection form button
+        width: 100%
+
+// PATIENT_CALENDAR_TIMEZONE_V2
+.patient-booking-timezone-legend
+    display: flex
+    flex-wrap: wrap
+    align-items: center
+    gap: 8px 16px
+    margin: -5px 0 14px
+    color: $patient-muted
+    font-size: 9px
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 5px
+
+    i
+        color: $patient-accent
+
+.patient-booking-day__hours
+    white-space: pre-line
+    line-height: 1.5
+
+.patient-booking-slot
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    gap: 2px
+    min-height: 40px
+    padding: 4px 2px
+
+.patient-booking-slot__patient-time
+    display: block
+    font-size: 9px
+    line-height: 1.1
+    font-weight: 800
+
+.patient-booking-slot__doctor-time
+    display: block
+    max-width: 100%
+    overflow: hidden
+    color: inherit
+    font-size: 6.5px
+    line-height: 1.1
+    font-weight: 600
+    text-overflow: ellipsis
+    white-space: nowrap
+    opacity: .82
+
+.patient-booking-slot.is-selected .patient-booking-slot__doctor-time
+    opacity: 1
+
+.patient-booking-upcoming__date
+    small
+        color: $patient-muted
+        font-size: 7px
+        font-weight: 800
+        text-transform: uppercase
+
+.patient-booking-upcoming__doctor-time
+    color: $patient-accent
+    font-size: 8px
+    line-height: 1.45
+    overflow-wrap: anywhere
+
+@media (max-width: 767.98px)
+    .patient-booking-timezone-legend
+        gap: 6px 10px
+        font-size: 8px
+
+    .patient-booking-slot__doctor-time
+        font-size: 6px
+
+
+.patient-booking-week-nav
+    button:disabled
+        opacity: .35
+        cursor: not-allowed
+
+// PATIENT_MONTHLY_BOOKING_LIMIT_V1
+.patient-booking-monthly-quota
+    display: flex
+    flex-wrap: wrap
+    gap: 7px
+    margin: -3px 0 13px
+
+    &[hidden]
+        display: none
+
+.patient-booking-monthly-quota__line
+    display: inline-flex
+    align-items: center
+    gap: 7px
+    min-height: 30px
+    padding: 6px 10px
+    border: 1px solid #cce5dc
+    border-radius: 9px
+    background: #f2faf6
+    color: #24764b
+    font-size: 9px
+    font-weight: 700
+
+    i
+        font-size: 12px
+
+    &.is-full
+        border-color: #f0d1d1
+        background: #fff5f5
+        color: #a33d3d
+
+.patient-booking-day__empty
+    color: #a33d3d
+    font-weight: 700
+
+// PATIENT_MULTICLINIC_BOOKING_V1
+.patient-booking-controls
+    grid-template-columns: minmax(175px, .9fr) minmax(225px, 1.25fr) minmax(220px, 1fr) minmax(145px, .7fr)
+
+@media (max-width: 1100px)
+    .patient-booking-controls
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+@media (max-width: 767.98px)
+    .patient-booking-controls
+        grid-template-columns: 1fr
+
+// PATIENT_MULTICLINIC_OVERVIEW_PROFILE_V1
+.patient-clinic-context
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 16px
+    margin-bottom: 15px
+    padding: 14px 16px
+    border: 1px solid #dbe7e2
+    border-radius: 14px
+    background: linear-gradient(135deg, #ffffff, #f6fbf9)
+    box-shadow: 0 7px 20px rgba(25, 61, 55, .035)
+
+.patient-clinic-context__copy
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: 3px
+
+    strong
+        color: #173f3a
+        font-size: 12px
+        font-weight: 800
+        overflow-wrap: anywhere
+
+    span
+        color: #748783
+        font-size: 9px
+        line-height: 1.45
+
+.patient-clinic-context__actions
+    display: flex
+    align-items: center
+    justify-content: flex-end
+    flex-wrap: wrap
+    gap: 8px
+
+    form
+        min-width: min(290px, 100%)
+
+    select
+        width: 100%
+        min-height: 38px
+        padding: 8px 32px 8px 10px
+        border: 1px solid #d7e4df
+        border-radius: 10px
+        background: #fff
+        color: #244842
+        font-size: 9px
+        font-weight: 700
+        outline: 0
+
+        &:focus
+            border-color: #168f88
+            box-shadow: 0 0 0 3px rgba(22, 143, 136, .09)
+
+.patient-clinic-context__book,
+.patient-clinic-context__inpatient
+    min-height: 38px
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    gap: 7px
+    padding: 8px 12px
+    border-radius: 10px
+    font-size: 9px
+    font-weight: 800
+    white-space: nowrap
+
+.patient-clinic-context__book
+    background: #168f88
+    color: #fff
+    text-decoration: none
+
+    &:hover
+        color: #fff
+        background: #117c76
+
+.patient-clinic-context__inpatient
+    border: 1px solid #dbe7e2
+    background: #f5f8f7
+    color: #738580
+
+.patient-summary-card__clinic
+    display: block
+    margin-top: 4px
+    color: #7f918c
+    font-size: 8px
+    line-height: 1.35
+    overflow-wrap: anywhere
+
+.patient-calendar-card__clinic
+    margin: 3px 0 0
+    color: #7d908b
+    font-size: 8px
+    line-height: 1.4
+
+.patient-profile-hero__clinic-count
+    display: inline-flex
+    align-items: center
+    margin-left: 6px
+    padding: 2px 7px
+    border-radius: 999px
+    background: #e8f5f1
+    color: #168f88
+    font-size: 8px
+    font-weight: 800
+
+.patient-profile-clinic-summary
+    display: flex
+    align-items: baseline
+    gap: 7px
+    margin-bottom: 10px
+
+    strong
+        color: #173f3a
+        font-size: 24px
+        font-weight: 850
+        line-height: 1
+
+    span
+        color: #788b86
+        font-size: 9px
+
+.patient-profile-clinics
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 13px
+
+.patient-profile-clinic
+    min-width: 0
+    overflow: hidden
+    border: 1px solid #dfe9e5
+    border-radius: 13px
+    background: #fff
+    box-shadow: 0 5px 18px rgba(25, 61, 55, .035)
+
+.patient-profile-clinic__head
+    display: flex
+    align-items: flex-start
+    gap: 11px
+    padding: 14px
+    border-bottom: 1px solid #edf2ef
+    background: linear-gradient(135deg, #fbfdfc, #f4faf7)
+
+.patient-profile-clinic__icon
+    width: 36px
+    height: 36px
+    flex: 0 0 36px
+    display: grid
+    place-items: center
+    border-radius: 10px
+    background: #e6f4f0
+    color: #168f88
+    font-size: 15px
+
+.patient-profile-clinic__title
+    min-width: 0
+    flex: 1
+
+    > div
+        display: flex
+        align-items: center
+        flex-wrap: wrap
+        gap: 5px
+
+    h3
+        margin: 0
+        color: #173f3a
+        font-size: 12px
+        font-weight: 820
+        overflow-wrap: anywhere
+
+    p
+        display: flex
+        align-items: center
+        gap: 5px
+        margin: 5px 0 0
+        color: #7c8e89
+        font-size: 8px
+
+.patient-profile-clinic__badge
+    display: inline-flex
+    align-items: center
+    padding: 3px 6px
+    border-radius: 999px
+    background: #f0f4f3
+    color: #6d817b
+    font-size: 7px
+    font-weight: 800
+
+    &.is-primary
+        background: #e3f4ec
+        color: #257955
+
+.patient-profile-clinic__details
+    display: grid
+    gap: 9px
+    padding: 13px 14px
+
+    > div
+        min-width: 0
+        padding: 9px 10px
+        border: 1px solid #edf2ef
+        border-radius: 9px
+        background: #fafcfb
+
+    span,
+    strong,
+    small
+        display: block
+
+    span
+        margin-bottom: 4px
+        color: #879792
+        font-size: 7px
+        font-weight: 700
+
+    strong
+        color: #2a4943
+        font-size: 9px
+        font-weight: 780
+        overflow-wrap: anywhere
+
+    small
+        margin-top: 3px
+        color: #7a8c87
+        font-size: 8px
+        line-height: 1.4
+        overflow-wrap: anywhere
+
+.patient-profile-clinic__actions
+    display: flex
+    align-items: center
+    justify-content: flex-end
+    padding: 0 14px 14px
+
+    .patient-profile-primary
+        min-height: 36px
+        padding: 8px 12px
+        text-decoration: none
+
+.patient-profile-clinic__inpatient-note
+    display: flex
+    align-items: flex-start
+    gap: 6px
+    color: #7b8e89
+    font-size: 8px
+    line-height: 1.45
+
+@media (max-width: 900px)
+    .patient-clinic-context
+        align-items: stretch
+        flex-direction: column
+
+    .patient-clinic-context__actions
+        justify-content: stretch
+
+        form
+            min-width: 0
+            flex: 1 1 100%
+
+    .patient-profile-clinics
+        grid-template-columns: 1fr
+
+@media (max-width: 560px)
+    .patient-clinic-context__actions
+        flex-direction: column
+        align-items: stretch
+
+    .patient-clinic-context__book,
+    .patient-clinic-context__inpatient
+        width: 100%
+
+// PATIENT_CLINIC_TEXT_SEARCH_V1
+.patient-clinic-search
+    position: relative
+    z-index: 20
+
+    > label
+        color: $patient-muted
+        font-size: 10px
+        font-weight: 700
+
+.patient-clinic-search__input
+    width: 100%
+    min-height: 42px
+    padding: 9px 11px
+    border: 1px solid $patient-border
+    border-radius: 10px
+    outline: 0
+    background: #fff
+    color: $patient-ink
+    font: inherit
+    font-size: 11px
+
+    &:focus
+        border-color: $patient-accent
+        box-shadow: 0 0 0 3px rgba(31,116,109,.09)
+
+.patient-clinic-selected
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 8px
+    margin-top: 7px
+    padding: 8px 10px
+    border: 1px solid #cce5dc
+    border-radius: 9px
+    background: #f2faf6
+
+    &[hidden]
+        display: none
+
+    > div
+        min-width: 0
+        display: flex
+        flex-direction: column
+        gap: 3px
+
+    strong
+        color: $patient-ink
+        font-size: 10px
+        overflow-wrap: anywhere
+
+    small
+        color: $patient-muted
+        font-size: 8px
+        line-height: 1.4
+
+    > span
+        display: inline-flex
+        align-items: center
+        gap: 5px
+        color: #24764b
+        font-size: 8px
+        font-weight: 800
+        white-space: nowrap
+
+.patient-clinic-search__hint
+    display: block
+    color: $patient-muted
+    font-size: 8px
+    line-height: 1.4
+
+.patient-clinic-search__results
+    position: absolute
+    top: calc(100% - 16px)
+    left: 0
+    right: 0
+    z-index: 50
+    max-height: 360px
+    overflow-y: auto
+    padding: 7px
+    border: 1px solid $patient-border
+    border-radius: 12px
+    background: #fff
+    box-shadow: 0 14px 32px rgba(26, 58, 53, .14)
+
+    &[hidden]
+        display: none
+
+.patient-clinic-search__group
+    & + &
+        margin-top: 8px
+        padding-top: 8px
+        border-top: 1px solid $patient-border
+
+.patient-clinic-search__group-title
+    padding: 5px 7px
+    color: $patient-accent
+    font-size: 9px
+    font-weight: 800
+
+.patient-clinic-search__group-items
+    display: grid
+    gap: 3px
+
+.patient-clinic-search__result
+    display: flex
+    flex-direction: column
+    gap: 3px
+    width: 100%
+    padding: 9px
+    border: 0
+    border-radius: 8px
+    background: transparent
+    text-align: left
+    cursor: pointer
+
+    &:hover,
+    &:focus
+        outline: 0
+        background: $patient-accent-soft
+
+    strong
+        color: $patient-ink
+        font-size: 10px
+        font-weight: 700
+
+    small
+        color: $patient-muted
+        font-size: 8px
+        line-height: 1.4
+
+.patient-clinic-search__more
+    width: 100%
+    margin-top: 7px
+    padding: 9px
+    border: 1px solid $patient-border
+    border-radius: 8px
+    background: #f8fbfa
+    color: $patient-accent
+    font-size: 9px
+    font-weight: 800
+    cursor: pointer
+
+    &:disabled
+        opacity: .6
+        cursor: wait
+
+.patient-clinic-search__empty
+    padding: 14px 10px
+    color: $patient-muted
+    font-size: 9px
+    line-height: 1.5
+    text-align: center
+
+@media (max-width: 1100px)
+    .patient-booking-controls
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+@media (max-width: 767.98px)
+    .patient-booking-controls
+        grid-template-columns: 1fr
+
+// PATIENT_UNIFIED_APPOINTMENT_TOOLTIP_V1
+.patient-doctor-tooltip__status-row
+    grid-template-columns: 1fr
+    gap: 4px
+    margin-top: 6px
+    padding-top: 8px
+    border-top: 1px solid #dfe9e5
+
+    &[hidden]
+        display: none
+
+    span
+        color: #71847f
+        font-size: 8px
+        font-weight: 700
+
+    b
+        color: #425b56
+        font-size: 9px
+        font-weight: 700
+        line-height: 1.4
+        text-align: left
+        white-space: normal
+
+    &.is-held b
+        color: #24764b
+
+    &.is-arrived b
+        color: #2368a4
+
+    &.is-unknown b
+        color: #8b681b
+
+    &.is-not_held b,
+    &.is-not-held b
+        color: #a33d3d

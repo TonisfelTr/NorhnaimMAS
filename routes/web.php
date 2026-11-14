@@ -148,6 +148,111 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
     ->name('patients.')
     ->group(function (): void {
         Route::get('/', PatientDashboardController::class)->name('dashboard');
+        Route::get('/profile', [\App\Http\Controllers\Patients\ProfileController::class, 'index'])
+            ->name('profile.index');
+
+        Route::put('/profile', [\App\Http\Controllers\Patients\ProfileController::class, 'update'])
+            ->middleware('throttle:20,1')
+            ->name('profile.update');
+
+        Route::post('/profile/avatar', [\App\Http\Controllers\Patients\ProfileController::class, 'avatar'])
+            ->middleware('throttle:10,1')
+            ->name('profile.avatar.store');
+
+        Route::delete('/profile/avatar', [\App\Http\Controllers\Patients\ProfileController::class, 'avatarDestroy'])
+            ->middleware('throttle:10,1')
+            ->name('profile.avatar.destroy');
+
+        Route::put('/profile/password', [\App\Http\Controllers\Patients\ProfileController::class, 'password'])
+            ->middleware('throttle:5,1')
+            ->name('profile.password.update');
+
+        Route::get('/calendar', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'index'])->name('calendar');
+        Route::get('/calendar/clinics/search', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'searchClinics'])->middleware('throttle:30,1')->name('calendar.clinics.search');
+        Route::get('/calendar/availability', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'availability'])->middleware('throttle:60,1')->name('calendar.availability');
+        Route::post('/calendar', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'store'])->middleware('throttle:5,1')->name('calendar.store');
+    });
+
+
+Route::middleware([
+    'auth',
+    \Spatie\Permission\Middleware\RoleMiddleware::class . ':patients',
+])
+    ->prefix('patient')
+    ->name('patients.')
+    ->group(function (): void {
+        Route::get(
+            '/identity',
+            [\App\Http\Controllers\Patients\IdentityController::class, 'index']
+        )->name('identity.index');
+
+        Route::post(
+            '/identity',
+            [\App\Http\Controllers\Patients\IdentityController::class, 'submit']
+        )
+            ->middleware('throttle:5,1')
+            ->name('identity.submit');
+
+        Route::post(
+            '/identity/verify',
+            [\App\Http\Controllers\Patients\IdentityController::class, 'verify']
+        )
+            ->middleware('throttle:5,1')
+            ->name('identity.verify');
+    });
+
+
+Route::middleware([
+    'auth',
+    \Spatie\Permission\Middleware\RoleMiddleware::class . ':patients',
+])
+    ->prefix('patient')
+    ->name('patients.')
+    ->group(function (): void {
+        Route::post('/profile/change-requests', [\App\Http\Controllers\Patients\ProfileChangeRequestController::class, 'store'])->middleware('throttle:5,1')->name('profile.change-requests.store');
+    });
+
+Route::middleware([
+    'auth',
+    \App\Http\Middleware\DoctorOrHospitalAdmin::class,
+])
+    ->prefix('doctors')
+    ->name('doctors.')
+    ->group(function (): void {
+        Route::get(
+            '/patient-profile-change-requests',
+            [\App\Http\Controllers\Doctors\PatientProfileChangeRequestController::class, 'index']
+        )->name('patient-profile-change-requests.index');
+
+        Route::post(
+            '/patient-profile-change-requests/{changeRequest}/approve',
+            [\App\Http\Controllers\Doctors\PatientProfileChangeRequestController::class, 'approve']
+        )->whereNumber('changeRequest')
+            ->middleware('throttle:20,1')
+            ->name('patient-profile-change-requests.approve');
+
+        Route::post(
+            '/patient-profile-change-requests/{changeRequest}/reject',
+            [\App\Http\Controllers\Doctors\PatientProfileChangeRequestController::class, 'reject']
+        )->whereNumber('changeRequest')
+            ->middleware('throttle:20,1')
+            ->name('patient-profile-change-requests.reject');
+
+        Route::post(
+            '/patient-link-requests/{linkRequest}/approve',
+            [\App\Http\Controllers\Doctors\PatientProfileChangeRequestController::class, 'approveLink']
+        )->whereNumber('linkRequest')
+            ->middleware('throttle:10,1')
+            ->name('patient-link-requests.approve');
+
+
+        Route::post(
+            '/patient-link-requests/{linkRequest}/reject',
+            [\App\Http\Controllers\Doctors\PatientProfileChangeRequestController::class, 'rejectLink']
+        )->whereNumber('linkRequest')
+            ->middleware('throttle:10,1')
+            ->name('patient-link-requests.reject');
+
     });
 
 Route::prefix('api')->group(function (): void {

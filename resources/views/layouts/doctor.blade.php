@@ -169,6 +169,16 @@
                             <span class="doctor-sidebar__link-active-dot" aria-hidden="true"></span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('doctors.patient-profile-change-requests.index') }}"
+                           class="doctor-sidebar__link {{ request()->routeIs('doctors.patient-profile-change-requests.*') ? 'is-active' : '' }}"
+                           title="Запросы пациентов" aria-label="Запросы пациентов"
+                           @if(request()->routeIs('doctors.patient-profile-change-requests.*')) aria-current="page" @endif>
+                            <span class="doctor-sidebar__link-icon"><i class="bi bi-person-lines-fill" aria-hidden="true"></i></span>
+                            <span class="doctor-sidebar__link-text">Запросы пациентов</span>
+                            <span class="doctor-sidebar__link-active-dot" aria-hidden="true"></span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
