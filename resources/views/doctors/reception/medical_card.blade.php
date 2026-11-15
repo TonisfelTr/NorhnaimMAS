@@ -2019,8 +2019,60 @@
                 </div>
 
                 <div class="tab-pane fade mc-pane" id="pane-presc" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="small text-muted">Выписанные рецепты</div>
+                    {{-- PATIENT_MEDICATION_TAB_V6_UI --}}
+                    <div class="medication-tab-hero">
+                        <div class="medication-tab-hero__main">
+                            <div class="medication-tab-hero__icon" aria-hidden="true">
+                                <i class="bi bi-capsule-pill"></i>
+                            </div>
+
+                            <div class="min-w-0">
+                                <div class="medication-tab-hero__eyebrow">
+                                    Лекарственная терапия
+                                </div>
+
+                                <h2 class="medication-tab-hero__title">
+                                    Препараты, назначения и рецепты
+                                </h2>
+
+                                <div class="medication-tab-hero__subtitle">
+                                    Здесь хранится действующая схема лечения пациента, врачебные инструкции
+                                    и история выписанных рецептов.
+                                </div>
+
+                                <div class="medication-tab-hero__steps">
+                                    <span class="medication-tab-step-chip">
+                                        <span>1</span>
+                                        Выписать рецепт
+                                    </span>
+
+                                    <i class="bi bi-arrow-right medication-tab-hero__arrow" aria-hidden="true"></i>
+
+                                    <span class="medication-tab-step-chip">
+                                        <span>2</span>
+                                        Оформить назначение
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="medication-tab-hero__action">
+                            <button
+                                type="button"
+                                class="btn btn-primary medication-tab-primary-action"
+                                data-bs-toggle="modal"
+                                data-bs-target="#prescriptionModal"
+                                data-role="open-prescription-modal"
+                            >
+                                <i class="bi bi-journal-medical me-1"></i>
+                                Рецепт и назначение
+                            </button>
+
+                            <div class="medication-tab-hero__action-hint">
+                                Оба шага выполняются последовательно
+                            </div>
+                        </div>
+                    </div>
 
                         <button
                             type="button"
@@ -2033,8 +2085,68 @@
                         </button>
                     </div>
 
-                    @include('doctors.reception.partials.benefit_prescription_list')
+                    <section class="medication-tab-section medication-tab-section--assignments">
+                        <div class="medication-tab-section__head">
+                            <div class="medication-tab-section__icon">
+                                <i class="bi bi-clipboard2-pulse"></i>
+                            </div>
+                            <div>
+                                <h3 class="medication-tab-section__title">Назначения пациенту</h3>
+                                <div class="medication-tab-section__subtitle">
+                                    Текущая схема лечения и инструкция, доступная пациенту.
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="medication-tab-section__body">
+                        @include('doctors.reception.partials.medication_assignments')
+                    </div>
+                    </section>
+
+                    <section class="medication-tab-section medication-tab-section--benefit">
+                        <div class="medication-tab-section__head">
+                            <div class="medication-tab-section__icon">
+                                <i class="bi bi-file-earmark-medical"></i>
+                            </div>
+                            <div>
+                                <h3 class="medication-tab-section__title">Льготные рецепты</h3>
+                                <div class="medication-tab-section__subtitle">
+                                    Бумажные формы и сохранённые льготные рецепты пациента.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="medication-tab-section__body">
+                        @include('doctors.reception.partials.benefit_prescription_list')
+                    </div>
+                    </section>
+
+                    <section class="medication-tab-section medication-tab-section--history">
+                        <div class="medication-tab-section__head medication-tab-section__head--history">
+                            <div class="medication-tab-section__icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div>
+                                <h3 class="medication-tab-section__title">История рецептов</h3>
+                                <div class="medication-tab-section__subtitle">
+                                    Все выписанные ранее препараты, сгруппированные по датам.
+                                </div>
+                            </div>
+                        </div>
+
+                        @if($prescriptions->isEmpty())
+                            <div class="medication-tab-empty">
+                                <div class="medication-tab-empty__icon">
+                                    <i class="bi bi-prescription2"></i>
+                                </div>
+                                <div>
+                                    <div class="medication-tab-empty__title">Рецептов пока нет</div>
+                                    <div class="medication-tab-empty__text">
+                                        После первой выписки здесь появится история рецептов пациента.
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     <div class="d-flex flex-column gap-4">
                         @foreach($prescriptions as $date => $datePrescriptions)
 
@@ -2129,6 +2241,7 @@
                             </div>
                         @endforeach
                     </div>
+                    </section>
                 </div>
 
                 <div class="tab-pane fade mc-pane" id="pane-epicrisis" role="tabpanel">
@@ -4870,6 +4983,3735 @@
             </div>
         </div>
     </div>
+    {{-- PATIENT_TREATMENT_WIZARD_V5_NATIVE_PRESCRIPTION --}}
+    <style id="patient-treatment-wizard-v5-style">
+        #prescriptionModal .treatment-wizard-dialog {
+            width: min(1380px, calc(100vw - 32px));
+            max-width: 1380px;
+        }
+    
+        #prescriptionModal .treatment-wizard-master {
+            border-bottom: 1px solid #e8edf3;
+            background: #fff;
+        }
+    
+        #prescriptionModal .treatment-wizard-master__head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 1.25rem .8rem;
+        }
+    
+        #prescriptionModal .treatment-wizard-master__title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+    
+        #prescriptionModal .treatment-wizard-master__subtitle {
+            margin-top: .2rem;
+            color: #6c757d;
+            font-size: .875rem;
+        }
+    
+        #prescriptionModal .treatment-wizard-steps {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .75rem;
+            padding: 0 1.25rem 1rem;
+        }
+    
+        #prescriptionModal .treatment-wizard-step {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            width: 100%;
+            min-height: 64px;
+            padding: .8rem 1rem;
+            border: 1px solid #dce4ec;
+            border-radius: .8rem;
+            background: #f8fafc;
+            text-align: left;
+        }
+    
+        #prescriptionModal .treatment-wizard-step__number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 2rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: #e9f1f4;
+            color: #0f766e;
+            font-weight: 700;
+        }
+    
+        #prescriptionModal .treatment-wizard-step strong,
+        #prescriptionModal .treatment-wizard-step small {
+            display: block;
+        }
+    
+        #prescriptionModal .treatment-wizard-step small {
+            margin-top: .1rem;
+            color: #6c757d;
+        }
+    
+        #prescriptionModal .treatment-wizard-step.is-active {
+            border-color: #5bc1b4;
+            background: #f0fbf8;
+            box-shadow: 0 0 0 .15rem rgba(15, 118, 110, .08);
+        }
+    
+        #prescriptionModal .treatment-wizard-step.is-active .treatment-wizard-step__number {
+            background: #0f8c82;
+            color: #fff;
+        }
+    
+        #prescriptionModal .treatment-wizard-step.is-disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+    
+        #prescriptionModal #patientPrescriptionForm > .modal-header {
+            border-top: 0;
+        }
+    
+        #prescriptionModal #patientPrescriptionForm > .modal-header .btn-close {
+            display: none;
+        }
+    
+        #prescriptionModal .treatment-wizard-assignment-pane {
+            display: none;
+        }
+    
+        #prescriptionModal.is-treatment-step-2 #patientPrescriptionForm {
+            display: none;
+        }
+    
+        #prescriptionModal.is-treatment-step-2 .treatment-wizard-assignment-pane {
+            display: block;
+        }
+    
+        #prescriptionModal #treatmentWizardAssignmentHost {
+            width: 100%;
+            min-width: 0;
+        }
+    
+        #prescriptionModal #treatmentWizardAssignmentHost > .modal-dialog {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+        }
+    
+        #prescriptionModal #treatmentWizardAssignmentHost > .modal-dialog > .modal-content {
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+    
+        #prescriptionModal .treatment-wizard-assignment-footer {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .85rem 1.25rem;
+            border-top: 1px solid #e8edf3;
+            background: #fff;
+        }
+    
+        #prescriptionModal .treatment-wizard-saving {
+            pointer-events: none;
+            opacity: .75;
+        }
+    
+        @media (max-width: 767.98px) {
+            #prescriptionModal .treatment-wizard-dialog {
+                width: calc(100vw - 12px);
+                max-width: calc(100vw - 12px);
+                margin: .5rem auto;
+            }
+    
+            #prescriptionModal .treatment-wizard-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    
+    <script>
+    (() => {
+        'use strict';
+    
+        const boot = () => {
+            const prescriptionModal = document.getElementById('prescriptionModal');
+            const prescriptionForm = document.getElementById('patientPrescriptionForm');
+            const prescriptionDialog = prescriptionModal?.querySelector(':scope > .modal-dialog');
+            const prescriptionContent = prescriptionDialog?.querySelector(':scope > .modal-content');
+    
+            const assignmentModal = document.getElementById('medicationAssignmentModal');
+            const assignmentDialog = assignmentModal?.querySelector(':scope > .modal-dialog');
+    
+            if (!prescriptionModal || !prescriptionForm || !prescriptionDialog || !prescriptionContent) {
+                return;
+            }
+    
+            if (prescriptionModal.dataset.treatmentWizardV5 === '1') {
+                return;
+            }
+            prescriptionModal.dataset.treatmentWizardV5 = '1';
+    
+            prescriptionDialog.classList.add('treatment-wizard-dialog');
+    
+            // Любая штатная кнопка выписки теперь открывает один и тот же мастер.
+            document.querySelectorAll('[data-bs-target="#prescriptionModal"]').forEach((button) => {
+                if (button.matches('[data-role="open-prescription-modal"]')) {
+                    button.innerHTML =
+                        '<i class="bi bi-journal-medical me-1"></i> Рецепт и назначение';
+                }
+            });
+    
+            const master = document.createElement('div');
+            master.className = 'treatment-wizard-master';
+            master.innerHTML = `
+                <div class="treatment-wizard-master__head">
+                    <div>
+                        <h5 class="treatment-wizard-master__title">Рецепт и назначение</h5>
+                        <div class="treatment-wizard-master__subtitle">
+                            Оба шага обязательны: сначала сохраняется рецепт, затем назначение пациенту.
+                        </div>
+                    </div>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"></button>
+                </div>
+    
+                <div class="treatment-wizard-steps">
+                    <button type="button"
+                            class="treatment-wizard-step is-active"
+                            data-treatment-wizard-step="1">
+                        <span class="treatment-wizard-step__number">1</span>
+                        <span>
+                            <strong>Рецепт</strong>
+                            <small>Выписка и сохранение рецепта</small>
+                        </span>
+                    </button>
+    
+                    <button type="button"
+                            class="treatment-wizard-step is-disabled"
+                            data-treatment-wizard-step="2"
+                            aria-disabled="true">
+                        <span class="treatment-wizard-step__number">2</span>
+                        <span>
+                            <strong>Назначение</strong>
+                            <small>Инструкция пациенту</small>
+                        </span>
+                    </button>
+                </div>
+            `;
+    
+            prescriptionContent.insertBefore(master, prescriptionForm);
+    
+            const assignmentPane = document.createElement('div');
+            assignmentPane.id = 'treatmentWizardAssignmentPane';
+            assignmentPane.className =
+                'treatment-wizard-assignment-pane mc-modal-ui mc-modal-ui--teal';
+            assignmentPane.innerHTML = `
+                <div class="px-4 pt-4">
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-check2-circle me-1"></i>
+                        <strong>Шаг 1 завершён.</strong>
+                        Рецепт сохранён. Теперь обязательно оформите назначение пациенту.
+                    </div>
+                </div>
+    
+                <div id="treatmentWizardAssignmentHost"></div>
+    
+                <div class="treatment-wizard-assignment-footer">
+                    <button type="button"
+                            class="btn btn-light"
+                            data-treatment-wizard-back>
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Назад к рецепту
+                    </button>
+    
+                    <div class="ms-auto small text-muted">
+                        После сохранения назначения мастер будет завершён.
+                    </div>
+                </div>
+            `;
+            prescriptionContent.appendChild(assignmentPane);
+    
+            const step1Button = master.querySelector('[data-treatment-wizard-step="1"]');
+            const step2Button = master.querySelector('[data-treatment-wizard-step="2"]');
+            const backButton = assignmentPane.querySelector('[data-treatment-wizard-back]');
+            const assignmentHost = assignmentPane.querySelector('#treatmentWizardAssignmentHost');
+            const prescriptionSubmit = document.getElementById('prescriptionSubmitButton');
+            const alertBox = document.getElementById('prescription_form_alert');
+    
+            let prescriptionSaved = false;
+            let prescriptionSaving = false;
+    
+            const setAlert = (type, html) => {
+                if (!alertBox) return;
+                alertBox.className = `alert alert-${type}`;
+                alertBox.innerHTML = html;
+            };
+    
+            const clearAlert = () => {
+                if (!alertBox) return;
+                alertBox.className = 'alert alert-danger d-none';
+                alertBox.innerHTML = '';
+            };
+    
+            const dispatchBootstrapLifecycle = (element, name) => {
+                try {
+                    element?.dispatchEvent(new CustomEvent(name, {
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+                } catch (_) {}
+    
+                if (window.jQuery && element) {
+                    try {
+                        window.jQuery(element).trigger(name);
+                    } catch (_) {}
+                }
+            };
+    
+            const mountAssignment = () => {
+                if (!assignmentModal || !assignmentDialog || !assignmentHost) {
+                    setAlert(
+                        'danger',
+                        '<strong>Не удалось открыть шаг 2.</strong> ' +
+                        'На странице отсутствует форма назначения.'
+                    );
+                    return false;
+                }
+    
+                dispatchBootstrapLifecycle(assignmentModal, 'show.bs.modal');
+    
+                if (!assignmentHost.contains(assignmentDialog)) {
+                    assignmentHost.appendChild(assignmentDialog);
+                }
+    
+                assignmentDialog.style.setProperty('width', '100%', 'important');
+                assignmentDialog.style.setProperty('max-width', 'none', 'important');
+                assignmentDialog.style.setProperty('margin', '0', 'important');
+    
+                dispatchBootstrapLifecycle(assignmentModal, 'shown.bs.modal');
+                return true;
+            };
+    
+            const unmountAssignment = () => {
+                if (
+                    assignmentModal &&
+                    assignmentDialog &&
+                    !assignmentModal.contains(assignmentDialog)
+                ) {
+                    dispatchBootstrapLifecycle(assignmentModal, 'hide.bs.modal');
+                    assignmentModal.appendChild(assignmentDialog);
+                    dispatchBootstrapLifecycle(assignmentModal, 'hidden.bs.modal');
+                }
+            };
+    
+            const setStep = (step) => {
+                if (step === 2 && !prescriptionSaved) {
+                    setAlert(
+                        'warning',
+                        '<strong>Сначала завершите шаг 1.</strong> ' +
+                        'Рецепт необходимо сохранить перед оформлением назначения.'
+                    );
+                    prescriptionForm.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    return;
+                }
+    
+                if (step === 2 && !mountAssignment()) {
+                    return;
+                }
+    
+                const second = step === 2;
+                prescriptionModal.classList.toggle('is-treatment-step-2', second);
+    
+                step1Button?.classList.toggle('is-active', !second);
+                step2Button?.classList.toggle('is-active', second);
+    
+                if (!second) {
+                    clearAlert();
+                }
+            };
+    
+            step1Button?.addEventListener('click', () => setStep(1));
+            step2Button?.addEventListener('click', () => setStep(2));
+            backButton?.addEventListener('click', () => setStep(1));
+    
+            // После сохранения любое изменение рецепта снова делает шаг 1 незавершённым.
+            const markPrescriptionDirty = () => {
+                if (!prescriptionSaved) return;
+                prescriptionSaved = false;
+                step2Button?.classList.add('is-disabled');
+                step2Button?.setAttribute('aria-disabled', 'true');
+            };
+    
+            prescriptionForm.addEventListener('input', markPrescriptionDirty);
+            prescriptionForm.addEventListener('change', markPrescriptionDirty);
+    
+            if (prescriptionSubmit) {
+                prescriptionSubmit.innerHTML =
+                    '<i class="bi bi-check2-circle me-1"></i> Сохранить рецепт и перейти к назначению';
+            }
+    
+            /*
+             * ВАЖНО:
+             * Мы не переносим prescriptionModal и не подменяем его.
+             * Поэтому вся штатная логика medical_card.js (Select2, поиск препарата,
+             * подбор МНН, форма/дозировка/количество) работает на родной модалке.
+             *
+             * Перехватываем только стандартную кнопку сохранения рецепта.
+             * Остальные submit-кнопки (например, льготный рецепт) не затрагиваются.
+             */
+            prescriptionForm.addEventListener('submit', (event) => {
+                const submitter = event.submitter;
+    
+                if (!submitter || submitter.id !== 'prescriptionSubmitButton') {
+                    return;
+                }
+    
+                event.preventDefault();
+    
+                if (prescriptionSaving) {
+                    return;
+                }
+    
+                // Даём ранее зарегистрированным обработчикам закончить синхронизацию
+                // hidden-полей (usage_instructions и т.п.), затем отправляем форму.
+                queueMicrotask(async () => {
+                    if (!prescriptionForm.checkValidity()) {
+                        prescriptionForm.reportValidity();
+                        return;
+                    }
+    
+                    prescriptionSaving = true;
+                    prescriptionForm.classList.add('treatment-wizard-saving');
+                    clearAlert();
+    
+                    const oldButtonHtml = prescriptionSubmit.innerHTML;
+                    prescriptionSubmit.disabled = true;
+                    prescriptionSubmit.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-1"></span> Сохраняем рецепт…';
+    
+                    try {
+                        const response = await fetch(prescriptionForm.action, {
+                            method: (prescriptionForm.method || 'POST').toUpperCase(),
+                            body: new FormData(prescriptionForm),
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            credentials: 'same-origin',
+                            redirect: 'manual',
+                        });
+    
+                        if (response.status === 422) {
+                            let payload = {};
+                            try {
+                                payload = await response.json();
+                            } catch (_) {}
+    
+                            const errors = payload?.errors || {};
+                            const messages = Object.values(errors)
+                                .flat()
+                                .map((message) => `<li>${String(message)}</li>`)
+                                .join('');
+    
+                            setAlert(
+                                'danger',
+                                '<strong>Рецепт не сохранён.</strong>' +
+                                (messages
+                                    ? `<ul class="mb-0 mt-2">${messages}</ul>`
+                                    : ' Проверьте заполненные поля.')
+                            );
+                            return;
+                        }
+    
+                        if (response.status === 419 || response.status === 401 || response.status === 403) {
+                            setAlert(
+                                'danger',
+                                '<strong>Не удалось сохранить рецепт.</strong> ' +
+                                'Сессия или права доступа изменились. Обновите страницу и повторите.'
+                            );
+                            return;
+                        }
+    
+                        /*
+                         * Laravel при успешном store обычно отвечает redirect.
+                         * При fetch(..., redirect:"manual") браузер может вернуть
+                         * status 0 / opaqueredirect. Это считаем успешным сохранением.
+                         */
+                        const success =
+                            response.status === 0 ||
+                            (response.status >= 200 && response.status < 400);
+    
+                        if (!success) {
+                            setAlert(
+                                'danger',
+                                `<strong>Рецепт не сохранён.</strong> Сервер вернул HTTP ${response.status}.`
+                            );
+                            return;
+                        }
+    
+                        prescriptionSaved = true;
+                        step2Button?.classList.remove('is-disabled');
+                        step2Button?.setAttribute('aria-disabled', 'false');
+    
+                        setAlert(
+                            'success',
+                            '<i class="bi bi-check2-circle me-1"></i>' +
+                            '<strong>Рецепт сохранён.</strong> Переходим к обязательному назначению.'
+                        );
+    
+                        setStep(2);
+                    } catch (error) {
+                        setAlert(
+                            'danger',
+                            '<strong>Не удалось сохранить рецепт.</strong> ' +
+                            'Проверьте соединение и повторите попытку.'
+                        );
+                        console.error('Treatment wizard prescription save error:', error);
+                    } finally {
+                        prescriptionSaving = false;
+                        prescriptionForm.classList.remove('treatment-wizard-saving');
+                        prescriptionSubmit.disabled = false;
+                        prescriptionSubmit.innerHTML = oldButtonHtml;
+                    }
+                });
+            });
+    
+            prescriptionModal.addEventListener('show.bs.modal', () => {
+                prescriptionSaved = false;
+                step2Button?.classList.add('is-disabled');
+                step2Button?.setAttribute('aria-disabled', 'true');
+                prescriptionModal.classList.remove('is-treatment-step-2');
+                step1Button?.classList.add('is-active');
+                step2Button?.classList.remove('is-active');
+                clearAlert();
+            });
+    
+            prescriptionModal.addEventListener('hidden.bs.modal', () => {
+                unmountAssignment();
+                prescriptionModal.classList.remove('is-treatment-step-2');
+                prescriptionSaved = false;
+            });
+        };
+    
+        // Vite/module-скрипты успевают зарегистрировать штатную логику первыми.
+        const scheduleBoot = () => window.setTimeout(boot, 0);
+    
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', scheduleBoot, {once: true});
+        } else {
+            scheduleBoot();
+        }
+    })();
+    </script>
+    <style id="patient-medication-tab-v6-ui">
+        #pane-presc {
+            --med-tab-border: #dfe8ef;
+            --med-tab-muted: #6b7b8c;
+            --med-tab-soft-primary: rgba(var(--bs-primary-rgb), .07);
+            --med-tab-shadow: 0 10px 30px rgba(20, 52, 71, .055);
+        }
+
+        #pane-presc > .medication-tab-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            padding: 1.35rem 1.45rem;
+            margin-bottom: 1.15rem;
+            border: 1px solid rgba(var(--bs-primary-rgb), .16);
+            border-radius: 1rem;
+            background:
+                radial-gradient(circle at 0 0, rgba(var(--bs-primary-rgb), .10), transparent 42%),
+                linear-gradient(135deg, #ffffff 0%, #f8fbfd 100%);
+            box-shadow: var(--med-tab-shadow);
+        }
+
+        .medication-tab-hero__main {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .medication-tab-hero__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 3.25rem;
+            width: 3.25rem;
+            height: 3.25rem;
+            border-radius: .9rem;
+            background: var(--med-tab-soft-primary);
+            color: var(--bs-primary);
+            font-size: 1.45rem;
+        }
+
+        .medication-tab-hero__eyebrow {
+            margin-bottom: .15rem;
+            color: var(--bs-primary);
+            font-size: .76rem;
+            font-weight: 800;
+            letter-spacing: .055em;
+            text-transform: uppercase;
+        }
+
+        .medication-tab-hero__title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1f3342;
+        }
+
+        .medication-tab-hero__subtitle {
+            max-width: 760px;
+            margin-top: .35rem;
+            color: var(--med-tab-muted);
+            line-height: 1.45;
+        }
+
+        .medication-tab-hero__steps {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            margin-top: .8rem;
+            flex-wrap: wrap;
+        }
+
+        .medication-tab-step-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .42rem;
+            padding: .38rem .62rem;
+            border: 1px solid var(--med-tab-border);
+            border-radius: 999px;
+            background: #fff;
+            color: #405565;
+            font-size: .79rem;
+            font-weight: 650;
+        }
+
+        .medication-tab-step-chip > span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.3rem;
+            height: 1.3rem;
+            border-radius: 50%;
+            background: var(--bs-primary);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 800;
+        }
+
+        .medication-tab-hero__arrow {
+            color: #94a6b4;
+            font-size: .85rem;
+        }
+
+        .medication-tab-hero__action {
+            flex: 0 0 auto;
+            text-align: center;
+        }
+
+        .medication-tab-primary-action {
+            min-width: 205px;
+            min-height: 42px;
+            font-weight: 700;
+            box-shadow: 0 7px 18px rgba(var(--bs-primary-rgb), .17);
+        }
+
+        .medication-tab-hero__action-hint {
+            margin-top: .38rem;
+            color: var(--med-tab-muted);
+            font-size: .72rem;
+        }
+
+        .medication-tab-section {
+            margin-bottom: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--med-tab-border);
+            border-radius: 1rem;
+            background: #fff;
+            box-shadow: var(--med-tab-shadow);
+        }
+
+        .medication-tab-section__head {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            padding: .95rem 1.1rem;
+            border-bottom: 1px solid #edf2f5;
+            background: linear-gradient(180deg, #fff 0%, #fbfdfe 100%);
+        }
+
+        .medication-tab-section__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 2.35rem;
+            width: 2.35rem;
+            height: 2.35rem;
+            border-radius: .7rem;
+            background: var(--med-tab-soft-primary);
+            color: var(--bs-primary);
+            font-size: 1rem;
+        }
+
+        .medication-tab-section__title {
+            margin: 0;
+            color: #243846;
+            font-size: .98rem;
+            font-weight: 800;
+        }
+
+        .medication-tab-section__subtitle {
+            margin-top: .12rem;
+            color: var(--med-tab-muted);
+            font-size: .78rem;
+        }
+
+        .medication-tab-section__body {
+            padding: 1rem;
+        }
+
+        #pane-presc .medication-tab-section--assignments .medication-assignment-panel {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        #pane-presc #medicationWizardOpenButton {
+            display: none !important;
+        }
+
+        .medication-tab-section--history > .d-flex.flex-column.gap-4 {
+            padding: 1rem;
+        }
+
+        .medication-tab-empty {
+            display: flex;
+            align-items: center;
+            gap: .85rem;
+            padding: 1rem 1.1rem;
+            margin: 1rem;
+            border: 1px dashed #d8e3ea;
+            border-radius: .8rem;
+            background: #fafcfd;
+        }
+
+        .medication-tab-empty__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 2.7rem;
+            width: 2.7rem;
+            height: 2.7rem;
+            border-radius: .8rem;
+            background: #eef4f7;
+            color: #6f8797;
+            font-size: 1.2rem;
+        }
+
+        .medication-tab-empty__title {
+            color: #344b5a;
+            font-weight: 750;
+        }
+
+        .medication-tab-empty__text {
+            margin-top: .12rem;
+            color: var(--med-tab-muted);
+            font-size: .8rem;
+        }
+
+        #pane-presc > .d-flex.justify-content-between.align-items-center.mb-2 {
+            display: none !important;
+        }
+
+        @media (max-width: 991.98px) {
+            #pane-presc > .medication-tab-hero {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .medication-tab-hero__action {
+                text-align: left;
+            }
+
+            .medication-tab-primary-action {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            #pane-presc > .medication-tab-hero,
+            .medication-tab-section__body {
+                padding: .9rem;
+            }
+
+            .medication-tab-hero__icon {
+                display: none;
+            }
+
+            .medication-tab-hero__steps {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .medication-tab-hero__arrow {
+                display: none;
+            }
+        }
+    </style>
+    {{-- PATIENT_MEDICATION_TAB_V7_CLEAN_UI --}}
+    <style id="patient-medication-tab-v7-clean-ui">
+        /*
+         * V7 intentionally simplifies V6:
+         * - one CTA only;
+         * - no card-inside-card headers;
+         * - original functional partials remain untouched;
+         * - compact visual rhythm matching the rest of the medical card.
+         */
+
+        #pane-presc {
+            --med-v7-border: #dfe8ee;
+            --med-v7-text: #243847;
+            --med-v7-muted: #718291;
+            --med-v7-bg: #f8fbfd;
+            --med-v7-shadow: 0 6px 18px rgba(28, 57, 75, .045);
+        }
+
+        /* ---------- Hero: shorter and calmer ---------- */
+
+        #pane-presc > .medication-tab-hero {
+            min-height: 0;
+            padding: 1rem 1.15rem;
+            margin-bottom: .9rem;
+            border-color: var(--med-v7-border);
+            border-radius: .85rem;
+            background: #fff;
+            box-shadow: var(--med-v7-shadow);
+        }
+
+        #pane-presc .medication-tab-hero__main {
+            align-items: center;
+            gap: .8rem;
+        }
+
+        #pane-presc .medication-tab-hero__icon {
+            flex-basis: 2.65rem;
+            width: 2.65rem;
+            height: 2.65rem;
+            border-radius: .7rem;
+            font-size: 1.15rem;
+        }
+
+        #pane-presc .medication-tab-hero__eyebrow {
+            margin-bottom: .08rem;
+            font-size: .68rem;
+            letter-spacing: .045em;
+        }
+
+        #pane-presc .medication-tab-hero__title {
+            font-size: 1.08rem;
+            line-height: 1.25;
+        }
+
+        #pane-presc .medication-tab-hero__subtitle {
+            max-width: 690px;
+            margin-top: .22rem;
+            font-size: .79rem;
+            line-height: 1.35;
+        }
+
+        /*
+         * The step chips repeat the same flow shown inside the wizard.
+         * Hiding them keeps the page itself simple.
+         */
+        #pane-presc .medication-tab-hero__steps {
+            display: none !important;
+        }
+
+        #pane-presc .medication-tab-primary-action {
+            min-width: 185px;
+            min-height: 38px;
+            padding: .48rem .85rem;
+            font-size: .82rem;
+            box-shadow: none;
+        }
+
+        #pane-presc .medication-tab-hero__action-hint {
+            margin-top: .28rem;
+            font-size: .67rem;
+        }
+
+        /* ---------- There must be exactly one prescription CTA ---------- */
+
+        #pane-presc [data-bs-target="#prescriptionModal"]:not(.medication-tab-primary-action) {
+            display: none !important;
+        }
+
+        #pane-presc #medicationWizardOpenButton {
+            display: none !important;
+        }
+
+        /*
+         * V6 wrapped existing partials in new sections.
+         * Keep the wrappers only as layout containers; hide their duplicate headings.
+         */
+        #pane-presc .medication-tab-section--assignments,
+        #pane-presc .medication-tab-section--benefit {
+            overflow: visible;
+            margin-bottom: .9rem;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        #pane-presc .medication-tab-section--assignments > .medication-tab-section__head,
+        #pane-presc .medication-tab-section--benefit > .medication-tab-section__head {
+            display: none !important;
+        }
+
+        #pane-presc .medication-tab-section--assignments > .medication-tab-section__body,
+        #pane-presc .medication-tab-section--benefit > .medication-tab-section__body {
+            padding: 0;
+        }
+
+        /* ---------- Assignments: make the original partial the single card ---------- */
+
+        #pane-presc .medication-tab-section--assignments .medication-assignment-panel {
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+            border: 1px solid var(--med-v7-border) !important;
+            border-radius: .85rem !important;
+            background: #fff !important;
+            box-shadow: var(--med-v7-shadow) !important;
+        }
+
+        #pane-presc .medication-assignment-panel__head {
+            min-height: 0;
+            padding: .85rem 1rem !important;
+            border-bottom: 1px solid #edf2f5;
+            background: #fff;
+        }
+
+        #pane-presc .medication-assignment-panel__head .h5 {
+            margin-bottom: .1rem !important;
+            color: var(--med-v7-text);
+            font-size: .95rem !important;
+            font-weight: 750;
+        }
+
+        #pane-presc .medication-assignment-panel__head .small,
+        #pane-presc .medication-assignment-panel__head .text-muted {
+            color: var(--med-v7-muted) !important;
+            font-size: .75rem;
+        }
+
+        /*
+         * Reduce empty-state vertical space inside assignments.
+         * Do not hide its message.
+         */
+        #pane-presc .medication-assignment-panel .alert,
+        #pane-presc .medication-assignment-panel [class*="empty"] {
+            margin: .75rem 1rem 1rem;
+        }
+
+        /* ---------- Benefit partial: no outer duplicate card ---------- */
+
+        #pane-presc .medication-tab-section--benefit > .medication-tab-section__body {
+            background: transparent;
+        }
+
+        /*
+         * Normalize the first visual card returned by the benefit partial.
+         * This is intentionally generic because the partial keeps its own functional classes.
+         */
+        #pane-presc .medication-tab-section--benefit > .medication-tab-section__body > :first-child {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            border-radius: .85rem !important;
+            box-shadow: var(--med-v7-shadow);
+        }
+
+        /* ---------- History stays as the third single card ---------- */
+
+        #pane-presc .medication-tab-section--history {
+            margin-bottom: .9rem;
+            border: 1px solid var(--med-v7-border);
+            border-radius: .85rem;
+            background: #fff;
+            box-shadow: var(--med-v7-shadow);
+        }
+
+        #pane-presc .medication-tab-section--history > .medication-tab-section__head {
+            padding: .85rem 1rem;
+            background: #fff;
+        }
+
+        #pane-presc .medication-tab-section--history .medication-tab-section__icon {
+            flex-basis: 2rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: .55rem;
+            font-size: .9rem;
+        }
+
+        #pane-presc .medication-tab-section__title {
+            font-size: .92rem;
+        }
+
+        #pane-presc .medication-tab-section__subtitle {
+            font-size: .73rem;
+        }
+
+        #pane-presc .medication-tab-empty {
+            margin: .75rem 1rem 1rem;
+            padding: .8rem .9rem;
+            border-radius: .7rem;
+            background: var(--med-v7-bg);
+        }
+
+        #pane-presc .medication-tab-empty__icon {
+            flex-basis: 2.25rem;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: .6rem;
+            font-size: 1rem;
+        }
+
+        #pane-presc .medication-tab-empty__title {
+            font-size: .82rem;
+        }
+
+        #pane-presc .medication-tab-empty__text {
+            font-size: .73rem;
+        }
+
+        /*
+         * Safety net for the pre-V6 technical header/button.
+         */
+        #pane-presc > .d-flex.justify-content-between.align-items-center.mb-2 {
+            display: none !important;
+        }
+
+        /*
+         * If an orphan prescription button survived between hero and the first section,
+         * hide it without affecting other actions in this tab.
+         */
+        #pane-presc > button[data-bs-target="#prescriptionModal"],
+        #pane-presc > a[data-bs-target="#prescriptionModal"] {
+            display: none !important;
+        }
+
+        @media (max-width: 991.98px) {
+            #pane-presc > .medication-tab-hero {
+                align-items: stretch;
+                gap: .85rem;
+            }
+
+            #pane-presc .medication-tab-hero__action {
+                text-align: left;
+            }
+
+            #pane-presc .medication-tab-primary-action {
+                width: 100%;
+            }
+
+            #pane-presc .medication-tab-hero__action-hint {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            #pane-presc > .medication-tab-hero {
+                padding: .85rem;
+            }
+
+            #pane-presc .medication-tab-hero__icon {
+                display: none;
+            }
+        }
+    </style>
+    {{-- PATIENT_TREATMENT_WIZARD_V8_MEDGEMMA --}}
+    <style id="patient-treatment-wizard-v8-medgemma-style">
+        #prescriptionModal.is-treatment-step-2
+        > .modal-dialog
+        > .modal-content
+        > #patientPrescriptionForm {
+            display: none !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost .modal-header {
+            display: none !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost > .modal-dialog {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost > .modal-dialog > .modal-content {
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost .modal-body {
+            padding: 1rem 1rem 1.1rem !important;
+            background: #f7fafc;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentPane > .px-4.pt-4,
+        #prescriptionModal.is-treatment-step-2
+        .treatment-wizard-assignment-footer {
+            display: none !important;
+        }
+
+        .medgemma-assignment-toolbar {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: center;
+            padding: .9rem 1rem;
+            margin-bottom: .9rem;
+            border: 1px solid #d9e6eb;
+            border-radius: .8rem;
+            background: #fff;
+            box-shadow: 0 5px 16px rgba(28, 57, 75, .04);
+        }
+
+        .medgemma-assignment-toolbar__eyebrow {
+            color: #0f8c82;
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .055em;
+            text-transform: uppercase;
+        }
+
+        .medgemma-assignment-toolbar__title {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .1rem;
+            color: #203542;
+            font-size: .98rem;
+            font-weight: 800;
+        }
+
+        .medgemma-assignment-toolbar__drug {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            max-width: 100%;
+            padding: .32rem .55rem;
+            border-radius: 999px;
+            background: #eef8f6;
+            color: #0c736b;
+            font-size: .75rem;
+            font-weight: 750;
+        }
+
+        .medgemma-assignment-toolbar__hint {
+            margin-top: .25rem;
+            color: #748591;
+            font-size: .72rem;
+            line-height: 1.35;
+        }
+
+        .medgemma-assignment-toolbar__actions {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+        }
+
+        .medgemma-assignment-toolbar__status {
+            min-height: 1rem;
+            margin-top: .35rem;
+            color: #6f818e;
+            font-size: .7rem;
+            text-align: right;
+        }
+
+        .medgemma-assignment-btn {
+            white-space: nowrap;
+            font-weight: 700;
+        }
+
+        #medicationDrugSearch.medication-drug-locked {
+            pointer-events: none;
+            background: #f1f5f7 !important;
+            color: #2e4552 !important;
+            cursor: not-allowed;
+            padding-right: 2.7rem;
+        }
+
+        .medication-drug-lock-wrap {
+            position: relative;
+        }
+
+        .medication-drug-lock-badge {
+            position: absolute;
+            top: 50%;
+            right: .7rem;
+            z-index: 3;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-50%);
+            color: #0f8c82;
+            pointer-events: none;
+        }
+
+        #medicationDrugSelected.medication-drug-selected--locked {
+            color: #0c736b;
+            font-weight: 700;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost textarea.form-control {
+            min-height: 74px;
+            resize: vertical;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost [name="doctor_instruction"] {
+            min-height: 110px;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost [name="overdose_actions"] {
+            border-color: #efc7c7;
+            background: #fffafa;
+        }
+
+        @media (max-width: 767.98px) {
+            .medgemma-assignment-toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .medgemma-assignment-btn {
+                width: 100%;
+            }
+
+            .medgemma-assignment-toolbar__status {
+                text-align: left;
+            }
+        }
+    </style>
+
+    <script>
+    (() => {
+        'use strict';
+
+        const bootMedicationAssignmentV8 = () => {
+            const prescriptionModal = document.getElementById('prescriptionModal');
+            const prescriptionForm = document.getElementById('patientPrescriptionForm');
+            const assignmentModal = document.getElementById('medicationAssignmentModal');
+
+            if (!prescriptionModal || !prescriptionForm || !assignmentModal) {
+                return;
+            }
+
+            if (prescriptionModal.dataset.treatmentWizardV8 === '1') {
+                return;
+            }
+            prescriptionModal.dataset.treatmentWizardV8 = '1';
+
+            let referenceCache = null;
+            let lastDrugId = null;
+
+            const rawFieldValue = (selector) => {
+                const el = document.querySelector(selector);
+                return el ? String(el.value || '').trim() : '';
+            };
+
+            const displayFieldValue = (selector) => {
+                const el = document.querySelector(selector);
+                if (!el) return '';
+
+                if (el.tagName === 'SELECT') {
+                    const option = el.selectedOptions?.[0];
+                    return String(option?.textContent || el.value || '').trim();
+                }
+
+                return String(el.value || '').trim();
+            };
+
+            const snapshot = () => {
+                const drugSelect = document.getElementById('drug_id_modal');
+                const selectedOption = drugSelect?.selectedOptions?.[0];
+
+                return {
+                    patient_id: rawFieldValue('#patientPrescriptionForm [name="patient_id"]'),
+                    drug_id: String(drugSelect?.value || '').trim(),
+                    drug_name: String(selectedOption?.textContent || '').trim(),
+                    dosage: displayFieldValue('#dosage_modal'),
+                    regimen:
+                        rawFieldValue('#usage_instructions__')
+                        || [
+                            rawFieldValue('#taking_drug_modal')
+                                ? 'По ' + rawFieldValue('#taking_drug_modal')
+                                : '',
+                            rawFieldValue('#taking_count_modal')
+                                ? rawFieldValue('#taking_count_modal') + ' раз(а) в день'
+                                : '',
+                        ].filter(Boolean).join(', '),
+                    diagnosis_code: rawFieldValue('#diagnosis_code'),
+                    birth_at: rawFieldValue('#birth_at__'),
+                };
+            };
+
+            const assignmentField = (name) =>
+                assignmentModal.querySelector(`[name="${CSS.escape(name)}"]`);
+
+            const setField = (name, value) => {
+                const el = assignmentField(name);
+                if (!el || value == null) return;
+
+                el.value = String(value);
+                el.dispatchEvent(new Event('input', {bubbles: true}));
+                el.dispatchEvent(new Event('change', {bubbles: true}));
+            };
+
+            const lockDrugFromPrescription = (data) => {
+                const drugIdInput = document.getElementById('medicationDrugId');
+                const searchInput = document.getElementById('medicationDrugSearch');
+                const results = document.getElementById('medicationDrugResults');
+                const selected = document.getElementById('medicationDrugSelected');
+
+                if (drugIdInput) {
+                    drugIdInput.value = data.drug_id;
+                    drugIdInput.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+
+                if (searchInput) {
+                    searchInput.value = data.drug_name;
+                    searchInput.readOnly = true;
+                    searchInput.setAttribute('aria-readonly', 'true');
+                    searchInput.classList.add('medication-drug-locked');
+
+                    if (!searchInput.parentElement?.classList.contains('medication-drug-lock-wrap')) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'medication-drug-lock-wrap';
+                        searchInput.parentNode.insertBefore(wrap, searchInput);
+                        wrap.appendChild(searchInput);
+
+                        const badge = document.createElement('span');
+                        badge.className = 'medication-drug-lock-badge';
+                        badge.title = 'Препарат перенесён из рецепта и не может быть изменён';
+                        badge.innerHTML = '<i class="bi bi-lock-fill"></i>';
+                        wrap.appendChild(badge);
+                    }
+                }
+
+                if (results) {
+                    results.hidden = true;
+                    results.replaceChildren();
+                }
+
+                if (selected) {
+                    selected.textContent = 'Перенесён из рецепта · ' + data.drug_name;
+                    selected.classList.add('medication-drug-selected--locked');
+                }
+
+                setField('dosage', data.dosage);
+                setField('regimen', data.regimen);
+
+                const startsAt = assignmentField('starts_at');
+                if (startsAt && !startsAt.value) {
+                    const now = new Date();
+                    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+                    startsAt.value = local.toISOString().slice(0, 10);
+                    startsAt.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+            };
+
+            const fetchReference = async (data) => {
+                if (!data.drug_id) return null;
+                if (referenceCache && lastDrugId === data.drug_id) return referenceCache;
+
+                const template = assignmentModal.dataset.drugReferenceUrl;
+                if (!template) return null;
+
+                const url = template.replace('__DRUG__', encodeURIComponent(data.drug_id));
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                const payload = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(
+                        payload.message || 'Не удалось загрузить справочник препарата.'
+                    );
+                }
+
+                referenceCache = payload;
+                lastDrugId = data.drug_id;
+                return payload;
+            };
+
+            const ensureToolbar = () => {
+                const body = assignmentModal.querySelector('.modal-body');
+                if (!body) return null;
+
+                let toolbar = document.getElementById('medgemmaAssignmentToolbar');
+                if (toolbar) return toolbar;
+
+                toolbar = document.createElement('div');
+                toolbar.id = 'medgemmaAssignmentToolbar';
+                toolbar.className = 'medgemma-assignment-toolbar';
+                toolbar.innerHTML = `
+                    <div>
+                        <div class="medgemma-assignment-toolbar__eyebrow">
+                            Шаг 2 · инструкция пациенту
+                        </div>
+
+                        <div class="medgemma-assignment-toolbar__title">
+                            <span>Назначение</span>
+                            <span class="medgemma-assignment-toolbar__drug"
+                                  id="medgemmaAssignmentDrug">
+                                <i class="bi bi-lock-fill"></i>
+                                <span>Препарат из рецепта</span>
+                            </span>
+                        </div>
+
+                        <div class="medgemma-assignment-toolbar__hint">
+                            Препарат, дозировка и схема берутся из выписанного рецепта.
+                            MedGemma заполняет текст инструкции; врач проверяет черновик перед сохранением.
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="medgemma-assignment-toolbar__actions">
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm medgemma-assignment-btn"
+                                    id="medgemmaFillAssignment">
+                                <i class="bi bi-stars me-1"></i>
+                                Заполнить через MedGemma
+                            </button>
+                        </div>
+
+                        <div class="medgemma-assignment-toolbar__status"
+                             id="medgemmaAssignmentStatus"></div>
+                    </div>
+                `;
+
+                body.insertBefore(toolbar, body.firstChild);
+                return toolbar;
+            };
+
+            const setStatus = (message, kind = 'muted') => {
+                const status = document.getElementById('medgemmaAssignmentStatus');
+                if (!status) return;
+
+                status.textContent = message || '';
+                status.className = 'medgemma-assignment-toolbar__status';
+
+                if (kind === 'success') status.classList.add('text-success');
+                if (kind === 'danger') status.classList.add('text-danger');
+                if (kind === 'warning') status.classList.add('text-warning');
+            };
+
+            const prepareStep2 = async () => {
+                if (!prescriptionModal.classList.contains('is-treatment-step-2')) {
+                    return;
+                }
+
+                ensureToolbar();
+
+                const data = snapshot();
+
+                if (!data.drug_id || !data.drug_name) {
+                    setStatus('Не удалось определить препарат из рецепта.', 'danger');
+                    return;
+                }
+
+                lockDrugFromPrescription(data);
+
+                const drugLabel = document.querySelector(
+                    '#medgemmaAssignmentDrug span:last-child'
+                );
+                if (drugLabel) drugLabel.textContent = data.drug_name;
+
+                try {
+                    await fetchReference(data);
+                } catch (error) {
+                    setStatus(error.message, 'warning');
+                }
+            };
+
+            const observer = new MutationObserver(() => {
+                if (prescriptionModal.classList.contains('is-treatment-step-2')) {
+                    window.setTimeout(prepareStep2, 0);
+                }
+            });
+
+            observer.observe(prescriptionModal, {
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+
+            document.addEventListener('click', async (event) => {
+                const button = event.target.closest('#medgemmaFillAssignment');
+                if (!button) return;
+
+                const data = snapshot();
+
+                if (!data.patient_id || !data.drug_id || !data.drug_name) {
+                    setStatus(
+                        'Нет данных рецепта: сначала завершите шаг 1.',
+                        'danger'
+                    );
+                    return;
+                }
+
+                const originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-1"></span>' +
+                    'MedGemma заполняет…';
+
+                setStatus('Формируем черновик инструкции…');
+
+                try {
+                    const reference = await fetchReference(data);
+
+                    const response = await fetch(
+                        `/doctors/patients/${encodeURIComponent(data.patient_id)}` +
+                        '/medication-assignments/medgemma',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN':
+                                    document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({
+                                patient_id: Number(data.patient_id),
+                                drug_id: Number(data.drug_id),
+                                drug_name: data.drug_name,
+                                dosage: data.dosage,
+                                regimen: data.regimen,
+                                diagnosis_code: data.diagnosis_code,
+                                birth_at: data.birth_at,
+                                reference: reference || {},
+                            }),
+                        }
+                    );
+
+                    const payload = await response.json().catch(() => ({}));
+
+                    if (!response.ok) {
+                        throw new Error(
+                            payload.message
+                            || 'MedGemma не смогла сформировать инструкцию.'
+                        );
+                    }
+
+                    const fields = payload.fields || {};
+
+                    [
+                        'doctor_instruction',
+                        'indication',
+                        'contraindications',
+                        'adverse_reactions',
+                        'missed_dose',
+                        'overdose_actions',
+                        'urgent_symptoms',
+                    ].forEach((name) => {
+                        if (Object.prototype.hasOwnProperty.call(fields, name)) {
+                            setField(name, fields[name]);
+                        }
+                    });
+
+                    // Никогда не принимаем от модели препарат, дозировку и режим.
+                    lockDrugFromPrescription(data);
+
+                    setStatus(
+                        `Черновик заполнен через ${payload.model || 'MedGemma'}. ` +
+                        'Проверьте перед сохранением.',
+                        'success'
+                    );
+                } catch (error) {
+                    console.error('MedicationAssignment MedGemma error:', error);
+                    setStatus(error.message || 'Ошибка MedGemma.', 'danger');
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalHtml;
+                }
+            });
+
+            window.setTimeout(prepareStep2, 0);
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => window.setTimeout(bootMedicationAssignmentV8, 0),
+                {once: true}
+            );
+        } else {
+            window.setTimeout(bootMedicationAssignmentV8, 0);
+        }
+    })();
+    </script>
+    {{-- PATIENT_TREATMENT_WIZARD_V9_ASSIGNMENT_ACTIONS --}}
+    <style id="patient-treatment-wizard-v9-assignment-actions">
+        #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentPane {
+            position: relative;
+            background: #f6f9fb;
+        }
+
+        #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentHost {
+            width: 100%;
+            min-width: 0;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost > .modal-dialog {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost > .modal-dialog > .modal-content {
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost .modal-header {
+            display: none !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost .modal-body {
+            padding: .9rem 1rem 1rem !important;
+            overflow: visible !important;
+            max-height: none !important;
+            background: #f6f9fb;
+        }
+
+        /*
+         * Старая footer формы остаётся функционально в DOM,
+         * но визуально заменяется единым footer мастера V9.
+         */
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost .modal-footer {
+            display: none !important;
+        }
+
+        .medication-v9-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .85rem 1rem;
+            margin: .9rem 1rem 0;
+            border: 1px solid #d9e6eb;
+            border-radius: .8rem;
+            background: #fff;
+            box-shadow: 0 5px 16px rgba(28, 57, 75, .04);
+        }
+
+        .medication-v9-toolbar__main {
+            min-width: 0;
+        }
+
+        .medication-v9-toolbar__eyebrow {
+            color: #0f8c82;
+            font-size: .66rem;
+            font-weight: 800;
+            letter-spacing: .055em;
+            text-transform: uppercase;
+        }
+
+        .medication-v9-toolbar__title {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .45rem;
+            margin-top: .12rem;
+            color: #203542;
+            font-size: .96rem;
+            font-weight: 800;
+        }
+
+        .medication-v9-drug {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            max-width: 100%;
+            padding: .3rem .55rem;
+            border-radius: 999px;
+            background: #eaf7f5;
+            color: #08746c;
+            font-size: .74rem;
+            font-weight: 750;
+        }
+
+        .medication-v9-toolbar__hint {
+            margin-top: .25rem;
+            color: #748591;
+            font-size: .72rem;
+            line-height: 1.35;
+        }
+
+        .medication-v9-toolbar__side {
+            flex: 0 0 auto;
+            text-align: right;
+        }
+
+        .medication-v9-toolbar__status {
+            max-width: 310px;
+            min-height: 1rem;
+            margin-top: .3rem;
+            color: #71818c;
+            font-size: .68rem;
+            line-height: 1.3;
+        }
+
+        #medicationV9MedGemmaButton {
+            white-space: nowrap;
+            font-weight: 700;
+        }
+
+        .medication-v9-footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: .8rem 1rem;
+            border-top: 1px solid #dfe8ed;
+            background: rgba(255, 255, 255, .97);
+            box-shadow: 0 -8px 20px rgba(27, 55, 72, .065);
+            backdrop-filter: blur(8px);
+        }
+
+        .medication-v9-footer__hint {
+            margin-right: auto;
+            color: #748591;
+            font-size: .72rem;
+        }
+
+        #medicationV9SaveButton {
+            min-width: 175px;
+            font-weight: 750;
+        }
+
+        #medicationDrugSearch.medication-v9-drug-locked {
+            pointer-events: none !important;
+            background: #f1f5f7 !important;
+            color: #29414e !important;
+            cursor: not-allowed !important;
+            padding-right: 2.6rem !important;
+        }
+
+        .medication-v9-drug-wrap {
+            position: relative;
+        }
+
+        .medication-v9-lock {
+            position: absolute;
+            top: 50%;
+            right: .75rem;
+            z-index: 5;
+            transform: translateY(-50%);
+            color: #0f8c82;
+            pointer-events: none;
+        }
+
+        #medicationDrugSelected.medication-v9-selected {
+            color: #08746c !important;
+            font-weight: 700;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost textarea.form-control {
+            min-height: 72px;
+            resize: vertical;
+        }
+
+        @media (max-width: 767.98px) {
+            .medication-v9-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .medication-v9-toolbar__side {
+                text-align: left;
+            }
+
+            #medicationV9MedGemmaButton,
+            #medicationV9SaveButton {
+                width: 100%;
+            }
+
+            .medication-v9-footer {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .medication-v9-footer__hint {
+                margin-right: 0;
+            }
+        }
+    </style>
+
+    <script>
+    (() => {
+        'use strict';
+
+        const bootV9 = () => {
+            const prescriptionModal = document.getElementById('prescriptionModal');
+            const prescriptionForm = document.getElementById('patientPrescriptionForm');
+            const assignmentShell = document.getElementById('medicationAssignmentModal');
+            const pane = document.getElementById('treatmentWizardAssignmentPane');
+            const host = document.getElementById('treatmentWizardAssignmentHost');
+
+            if (!prescriptionModal || !prescriptionForm || !pane || !host) {
+                return;
+            }
+
+            if (prescriptionModal.dataset.treatmentWizardV9 === '1') {
+                return;
+            }
+            prescriptionModal.dataset.treatmentWizardV9 = '1';
+
+            let lastReference = null;
+            let lastReferenceDrugId = null;
+
+            const currentDialog = () =>
+                host.querySelector(':scope > .modal-dialog')
+                || assignmentShell?.querySelector('.modal-dialog')
+                || null;
+
+            const currentForm = () => {
+                const dialog = currentDialog();
+                if (!dialog) return null;
+
+                const content = dialog.querySelector(':scope > .modal-content');
+
+                if (content?.tagName === 'FORM') {
+                    return content;
+                }
+
+                return dialog.querySelector('form');
+            };
+
+            const getPrescriptionSnapshot = () => {
+                const drugSelect = document.getElementById('drug_id_modal');
+                const selectedOption = drugSelect?.selectedOptions?.[0];
+
+                const raw = (selector) =>
+                    String(document.querySelector(selector)?.value || '').trim();
+
+                const display = (selector) => {
+                    const el = document.querySelector(selector);
+                    if (!el) return '';
+
+                    if (el.tagName === 'SELECT') {
+                        return String(
+                            el.selectedOptions?.[0]?.textContent || el.value || ''
+                        ).trim();
+                    }
+
+                    return String(el.value || '').trim();
+                };
+
+                return {
+                    patient_id: raw('#patientPrescriptionForm [name="patient_id"]'),
+                    drug_id: String(drugSelect?.value || '').trim(),
+                    drug_name: String(selectedOption?.textContent || '').trim(),
+                    dosage: display('#dosage_modal'),
+                    regimen:
+                        raw('#usage_instructions__')
+                        || [
+                            raw('#taking_drug_modal')
+                                ? 'По ' + raw('#taking_drug_modal')
+                                : '',
+                            raw('#taking_count_modal')
+                                ? raw('#taking_count_modal') + ' раз(а) в день'
+                                : '',
+                        ].filter(Boolean).join(', '),
+                    diagnosis_code: raw('#diagnosis_code'),
+                    birth_at: raw('#birth_at__'),
+                };
+            };
+
+            const labelTextFor = (form, field) => {
+                if (!field) return '';
+
+                if (field.id) {
+                    const direct = form.querySelector(
+                        `label[for="${CSS.escape(field.id)}"]`
+                    );
+                    if (direct) return direct.textContent || '';
+                }
+
+                const parentLabel = field.closest('label');
+                if (parentLabel) return parentLabel.textContent || '';
+
+                const container = field.closest(
+                    '.mb-3, .mb-2, .form-group, .medication-assignment-field, .col, [class*="col-"]'
+                );
+
+                return container?.querySelector('label')?.textContent || '';
+            };
+
+            const findByRussianLabel = (form, patterns) => {
+                const fields = Array.from(
+                    form.querySelectorAll('textarea, input:not([type="hidden"]), select')
+                );
+
+                return fields.find((field) => {
+                    const label = labelTextFor(form, field)
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                        .toLowerCase();
+
+                    return patterns.some((pattern) => label.includes(pattern));
+                }) || null;
+            };
+
+            const findField = (key) => {
+                const form = currentForm();
+                if (!form) return null;
+
+                const selectorMap = {
+                    dosage: [
+                        '[name="dosage"]',
+                        '#medicationDosage',
+                    ],
+                    regimen: [
+                        '[name="regimen"]',
+                        '#medicationRegimen',
+                    ],
+                    starts_at: [
+                        '[name="starts_at"]',
+                        '#medicationStartsAt',
+                    ],
+                    doctor_instruction: [
+                        '[name="doctor_instruction"]',
+                        '#medicationDoctorInstruction',
+                        '#medicationInstructionText',
+                    ],
+                    indication: [
+                        '[name="indication"]',
+                        '#medicationIndicationText',
+                    ],
+                    contraindications: [
+                        '[name="contraindications"]',
+                        '#medicationContraindicationsText',
+                    ],
+                    adverse_reactions: [
+                        '[name="adverse_reactions"]',
+                        '[name="side_effects"]',
+                        '#medicationSideEffectsText',
+                    ],
+                    missed_dose: [
+                        '[name="missed_dose"]',
+                        '#medicationMissedDoseText',
+                    ],
+                    overdose_actions: [
+                        '[name="overdose_actions"]',
+                        '#medicationOverdoseActionsText',
+                        '#medicationOverdoseText',
+                    ],
+                    urgent_symptoms: [
+                        '[name="urgent_symptoms"]',
+                        '#medicationUrgentSymptomsText',
+                    ],
+                };
+
+                for (const selector of selectorMap[key] || []) {
+                    const field = form.querySelector(selector);
+                    if (field) return field;
+                }
+
+                const labelPatterns = {
+                    dosage: ['дозировка'],
+                    regimen: ['режим приёма', 'режим приема'],
+                    starts_at: ['начало'],
+                    doctor_instruction: [
+                        'индивидуальная инструкция врача',
+                        'инструкция врача',
+                    ],
+                    indication: ['показание'],
+                    contraindications: ['противопоказания'],
+                    adverse_reactions: [
+                        'нежелательные реакции',
+                        'побочные реакции',
+                    ],
+                    missed_dose: ['пропуске приёма', 'пропуске приема'],
+                    overdose_actions: ['передозировк'],
+                    urgent_symptoms: [
+                        'срочная связь с врачом',
+                        'срочно обратиться',
+                    ],
+                };
+
+                return findByRussianLabel(form, labelPatterns[key] || []);
+            };
+
+            const assignValue = (key, value) => {
+                if (value == null || value === '') return;
+
+                const field = findField(key);
+                if (!field) {
+                    console.warn('V9: field not found:', key);
+                    return;
+                }
+
+                field.value = String(value);
+                field.dispatchEvent(new Event('input', {bubbles: true}));
+                field.dispatchEvent(new Event('change', {bubbles: true}));
+            };
+
+            const setStatus = (message, type = 'muted') => {
+                const el = document.getElementById('medicationV9Status');
+                if (!el) return;
+
+                el.textContent = message || '';
+                el.className = 'medication-v9-toolbar__status';
+
+                if (type === 'success') el.classList.add('text-success');
+                if (type === 'danger') el.classList.add('text-danger');
+                if (type === 'warning') el.classList.add('text-warning');
+            };
+
+            const lockDrug = (snapshot) => {
+                const form = currentForm();
+                if (!form) return;
+
+                const drugIdInput =
+                    form.querySelector('#medicationDrugId')
+                    || form.querySelector('[name="drug_id"]');
+
+                const searchInput =
+                    form.querySelector('#medicationDrugSearch');
+
+                const results =
+                    form.querySelector('#medicationDrugResults');
+
+                const selected =
+                    form.querySelector('#medicationDrugSelected');
+
+                if (drugIdInput) {
+                    drugIdInput.value = snapshot.drug_id;
+                    drugIdInput.dispatchEvent(
+                        new Event('change', {bubbles: true})
+                    );
+                }
+
+                if (searchInput) {
+                    searchInput.value = snapshot.drug_name;
+                    searchInput.readOnly = true;
+                    searchInput.setAttribute('aria-readonly', 'true');
+                    searchInput.classList.add('medication-v9-drug-locked');
+
+                    if (!searchInput.parentElement?.classList.contains('medication-v9-drug-wrap')) {
+                        const wrap = document.createElement('div');
+                        wrap.className = 'medication-v9-drug-wrap';
+
+                        searchInput.parentNode.insertBefore(wrap, searchInput);
+                        wrap.appendChild(searchInput);
+
+                        const lock = document.createElement('span');
+                        lock.className = 'medication-v9-lock';
+                        lock.title = 'Препарат зафиксирован на шаге 1';
+                        lock.innerHTML = '<i class="bi bi-lock-fill"></i>';
+                        wrap.appendChild(lock);
+                    }
+                }
+
+                if (results) {
+                    results.hidden = true;
+                    results.replaceChildren();
+                }
+
+                if (selected) {
+                    selected.textContent =
+                        'Перенесён из рецепта · ' + snapshot.drug_name;
+                    selected.classList.add('medication-v9-selected');
+                }
+
+                // Эти поля — тоже часть решения врача на шаге 1.
+                assignValue('dosage', snapshot.dosage);
+                assignValue('regimen', snapshot.regimen);
+
+                const startsAt = findField('starts_at');
+                if (startsAt && !startsAt.value) {
+                    const now = new Date();
+                    const local = new Date(
+                        now.getTime() - now.getTimezoneOffset() * 60000
+                    );
+
+                    startsAt.value = local.toISOString().slice(0, 10);
+                    startsAt.dispatchEvent(
+                        new Event('change', {bubbles: true})
+                    );
+                }
+            };
+
+            const loadReference = async (snapshot) => {
+                if (!snapshot.drug_id) return {};
+
+                if (
+                    lastReference
+                    && lastReferenceDrugId === snapshot.drug_id
+                ) {
+                    return lastReference;
+                }
+
+                const template = assignmentShell?.dataset.drugReferenceUrl;
+                if (!template) return {};
+
+                const url = template.replace(
+                    '__DRUG__',
+                    encodeURIComponent(snapshot.drug_id)
+                );
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                const payload = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(
+                        payload.message
+                        || 'Не удалось загрузить справочник препарата.'
+                    );
+                }
+
+                lastReference = payload;
+                lastReferenceDrugId = snapshot.drug_id;
+                return payload;
+            };
+
+            const createToolbar = () => {
+                if (document.getElementById('medicationV9Toolbar')) {
+                    return;
+                }
+
+                const toolbar = document.createElement('div');
+                toolbar.id = 'medicationV9Toolbar';
+                toolbar.className = 'medication-v9-toolbar';
+                toolbar.innerHTML = `
+                    <div class="medication-v9-toolbar__main">
+                        <div class="medication-v9-toolbar__eyebrow">
+                            Шаг 2 · назначение пациенту
+                        </div>
+
+                        <div class="medication-v9-toolbar__title">
+                            <span>Инструкция к препарату</span>
+                            <span class="medication-v9-drug"
+                                  id="medicationV9DrugBadge">
+                                <i class="bi bi-lock-fill"></i>
+                                <span>Препарат из рецепта</span>
+                            </span>
+                        </div>
+
+                        <div class="medication-v9-toolbar__hint">
+                            Препарат, дозировка и режим приёма зафиксированы на шаге 1.
+                            MedGemma формирует черновик остальных полей; врач проверяет его перед сохранением.
+                        </div>
+                    </div>
+
+                    <div class="medication-v9-toolbar__side">
+                        <button type="button"
+                                class="btn btn-primary btn-sm"
+                                id="medicationV9MedGemmaButton">
+                            <i class="bi bi-stars me-1"></i>
+                            Заполнить через MedGemma
+                        </button>
+
+                        <div class="medication-v9-toolbar__status"
+                             id="medicationV9Status"></div>
+                    </div>
+                `;
+
+                pane.insertBefore(toolbar, host);
+            };
+
+            const createFooter = () => {
+                if (document.getElementById('medicationV9Footer')) {
+                    return;
+                }
+
+                const footer = document.createElement('div');
+                footer.id = 'medicationV9Footer';
+                footer.className = 'medication-v9-footer';
+                footer.innerHTML = `
+                    <div class="medication-v9-footer__hint">
+                        Проверьте инструкцию, противопоказания и действия при передозировке перед сохранением.
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-light"
+                            id="medicationV9BackButton">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Назад к рецепту
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-primary"
+                            id="medicationV9SaveButton">
+                        <i class="bi bi-check2-circle me-1"></i>
+                        Сохранить назначение
+                    </button>
+                `;
+
+                pane.appendChild(footer);
+
+                footer.querySelector('#medicationV9BackButton')
+                    ?.addEventListener('click', () => {
+                        prescriptionModal
+                            .querySelector('[data-treatment-wizard-step="1"]')
+                            ?.click();
+                    });
+
+                footer.querySelector('#medicationV9SaveButton')
+                    ?.addEventListener('click', () => {
+                        const form = currentForm();
+
+                        if (!form) {
+                            setStatus(
+                                'Форма назначения не найдена.',
+                                'danger'
+                            );
+                            return;
+                        }
+
+                        if (!form.checkValidity()) {
+                            form.reportValidity();
+                            return;
+                        }
+
+                        if (typeof form.requestSubmit === 'function') {
+                            form.requestSubmit();
+                        } else {
+                            form.submit();
+                        }
+                    });
+            };
+
+            const prepare = async () => {
+                if (
+                    !prescriptionModal.classList.contains(
+                        'is-treatment-step-2'
+                    )
+                ) {
+                    return;
+                }
+
+                const dialog = currentDialog();
+                const form = currentForm();
+
+                if (!dialog || !form) {
+                    window.setTimeout(prepare, 60);
+                    return;
+                }
+
+                createToolbar();
+                createFooter();
+
+                const snapshot = getPrescriptionSnapshot();
+
+                if (!snapshot.drug_id || !snapshot.drug_name) {
+                    setStatus(
+                        'Не удалось определить препарат из рецепта.',
+                        'danger'
+                    );
+                    return;
+                }
+
+                const badge = document.querySelector(
+                    '#medicationV9DrugBadge span:last-child'
+                );
+                if (badge) {
+                    badge.textContent = snapshot.drug_name;
+                }
+
+                lockDrug(snapshot);
+            };
+
+            document.addEventListener(
+                'click',
+                async (event) => {
+                    const button = event.target.closest(
+                        '#medicationV9MedGemmaButton'
+                    );
+
+                    if (!button) return;
+
+                    const form = currentForm();
+                    const snapshot = getPrescriptionSnapshot();
+
+                    if (
+                        !form
+                        || !snapshot.patient_id
+                        || !snapshot.drug_id
+                        || !snapshot.drug_name
+                    ) {
+                        setStatus(
+                            'Нет данных рецепта. Вернитесь на шаг 1.',
+                            'danger'
+                        );
+                        return;
+                    }
+
+                    const originalHtml = button.innerHTML;
+
+                    button.disabled = true;
+                    button.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-1"></span>' +
+                        'MedGemma заполняет…';
+
+                    setStatus('Формируем черновик инструкции…');
+
+                    try {
+                        const reference = await loadReference(snapshot);
+
+                        const response = await fetch(
+                            `/doctors/patients/${encodeURIComponent(snapshot.patient_id)}` +
+                            '/medication-assignments/medgemma',
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN':
+                                        document.querySelector(
+                                            'meta[name="csrf-token"]'
+                                        )?.content || '',
+                                },
+                                credentials: 'same-origin',
+                                body: JSON.stringify({
+                                    patient_id: Number(snapshot.patient_id),
+                                    drug_id: Number(snapshot.drug_id),
+                                    drug_name: snapshot.drug_name,
+                                    dosage: snapshot.dosage,
+                                    regimen: snapshot.regimen,
+                                    diagnosis_code:
+                                        snapshot.diagnosis_code,
+                                    birth_at: snapshot.birth_at,
+                                    reference,
+                                }),
+                            }
+                        );
+
+                        const payload =
+                            await response.json().catch(() => ({}));
+
+                        if (!response.ok) {
+                            throw new Error(
+                                payload.message
+                                || 'MedGemma не смогла сформировать инструкцию.'
+                            );
+                        }
+
+                        const fields = payload.fields || {};
+
+                        [
+                            'doctor_instruction',
+                            'indication',
+                            'contraindications',
+                            'adverse_reactions',
+                            'missed_dose',
+                            'overdose_actions',
+                            'urgent_symptoms',
+                        ].forEach((key) => {
+                            if (
+                                Object.prototype.hasOwnProperty.call(
+                                    fields,
+                                    key
+                                )
+                            ) {
+                                assignValue(key, fields[key]);
+                            }
+                        });
+
+                        // Никогда не позволяем ответу ИИ изменить то,
+                        // что врач зафиксировал на шаге рецепта.
+                        lockDrug(snapshot);
+
+                        setStatus(
+                            `Черновик заполнен через ${payload.model || 'MedGemma'}. ` +
+                            'Проверьте текст перед сохранением.',
+                            'success'
+                        );
+                    } catch (error) {
+                        console.error(
+                            'Medication V9 MedGemma error:',
+                            error
+                        );
+
+                        setStatus(
+                            error.message || 'Ошибка MedGemma.',
+                            'danger'
+                        );
+                    } finally {
+                        button.disabled = false;
+                        button.innerHTML = originalHtml;
+                    }
+                },
+                false
+            );
+
+            const classObserver = new MutationObserver(() => {
+                if (
+                    prescriptionModal.classList.contains(
+                        'is-treatment-step-2'
+                    )
+                ) {
+                    window.setTimeout(prepare, 0);
+                }
+            });
+
+            classObserver.observe(
+                prescriptionModal,
+                {
+                    attributes: true,
+                    attributeFilter: ['class'],
+                }
+            );
+
+            const hostObserver = new MutationObserver(() => {
+                if (
+                    prescriptionModal.classList.contains(
+                        'is-treatment-step-2'
+                    )
+                ) {
+                    window.setTimeout(prepare, 0);
+                }
+            });
+
+            hostObserver.observe(
+                host,
+                {
+                    childList: true,
+                }
+            );
+
+            window.setTimeout(prepare, 0);
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => window.setTimeout(bootV9, 0),
+                {once: true}
+            );
+        } else {
+            window.setTimeout(bootV9, 0);
+        }
+    })();
+    </script>
+    {{-- PATIENT_TREATMENT_WIZARD_V10_QUEUE --}}
+    <style id="patient-treatment-wizard-v10-queue">
+        .medication-v10-progress {
+            display: none;
+            min-width: 235px;
+            margin-top: .45rem;
+        }
+
+        .medication-v10-progress.is-visible {
+            display: block;
+        }
+
+        .medication-v10-progress__line {
+            height: 6px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #e9eff3;
+        }
+
+        .medication-v10-progress__bar {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--bs-primary);
+            transition: width .35s ease;
+        }
+
+        .medication-v10-progress__meta {
+            display: flex;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-top: .3rem;
+            color: #6f818d;
+            font-size: .66rem;
+        }
+
+        .medication-v10-progress__stage {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #medicationV9MedGemmaButton.is-running {
+            pointer-events: none;
+        }
+    </style>
+
+    <script>
+    (() => {
+        'use strict';
+
+        const bootV10 = () => {
+            const prescriptionModal = document.getElementById('prescriptionModal');
+
+            if (!prescriptionModal) return;
+
+            if (prescriptionModal.dataset.treatmentWizardV10 === '1') {
+                return;
+            }
+            prescriptionModal.dataset.treatmentWizardV10 = '1';
+
+            let activeTaskId = null;
+            let pollTimer = null;
+            let syntheticProgressTimer = null;
+            let displayedProgress = 0;
+            let backendProgress = 0;
+
+            const currentHost = () =>
+                document.getElementById('treatmentWizardAssignmentHost');
+
+            const currentDialog = () =>
+                currentHost()?.querySelector(':scope > .modal-dialog') || null;
+
+            const currentForm = () => {
+                const dialog = currentDialog();
+                if (!dialog) return null;
+
+                const direct = dialog.querySelector(':scope > .modal-content');
+                if (direct?.tagName === 'FORM') return direct;
+
+                return dialog.querySelector('form');
+            };
+
+            const normalizeLabel = (text) =>
+                String(text || '')
+                    .replace(/\s+/g, ' ')
+                    .replace(/\*/g, '')
+                    .trim()
+                    .toLowerCase();
+
+            const fieldFromLabel = (form, patterns) => {
+                const labels = Array.from(form.querySelectorAll('label'));
+
+                for (const label of labels) {
+                    const text = normalizeLabel(label.textContent);
+
+                    if (!patterns.some((pattern) => text.includes(pattern))) {
+                        continue;
+                    }
+
+                    const forId = label.getAttribute('for');
+
+                    if (forId) {
+                        const direct = form.querySelector(
+                            '#' + CSS.escape(forId)
+                        );
+                        if (direct) return direct;
+                    }
+
+                    const container = label.closest(
+                        '.mb-3, .mb-2, .form-group, .medication-assignment-field, ' +
+                        '.col, [class*="col-"], section, .card, .border'
+                    );
+
+                    const field = container?.querySelector(
+                        'textarea, input:not([type="hidden"]), select'
+                    );
+
+                    if (field) return field;
+                }
+
+                return null;
+            };
+
+            const findField = (key) => {
+                const form = currentForm();
+                if (!form) return null;
+
+                const selectors = {
+                    doctor_instruction: [
+                        '[name="doctor_instruction"]',
+                        '[name="patient_instruction"]',
+                        '#medicationDoctorInstruction',
+                        '#medicationInstructionText',
+                    ],
+                    indication: [
+                        '[name="indication"]',
+                        '#medicationIndicationText',
+                    ],
+                    contraindications: [
+                        '[name="contraindications"]',
+                        '#medicationContraindicationsText',
+                    ],
+                    adverse_reactions: [
+                        '[name="adverse_reactions"]',
+                        '[name="side_effects"]',
+                        '#medicationSideEffectsText',
+                    ],
+                    missed_dose: [
+                        '[name="missed_dose"]',
+                        '#medicationMissedDoseText',
+                    ],
+                    overdose_actions: [
+                        '[name="overdose_actions"]',
+                        '#medicationOverdoseActionsText',
+                        '#medicationOverdoseText',
+                    ],
+                    urgent_symptoms: [
+                        '[name="urgent_symptoms"]',
+                        '#medicationUrgentSymptomsText',
+                    ],
+                };
+
+                for (const selector of selectors[key] || []) {
+                    const field = form.querySelector(selector);
+                    if (field) return field;
+                }
+
+                const labels = {
+                    doctor_instruction: [
+                        'индивидуальная инструкция врача',
+                        'инструкция врача',
+                    ],
+                    indication: [
+                        'показание',
+                        'почему назначен препарат',
+                    ],
+                    contraindications: [
+                        'противопоказания и ограничения',
+                        'противопоказания',
+                    ],
+                    adverse_reactions: [
+                        'возможные нежелательные реакции',
+                        'нежелательные реакции',
+                        'побочные реакции',
+                    ],
+                    missed_dose: [
+                        'если пропущен приём',
+                        'если пропущен прием',
+                        'пропуске приёма',
+                        'пропуске приема',
+                    ],
+                    overdose_actions: [
+                        'действия при подозрении на передозировку',
+                        'передозировк',
+                    ],
+                    urgent_symptoms: [
+                        'симптомы/ситуации, при которых нужна срочная связь с врачом',
+                        'срочная связь с врачом',
+                        'срочно обратиться',
+                    ],
+                };
+
+                return fieldFromLabel(form, labels[key] || []);
+            };
+
+            const writeField = (key, value) => {
+                if (value == null || String(value).trim() === '') {
+                    return false;
+                }
+
+                const field = findField(key);
+
+                if (!field) {
+                    console.warn('V10: assignment field not found:', key);
+                    return false;
+                }
+
+                field.value = String(value).trim();
+                field.dispatchEvent(new Event('input', {bubbles: true}));
+                field.dispatchEvent(new Event('change', {bubbles: true}));
+
+                return String(field.value || '').trim() !== '';
+            };
+
+            const prescriptionSnapshot = () => {
+                const drug = document.getElementById('drug_id_modal');
+                const option = drug?.selectedOptions?.[0];
+
+                const raw = (selector) =>
+                    String(document.querySelector(selector)?.value || '').trim();
+
+                const display = (selector) => {
+                    const el = document.querySelector(selector);
+                    if (!el) return '';
+
+                    if (el.tagName === 'SELECT') {
+                        return String(
+                            el.selectedOptions?.[0]?.textContent
+                            || el.value
+                            || ''
+                        ).trim();
+                    }
+
+                    return String(el.value || '').trim();
+                };
+
+                return {
+                    patient_id: raw('#patientPrescriptionForm [name="patient_id"]'),
+                    drug_id: String(drug?.value || '').trim(),
+                    drug_name: String(option?.textContent || '').trim(),
+                    dosage: display('#dosage_modal'),
+                    regimen:
+                        raw('#usage_instructions__')
+                        || [
+                            raw('#taking_drug_modal')
+                                ? 'По ' + raw('#taking_drug_modal')
+                                : '',
+                            raw('#taking_count_modal')
+                                ? raw('#taking_count_modal') + ' раз(а) в день'
+                                : '',
+                        ].filter(Boolean).join(', '),
+                    diagnosis_code: raw('#diagnosis_code'),
+                    birth_at: raw('#birth_at__'),
+                };
+            };
+
+            const ensureProgressUi = () => {
+                const side = document.querySelector(
+                    '.medication-v9-toolbar__side'
+                );
+
+                if (!side) return null;
+
+                let root = document.getElementById(
+                    'medicationV10Progress'
+                );
+
+                if (root) return root;
+
+                root = document.createElement('div');
+                root.id = 'medicationV10Progress';
+                root.className = 'medication-v10-progress';
+                root.innerHTML = `
+                    <div class="medication-v10-progress__line">
+                        <div class="medication-v10-progress__bar"
+                             id="medicationV10ProgressBar"></div>
+                    </div>
+
+                    <div class="medication-v10-progress__meta">
+                        <span class="medication-v10-progress__stage"
+                              id="medicationV10ProgressStage">
+                            Ожидание
+                        </span>
+                        <span id="medicationV10ProgressPercent">0%</span>
+                    </div>
+                `;
+
+                side.appendChild(root);
+                return root;
+            };
+
+            const setStatus = (message, type = 'muted') => {
+                const status = document.getElementById(
+                    'medicationV9Status'
+                );
+
+                if (!status) return;
+
+                status.textContent = message || '';
+                status.className = 'medication-v9-toolbar__status';
+
+                if (type === 'success') {
+                    status.classList.add('text-success');
+                }
+                if (type === 'danger') {
+                    status.classList.add('text-danger');
+                }
+                if (type === 'warning') {
+                    status.classList.add('text-warning');
+                }
+            };
+
+            const renderProgress = (percent, stage) => {
+                const root = ensureProgressUi();
+
+                if (!root) return;
+
+                displayedProgress = Math.max(
+                    displayedProgress,
+                    Math.min(100, Number(percent) || 0)
+                );
+
+                root.classList.add('is-visible');
+
+                const bar = document.getElementById(
+                    'medicationV10ProgressBar'
+                );
+                const stageEl = document.getElementById(
+                    'medicationV10ProgressStage'
+                );
+                const percentEl = document.getElementById(
+                    'medicationV10ProgressPercent'
+                );
+
+                if (bar) {
+                    bar.style.width = displayedProgress + '%';
+                }
+
+                if (stageEl) {
+                    stageEl.textContent = stage || 'Выполняется';
+                }
+
+                if (percentEl) {
+                    percentEl.textContent =
+                        Math.round(displayedProgress) + '%';
+                }
+            };
+
+            const stopSyntheticProgress = () => {
+                if (syntheticProgressTimer) {
+                    window.clearInterval(syntheticProgressTimer);
+                    syntheticProgressTimer = null;
+                }
+            };
+
+            const startSyntheticProgress = () => {
+                stopSyntheticProgress();
+
+                syntheticProgressTimer = window.setInterval(() => {
+                    /*
+                     * Во время единственного LLM-запроса нет честного token-progress.
+                     * Поэтому UI лишь плавно движется внутри текущего серверного этапа,
+                     * не переходя выше 88% до ответа worker.
+                     */
+                    const ceiling = backendProgress >= 45 ? 88 : backendProgress;
+
+                    if (displayedProgress < ceiling) {
+                        renderProgress(
+                            Math.min(
+                                ceiling,
+                                displayedProgress + 1
+                            ),
+                            document.getElementById(
+                                'medicationV10ProgressStage'
+                            )?.textContent || 'MedGemma обрабатывает'
+                        );
+                    }
+                }, 750);
+            };
+
+            const finishProgress = (success) => {
+                stopSyntheticProgress();
+
+                renderProgress(
+                    success ? 100 : Math.max(displayedProgress, backendProgress),
+                    success ? 'Готово' : 'Ошибка'
+                );
+            };
+
+            const fillResult = (fields) => {
+                const keys = [
+                    'doctor_instruction',
+                    'indication',
+                    'contraindications',
+                    'adverse_reactions',
+                    'missed_dose',
+                    'overdose_actions',
+                    'urgent_symptoms',
+                ];
+
+                let written = 0;
+
+                for (const key of keys) {
+                    if (
+                        Object.prototype.hasOwnProperty.call(
+                            fields || {},
+                            key
+                        )
+                        && writeField(key, fields[key])
+                    ) {
+                        written++;
+                    }
+                }
+
+                return {
+                    written,
+                    total: keys.length,
+                };
+            };
+
+            const clearPolling = () => {
+                if (pollTimer) {
+                    window.clearTimeout(pollTimer);
+                    pollTimer = null;
+                }
+            };
+
+            const poll = async (
+                patientId,
+                taskId,
+                button
+            ) => {
+                clearPolling();
+
+                try {
+                    const response = await fetch(
+                        `/doctors/patients/${encodeURIComponent(patientId)}` +
+                        `/medication-assignments/medgemma/${encodeURIComponent(taskId)}`,
+                        {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            credentials: 'same-origin',
+                        }
+                    );
+
+                    const payload = await response.json().catch(() => ({}));
+
+                    if (!response.ok) {
+                        throw new Error(
+                            payload.message
+                            || 'Не удалось получить статус задания.'
+                        );
+                    }
+
+                    backendProgress = Number(payload.progress || 0);
+
+                    renderProgress(
+                        backendProgress,
+                        payload.stage_label
+                        || payload.message
+                        || 'Выполняется'
+                    );
+
+                    if (payload.status === 'completed') {
+                        clearPolling();
+                        stopSyntheticProgress();
+
+                        const result = fillResult(
+                            payload.result?.fields || {}
+                        );
+
+                        if (result.written === 0) {
+                            finishProgress(false);
+
+                            throw new Error(
+                                'MedGemma ответила, но ни одно поле формы не удалось заполнить. ' +
+                                'Структура формы не совпала с ожидаемой.'
+                            );
+                        }
+
+                        finishProgress(true);
+
+                        setStatus(
+                            `MedGemma заполнила ${result.written} из ${result.total} полей. ` +
+                            'Проверьте черновик перед сохранением.',
+                            result.written === result.total
+                                ? 'success'
+                                : 'warning'
+                        );
+
+                        button.disabled = false;
+                        button.classList.remove('is-running');
+                        button.innerHTML =
+                            '<i class="bi bi-stars me-1"></i>' +
+                            'Заполнить заново через MedGemma';
+
+                        activeTaskId = null;
+                        return;
+                    }
+
+                    if (payload.status === 'failed') {
+                        clearPolling();
+                        finishProgress(false);
+
+                        throw new Error(
+                            payload.error
+                            || payload.message
+                            || 'Задание MedGemma завершилось ошибкой.'
+                        );
+                    }
+
+                    if (
+                        payload.status === 'queued'
+                        || payload.status === 'running'
+                    ) {
+                        startSyntheticProgress();
+
+                        pollTimer = window.setTimeout(
+                            () => poll(patientId, taskId, button),
+                            1100
+                        );
+                        return;
+                    }
+
+                    throw new Error(
+                        'Неизвестный статус задания MedGemma.'
+                    );
+                } catch (error) {
+                    clearPolling();
+                    stopSyntheticProgress();
+
+                    setStatus(
+                        error.message || 'Ошибка MedGemma.',
+                        'danger'
+                    );
+
+                    button.disabled = false;
+                    button.classList.remove('is-running');
+                    button.innerHTML =
+                        '<i class="bi bi-stars me-1"></i>' +
+                        'Повторить через MedGemma';
+
+                    activeTaskId = null;
+                }
+            };
+
+            /*
+             * Capture=true специально: V9 имеет старый синхронный обработчик
+             * на той же кнопке в bubble-фазе. V10 его блокирует и запускает queue.
+             */
+            document.addEventListener(
+                'click',
+                async (event) => {
+                    const button = event.target.closest(
+                        '#medicationV9MedGemmaButton'
+                    );
+
+                    if (!button) return;
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+
+                    if (activeTaskId) {
+                        return;
+                    }
+
+                    const snapshot = prescriptionSnapshot();
+
+                    if (
+                        !snapshot.patient_id
+                        || !snapshot.drug_id
+                        || !snapshot.drug_name
+                    ) {
+                        setStatus(
+                            'Нет данных рецепта. Вернитесь на шаг 1.',
+                            'danger'
+                        );
+                        return;
+                    }
+
+                    displayedProgress = 0;
+                    backendProgress = 0;
+
+                    button.disabled = true;
+                    button.classList.add('is-running');
+                    button.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-1"></span>' +
+                        'Ставим в очередь…';
+
+                    renderProgress(2, 'Постановка в очередь');
+                    setStatus('Создаём фоновое задание…');
+
+                    try {
+                        const response = await fetch(
+                            `/doctors/patients/${encodeURIComponent(snapshot.patient_id)}` +
+                            '/medication-assignments/medgemma/start',
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN':
+                                        document.querySelector(
+                                            'meta[name="csrf-token"]'
+                                        )?.content || '',
+                                },
+                                credentials: 'same-origin',
+                                body: JSON.stringify({
+                                    patient_id:
+                                        Number(snapshot.patient_id),
+                                    drug_id:
+                                        Number(snapshot.drug_id),
+                                    drug_name:
+                                        snapshot.drug_name,
+                                    dosage:
+                                        snapshot.dosage,
+                                    regimen:
+                                        snapshot.regimen,
+                                    diagnosis_code:
+                                        snapshot.diagnosis_code,
+                                    birth_at:
+                                        snapshot.birth_at,
+                                }),
+                            }
+                        );
+
+                        const payload =
+                            await response.json().catch(() => ({}));
+
+                        if (!response.ok) {
+                            throw new Error(
+                                payload.message
+                                || 'Не удалось поставить MedGemma в очередь.'
+                            );
+                        }
+
+                        activeTaskId = payload.task_id;
+
+                        button.innerHTML =
+                            '<span class="spinner-border spinner-border-sm me-1"></span>' +
+                            'MedGemma работает…';
+
+                        backendProgress =
+                            Number(payload.progress || 5);
+
+                        renderProgress(
+                            backendProgress,
+                            payload.stage_label || 'В очереди'
+                        );
+
+                        startSyntheticProgress();
+
+                        await poll(
+                            snapshot.patient_id,
+                            activeTaskId,
+                            button
+                        );
+                    } catch (error) {
+                        clearPolling();
+                        stopSyntheticProgress();
+
+                        finishProgress(false);
+
+                        setStatus(
+                            error.message || 'Ошибка очереди MedGemma.',
+                            'danger'
+                        );
+
+                        button.disabled = false;
+                        button.classList.remove('is-running');
+                        button.innerHTML =
+                            '<i class="bi bi-stars me-1"></i>' +
+                            'Повторить через MedGemma';
+
+                        activeTaskId = null;
+                    }
+                },
+                true
+            );
+
+            ensureProgressUi();
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => window.setTimeout(bootV10, 0),
+                {once: true}
+            );
+        } else {
+            window.setTimeout(bootV10, 0);
+        }
+    })();
+    </script>
+    {{-- PATIENT_TREATMENT_WIZARD_V13_DEFER_PRESCRIPTION --}}
+    <style id="patient-treatment-wizard-v13-defer-prescription">
+        .treatment-v13-draft-note {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            margin-left: .45rem;
+            padding: .25rem .5rem;
+            border-radius: 999px;
+            background: #fff6d8;
+            color: #856404;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .treatment-v13-save-progress {
+            display: none;
+            align-items: center;
+            gap: .45rem;
+            margin-right: auto;
+            color: #647986;
+            font-size: .72rem;
+        }
+
+        .treatment-v13-save-progress.is-visible {
+            display: inline-flex;
+        }
+    </style>
+
+    <script>
+    (() => {
+        'use strict';
+
+        const bootV13 = () => {
+            const wizard = document.getElementById('prescriptionModal');
+            const prescriptionForm = document.getElementById('patientPrescriptionForm');
+            const prescriptionSubmit = document.getElementById('prescriptionSubmitButton');
+            const assignmentShell = document.getElementById('medicationAssignmentModal');
+            const assignmentHost = document.getElementById('treatmentWizardAssignmentHost');
+            const assignmentPane = document.getElementById('treatmentWizardAssignmentPane');
+
+            if (
+                !wizard
+                || !prescriptionForm
+                || !prescriptionSubmit
+                || !assignmentHost
+                || !assignmentPane
+            ) {
+                return;
+            }
+
+            if (wizard.dataset.treatmentWizardV13 === '1') {
+                return;
+            }
+            wizard.dataset.treatmentWizardV13 = '1';
+
+            let prescriptionDraftReady = false;
+            let finalSaving = false;
+
+            const step1Button = wizard.querySelector(
+                '[data-treatment-wizard-step="1"]'
+            );
+            const step2Button = wizard.querySelector(
+                '[data-treatment-wizard-step="2"]'
+            );
+
+            const currentAssignmentDialog = () =>
+                assignmentHost.querySelector(':scope > .modal-dialog')
+                || assignmentShell?.querySelector('.modal-dialog')
+                || null;
+
+            const currentAssignmentForm = () => {
+                const dialog = currentAssignmentDialog();
+                if (!dialog) return null;
+
+                const direct = dialog.querySelector(':scope > .modal-content');
+                if (direct?.tagName === 'FORM') return direct;
+
+                return dialog.querySelector('form');
+            };
+
+            const setPrescriptionAlert = (type, html) => {
+                const alert = document.getElementById('prescription_form_alert');
+                if (!alert) return;
+
+                alert.className = `alert alert-${type}`;
+                alert.innerHTML = html;
+            };
+
+            const clearPrescriptionAlert = () => {
+                const alert = document.getElementById('prescription_form_alert');
+                if (!alert) return;
+
+                alert.className = 'alert alert-danger d-none';
+                alert.innerHTML = '';
+            };
+
+            const setStepUi = (step) => {
+                const second = step === 2;
+
+                wizard.classList.toggle(
+                    'is-treatment-step-2',
+                    second
+                );
+
+                step1Button?.classList.toggle(
+                    'is-active',
+                    !second
+                );
+
+                step2Button?.classList.toggle(
+                    'is-active',
+                    second
+                );
+
+                if (step2Button) {
+                    step2Button.classList.toggle(
+                        'is-disabled',
+                        !prescriptionDraftReady
+                    );
+
+                    step2Button.setAttribute(
+                        'aria-disabled',
+                        prescriptionDraftReady ? 'false' : 'true'
+                    );
+                }
+            };
+
+            const dispatchBootstrapLifecycle = (element, name) => {
+                if (!element) return;
+
+                try {
+                    element.dispatchEvent(
+                        new CustomEvent(name, {
+                            bubbles: true,
+                            cancelable: true,
+                        })
+                    );
+                } catch (_) {}
+
+                if (window.jQuery) {
+                    try {
+                        window.jQuery(element).trigger(name);
+                    } catch (_) {}
+                }
+            };
+
+            const mountAssignment = () => {
+                const dialog = currentAssignmentDialog();
+
+                if (!dialog) {
+                    setPrescriptionAlert(
+                        'danger',
+                        '<strong>Форма назначения не найдена.</strong>'
+                    );
+                    return false;
+                }
+
+                dispatchBootstrapLifecycle(
+                    assignmentShell,
+                    'show.bs.modal'
+                );
+
+                if (!assignmentHost.contains(dialog)) {
+                    assignmentHost.appendChild(dialog);
+                }
+
+                dialog.style.setProperty(
+                    'width',
+                    '100%',
+                    'important'
+                );
+                dialog.style.setProperty(
+                    'max-width',
+                    'none',
+                    'important'
+                );
+                dialog.style.setProperty(
+                    'margin',
+                    '0',
+                    'important'
+                );
+
+                dispatchBootstrapLifecycle(
+                    assignmentShell,
+                    'shown.bs.modal'
+                );
+
+                return true;
+            };
+
+            const enterStep2 = () => {
+                if (!prescriptionDraftReady) {
+                    setPrescriptionAlert(
+                        'warning',
+                        '<strong>Сначала заполните рецепт.</strong> ' +
+                        'На этом этапе он ещё не сохраняется в историю.'
+                    );
+                    prescriptionForm.reportValidity();
+                    return;
+                }
+
+                if (!mountAssignment()) {
+                    return;
+                }
+
+                clearPrescriptionAlert();
+                setStepUi(2);
+            };
+
+            const markDraftDirty = () => {
+                if (!prescriptionDraftReady) return;
+
+                prescriptionDraftReady = false;
+
+                if (step2Button) {
+                    step2Button.classList.add('is-disabled');
+                    step2Button.setAttribute('aria-disabled', 'true');
+                }
+            };
+
+            prescriptionForm.addEventListener(
+                'input',
+                markDraftDirty
+            );
+
+            prescriptionForm.addEventListener(
+                'change',
+                markDraftDirty
+            );
+
+            /*
+             * Шаг 1 только валидирует форму и открывает назначение.
+             * POST в doctors.prescriptions.store здесь НЕ выполняется.
+             */
+            prescriptionForm.addEventListener(
+                'submit',
+                (event) => {
+                    const submitter = event.submitter;
+
+                    if (
+                        !submitter
+                        || submitter.id !== 'prescriptionSubmitButton'
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+
+                    if (!prescriptionForm.checkValidity()) {
+                        prescriptionForm.reportValidity();
+                        return;
+                    }
+
+                    prescriptionDraftReady = true;
+
+                    if (step2Button) {
+                        step2Button.classList.remove('is-disabled');
+                        step2Button.setAttribute('aria-disabled', 'false');
+                    }
+
+                    setPrescriptionAlert(
+                        'info',
+                        '<strong>Рецепт подготовлен, но ещё не выписан.</strong> ' +
+                        'Он будет сохранён только после успешного сохранения назначения.'
+                    );
+
+                    enterStep2();
+                },
+                true
+            );
+
+            step2Button?.addEventListener(
+                'click',
+                (event) => {
+                    if (!prescriptionDraftReady) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+
+                    enterStep2();
+                },
+                true
+            );
+
+            const responseError = async (response, fallback) => {
+                let payload = null;
+
+                try {
+                    payload = await response.clone().json();
+                } catch (_) {}
+
+                if (payload?.message) {
+                    return payload.message;
+                }
+
+                if (payload?.errors) {
+                    return Object.values(payload.errors)
+                        .flat()
+                        .join(' ');
+                }
+
+                return fallback + ` HTTP ${response.status}`;
+            };
+
+            const submitForm = async (form, label) => {
+                const response = await fetch(
+                    form.action,
+                    {
+                        method: (form.method || 'POST').toUpperCase(),
+                        body: new FormData(form),
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        credentials: 'same-origin',
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        await responseError(
+                            response,
+                            `${label} не сохранён.`
+                        )
+                    );
+                }
+
+                return response;
+            };
+
+            const ensureDraftNote = () => {
+                const title = wizard.querySelector(
+                    '.treatment-wizard-master__title'
+                );
+
+                if (
+                    !title
+                    || document.getElementById('treatmentV13DraftNote')
+                ) {
+                    return;
+                }
+
+                const note = document.createElement('span');
+                note.id = 'treatmentV13DraftNote';
+                note.className = 'treatment-v13-draft-note';
+                note.innerHTML =
+                    '<i class="bi bi-hourglass-split"></i>' +
+                    ' Рецепт сохраняется после назначения';
+
+                title.insertAdjacentElement('afterend', note);
+            };
+
+            const ensureFinalProgress = () => {
+                const footer = document.getElementById(
+                    'medicationV9Footer'
+                );
+
+                if (!footer) return null;
+
+                let progress = document.getElementById(
+                    'treatmentV13SaveProgress'
+                );
+
+                if (progress) return progress;
+
+                progress = document.createElement('div');
+                progress.id = 'treatmentV13SaveProgress';
+                progress.className = 'treatment-v13-save-progress';
+
+                const hint = footer.querySelector(
+                    '.medication-v9-footer__hint'
+                );
+
+                if (hint) {
+                    hint.insertAdjacentElement(
+                        'afterend',
+                        progress
+                    );
+                } else {
+                    footer.prepend(progress);
+                }
+
+                return progress;
+            };
+
+            const setFinalProgress = (html) => {
+                const progress = ensureFinalProgress();
+                if (!progress) return;
+
+                progress.innerHTML = html;
+                progress.classList.add('is-visible');
+            };
+
+            const hideFinalProgress = () => {
+                const progress = document.getElementById(
+                    'treatmentV13SaveProgress'
+                );
+
+                progress?.classList.remove('is-visible');
+            };
+
+            /*
+             * Финал:
+             * 1. Сохраняем назначение.
+             * 2. Только после успеха сохраняем рецепт.
+             *
+             * Следовательно: назначения нет => рецепта нет.
+             */
+            document.addEventListener(
+                'submit',
+                async (event) => {
+                    const assignmentForm = currentAssignmentForm();
+
+                    if (
+                        !assignmentForm
+                        || event.target !== assignmentForm
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+
+                    if (finalSaving) {
+                        return;
+                    }
+
+                    if (!prescriptionDraftReady) {
+                        setStepUi(1);
+
+                        setPrescriptionAlert(
+                            'warning',
+                            '<strong>Рецепт изменён.</strong> ' +
+                            'Подтвердите шаг 1 заново.'
+                        );
+                        return;
+                    }
+
+                    if (!assignmentForm.checkValidity()) {
+                        assignmentForm.reportValidity();
+                        return;
+                    }
+
+                    finalSaving = true;
+
+                    const saveButton = document.getElementById(
+                        'medicationV9SaveButton'
+                    );
+
+                    const oldButtonHtml =
+                        saveButton?.innerHTML || '';
+
+                    if (saveButton) {
+                        saveButton.disabled = true;
+                        saveButton.innerHTML =
+                            '<span class="spinner-border spinner-border-sm me-1"></span>' +
+                            'Сохраняем…';
+                    }
+
+                    try {
+                        setFinalProgress(
+                            '<span class="spinner-border spinner-border-sm"></span>' +
+                            '<span>1/2 · Сохраняем назначение…</span>'
+                        );
+
+                        await submitForm(
+                            assignmentForm,
+                            'Назначение'
+                        );
+
+                        setFinalProgress(
+                            '<span class="spinner-border spinner-border-sm"></span>' +
+                            '<span>2/2 · Выписываем рецепт…</span>'
+                        );
+
+                        await submitForm(
+                            prescriptionForm,
+                            'Рецепт'
+                        );
+
+                        setFinalProgress(
+                            '<i class="bi bi-check2-circle text-success"></i>' +
+                            '<span class="text-success">Назначение и рецепт сохранены</span>'
+                        );
+
+                        window.setTimeout(() => {
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('tab', 'presc');
+                            window.location.assign(url.toString());
+                        }, 350);
+                    } catch (error) {
+                        console.error(
+                            'Treatment V13 final save error:',
+                            error
+                        );
+
+                        setFinalProgress(
+                            '<i class="bi bi-exclamation-triangle text-danger"></i>' +
+                            '<span class="text-danger">' +
+                            String(error.message || 'Ошибка сохранения') +
+                            '</span>'
+                        );
+
+                        if (saveButton) {
+                            saveButton.disabled = false;
+                            saveButton.innerHTML = oldButtonHtml;
+                        }
+
+                        finalSaving = false;
+                    }
+                },
+                true
+            );
+
+            ensureDraftNote();
+
+            prescriptionSubmit.innerHTML =
+                '<i class="bi bi-arrow-right-circle me-1"></i>' +
+                'Продолжить к назначению';
+
+            wizard.addEventListener(
+                'show.bs.modal',
+                () => {
+                    prescriptionDraftReady = false;
+                    finalSaving = false;
+                    hideFinalProgress();
+
+                    prescriptionSubmit.innerHTML =
+                        '<i class="bi bi-arrow-right-circle me-1"></i>' +
+                        'Продолжить к назначению';
+                }
+            );
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => window.setTimeout(bootV13, 0),
+                {once: true}
+            );
+        } else {
+            window.setTimeout(bootV13, 0);
+        }
+    })();
+    </script>
     {{-- PATIENT_DOCTOR_TRANSFER_MODAL_INCLUDE --}}
     @include('doctors.reception.partials.patient_doctor_transfer_modal')
 @endsection

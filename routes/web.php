@@ -171,6 +171,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
         Route::get('/calendar/clinics/search', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'searchClinics'])->middleware('throttle:30,1')->name('calendar.clinics.search');
         Route::get('/calendar/availability', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'availability'])->middleware('throttle:60,1')->name('calendar.availability');
         Route::post('/calendar', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'store'])->middleware('throttle:5,1')->name('calendar.store');
+        Route::get('/assignments', [\App\Http\Controllers\Patients\MedicationAssignmentsController::class, 'index'])->name('assignments.index');
     });
 
 
@@ -401,6 +402,10 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
             Route::post('/documents/store', [DocumentController::class, 'upload'])->name('documents.upload');
             Route::get('/documents/{document:id}', [DocumentController::class, 'download'])->name('documents.download');
             Route::post('/documents/{document:id}/delete', [DocumentController::class, 'delete'])->name('documents.delete');
+
+            Route::post('/medication-assignments', [\App\Http\Controllers\Doctors\MedicationAssignmentController::class, 'store'])->name('medication-assignments.store');
+            Route::patch('/medication-assignments/{assignment}', [\App\Http\Controllers\Doctors\MedicationAssignmentController::class, 'updateStatus'])->whereNumber('assignment')->name('medication-assignments.status');
+            Route::get('/medication-assignments/drugs/{drug}/reference', [\App\Http\Controllers\Doctors\MedicationAssignmentController::class, 'reference'])->whereNumber('drug')->name('medication-assignments.reference');
 
             Route::post('/epicrisis/store', [EpicrisisController::class, 'store'])->name('epicrisis.store');
             Route::get('/epicrisis/{epicrisis:id}', [EpicrisisController::class, 'show'])->name('epicrisis.show');
@@ -861,3 +866,26 @@ Route::prefix('laboratory')->as('laboratory.')->group(function (): void {
                 ->name('logout');
         });
 });
+
+// PATIENT_TREATMENT_WIZARD_V8_MEDGEMMA_ROUTE
+Route::post(
+    '/doctors/patients/{patient}/medication-assignments/medgemma',
+    [\App\Http\Controllers\Doctors\MedicationAssignmentAiController::class, 'generate']
+)
+    ->middleware('auth')
+    ->name('doctors.patients.medication-assignments.medgemma');
+
+// PATIENT_TREATMENT_WIZARD_V10_QUEUE_ROUTES
+Route::post(
+    '/doctors/patients/{patient}/medication-assignments/medgemma/start',
+    [\App\Http\Controllers\Doctors\MedicationAssignmentAiController::class, 'start']
+)
+    ->middleware('auth')
+    ->name('doctors.patients.medication-assignments.medgemma.start');
+
+Route::get(
+    '/doctors/patients/{patient}/medication-assignments/medgemma/{task}',
+    [\App\Http\Controllers\Doctors\MedicationAssignmentAiController::class, 'status']
+)
+    ->middleware('auth')
+    ->name('doctors.patients.medication-assignments.medgemma.status');

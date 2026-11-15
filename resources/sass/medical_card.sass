@@ -3834,3 +3834,299 @@
     color: #8a6d28
     font-size: 10px
     font-weight: 600
+
+// DOCTOR_MEDICATION_ASSIGNMENTS_V1
+.medication-assignment-panel
+    padding: 16px
+    border: 1px solid #dfe9e5
+    border-radius: 14px
+    background: #fbfdfc
+
+.medication-assignment-panel__head
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 12px
+    margin-bottom: 12px
+
+.medication-assignment-doctor-list
+    display: grid
+    gap: 8px
+
+.medication-assignment-doctor-card
+    display: flex
+    gap: 12px
+    justify-content: space-between
+    padding: 12px
+    border: 1px solid #dfe9e5
+    border-radius: 11px
+    background: #fff
+
+    &.is-active
+        border-color: #bcded3
+
+    &.is-muted
+        opacity: .75
+
+.medication-assignment-doctor-card__main
+    min-width: 0
+    flex: 1 1 auto
+
+.medication-assignment-doctor-card__overdose
+    display: flex
+    gap: 7px
+    margin-top: 8px
+    padding: 8px 9px
+    border-radius: 8px
+    background: #fff4f4
+    color: #9f3d3d
+    font-size: 12px
+    line-height: 1.45
+
+.medication-assignment-doctor-card__actions
+    display: flex
+    flex-direction: column
+    gap: 6px
+    flex: 0 0 auto
+
+.medication-assignment-doctor-empty
+    padding: 16px
+    border: 1px dashed #d7e3df
+    border-radius: 10px
+    color: #788a85
+    text-align: center
+    font-size: 12px
+
+.medication-assignment-form-section,
+.medication-reference-card
+    padding: 14px
+    border: 1px solid #dfe9e5
+    border-radius: 12px
+    background: #fff
+
+.medication-assignment-form-section h6,
+.medication-reference-card__title
+    margin: 0 0 12px
+    font-weight: 700
+
+.medication-overdose-field
+    padding: 12px
+    border: 1px solid #efcaca
+    border-radius: 10px
+    background: #fff7f7
+
+    .form-label
+        color: #a13d3d
+        font-weight: 700
+
+.medication-drug-search
+    position: relative
+
+.medication-drug-search__results
+    position: absolute
+    left: 0
+    right: 0
+    top: calc(100% - 18px)
+    z-index: 1065
+    max-height: 280px
+    overflow-y: auto
+    padding: 6px
+    border: 1px solid #d9e5e1
+    border-radius: 10px
+    background: #fff
+    box-shadow: 0 12px 28px rgba(33, 60, 55, .14)
+
+    &[hidden]
+        display: none
+
+.medication-drug-search__item
+    width: 100%
+    display: flex
+    flex-direction: column
+    gap: 2px
+    padding: 8px 9px
+    border: 0
+    border-radius: 7px
+    background: transparent
+    text-align: left
+    cursor: pointer
+
+    &:hover
+        background: #eef8f5
+
+    strong
+        font-size: 12px
+
+    small
+        color: #7a8a86
+        font-size: 10px
+
+.medication-drug-search__empty
+    padding: 10px
+    color: #7a8a86
+    font-size: 11px
+    text-align: center
+
+.medication-reference-card
+    background: #f8fbfa
+
+.medication-reference-block
+    margin-top: 10px
+    padding-top: 10px
+    border-top: 1px solid #dfe9e5
+
+.medication-reference-block__head
+    display: flex
+    justify-content: space-between
+    gap: 8px
+    align-items: center
+
+    b
+        font-size: 11px
+
+    button
+        padding: 3px 7px
+        border: 1px solid #bddbd2
+        border-radius: 6px
+        background: #fff
+        color: #17786e
+        font-size: 9px
+        font-weight: 700
+
+.medication-reference-block pre
+    margin: 6px 0 0
+    max-height: 130px
+    overflow: auto
+    white-space: pre-wrap
+    color: #52645f
+    font-family: inherit
+    font-size: 10px
+    line-height: 1.4
+
+@media (max-width: 767.98px)
+    .medication-assignment-panel__head,
+    .medication-assignment-doctor-card
+        flex-direction: column
+
+    .medication-assignment-doctor-card__actions
+        flex-direction: row
+
+// PATIENT_MEDICATION_WIZARD_V1
+.medication-treatment-wizard
+    max-width: 1220px
+
+.medication-treatment-wizard__header
+    border-bottom: 1px solid #dfe9e5
+
+.medication-treatment-wizard__steps
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 10px
+    margin-bottom: 16px
+
+.medication-treatment-wizard__step
+    width: 100%
+    display: flex
+    align-items: center
+    gap: 10px
+    padding: 12px
+    border: 1px solid #dfe9e5
+    border-radius: 12px
+    background: #f8fbfa
+    text-align: left
+    cursor: pointer
+
+    span
+        width: 28px
+        height: 28px
+        display: grid
+        place-items: center
+        border-radius: 999px
+        background: #e8f3ef
+        color: #1a7e73
+        font-size: 12px
+        font-weight: 700
+
+    strong
+        display: block
+        color: #213733
+        font-size: 13px
+
+    small
+        color: #6a7f7b
+        font-size: 11px
+
+    &.is-active
+        border-color: #8fc8b9
+        background: #f3fbf8
+        box-shadow: inset 0 0 0 1px rgba(26,126,115,.15)
+
+        span
+            background: #1a7e73
+            color: #fff
+
+.medication-treatment-wizard__pane
+    display: none
+
+    &.is-active
+        display: block
+
+.medication-treatment-wizard__intro
+    display: flex
+    gap: 12px
+    padding: 14px
+    margin-bottom: 14px
+    border: 1px solid #dfe9e5
+    border-radius: 12px
+    background: #f8fbfa
+
+    strong
+        display: block
+        margin-bottom: 4px
+        color: #213733
+        font-size: 14px
+
+    p
+        margin: 0
+        color: #647571
+        font-size: 12px
+        line-height: 1.55
+
+    &.is-secondary
+        background: #f7fbfd
+
+.medication-treatment-wizard__intro-icon
+    width: 42px
+    height: 42px
+    flex: 0 0 42px
+    display: grid
+    place-items: center
+    border-radius: 12px
+    background: #e4f2ee
+    color: #1a7e73
+    font-size: 18px
+
+.medication-treatment-wizard__embedded
+    min-height: 120px
+
+    > .modal-dialog
+        margin: 0
+        max-width: none
+
+    .modal-content
+        border: 1px solid #dfe9e5
+        border-radius: 14px
+        box-shadow: none
+
+.medication-treatment-wizard__footer
+    border-top: 1px solid #dfe9e5
+
+.medication-treatment-wizard__source
+    display: none !important
+
+@media (max-width: 767.98px)
+    .medication-treatment-wizard__steps
+        grid-template-columns: 1fr
+
+    .medication-treatment-wizard__intro
+        flex-direction: column

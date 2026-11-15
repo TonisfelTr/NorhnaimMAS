@@ -144,13 +144,16 @@
 
 
                         <li>
-                            <span class="patient-sidebar__link is-disabled">
+                            <a
+                                href="{{ route('patients.assignments.index') }}"
+                                @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.assignments.*')])
+                                @if(request()->routeIs('patients.assignments.*')) aria-current="page" @endif
+                            >
                                 <span class="patient-sidebar__link-icon">
                                     <i class="bi bi-capsule-pill"></i>
                                 </span>
                                 <span>Назначения</span>
-                                <small>скоро</small>
-                            </span>
+                            </a>
                         </li>
 
                         <li>

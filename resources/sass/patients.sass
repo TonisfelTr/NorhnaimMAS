@@ -3069,3 +3069,340 @@ body.patient-panel-body
     &.is-not_held b,
     &.is-not-held b
         color: #a33d3d
+
+// PATIENT_MEDICATION_ASSIGNMENTS_V1
+.patient-assignments-page
+    display: grid
+    gap: 18px
+
+.patient-assignments-header
+    margin-bottom: 0
+
+.patient-assignment-safety
+    display: flex
+    gap: 14px
+    padding: 16px
+    border: 1px solid #efd8a2
+    border-radius: 15px
+    background: #fffaf0
+
+.patient-assignment-safety__icon
+    width: 42px
+    height: 42px
+    flex: 0 0 42px
+    display: grid
+    place-items: center
+    border-radius: 12px
+    background: #fff0c8
+    color: #9d7418
+    font-size: 19px
+
+.patient-assignment-safety
+    strong
+        color: $patient-ink
+        font-size: 11px
+
+    p
+        margin: 5px 0 0
+        color: $patient-muted
+        font-size: 10px
+        line-height: 1.55
+
+.patient-assignment-section
+    display: grid
+    gap: 12px
+
+.patient-assignment-section__head
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 12px
+
+    h2
+        margin: 3px 0 0
+        color: $patient-ink
+        font-family: 'Montserrat', sans-serif
+        font-size: 18px
+        font-weight: 700
+
+.patient-assignment-count
+    min-width: 30px
+    height: 30px
+    display: grid
+    place-items: center
+    border-radius: 10px
+    background: $patient-accent-soft
+    color: $patient-accent
+    font-size: 10px
+    font-weight: 800
+
+.patient-assignment-card
+    padding: 19px
+    border: 1px solid $patient-border
+    border-radius: 17px
+    background: #fff
+    box-shadow: 0 9px 26px rgba(28, 59, 55, .045)
+
+    &.is-active
+        border-color: #cde4dc
+
+.patient-assignment-card__top
+    display: flex
+    justify-content: space-between
+    gap: 18px
+    align-items: flex-start
+
+    h3
+        margin: 7px 0 2px
+        color: $patient-ink
+        font-family: 'Montserrat', sans-serif
+        font-size: 19px
+        font-weight: 750
+
+.patient-assignment-card__eyebrow
+    display: flex
+    align-items: center
+    gap: 8px
+    color: $patient-muted
+    font-size: 8px
+
+.patient-assignment-generic
+    margin: 0
+    color: $patient-muted
+    font-size: 9px
+
+.patient-assignment-status
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    padding: 5px 8px
+    border-radius: 8px
+    font-size: 8px
+    font-weight: 800
+
+    &.is-active
+        background: #e8f7ef
+        color: #23794d
+
+    &.is-completed
+        background: #eef3f2
+        color: #506965
+
+    &.is-cancelled
+        background: #fff0f0
+        color: #a33d3d
+
+.patient-assignment-dose
+    min-width: 120px
+    display: flex
+    flex-direction: column
+    gap: 3px
+    padding: 9px 11px
+    border-radius: 11px
+    background: $patient-accent-soft
+
+    span
+        color: $patient-muted
+        font-size: 8px
+
+    strong
+        color: $patient-accent
+        font-size: 12px
+
+.patient-assignment-primary
+    display: flex
+    gap: 10px
+    align-items: center
+    margin-top: 15px
+    padding: 12px
+    border-radius: 12px
+    background: #f5faf8
+
+    > div:last-child
+        display: flex
+        flex-direction: column
+        gap: 3px
+
+        span
+            color: $patient-muted
+            font-size: 8px
+
+        strong
+            color: $patient-ink
+            font-size: 11px
+            white-space: pre-line
+
+.patient-assignment-primary__icon
+    width: 36px
+    height: 36px
+    flex: 0 0 36px
+    display: grid
+    place-items: center
+    border-radius: 10px
+    background: #dff1eb
+    color: $patient-accent
+    font-size: 16px
+
+.patient-assignment-grid
+    display: grid
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+    gap: 10px
+    margin-top: 12px
+
+.patient-assignment-info
+    padding: 12px
+    border: 1px solid $patient-border
+    border-radius: 11px
+    background: #fff
+
+    &.is-doctor
+        border-color: #cde5de
+        background: #f7fcfa
+
+    &.is-warning
+        border-color: #efdfb3
+        background: #fffdf6
+
+.patient-assignment-info__title
+    display: flex
+    align-items: center
+    gap: 6px
+    margin-bottom: 7px
+    color: $patient-accent
+    font-size: 9px
+    font-weight: 800
+
+.patient-assignment-info__text
+    color: $patient-ink
+    font-size: 10px
+    line-height: 1.55
+    white-space: pre-line
+
+.patient-assignment-overdose
+    display: flex
+    gap: 11px
+    margin-top: 12px
+    padding: 13px
+    border: 1px solid #f0c9c9
+    border-radius: 12px
+    background: #fff5f5
+
+    > div:last-child
+        display: flex
+        flex-direction: column
+        gap: 4px
+
+        span
+            color: #a33d3d
+            font-size: 9px
+            font-weight: 800
+
+        strong
+            color: #6f2929
+            font-size: 10px
+            line-height: 1.55
+            white-space: pre-line
+
+        small
+            color: #8b5d5d
+            font-size: 8px
+            line-height: 1.4
+
+.patient-assignment-overdose__icon
+    color: #c94747
+    font-size: 18px
+
+.patient-assignment-card__footer
+    display: flex
+    flex-wrap: wrap
+    gap: 7px 15px
+    margin-top: 13px
+    padding-top: 11px
+    border-top: 1px solid $patient-border
+    color: $patient-muted
+    font-size: 8px
+
+    span
+        display: inline-flex
+        align-items: center
+        gap: 5px
+
+.patient-assignment-empty
+    display: flex
+    gap: 12px
+    align-items: center
+    padding: 18px
+    border: 1px solid $patient-border
+    border-radius: 14px
+    background: #fff
+    color: $patient-muted
+
+    > i
+        color: $patient-accent
+        font-size: 22px
+
+    h2
+        margin: 0 0 4px
+        color: $patient-ink
+        font-size: 14px
+
+    p
+        margin: 0
+        font-size: 9px
+
+    &.is-compact
+        padding: 14px
+
+.patient-assignment-history-list
+    display: grid
+    gap: 8px
+
+.patient-assignment-history
+    border: 1px solid $patient-border
+    border-radius: 11px
+    background: #fff
+    overflow: hidden
+
+    summary
+        display: flex
+        justify-content: space-between
+        gap: 12px
+        align-items: center
+        padding: 12px
+        cursor: pointer
+        list-style: none
+
+        &::-webkit-details-marker
+            display: none
+
+        > div
+            min-width: 0
+            display: flex
+            flex-direction: column
+            gap: 3px
+
+        strong
+            color: $patient-ink
+            font-size: 10px
+
+        span
+            color: $patient-muted
+            font-size: 8px
+
+.patient-assignment-history__body
+    display: grid
+    gap: 7px
+    padding: 0 12px 12px
+    color: $patient-ink
+    font-size: 9px
+    line-height: 1.5
+
+@media (max-width: 767.98px)
+    .patient-assignment-card__top
+        flex-direction: column
+
+    .patient-assignment-dose
+        width: 100%
+
+    .patient-assignment-grid
+        grid-template-columns: 1fr

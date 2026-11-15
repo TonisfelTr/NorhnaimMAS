@@ -394,6 +394,18 @@ class MedicalCardController extends Controller
             ]
         );
 
+        $medicationAssignments = \App\Models\PatientMedicationAssignment::query()
+            ->where('patient_id', (int) $patient->id)
+            ->orderByRaw(
+                "CASE status "
+                . "WHEN 'active' THEN 0 "
+                . "WHEN 'completed' THEN 1 "
+                . "ELSE 2 END"
+            )
+            ->orderByDesc('starts_on')
+            ->orderByDesc('id')
+            ->get();
+
         if (config('app.debug')) {
             $labTemplates = LabResearchTemplate::orderBy('name', 'desc')->get();
         } else {
@@ -557,6 +569,7 @@ class MedicalCardController extends Controller
             'templatesMap',
             'prescriptions',
             'prescriptionDateLabels',
+            'medicationAssignments',
             'patientDisability',
             'benefitPrescriptions',
         ), $visitHistoryData, $medicalCardContext, $visitAuditData));
