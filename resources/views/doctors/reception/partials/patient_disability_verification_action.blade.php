@@ -1,4 +1,4 @@
-{{-- NORHNAIM_DISABILITY_VERIFICATION_ACTION_V1 --}}
+
 
 @if(session('disability_verification_success'))
     <div class="alert alert-success mt-3 mb-0" role="status">

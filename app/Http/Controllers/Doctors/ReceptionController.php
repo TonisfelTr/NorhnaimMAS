@@ -1715,7 +1715,6 @@ private function assertDoctorAvailableForReception(
             ->all();
     }
 
-
     private function clinicScheduleExceptionDataForDoctors(
         $doctors
     ): array {
@@ -1983,7 +1982,6 @@ private function assertDoctorAvailableForReception(
         ];
     }
 
-
     public function validateAppointmentWithinClinicSchedule(
         Doctor $doctor,
         Carbon $appointment,
@@ -2112,7 +2110,6 @@ private function assertDoctorAvailableForReception(
             ]);
         }
     }
-
 
     /**
      * Проверяет особые периоды клиники.
@@ -2605,7 +2602,6 @@ $futureReceptionsQuery = (clone $receptionsQuery)->reorder();
 
                 return [
                     'id' => $record->id,
-                    // NORHNAIM_REGISTRY_APPOINTMENT_ARRIVAL_V1
                     'appointment' => (bool) $record->appointment,
                     'arrival_can_confirm' => (static function ($value): bool {
                         if (!$value) {
@@ -3210,9 +3206,7 @@ $query->where('appointment', true)->orWhere(function ($past) use ($now): void {
             $record->appointment_format = $appointmentFormat;
         }
 
-
         $record->clinic_id = $currentClinicId;
-
 
         $record->save();
 
@@ -3234,7 +3228,6 @@ $query->where('appointment', true)->orWhere(function ($past) use ($now): void {
     public function destroy($id)
     {
         $record = RegistryRecord::findOrFail($id);
-        // NORHNAIM_TELEMED_JOURNAL_V1: do not bypass telemedicine cancellation rules.
         if ($record->appointment_format === 'telemedicine') {
             return app(TelemedicineJournalController::class)->destroy(
                 request(), $record->patient, (int) $record->getKey(),

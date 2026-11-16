@@ -31,7 +31,6 @@
             {{ $receptionRow['schedule']['state_label'] }}
         </span>
 
-        {{-- NORHNAIM_REGISTRY_APPOINTMENT_ARRIVAL_V1 --}}
         @if(
             ($receptionRow['appointment_format'] ?? 'in_person') === 'in_person'
             && ($receptionRow['appointment'] ?? false)

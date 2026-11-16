@@ -17,7 +17,6 @@ class DoctorOrHospitalAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // NORHNAIM_TELEMED_ACCESS_V1: card route only; controller checks this patient.
         if ($request->routeIs('doctors.patients.medical_card')
             && app(\App\Support\TelemedicineJournalAccess::class)->hasAdministrativeClinic($request->user())) {
             return $next($request);
@@ -26,8 +25,6 @@ class DoctorOrHospitalAdmin
         $user = $request->user();
         abort_unless($user, 403);
 
-
-        // NORHNAIM_CLINIC_ADMIN_GLOBAL_MEDCARD_V1
         // clinic_admin имеет глобальные права именно на маршруты медицинских карт.
         // Остальные doctors.* продолжают проходить штатные ограничения.
         $isGlobalClinicAdmin = $user->hasRole('clinic_admin');

@@ -45,7 +45,6 @@ class TelemedicineJournalService
 
     public function canManage($user, Patient $patient): bool
     {
-        // NORHNAIM_TELEMED_ACCESS_V1: separate scheduling permission, not clinical editing.
         return app(\App\Support\TelemedicineJournalAccess::class)->canManage($user, $patient);
     }
 
@@ -57,7 +56,6 @@ class TelemedicineJournalService
         }
         return $this->audit->visibleAppointments($user, $patient, $this->access);
     }
-
 
     public function authorize($user, Patient $patient): void
     {
@@ -271,7 +269,6 @@ $start = \App\Support\ClinicAppointmentTime::startInstant($record)
                 app(DoctorAppointmentAvailability::class)->assert($doctor, $clinicId, $start, $duration, 'telemedicine');
             }
             app(ReceptionController::class)->validateAppointmentWithinClinicSchedule($doctor, $start, appointmentFormat: 'telemedicine');
-// NORHNAIM_TELEMED_AVAILABLE_SLOTS_V1:
 // тот же overlap-контроль, что используется при показе свободных окон.
 app(\App\Services\TelemedicineAvailableSlotService::class)
     ->assertFree(

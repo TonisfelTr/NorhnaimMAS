@@ -174,7 +174,6 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
         Route::get('/assignments', [\App\Http\Controllers\Patients\MedicationAssignmentsController::class, 'index'])->name('assignments.index');
     });
 
-
 Route::middleware([
     'auth',
     \Spatie\Permission\Middleware\RoleMiddleware::class . ':patients',
@@ -201,7 +200,6 @@ Route::middleware([
             ->middleware('throttle:5,1')
             ->name('identity.verify');
     });
-
 
 Route::middleware([
     'auth',
@@ -245,7 +243,6 @@ Route::middleware([
         )->whereNumber('linkRequest')
             ->middleware('throttle:10,1')
             ->name('patient-link-requests.approve');
-
 
         Route::post(
             '/patient-link-requests/{linkRequest}/reject',
@@ -867,7 +864,6 @@ Route::prefix('laboratory')->as('laboratory.')->group(function (): void {
         });
 });
 
-// PATIENT_TREATMENT_WIZARD_V8_MEDGEMMA_ROUTE
 Route::post(
     '/doctors/patients/{patient}/medication-assignments/medgemma',
     [\App\Http\Controllers\Doctors\MedicationAssignmentAiController::class, 'generate']
@@ -875,7 +871,6 @@ Route::post(
     ->middleware('auth')
     ->name('doctors.patients.medication-assignments.medgemma');
 
-// PATIENT_TREATMENT_WIZARD_V10_QUEUE_ROUTES
 Route::post(
     '/doctors/patients/{patient}/medication-assignments/medgemma/start',
     [\App\Http\Controllers\Doctors\MedicationAssignmentAiController::class, 'start']
@@ -889,3 +884,10 @@ Route::get(
 )
     ->middleware('auth')
     ->name('doctors.patients.medication-assignments.medgemma.status');
+
+Route::get(
+    '/doctors/patients/{patient}/medication-assignments/prescription-meta',
+    [\App\Http\Controllers\Doctors\MedicationAssignmentPrescriptionMetaController::class, 'show']
+)
+    ->middleware('auth')
+    ->name('doctors.patients.medication-assignments.prescription-meta');

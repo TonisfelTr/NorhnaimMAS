@@ -7,7 +7,6 @@
         </div>
     </div>
 
-    {{-- NORHNAIM_TELEMED_JOURNAL_V1 --}}
     @include('doctors.reception.partials.telemedicine_journal_toolbar')
     {{-- clinic-telemedicine-timezones:timezone-journal-display-control:v1:begin --}}
     @include('shared.appointment_timezone_control')

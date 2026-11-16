@@ -24,7 +24,6 @@ class HospitalPatientAccess
      * The project's bootstrap administrator is a developer-only account.
      * A generic "admins" role is NOT sufficient to see patients in production.
      */
-    // NORHNAIM_CLINIC_ADMIN_GLOBAL_MEDCARD_V1
     /**
      * clinic_admin — глобальный администратор медицинских карт.
      * Дополнительно сохраняем точный системный аккаунт admin@admin.ru
@@ -154,7 +153,6 @@ class HospitalPatientAccess
             return true;
         }
 
-        // NORHNAIM_TELEMED_ACCESS_V1: permits reading; canEdit remains unchanged.
         if (app(\App\Support\TelemedicineJournalAccess::class)->canManage($user, $patient)) {
             return true;
         }

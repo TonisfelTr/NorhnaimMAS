@@ -536,18 +536,15 @@ class MedicalCardController extends Controller
         $visitAuditData = $this->buildMedicalVisitAuditContext(
             $request, $patient, $user, $access, $visitHistoryData['visitHistory']
         );
-        // NORHNAIM_TELEMED_JOURNAL_V1
         // clinic-telemedicine-timezones:provider-journal-navigation:v1:begin
         $visitAuditData = app(\App\Services\TelemedicineJournalService::class)->decorate(
             $request, $patient, $visitAuditData
         );
-        // NORHNAIM_CLINIC_TELEMEDICINE_PROVIDER_V1: navigation only, never create on GET.
         $visitAuditData = app(\App\Services\TelemedicineProviderSessionService::class)->decorate(
             $request, $patient, $visitAuditData
         );
         // clinic-telemedicine-timezones:provider-journal-navigation:v1:end
         $patientDisability = $this->buildPatientDisabilityCard($patient, $user, $access);
-        // NORHNAIM_BENEFIT_PRESCRIPTIONS_V1
         $benefitPrescriptions = app(\App\Services\BenefitPrescriptionService::class)
             ->cardContext($request, $patient, $patientDisability);
 
@@ -1065,7 +1062,6 @@ $upcomingQuery = (clone $base)->whereNull('deleted_at');
             $filters['format'] = 'all';
         }
 
-        // NORHNAIM_REGISTRY_APPOINTMENT_HISTORY_V1
         $totals['completed'] = (clone $base)
             ->where('appointment', true)
             ->count();
@@ -1292,7 +1288,6 @@ $appointmentTime = \App\Support\ClinicAppointmentTime::describe($record);
         ];
     }
 
-
     /**
      * Formal doctor attestations and independent WebRTC signaling log.
      * All queries are patient-scoped and use the same clinic visibility rules
@@ -1425,7 +1420,6 @@ $appointmentTime = \App\Support\ClinicAppointmentTime::describe($record);
         }
 
         $audit = app(\App\Services\MedicalVisitAuditService::class);
-        // NORHNAIM_TELEMED_ACCESS_V1
         $appointments = app(\App\Services\TelemedicineJournalService::class)
             ->journalAppointments($user, $patient)
             ->where('appointment_format', 'telemedicine')

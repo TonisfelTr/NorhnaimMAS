@@ -765,8 +765,6 @@
 
         .ward-modal-link:hover { background: var(--ward-primary-dark); color: #fff; }
 
-
-
         .ward-filter-stack {
             display: grid;
             gap: 10px;
@@ -1130,7 +1128,6 @@
             .ward-view-size-field { flex-basis: 100%; }
             .ward-view-size-reset { margin-left: auto; }
         }
-
 
         /* Прогресс загрузки палаты: оформление такое же, как в редакторе настроек. */
         .ward-page { position: relative; }
@@ -1521,7 +1518,6 @@
                             </div>
                         </header>
 
-                        <!-- WARD_VIEW_SIZE_CONTROLS_V2_ACTIVE: panel is rendered by rooms.blade.php -->
                         <!-- Размеры меняют только отображение в стационаре, исходный план не сохраняется. -->
                         <div class="ward-view-size-toolbar" data-ward-controls-version="v2" role="group" aria-label="Размер схемы палаты на экране">
                             <div class="ward-view-size-toolbar__title">
@@ -1704,8 +1700,6 @@
             </div>
         </div>
     </div>
-
-
 
     <div class="modal fade ward-assign-modal" id="wardAssignModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">

@@ -805,8 +805,6 @@
             border-top: 1px solid var(--reception-border);
         }
 
-
-
         /*
          * Выпадающие элементы фильтра должны выходить за границы карточки.
          * Базовая .reception-card использует overflow: hidden для скруглений,
@@ -3019,7 +3017,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                         @if(!$receptionPage['is_inpatient'] && ($receptionRow['can_modify'] ?? false))
 
-                                                                                        {{-- NORHNAIM_REGISTRY_APPOINTMENT_ARRIVAL_V1 --}}
                                             @if(
                                                 ($receptionRow['appointment_format'] ?? 'in_person') === 'in_person'
                                                 && !($receptionRow['appointment'] ?? false)

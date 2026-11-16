@@ -10,10 +10,37 @@ use Illuminate\Support\Carbon;
 
 class MedicalPrescription extends Model
 {
+
+    protected static function booted(): void
+    {
+        static::saving(
+            function (self $prescription): void {
+                if (
+                    (int) ($prescription->clinic_id ?? 0) > 0
+                    || (int) ($prescription->doctor_id ?? 0) <= 0
+                ) {
+                    return;
+                }
+
+                $clinicId = Doctor::query()
+                    ->whereKey(
+                        (int) $prescription->doctor_id
+                    )
+                    ->value('clinic_id');
+
+                if ((int) $clinicId > 0) {
+                    $prescription->clinic_id =
+                        (int) $clinicId;
+                }
+            }
+        );
+    }
+
     use SoftDeletes;
 
     protected $fillable = [
         'doctor_id',
+        'clinic_id',
         'doctor_name',
         'patient_id',
         'patient_name',

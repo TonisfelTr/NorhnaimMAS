@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Doctors;
 
-// PATIENT_TREATMENT_WIZARD_V10_GENERATED
-
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateMedicationAssignmentMedGemmaJob;
 use App\Models\Patient;
@@ -27,6 +25,8 @@ class MedicationAssignmentAiController extends Controller
             'regimen' => ['nullable', 'string', 'max:2000'],
             'diagnosis_code' => ['nullable', 'string', 'max:64'],
             'birth_at' => ['nullable', 'string', 'max:64'],
+            'dosage_unit' => ['nullable', 'string', 'max:50'],
+            'drug_form' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ((int) $data['patient_id'] !== (int) $patient->id) {
@@ -45,7 +45,7 @@ class MedicationAssignmentAiController extends Controller
             'progress' => 5,
             'stage' => 'queued',
             'stage_label' => 'В очереди',
-            'message' => 'Задание поставлено в очередь MedGemma.',
+            'message' => 'Задание поставлено в очередь.',
             'patient_id' => (int) $patient->id,
             'user_id' => $userId,
             'created_at' => now()->toIso8601String(),
@@ -107,7 +107,7 @@ class MedicationAssignmentAiController extends Controller
 
             return response()->json([
                 'message' =>
-                    'Не удалось поставить MedGemma в очередь.',
+                    'Не удалось запустить формирование инструкции.',
             ], 500);
         }
 
@@ -126,7 +126,7 @@ class MedicationAssignmentAiController extends Controller
         if (!is_array($status)) {
             return response()->json([
                 'message' =>
-                    'Задание MedGemma не найдено или уже истекло.',
+                    'Задание не найдено или срок его действия истёк.',
             ], 404);
         }
 
@@ -163,7 +163,7 @@ class MedicationAssignmentAiController extends Controller
     ): JsonResponse {
         return response()->json([
             'message' =>
-                'Синхронная генерация отключена. Используйте очередь MedGemma.',
+                'Формирование инструкции выполняется в фоновом режиме.',
         ], 409);
     }
 

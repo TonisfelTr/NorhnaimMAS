@@ -50,9 +50,8 @@
         </style>
     @endif
 
-
 <style>
-    /* NORHNAIM_DOCTOR_ACCOUNT_DROPDOWN_FIX_V1 */
+    
     .doctor-sidebar__account-dropdown {
         position: relative;
         overflow: visible !important;
@@ -343,7 +342,6 @@
 @stack('scripts')
 <script>
 (() => {
-    // NORHNAIM_DOCTOR_ACCOUNT_DROPDOWN_FIX_V1
     const toggle = document.getElementById('doctorSidebarAccount');
 
     if (!toggle) {
@@ -477,7 +475,6 @@
         })();
     </script>
 @endif
-
 
 <script>
     (() => {

@@ -27,7 +27,7 @@
                     <div><span>Дата рождения</span><strong>{{ $certificateUiContext['birth_date'] ?: 'Не указана' }}</strong></div>
                     <div><span>Медкарта</span><strong>{{ $certificateUiContext['card_number'] ?: 'Не указана' }}</strong></div>
                 </div>
-                {{-- NORHNAIM_MEDICAL_CERTIFICATE_NO_AI_V1 --}}
+                
                 <div class="mc-cert-mode" role="group" aria-label="Режим просмотра">
                     <button type="button" class="is-active" data-cert-edit aria-pressed="true" aria-controls="certCertificateModalEditor">
                         <i class="bi bi-pencil-square" aria-hidden="true"></i> Заполнение

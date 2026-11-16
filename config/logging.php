@@ -52,6 +52,14 @@ return [
 
     'channels' => [
 
+        'medgemma_debug' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/medgemma-debug.log'),
+            'level' => env('MEDGEMMA_DEBUG_LOG_LEVEL', 'debug'),
+            'days' => (int) env('MEDGEMMA_DEBUG_LOG_DAYS', 3),
+            'replace_placeholders' => true,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', env('LOG_STACK', 'single')),

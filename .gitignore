@@ -44,3 +44,4 @@ docker-compose.yml
 /qa/
 /patches/
 /telemedicine/
+/clean_project.py

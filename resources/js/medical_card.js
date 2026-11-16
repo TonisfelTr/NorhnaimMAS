@@ -700,7 +700,6 @@ function getCriticalRefText(param) {
     return parts.join(' или ');
 }
 
-
 function evaluateParamFlag(value, param) {
     const normalized = String(value ?? '')
         .replace(/\s+/g, '')
@@ -3063,7 +3062,6 @@ function initPrescriptionDrugSelect2() {
     });
 }
 
-
 // Epicrisis document editor: CodeMirror используется как WYSIWYG-подобный лист документа,
 // без HTML-кода в поле ввода. В textarea[name="text"] сохраняется готовый HTML,
 // а в text_json — структурированная модель для будущей генерации .docx.
@@ -5311,7 +5309,6 @@ function initTestAssignments() {
     loadAssignments();
 }
 
-
 function initPatientInfoForm() {
     const patientInfoForm = document.querySelector('#pane-patient-info form.patient-info-form-card');
     if (!patientInfoForm) {
@@ -6039,7 +6036,6 @@ function initPatientInfoForm() {
     collectPassport();
 }
 
-
 function initVisitHistoryDeepLink() {
     const query = new URLSearchParams(window.location.search);
     const isVisitTab = query.get('tab') === 'visits';
@@ -6751,7 +6747,6 @@ function initInstrumentalResultFiles() {
     });
 }
 
-
 $('.js-patient-select').select2({
 
     placeholder:
@@ -7352,7 +7347,6 @@ function initAnamnesisModal() {
 
         syncSetAsCurrent();
     }
-
 
     function isValidAiDiagnosis(item) {
         if (!item || typeof item !== 'object') {
@@ -8057,7 +8051,6 @@ function initMedicalCardCertificatesUi() {
         }
     }
 
-    // NORHNAIM_CERTIFICATE_PRINT_POLISH_V1
     async function loadCertificatePrintContext(modal) {
         if (
             modal.dataset.certificatePrintContextLoaded === '1'
@@ -8490,9 +8483,6 @@ function initMedicalCardCertificatesUi() {
         return true;
     }
 
-
-    // NORHNAIM_EPICRISIS_CDA_LAYOUT_V1
-    // NORHNAIM_EPICRISIS_CDA_LAYOUT_POLISH_V101
     function epicrisisField(
         id,
         label,
@@ -8555,7 +8545,6 @@ function initMedicalCardCertificatesUi() {
         return wrapper;
     }
 
-    // NORHNAIM_EPICRISIS_FORM_CONTEXT_V1
     async function loadEpicrisisFormContext(modal) {
         if (
             modal.dataset.certAiMode !== 'epicrisis'
@@ -9390,7 +9379,6 @@ function initMedicalCardCertificatesUi() {
 const issued = dateText(query(modal, '[data-cert-issued-date]')?.value);
         const fragment = document.createDocumentFragment();
 
-        // NORHNAIM_CLINIC_CERTIFICATE_HEADER_SPATIE_JS_V1
         const headerUrl = String(modal.dataset.certHeaderUrl || '').trim();
 
         if (headerUrl) {
@@ -9398,8 +9386,6 @@ const issued = dateText(query(modal, '[data-cert-issued-date]')?.value);
                 'div',
                 'mc-cert-paper__clinic-header'
             );
-            // NORHNAIM_CLINIC_CERTIFICATE_HEADER_LAYOUT_V3
-            // NORHNAIM_CLINIC_CERTIFICATE_HEADER_FULLWIDTH_V124
             header.style.cssText = [
                 'width:100%',
                 'max-width:100%',
@@ -9566,7 +9552,6 @@ fragment.append(node('h2', '', title));
         tests: 'тестов',
     };
 
-    // NORHNAIM_AI_MEDICAL_DOCUMENT_QUEUE_V1
     const activeCertificateAiTasks = new Map();
 
     function sleep(ms) {

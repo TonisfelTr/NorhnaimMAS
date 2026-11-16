@@ -103,14 +103,6 @@ final class MedicalDocumentAiTaskRunner
                 return 0;
             }
 
-            /*
-             * NORHNAIM_MEDICAL_DOCUMENT_ANALYZER_REFINEMENT_V2
-             *
-             * Общая постобработка клинических документов:
-             * - диагноз берём из primary_diagnosis анализатора;
-             * - жалобы заключения психиатра — из matched_symptoms;
-             * - выписка получает компактный anamnesis morbi.
-             */
             $mode = (string) $task->mode;
 
             if (
@@ -430,7 +422,6 @@ final class MedicalDocumentAiTaskRunner
         array $document,
         Patient $patient
     ): array {
-        // NORHNAIM_CONTINUE_TREATMENT_AI_REFINEMENT_V1
         return app(
             \App\Services\ContinueTreatmentRefinementService::class
         )->refine(

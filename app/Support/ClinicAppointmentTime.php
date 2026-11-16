@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
-/** NORHNAIM_VIEWER_TIMEZONE_V1: absolute instants + viewer-local presentation. */
 final class ClinicAppointmentTime
 {
     public static function timezone(Clinic|int|null $clinic): string

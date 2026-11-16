@@ -3,7 +3,7 @@
 @section('assets')
     @parent
     @vite('resources/js/medical_card.js')
-    {{-- NORHNAIM_BENEFIT_PRESCRIPTIONS_V1 --}}
+    
     <link rel="stylesheet" href="{{ asset('css/benefit-prescriptions.css') }}?v=1">
     <script src="{{ asset('js/benefit-prescriptions.js') }}?v=1" defer></script>
 @endsection
@@ -19,7 +19,6 @@
                     {{ session('patient_transfer_success') }}
                 </div>
             @endif
-
 
             <div class="mc-patient-shell">
                 <div class="mc-patient-head">
@@ -136,7 +135,6 @@
                         <div class="mc-patient-meta-icon">
                             <i class="bi bi-activity"></i>
                         </div>
-
 
                         <div class="mc-patient-meta-value">
                             @if($currentDiagnosisCode)
@@ -1580,7 +1578,6 @@
                                                 <tbody>
                                                 @foreach($instrumentalResearches as $instrumentalResearch)
 
-
                                                     <tr>
                                                         <td>
                                                             <div class="d-flex align-items-start gap-2">
@@ -2503,7 +2500,6 @@
         </div>
     </div>
 
-
     <div class="modal fade mc-modal-ui mc-modal-ui--teal"
          id="modalViewLab"
          tabindex="-1"
@@ -3268,7 +3264,6 @@
                                 </label>
                                 <textarea id="epicrisisTextValue" name="text" class="d-none"></textarea>
                                 <div id="epicrisisDocEditor" class="epicrisis-doc-editor"></div>
-
 
                             </div>
                         </div>
@@ -4500,7 +4495,6 @@
         </div>
     </div>
 
-
     <div
         class="modal fade prescription-modal-ui mc-modal-ui"
         id="prescriptionModal"
@@ -4983,7 +4977,7 @@
             </div>
         </div>
     </div>
-    {{-- PATIENT_TREATMENT_WIZARD_V5_NATIVE_PRESCRIPTION --}}
+    
     <style id="patient-treatment-wizard-v5-style">
         #prescriptionModal .treatment-wizard-dialog {
             width: min(1380px, calc(100vw - 32px));
@@ -5776,7 +5770,7 @@
             }
         }
     </style>
-    {{-- PATIENT_MEDICATION_TAB_V7_CLEAN_UI --}}
+    
     <style id="patient-medication-tab-v7-clean-ui">
         /*
          * V7 intentionally simplifies V6:
@@ -6049,7 +6043,7 @@
             }
         }
     </style>
-    {{-- PATIENT_TREATMENT_WIZARD_V8_MEDGEMMA --}}
+    
     <style id="patient-treatment-wizard-v8-medgemma-style">
         #prescriptionModal.is-treatment-step-2
         > .modal-dialog
@@ -6406,7 +6400,7 @@
 
                         <div class="medgemma-assignment-toolbar__hint">
                             Препарат, дозировка и схема берутся из выписанного рецепта.
-                            MedGemma заполняет текст инструкции; врач проверяет черновик перед сохранением.
+                            Инструкция формируется автоматически. Проверьте заполненные поля перед сохранением.
                         </div>
                     </div>
 
@@ -6416,7 +6410,7 @@
                                     class="btn btn-outline-primary btn-sm medgemma-assignment-btn"
                                     id="medgemmaFillAssignment">
                                 <i class="bi bi-stars me-1"></i>
-                                Заполнить через MedGemma
+                                Заполнить автоматически
                             </button>
                         </div>
 
@@ -6498,7 +6492,7 @@
                 button.disabled = true;
                 button.innerHTML =
                     '<span class="spinner-border spinner-border-sm me-1"></span>' +
-                    'MedGemma заполняет…';
+                    'Формируем инструкцию…';
 
                 setStatus('Формируем черновик инструкции…');
 
@@ -6536,7 +6530,7 @@
                     if (!response.ok) {
                         throw new Error(
                             payload.message
-                            || 'MedGemma не смогла сформировать инструкцию.'
+                            || 'Не удалось сформировать инструкцию.'
                         );
                     }
 
@@ -6560,13 +6554,13 @@
                     lockDrugFromPrescription(data);
 
                     setStatus(
-                        `Черновик заполнен через ${payload.model || 'MedGemma'}. ` +
+                        `Черновик инструкции сформирован. ` +
                         'Проверьте перед сохранением.',
                         'success'
                     );
                 } catch (error) {
                     console.error('MedicationAssignment MedGemma error:', error);
-                    setStatus(error.message || 'Ошибка MedGemma.', 'danger');
+                    setStatus(error.message || 'Не удалось сформировать инструкцию.', 'danger');
                 } finally {
                     button.disabled = false;
                     button.innerHTML = originalHtml;
@@ -6587,7 +6581,7 @@
         }
     })();
     </script>
-    {{-- PATIENT_TREATMENT_WIZARD_V9_ASSIGNMENT_ACTIONS --}}
+    
     <style id="patient-treatment-wizard-v9-assignment-actions">
         #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentPane {
             position: relative;
@@ -7156,7 +7150,7 @@
 
                         <div class="medication-v9-toolbar__hint">
                             Препарат, дозировка и режим приёма зафиксированы на шаге 1.
-                            MedGemma формирует черновик остальных полей; врач проверяет его перед сохранением.
+                            Остальные поля формируются автоматически. Проверьте их перед сохранением.
                         </div>
                     </div>
 
@@ -7165,7 +7159,7 @@
                                 class="btn btn-primary btn-sm"
                                 id="medicationV9MedGemmaButton">
                             <i class="bi bi-stars me-1"></i>
-                            Заполнить через MedGemma
+                            Заполнить автоматически
                         </button>
 
                         <div class="medication-v9-toolbar__status"
@@ -7186,7 +7180,7 @@
                 footer.className = 'medication-v9-footer';
                 footer.innerHTML = `
                     <div class="medication-v9-footer__hint">
-                        Проверьте инструкцию, противопоказания и действия при передозировке перед сохранением.
+                        Проверьте заполненные поля перед сохранением.
                     </div>
 
                     <button type="button"
@@ -7308,7 +7302,7 @@
                     button.disabled = true;
                     button.innerHTML =
                         '<span class="spinner-border spinner-border-sm me-1"></span>' +
-                        'MedGemma заполняет…';
+                        'Формируем инструкцию…';
 
                     setStatus('Формируем черновик инструкции…');
 
@@ -7350,7 +7344,7 @@
                         if (!response.ok) {
                             throw new Error(
                                 payload.message
-                                || 'MedGemma не смогла сформировать инструкцию.'
+                                || 'Не удалось сформировать инструкцию.'
                             );
                         }
 
@@ -7380,7 +7374,7 @@
                         lockDrug(snapshot);
 
                         setStatus(
-                            `Черновик заполнен через ${payload.model || 'MedGemma'}. ` +
+                            `Черновик инструкции сформирован. ` +
                             'Проверьте текст перед сохранением.',
                             'success'
                         );
@@ -7391,7 +7385,7 @@
                         );
 
                         setStatus(
-                            error.message || 'Ошибка MedGemma.',
+                            error.message || 'Не удалось сформировать инструкцию.',
                             'danger'
                         );
                     } finally {
@@ -7451,7 +7445,7 @@
         }
     })();
     </script>
-    {{-- PATIENT_TREATMENT_WIZARD_V10_QUEUE --}}
+     --}}
     <style id="patient-treatment-wizard-v10-queue">
         .medication-v10-progress {
             display: none;
@@ -7657,24 +7651,21 @@
                 return fieldFromLabel(form, labels[key] || []);
             };
 
-            const writeField = (key, value) => {
-                if (value == null || String(value).trim() === '') {
-                    return false;
-                }
+        const writeField = (key, value) => {
+            const field = findField(key);
 
-                const field = findField(key);
+            if (!field) {
+                console.warn('V29: assignment field not found:', key);
+                return false;
+            }
 
-                if (!field) {
-                    console.warn('V10: assignment field not found:', key);
-                    return false;
-                }
+            const text = value == null ? '' : String(value).trim();
+            field.value = text;
+            field.dispatchEvent(new Event('input', {bubbles: true}));
+            field.dispatchEvent(new Event('change', {bubbles: true}));
 
-                field.value = String(value).trim();
-                field.dispatchEvent(new Event('input', {bubbles: true}));
-                field.dispatchEvent(new Event('change', {bubbles: true}));
-
-                return String(field.value || '').trim() !== '';
-            };
+            return text !== '';
+        };
 
             const prescriptionSnapshot = () => {
                 const drug = document.getElementById('drug_id_modal');
@@ -7851,36 +7842,42 @@
                 );
             };
 
-            const fillResult = (fields) => {
-                const keys = [
-                    'doctor_instruction',
-                    'indication',
-                    'contraindications',
-                    'adverse_reactions',
-                    'missed_dose',
-                    'overdose_actions',
-                    'urgent_symptoms',
-                ];
+        const fillResult = (fields) => {
+            const keys = [
+                'doctor_instruction',
+                'indication',
+                'contraindications',
+                'adverse_reactions',
+                'missed_dose',
+                'overdose_actions',
+                'urgent_symptoms',
+            ];
 
-                let written = 0;
+            let written = 0;
+            let cleared = 0;
 
-                for (const key of keys) {
-                    if (
-                        Object.prototype.hasOwnProperty.call(
-                            fields || {},
-                            key
-                        )
-                        && writeField(key, fields[key])
-                    ) {
-                        written++;
-                    }
+            // Clear all seven fields first so a blank response cannot leave
+            // stale text from a previous MedGemma run in the form.
+            for (const key of keys) {
+                const field = findField(key);
+                if (!field) continue;
+                field.value = '';
+                field.dispatchEvent(new Event('input', {bubbles: true}));
+                field.dispatchEvent(new Event('change', {bubbles: true}));
+                cleared++;
+            }
+
+            for (const key of keys) {
+                if (!Object.prototype.hasOwnProperty.call(fields || {}, key)) {
+                    continue;
                 }
+                if (writeField(key, fields[key])) {
+                    written++;
+                }
+            }
 
-                return {
-                    written,
-                    total: keys.length,
-                };
-            };
+            return { written, total: keys.length, cleared };
+        };
 
             const clearPolling = () => {
                 if (pollTimer) {
@@ -7939,7 +7936,7 @@
                             finishProgress(false);
 
                             throw new Error(
-                                'MedGemma ответила, но ни одно поле формы не удалось заполнить. ' +
+                                'Не удалось заполнить поля инструкции. ' +
                                 'Структура формы не совпала с ожидаемой.'
                             );
                         }
@@ -7947,18 +7944,15 @@
                         finishProgress(true);
 
                         setStatus(
-                            `MedGemma заполнила ${result.written} из ${result.total} полей. ` +
-                            'Проверьте черновик перед сохранением.',
-                            result.written === result.total
-                                ? 'success'
-                                : 'warning'
+                            'Инструкция сформирована. Проверьте заполненные поля перед сохранением.',
+                            'success'
                         );
 
                         button.disabled = false;
                         button.classList.remove('is-running');
                         button.innerHTML =
                             '<i class="bi bi-stars me-1"></i>' +
-                            'Заполнить заново через MedGemma';
+                            'Заполнить заново';
 
                         activeTaskId = null;
                         return;
@@ -7971,7 +7965,7 @@
                         throw new Error(
                             payload.error
                             || payload.message
-                            || 'Задание MedGemma завершилось ошибкой.'
+                            || 'Не удалось сформировать инструкцию.'
                         );
                     }
 
@@ -7989,14 +7983,14 @@
                     }
 
                     throw new Error(
-                        'Неизвестный статус задания MedGemma.'
+                        'Не удалось определить состояние формирования инструкции.'
                     );
                 } catch (error) {
                     clearPolling();
                     stopSyntheticProgress();
 
                     setStatus(
-                        error.message || 'Ошибка MedGemma.',
+                        error.message || 'Не удалось сформировать инструкцию.',
                         'danger'
                     );
 
@@ -8004,7 +7998,7 @@
                     button.classList.remove('is-running');
                     button.innerHTML =
                         '<i class="bi bi-stars me-1"></i>' +
-                        'Повторить через MedGemma';
+                        'Повторить заполнение';
 
                     activeTaskId = null;
                 }
@@ -8106,7 +8100,7 @@
 
                         button.innerHTML =
                             '<span class="spinner-border spinner-border-sm me-1"></span>' +
-                            'MedGemma работает…';
+                            'Формируем инструкцию…';
 
                         backendProgress =
                             Number(payload.progress || 5);
@@ -8130,7 +8124,7 @@
                         finishProgress(false);
 
                         setStatus(
-                            error.message || 'Ошибка очереди MedGemma.',
+                            error.message || 'Не удалось запустить формирование инструкции.',
                             'danger'
                         );
 
@@ -8138,7 +8132,7 @@
                         button.classList.remove('is-running');
                         button.innerHTML =
                             '<i class="bi bi-stars me-1"></i>' +
-                            'Повторить через MedGemma';
+                            'Повторить заполнение';
 
                         activeTaskId = null;
                     }
@@ -8160,7 +8154,7 @@
         }
     })();
     </script>
-    {{-- PATIENT_TREATMENT_WIZARD_V13_DEFER_PRESCRIPTION --}}
+    
     <style id="patient-treatment-wizard-v13-defer-prescription">
         .treatment-v13-draft-note {
             display: inline-flex;
@@ -8710,6 +8704,1163 @@
         } else {
             window.setTimeout(bootV13, 0);
         }
+    })();
+    </script>
+    
+    <script>
+    (() => {
+        const wizard = document.getElementById('prescriptionModal');
+        if (!wizard) return;
+
+        const getUnit = () => {
+            const dosage = document.getElementById('dosage_modal');
+            const option = dosage?.selectedOptions?.[0];
+
+            const explicit =
+                option?.dataset?.unit
+                || option?.dataset?.dosageUnit
+                || option?.dataset?.doseUnit
+                || '';
+
+            if (explicit.trim()) {
+                return explicit.trim();
+            }
+
+            const text = String(
+                option?.textContent
+                || dosage?.value
+                || ''
+            );
+
+            const match = text.match(
+                /\b(мкг\/мл|мг\/мл|мкг|мг|мл|г|ЕД|МЕ)\b/i
+            );
+
+            if (match) {
+                return match[1];
+            }
+
+            const form = String(
+                document.getElementById('drug_form_modal')
+                    ?.selectedOptions?.[0]?.textContent
+                || ''
+            ).toLowerCase();
+
+            if (/таблет|капсул|драже|порош/i.test(form)) {
+                return 'мг';
+            }
+
+            if (/раствор|суспенз|сироп|капл|ампул|флакон/i.test(form)) {
+                return 'мл';
+            }
+
+            return '';
+        };
+
+        const syncPresentationFields = () => {
+            const host = document.getElementById(
+                'treatmentWizardAssignmentHost'
+            );
+
+            const form =
+                host?.querySelector('form')
+                || document.querySelector(
+                    '#medicationAssignmentModal form'
+                );
+
+            if (!form) return;
+
+            const ensureHidden = (name) => {
+                let input = form.querySelector(
+                    `input[type="hidden"][name="${name}"]`
+                );
+
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    form.appendChild(input);
+                }
+
+                return input;
+            };
+
+            const formText = String(
+                document.getElementById('drug_form_modal')
+                    ?.selectedOptions?.[0]?.textContent
+                || ''
+            ).trim();
+
+            ensureHidden('drug_form').value = formText;
+            ensureHidden('dosage_unit').value = getUnit();
+        };
+
+        const observer = new MutationObserver(() => {
+            if (
+                wizard.classList.contains(
+                    'is-treatment-step-2'
+                )
+            ) {
+                window.setTimeout(
+                    syncPresentationFields,
+                    0
+                );
+            }
+        });
+
+        observer.observe(
+            wizard,
+            {
+                attributes: true,
+                attributeFilter: ['class'],
+            }
+        );
+
+        document.addEventListener(
+            'submit',
+            (event) => {
+                const host = document.getElementById(
+                    'treatmentWizardAssignmentHost'
+                );
+
+                if (
+                    host
+                    && host.contains(event.target)
+                ) {
+                    syncPresentationFields();
+                }
+            },
+            true
+        );
+    })();
+    </script>
+    
+    <style id="patient-treatment-wizard-v16-units">
+        .presc-dosage-unit-v16 {
+            margin-top: .55rem;
+        }
+
+        .presc-dosage-unit-v16__label {
+            display: block;
+            margin-bottom: .25rem;
+            font-size: .76rem;
+            font-weight: 700;
+            color: #425766;
+        }
+
+        .presc-dosage-unit-v16__hint {
+            margin-top: .22rem;
+            font-size: .68rem;
+            color: #788b97;
+        }
+
+        .assignment-dose-with-unit-v16 {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .assignment-dose-with-unit-v16 > .form-control,
+        .assignment-dose-with-unit-v16 > input,
+        .assignment-dose-with-unit-v16 > select {
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .assignment-dose-unit-v16 {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 64px;
+            padding: .45rem .65rem;
+            border: 1px solid #ced9df;
+            border-left: 0;
+            border-radius: 0 .5rem .5rem 0;
+            background: #eef6f5;
+            color: #116b62;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .assignment-drug-form-v16 {
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+            margin-top: .45rem;
+            padding: .42rem .6rem;
+            border: 1px solid #dbe7eb;
+            border-radius: .55rem;
+            background: #f7fafb;
+            color: #45606e;
+            font-size: .74rem;
+        }
+
+        .assignment-drug-form-v16 strong {
+            color: #263f4c;
+        }
+    </style>
+
+    <script>
+    (() => {
+        'use strict';
+
+        const UNIT_OPTIONS_V16 = [
+            '',
+            'мг',
+            'мг/мл',
+            'мкг',
+            'мкг/мл',
+            'мл',
+            'г',
+            'ЕД',
+            'МЕ',
+        ];
+
+        const unitFromTextV16 = (text) => {
+            const match = String(text || '').match(
+                /\b(мкг\/мл|мг\/мл|мкг|мг|мл|г|ЕД|МЕ)\b/i
+            );
+
+            return match ? match[1] : '';
+        };
+
+        const ensureUnitSelectV16 = () => {
+            const dosageSelect = document.getElementById('dosage_modal');
+
+            if (!dosageSelect) return null;
+
+            let select = document.getElementById('dosage_unit_modal_v16');
+
+            if (select) return select;
+
+            const wrap = document.createElement('div');
+            wrap.className = 'presc-dosage-unit-v16';
+
+            const label = document.createElement('label');
+            label.className = 'presc-dosage-unit-v16__label';
+            label.htmlFor = 'dosage_unit_modal_v16';
+            label.innerHTML =
+                'Единица дозировки <span class="text-danger">*</span>';
+
+            select = document.createElement('select');
+            select.id = 'dosage_unit_modal_v16';
+            select.className = 'form-select';
+            select.required = true;
+
+            UNIT_OPTIONS_V16.forEach((unit) => {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit || 'Выберите единицу';
+                select.appendChild(option);
+            });
+
+            const hint = document.createElement('div');
+            hint.className = 'presc-dosage-unit-v16__hint';
+            hint.textContent =
+                'Например: мг для таблеток, мг/мл для концентрации раствора.';
+
+            wrap.append(label, select, hint);
+
+            const dosageField =
+                dosageSelect.closest('.presc-field')
+                || dosageSelect.parentElement;
+
+            dosageField?.appendChild(wrap);
+
+            return select;
+        };
+
+        const selectedDrugFormV16 = () =>
+            String(
+                document.getElementById('drug_form_modal')
+                    ?.selectedOptions?.[0]?.textContent
+                || ''
+            ).trim();
+
+        const inferUnitV16 = () => {
+            const dosage = document.getElementById('dosage_modal');
+            const option = dosage?.selectedOptions?.[0];
+
+            const explicit =
+                option?.dataset?.unit
+                || option?.dataset?.dosageUnit
+                || option?.dataset?.doseUnit
+                || '';
+
+            if (String(explicit).trim()) {
+                return String(explicit).trim();
+            }
+
+            const fromOption = unitFromTextV16(
+                option?.textContent || dosage?.value || ''
+            );
+
+            if (fromOption) return fromOption;
+
+            /*
+             * Only safe fallback:
+             * solid oral forms usually use a mass unit. We default to "мг"
+             * but leave liquid/concentration forms for explicit doctor choice.
+             */
+            const form = selectedDrugFormV16().toLowerCase();
+
+            if (/таблет|капсул|драже|порош/i.test(form)) {
+                return 'мг';
+            }
+
+            return '';
+        };
+
+        const syncUnitSelectV16 = () => {
+            const select = ensureUnitSelectV16();
+            if (!select) return;
+
+            const inferred = inferUnitV16();
+
+            if (inferred && !select.value) {
+                select.value = inferred;
+            }
+        };
+
+        const assignmentFormV16 = () => {
+            const host = document.getElementById('treatmentWizardAssignmentHost');
+
+            return (
+                host?.querySelector('form')
+                || document.querySelector('#medicationAssignmentModal form')
+            );
+        };
+
+        const ensureHiddenV16 = (form, name) => {
+            let input = form.querySelector(
+                `input[type="hidden"][name="${CSS.escape(name)}"]`
+            );
+
+            if (!input) {
+                input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                form.appendChild(input);
+            }
+
+            return input;
+        };
+
+        const findAssignmentDoseV16 = (form) => {
+            for (const selector of [
+                '[name="dosage"]',
+                '#medicationDosage',
+            ]) {
+                const field = form.querySelector(selector);
+                if (field) return field;
+            }
+
+            const labels = Array.from(form.querySelectorAll('label'));
+
+            for (const label of labels) {
+                if (
+                    String(label.textContent || '')
+                        .toLowerCase()
+                        .includes('дозировка')
+                ) {
+                    const forId = label.getAttribute('for');
+
+                    if (forId) {
+                        const field = form.querySelector(
+                            '#' + CSS.escape(forId)
+                        );
+                        if (field) return field;
+                    }
+
+                    const box = label.closest(
+                        '.mb-3, .form-group, [class*="col-"], section, .card'
+                    );
+
+                    const field = box?.querySelector('input, select');
+
+                    if (field) return field;
+                }
+            }
+
+            return null;
+        };
+
+        const renderStep2PresentationV16 = () => {
+            const form = assignmentFormV16();
+            if (!form) return;
+
+            const unitSelect = ensureUnitSelectV16();
+            const unit = String(unitSelect?.value || '').trim();
+            const drugForm = selectedDrugFormV16();
+
+            ensureHiddenV16(form, 'dosage_unit').value = unit;
+            ensureHiddenV16(form, 'drug_form').value = drugForm;
+
+            const dosageField = findAssignmentDoseV16(form);
+
+            if (
+                dosageField
+                && !dosageField.parentElement?.classList.contains(
+                    'assignment-dose-with-unit-v16'
+                )
+            ) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'assignment-dose-with-unit-v16';
+
+                dosageField.parentNode.insertBefore(wrapper, dosageField);
+                wrapper.appendChild(dosageField);
+
+                const suffix = document.createElement('span');
+                suffix.className = 'assignment-dose-unit-v16';
+                suffix.dataset.dosageUnitV16 = '1';
+                suffix.textContent = unit || '—';
+
+                wrapper.appendChild(suffix);
+            } else {
+                const suffix = form.querySelector(
+                    '[data-dosage-unit-v16="1"]'
+                );
+
+                if (suffix) suffix.textContent = unit || '—';
+            }
+
+            const drugSelected =
+                form.querySelector('#medicationDrugSelected')
+                || form.querySelector('#medicationDrugSearch')?.parentElement;
+
+            if (
+                drugSelected
+                && !form.querySelector('.assignment-drug-form-v16')
+            ) {
+                const info = document.createElement('div');
+                info.className = 'assignment-drug-form-v16';
+                info.innerHTML =
+                    '<i class="bi bi-capsule"></i>' +
+                    '<span>Форма препарата: <strong></strong></span>';
+
+                info.querySelector('strong').textContent =
+                    drugForm || 'не указана';
+
+                drugSelected.insertAdjacentElement('afterend', info);
+            } else {
+                const strong = form.querySelector(
+                    '.assignment-drug-form-v16 strong'
+                );
+
+                if (strong) {
+                    strong.textContent = drugForm || 'не указана';
+                }
+            }
+        };
+
+        const bootV16 = () => {
+            ensureUnitSelectV16();
+            syncUnitSelectV16();
+
+            [
+                document.getElementById('dosage_modal'),
+                document.getElementById('drug_form_modal'),
+            ].forEach((field) => {
+                field?.addEventListener('change', () => {
+                    const unitSelect = ensureUnitSelectV16();
+
+                    /*
+                     * When dosage/form changes, re-evaluate automatic value.
+                     * Liquid forms intentionally remain for explicit selection
+                     * unless the dosage text already contains mg/ml etc.
+                     */
+                    if (unitSelect) {
+                        const inferred = inferUnitV16();
+
+                        if (inferred) {
+                            unitSelect.value = inferred;
+                        } else if (
+                            selectedDrugFormV16()
+                            && /раствор|суспенз|сироп|капл|ампул|флакон/i.test(
+                                selectedDrugFormV16()
+                            )
+                        ) {
+                            unitSelect.value = '';
+                        }
+                    }
+
+                    renderStep2PresentationV16();
+                });
+            });
+
+            document.getElementById('dosage_unit_modal_v16')
+                ?.addEventListener(
+                    'change',
+                    renderStep2PresentationV16
+                );
+
+            const wizard = document.getElementById('prescriptionModal');
+
+            if (wizard) {
+                const observer = new MutationObserver(() => {
+                    if (
+                        wizard.classList.contains(
+                            'is-treatment-step-2'
+                        )
+                    ) {
+                        window.setTimeout(
+                            renderStep2PresentationV16,
+                            0
+                        );
+                    }
+                });
+
+                observer.observe(
+                    wizard,
+                    {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                    }
+                );
+            }
+
+            document.addEventListener(
+                'submit',
+                (event) => {
+                    const form = assignmentFormV16();
+
+                    if (form && event.target === form) {
+                        renderStep2PresentationV16();
+                    }
+                },
+                true
+            );
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener(
+                'DOMContentLoaded',
+                () => window.setTimeout(bootV16, 0),
+                {once: true}
+            );
+        } else {
+            window.setTimeout(bootV16, 0);
+        }
+    })();
+    </script>
+    
+    <style id="patient-treatment-wizard-v20-scroll">
+        #prescriptionModal > .modal-dialog.treatment-wizard-dialog {
+            height: calc(100vh - 24px) !important;
+            max-height: calc(100vh - 24px) !important;
+            margin-top: 12px !important;
+            margin-bottom: 12px !important;
+        }
+
+        #prescriptionModal > .modal-dialog.treatment-wizard-dialog > .modal-content {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            max-height: 100% !important;
+            overflow: hidden !important;
+        }
+
+        #prescriptionModal .treatment-wizard-master {
+            flex: 0 0 auto;
+        }
+
+        #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentPane {
+            display: flex !important;
+            flex: 1 1 auto !important;
+            flex-direction: column !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentHost {
+            display: flex !important;
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentHost > .modal-dialog {
+            display: flex !important;
+            flex: 1 1 auto !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+            margin: 0 !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2
+        #treatmentWizardAssignmentHost > .modal-dialog > .modal-content {
+            display: flex !important;
+            flex: 1 1 auto !important;
+            flex-direction: column !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+            overflow: hidden !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentHost .modal-body {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            overscroll-behavior: contain;
+            scrollbar-gutter: stable;
+            padding-bottom: 2rem !important;
+        }
+
+        #prescriptionModal.is-treatment-step-2 #medicationV9Footer {
+            position: relative !important;
+            bottom: auto !important;
+            flex: 0 0 auto !important;
+            z-index: 50;
+        }
+
+        #prescriptionModal.is-treatment-step-2 #treatmentWizardAssignmentHost textarea {
+            scroll-margin-bottom: 6rem;
+        }
+
+        @media (max-height: 760px) {
+            #prescriptionModal > .modal-dialog.treatment-wizard-dialog {
+                height: calc(100vh - 8px) !important;
+                max-height: calc(100vh - 8px) !important;
+                margin-top: 4px !important;
+                margin-bottom: 4px !important;
+            }
+        }
+    </style>
+
+    <script>
+    (() => {
+        if (window.__medgemmaV20FetchWrapped) return;
+        window.__medgemmaV20FetchWrapped = true;
+
+        const originalFetch = window.fetch;
+
+        window.fetch = async function (input, init = {}) {
+            const url =
+                typeof input === 'string'
+                    ? input
+                    : input?.url || '';
+
+            if (
+                url.includes('/medication-assignments/medgemma/start')
+                && init?.body
+                && typeof init.body === 'string'
+            ) {
+                try {
+                    const data = JSON.parse(init.body);
+
+                    data.dosage_unit =
+                        document.getElementById('dosage_unit_modal_v16')?.value || '';
+
+                    data.drug_form =
+                        document.getElementById('drug_form_modal')
+                            ?.selectedOptions?.[0]?.textContent?.trim()
+                        || '';
+
+                    init = {
+                        ...init,
+                        body: JSON.stringify(data),
+                    };
+                } catch (_) {}
+            }
+
+            return originalFetch.call(this, input, init);
+        };
+    })();
+    </script>
+    
+    <style id="patient-treatment-wizard-v21-locks">
+        #prescriptionModal.is-treatment-step-2
+        .treatment-v21-locked-field {
+            pointer-events: none !important;
+            background: #f1f5f7 !important;
+            color: #29414e !important;
+            cursor: not-allowed !important;
+        }
+
+        .treatment-v21-lock-note {
+            margin-top: .28rem;
+            color: #0f8c82;
+            font-size: .69rem;
+            font-weight: 700;
+        }
+
+        .treatment-v21-lock-note i {
+            margin-right: .25rem;
+        }
+    </style>
+
+    <script>
+    (() => {
+        'use strict';
+
+        const wizard =
+            document.getElementById('prescriptionModal');
+
+        if (
+            !wizard
+            || wizard.dataset.treatmentWizardV21 === '1'
+        ) {
+            return;
+        }
+
+        wizard.dataset.treatmentWizardV21 = '1';
+
+        let metaRequestKey = '';
+        let metaStartsAt = '';
+
+        const currentForm = () => {
+            const host =
+                document.getElementById(
+                    'treatmentWizardAssignmentHost'
+                );
+
+            return (
+                host?.querySelector('form')
+                || document.querySelector(
+                    '#medicationAssignmentModal form'
+                )
+            );
+        };
+
+        const findByLabel = (
+            form,
+            patterns
+        ) => {
+            if (!form) return null;
+
+            const fields = Array.from(
+                form.querySelectorAll(
+                    'input:not([type="hidden"]), textarea, select'
+                )
+            );
+
+            return fields.find((field) => {
+                let label = '';
+
+                if (field.id) {
+                    label =
+                        form.querySelector(
+                            `label[for="${CSS.escape(field.id)}"]`
+                        )?.textContent
+                        || '';
+                }
+
+                if (!label) {
+                    const box = field.closest(
+                        '.mb-3, .mb-2, .form-group, '
+                        + '[class*="col-"], section, .card'
+                    );
+
+                    label =
+                        box?.querySelector('label')
+                            ?.textContent
+                        || '';
+                }
+
+                const normalized =
+                    String(label)
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                        .toLowerCase();
+
+                return patterns.some(
+                    (pattern) =>
+                        normalized.includes(pattern)
+                );
+            }) || null;
+        };
+
+        const dosageField = (form) =>
+            form?.querySelector('[name="dosage"]')
+            || form?.querySelector('#medicationDosage')
+            || findByLabel(form, ['дозировка']);
+
+        const startsField = (form) =>
+            form?.querySelector('[name="starts_at"]')
+            || form?.querySelector('#medicationStartsAt')
+            || findByLabel(form, ['начало']);
+
+        const ensureHidden = (form, name) => {
+            let input =
+                form.querySelector(
+                    `input[type="hidden"][name="${CSS.escape(name)}"]`
+                );
+
+            if (!input) {
+                input =
+                    document.createElement('input');
+
+                input.type = 'hidden';
+                input.name = name;
+
+                form.appendChild(input);
+            }
+
+            return input;
+        };
+
+        const makeLocked = (
+            field,
+            noteText
+        ) => {
+            if (!field) return;
+
+            if (
+                field.tagName === 'INPUT'
+                || field.tagName === 'TEXTAREA'
+            ) {
+                field.readOnly = true;
+                field.setAttribute(
+                    'aria-readonly',
+                    'true'
+                );
+            }
+
+            field.classList.add(
+                'treatment-v21-locked-field'
+            );
+
+            field.setAttribute(
+                'tabindex',
+                '-1'
+            );
+
+            if (!field.dataset.v21Locked) {
+                field.dataset.v21Locked = '1';
+
+                field.addEventListener(
+                    'keydown',
+                    (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    },
+                    true
+                );
+
+                field.addEventListener(
+                    'beforeinput',
+                    (event) => {
+                        event.preventDefault();
+                    },
+                    true
+                );
+            }
+
+            const box =
+                field.closest(
+                    '.mb-3, .mb-2, .form-group, '
+                    + '[class*="col-"], section, .card'
+                )
+                || field.parentElement;
+
+            if (!box) return;
+
+            let note =
+                box.querySelector(
+                    '.treatment-v21-lock-note'
+                );
+
+            if (!note) {
+                note =
+                    document.createElement('div');
+
+                note.className =
+                    'treatment-v21-lock-note';
+
+                box.appendChild(note);
+            }
+
+            note.innerHTML =
+                '<i class="bi bi-lock-fill"></i>'
+                + noteText;
+        };
+
+        const step1Snapshot = () => {
+            const drug =
+                document.getElementById(
+                    'drug_id_modal'
+                );
+
+            return {
+                patientId:
+                    String(
+                        document.querySelector(
+                            '#patientPrescriptionForm [name="patient_id"]'
+                        )?.value
+                        || ''
+                    ).trim(),
+
+                drugId:
+                    String(
+                        drug?.value
+                        || ''
+                    ).trim(),
+
+                dosage:
+                    String(
+                        document.getElementById(
+                            'dosage_modal'
+                        )?.value
+                        || ''
+                    ).trim(),
+
+                unit:
+                    String(
+                        document.getElementById(
+                            'dosage_unit_modal_v16'
+                        )?.value
+                        || ''
+                    ).trim(),
+            };
+        };
+
+        const loadFirstPrescriptionDate = async (
+            snapshot
+        ) => {
+            if (
+                !snapshot.patientId
+                || !snapshot.drugId
+            ) {
+                return '';
+            }
+
+            const key =
+                snapshot.patientId
+                + ':'
+                + snapshot.drugId;
+
+            if (
+                key === metaRequestKey
+                && metaStartsAt
+            ) {
+                return metaStartsAt;
+            }
+
+            const url =
+                `/doctors/patients/${encodeURIComponent(snapshot.patientId)}`
+                + '/medication-assignments/prescription-meta'
+                + `?drug_id=${encodeURIComponent(snapshot.drugId)}`;
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        headers: {
+                            'Accept':
+                                'application/json',
+                            'X-Requested-With':
+                                'XMLHttpRequest',
+                        },
+                        credentials:
+                            'same-origin',
+                    }
+                );
+
+            const payload =
+                await response
+                    .json()
+                    .catch(
+                        () => ({})
+                    );
+
+            if (!response.ok) {
+                throw new Error(
+                    payload.message
+                    || 'Не удалось определить дату первой выписки препарата.'
+                );
+            }
+
+            metaRequestKey = key;
+            metaStartsAt =
+                String(
+                    payload.starts_at
+                    || ''
+                ).trim();
+
+            return metaStartsAt;
+        };
+
+        const lockFields = async () => {
+            if (
+                !wizard.classList.contains(
+                    'is-treatment-step-2'
+                )
+            ) {
+                return;
+            }
+
+            const form =
+                currentForm();
+
+            if (!form) return;
+
+            const snapshot =
+                step1Snapshot();
+
+            const dosage =
+                dosageField(form);
+
+            if (dosage) {
+                dosage.value =
+                    snapshot.dosage;
+
+                dosage.dispatchEvent(
+                    new Event(
+                        'input',
+                        {bubbles: true}
+                    )
+                );
+
+                dosage.dispatchEvent(
+                    new Event(
+                        'change',
+                        {bubbles: true}
+                    )
+                );
+
+                makeLocked(
+                    dosage,
+                    'Перенесено из рецепта'
+                    + (
+                        snapshot.dosage
+                            ? ' · '
+                                + snapshot.dosage
+                                + (
+                                    snapshot.unit
+                                        ? ' '
+                                            + snapshot.unit
+                                        : ''
+                                )
+                            : ''
+                    )
+                    + ' · изменение недоступно'
+                );
+            }
+
+            ensureHidden(
+                form,
+                'dosage_unit'
+            ).value =
+                snapshot.unit;
+
+            const starts =
+                startsField(form);
+
+            if (starts) {
+                try {
+                    const firstDate =
+                        await loadFirstPrescriptionDate(
+                            snapshot
+                        );
+
+                    if (firstDate) {
+                        starts.value =
+                            firstDate;
+
+                        starts.dispatchEvent(
+                            new Event(
+                                'input',
+                                {bubbles: true}
+                            )
+                        );
+
+                        starts.dispatchEvent(
+                            new Event(
+                                'change',
+                                {bubbles: true}
+                            )
+                        );
+                    }
+
+                    makeLocked(
+                        starts,
+                        'Первая выписка этого препарата '
+                        + 'в текущей клинике · изменение недоступно'
+                    );
+                } catch (error) {
+                    console.error(
+                        'V21 first prescription date:',
+                        error
+                    );
+
+                    makeLocked(
+                        starts,
+                        'Поле заблокировано; '
+                        + 'не удалось проверить историю выписок'
+                    );
+                }
+            }
+        };
+
+        new MutationObserver(
+            () => {
+                if (
+                    wizard.classList.contains(
+                        'is-treatment-step-2'
+                    )
+                ) {
+                    window.setTimeout(
+                        lockFields,
+                        0
+                    );
+                }
+            }
+        ).observe(
+            wizard,
+            {
+                attributes: true,
+                attributeFilter: ['class'],
+            }
+        );
+
+        const host =
+            document.getElementById(
+                'treatmentWizardAssignmentHost'
+            );
+
+        if (host) {
+            new MutationObserver(
+                () => {
+                    window.setTimeout(
+                        lockFields,
+                        0
+                    );
+                }
+            ).observe(
+                host,
+                {
+                    childList: true,
+                    subtree: true,
+                }
+            );
+        }
+
+        document.addEventListener(
+            'submit',
+            (event) => {
+                const form =
+                    currentForm();
+
+                if (
+                    form
+                    && event.target === form
+                ) {
+                    lockFields();
+                }
+            },
+            true
+        );
+
+        window.setTimeout(
+            lockFields,
+            0
+        );
     })();
     </script>
     {{-- PATIENT_DOCTOR_TRANSFER_MODAL_INCLUDE --}}

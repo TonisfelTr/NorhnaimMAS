@@ -10,7 +10,7 @@
       "path": "app/Http/Controllers/Doctors/MedicalCardController.php",
       "method": "index",
       "old": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
-      "new": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );\n        // NORHNAIM_CLINIC_TELEMEDICINE_PROVIDER_V1: navigation only, never create on GET.\n        $visitAuditData = app(\\App\\Services\\TelemedicineProviderSessionService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
+      "new": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );\n
       "label": "provider-journal-navigation"
     },
     {

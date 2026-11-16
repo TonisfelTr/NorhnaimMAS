@@ -41,13 +41,6 @@ final class GenerateMedicalDocumentAiTask implements ShouldQueue
             return;
         }
 
-        /*
-         * NORHNAIM_AI_DOCUMENT_CANCELLABLE_CHILD_V1
-         *
-         * Непосредственный AI-анализ выполняется в дочернем PHP-процессе.
-         * Это позволяет действительно завершить процесс при cancel/F5,
-         * а не ждать окончания блокирующего HTTP-запроса к Ollama.
-         */
         $process = new \Symfony\Component\Process\Process(
             [
                 PHP_BINARY,
@@ -108,7 +101,6 @@ final class GenerateMedicalDocumentAiTask implements ShouldQueue
             ])->save();
         }
     }
-
 
     private function failTask(
         AiMedicalDocumentTask $task,

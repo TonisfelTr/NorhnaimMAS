@@ -884,7 +884,7 @@
       "kind": "php_replace",
       "label": "provider-journal-navigation",
       "method": "index",
-      "new": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );\n        // NORHNAIM_CLINIC_TELEMEDICINE_PROVIDER_V1: navigation only, never create on GET.\n        $visitAuditData = app(\\App\\Services\\TelemedicineProviderSessionService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
+      "new": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );\n
       "old": "        $visitAuditData = app(\\App\\Services\\TelemedicineJournalService::class)->decorate(\n            $request, $patient, $visitAuditData\n        );",
       "path": "app/Http/Controllers/Doctors/MedicalCardController.php"
     },

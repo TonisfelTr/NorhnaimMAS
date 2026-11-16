@@ -40,7 +40,6 @@
                     @include('shared.appointment_timezone_control')
                 </div>
 
-{{-- NORHNAIM_TELEMED_AVAILABLE_SLOTS_V1 --}}
 <div class="border rounded-3 p-3 mt-3 bg-light-subtle"
      data-telemedicine-slot-picker
      data-slots-url="{{ route('doctors.patients.telemedicine.available-slots', ['patient' => $patient->id]) }}"
@@ -78,7 +77,6 @@
             </div>
         </div>
     </div>
-
 
 <div class="mt-3">
     <label class="form-label small mb-1"

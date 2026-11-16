@@ -1,4 +1,4 @@
-{{-- PATIENT_TREATMENT_WIZARD_V5_BUTTON --}}
+
 <section class="medication-assignment-panel mb-4">
     <div class="medication-assignment-panel__head">
         <div>
