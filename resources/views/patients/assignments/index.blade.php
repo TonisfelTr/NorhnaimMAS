@@ -1,157 +1,6 @@
 @extends('layouts.patient')
 
-@php
-    $patientAssignmentClinicNameV15 = static function ($assignment) {
-        foreach ([
-            'clinic.name',
-            'clinic.title',
-            'clinic_name',
-            'origin.clinic_name',
-            'clinical_origin.clinic_name',
-            'prescription.clinic.name',
-            'prescription.clinic_name',
-        ] as $key) {
-            $value = data_get($assignment, $key);
 
-            if (is_scalar($value) && trim((string) $value) !== '') {
-                return trim((string) $value);
-            }
-        }
-
-        return 'Клиника не указана';
-    };
-
-    $patientAssignmentClinicIdV15 = static function ($assignment) {
-        foreach ([
-            'clinic_id',
-            'clinic.id',
-            'origin.clinic_id',
-            'clinical_origin.clinic_id',
-            'prescription.clinic_id',
-            'prescription.clinic.id',
-        ] as $key) {
-            $value = data_get($assignment, $key);
-
-            if ($value !== null && $value !== '') {
-                return (string) $value;
-            }
-        }
-
-        return 'unknown';
-    };
-
-    $patientAssignmentUnitV15 = static function ($assignment) {
-        foreach ([
-            'dosage_unit',
-            'dose_unit',
-            'unit',
-            'measurement_unit',
-            'prescription.dosage_unit',
-            'prescription.dose_unit',
-            'prescription.unit',
-        ] as $key) {
-            $value = data_get($assignment, $key);
-
-            if (is_scalar($value) && trim((string) $value) !== '') {
-                return trim((string) $value);
-            }
-        }
-
-        $dosage = (string) (
-            data_get($assignment, 'dosage')
-            ?? data_get($assignment, 'dose')
-            ?? data_get($assignment, 'prescription.dosage')
-            ?? ''
-        );
-
-        if (
-            preg_match(
-                '/\b(мкг\/мл|мг\/мл|мкг|мг|мл|г|ЕД|МЕ)\b/ui',
-                $dosage,
-                $matches
-            )
-        ) {
-            return $matches[1];
-        }
-
-        $form = mb_strtolower(
-            trim((string) (
-                data_get($assignment, 'drug_form')
-                ?? data_get($assignment, 'form')
-                ?? data_get($assignment, 'prescription.drug_form')
-                ?? ''
-            ))
-        );
-
-        if (
-            preg_match(
-                '/таблет|капсул|драже|порош/ui',
-                $form
-            )
-        ) {
-            return 'мг';
-        }
-
-        if (
-            preg_match(
-                '/раствор|суспенз|сироп|капл|ампул|флакон/ui',
-                $form
-            )
-        ) {
-            return 'мл';
-        }
-
-        return null;
-    };
-
-    $patientAssignmentDoseV15 = static function ($assignment) use ($patientAssignmentUnitV15) {
-        $dosage = trim((string) (
-            data_get($assignment, 'dosage')
-            ?? data_get($assignment, 'dose')
-            ?? data_get($assignment, 'prescription.dosage')
-            ?? ''
-        ));
-
-        if ($dosage === '') {
-            return null;
-        }
-
-        if (
-            preg_match(
-                '/\b(мкг\/мл|мг\/мл|мкг|мг|мл|г|ЕД|МЕ)\b/ui',
-                $dosage
-            )
-        ) {
-            return $dosage;
-        }
-
-        $unit = $patientAssignmentUnitV15($assignment);
-
-        return $unit
-            ? trim($dosage . ' ' . $unit)
-            : $dosage;
-    };
-
-    $patientAssignmentFormV15 = static function ($assignment) {
-        foreach ([
-            'drug_form',
-            'form',
-            'form_name',
-            'drug.form_name',
-            'drug.form',
-            'prescription.drug_form',
-            'prescription.form',
-        ] as $key) {
-            $value = data_get($assignment, $key);
-
-            if (is_scalar($value) && trim((string) $value) !== '') {
-                return trim((string) $value);
-            }
-        }
-
-        return null;
-    };
-@endphp
 
 @php
     $patientAssignmentRead = static function ($source, array $keys, $default = null) {
@@ -256,6 +105,79 @@
             </div>
         </section>
 
+        @if($showPriorityClinicSelector)
+            <section class="patient-assignment-clinic-preference">
+                <div class="patient-assignment-clinic-preference__copy">
+                    <span class="patient-eyebrow">МОИ КЛИНИКИ</span>
+                    <h2>Приоритетная клиника</h2>
+                    <p>Она будет открываться первой в разделе назначений.</p>
+                </div>
+
+                <form method="POST"
+                      action="{{ route('patients.assignments.priority-clinic') }}"
+                      class="patient-assignment-clinic-preference__form">
+                    @csrf
+                    <label for="patientPriorityClinic">Основная клиника</label>
+                    <div class="patient-assignment-clinic-preference__controls">
+                        <select id="patientPriorityClinic"
+                                name="priority_clinic_id"
+                                required>
+                            @foreach($priorityClinicMemberships as $membership)
+                                <option value="{{ $membership->clinic_id }}"
+                                    @if((int) $priorityClinicId === (int) $membership->clinic_id) selected @endif>
+                                    {{ $membership->clinic->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit">
+                            <i class="bi bi-check2-circle"></i>
+                            Сохранить
+                        </button>
+                    </div>
+                    @error('priority_clinic_id')
+                        <small class="patient-assignment-clinic-preference__error" role="alert">{{ $message }}</small>
+                    @enderror
+                </form>
+            </section>
+            @if(session('success'))
+                <div class="patient-assignment-clinic-preference__saved" role="status">
+                    <i class="bi bi-check-circle-fill"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+        @endif
+
+        @if($showClinicTabs)
+            <nav class="patient-assignment-clinic-tabs"
+                 aria-label="Назначения по клиникам">
+                @foreach($clinicTabs as $tab)
+                    <a href="{{ route('patients.assignments.index', ['clinic_id' => $tab['clinic_id'] ?? 'unknown']) }}"
+                       class="patient-assignment-clinic-tab {{ $selectedClinicKey === $tab['key'] ? 'is-active' : '' }}"
+                       @if($selectedClinicKey === $tab['key']) aria-current="page" @endif>
+                        <span class="patient-assignment-clinic-tab__icon">
+                            <i class="bi bi-hospital"></i>
+                        </span>
+                        <span class="patient-assignment-clinic-tab__copy">
+                            <strong>{{ $tab['name'] }}</strong>
+                            <small>
+                                @if($tab['total'] > 0)
+                                    {{ $tab['active_count'] }} активных
+                                    @if($tab['history_count'] > 0)
+                                        · {{ $tab['history_count'] }} в истории
+                                    @endif
+                                @else
+                                    Пока нет назначений
+                                @endif
+                            </small>
+                        </span>
+                        <span class="patient-assignment-clinic-tab__count">
+                            {{ $tab['total'] }}
+                        </span>
+                    </a>
+                @endforeach
+            </nav>
+        @endif
+
         <section class="patient-assignment-section">
             <div class="patient-assignment-section__head">
                 <div>
@@ -313,17 +235,13 @@
     </div>
 @endif
 
-                            @if($assignment->generic_name_snapshot)
+                            @if($assignment->generic_name_snapshot && !$patientAssignmentCurrentMnn)
                                 <p class="patient-assignment-generic">
                                     МНН: {{ $assignment->generic_name_snapshot }}
                                 </p>
                             @endif
                         </div>
 
-                        <div class="patient-assignment-dose">
-                            <span>Дозировка</span>
-                            <strong>{{ $assignment->dosage }}</strong>
-                        </div>
                     </div>
 
                     <div class="patient-assignment-primary">
@@ -421,7 +339,7 @@
                     <footer class="patient-assignment-card__footer">
                         <span>
                             <i class="bi bi-hospital"></i>
-                            {{ $assignment->clinic_name_snapshot ?: 'Клиника не указана' }}
+                            {{ $assignment->clinic?->name ?: ($assignment->clinic_name_snapshot ?: 'Клиника не указана') }}
                         </span>
                         <span>
                             <i class="bi bi-person-badge"></i>
@@ -437,7 +355,13 @@
                 <div class="patient-assignment-empty is-compact">
                     <i class="bi bi-capsule"></i>
                     <div>
-                        <h2>Активных назначений нет</h2>
+                        <h2>
+                            @if($showClinicTabs && $historyAssignments->isEmpty())
+                                В этой клинике пока нет назначений
+                            @else
+                                Активных назначений нет
+                            @endif
+                        </h2>
                         <p>Если врач назначит лечение, инструкция появится здесь.</p>
                     </div>
                 </div>
@@ -455,70 +379,35 @@
                 </div>
 
                 <div class="patient-assignment-history-list">
-                    @php
-    $patientAssignmentClinicGroupsV15 = collect($historyAssignments)
-        ->groupBy(function ($assignment) use ($patientAssignmentClinicIdV15, $patientAssignmentClinicNameV15) {
-            return $patientAssignmentClinicIdV15($assignment) . '|' . $patientAssignmentClinicNameV15($assignment);
-        });
-@endphp
+                    @foreach($historyAssignments as $assignment)
+                        @php
+                            $historyDose = $patientAssignmentFormatDose($assignment);
+                            $historyForm = $patientAssignmentForm($assignment);
+                        @endphp
 
-@if($patientAssignmentClinicGroupsV15->count() > 1)
-    <div class="patient-assignment-clinic-tabs"
-         data-patient-assignment-clinic-tabs>
-        @foreach($patientAssignmentClinicGroupsV15 as $patientAssignmentClinicKeyV15 => $patientAssignmentClinicItemsV15)
-            @php
-                [$patientAssignmentClinicIdTabV15, $patientAssignmentClinicNameTabV15] =
-                    array_pad(explode('|', $patientAssignmentClinicKeyV15, 2), 2, '');
-            @endphp
-
-            <button type="button"
-                    class="patient-assignment-clinic-tab"
-                    data-clinic-tab="{ $patientAssignmentClinicIdTabV15 }">
-                <i class="bi bi-building"></i>
-                <span>{ $patientAssignmentClinicNameTabV15 }</span>
-                <span class="patient-assignment-clinic-tab__count">
-                    { $patientAssignmentClinicItemsV15->count() }
-                </span>
-            </button>
-        @endforeach
-    </div>
-@endif
-
-@foreach($historyAssignments as $assignment)
-    @php
-        $patientAssignmentClinicIdCurrentV15 = $patientAssignmentClinicIdV15($assignment);
-        $patientAssignmentDoseCurrentV15 = $patientAssignmentDoseV15($assignment);
-        $patientAssignmentFormCurrentV15 = $patientAssignmentFormV15($assignment);
-    @endphp
-
-    <div class="patient-assignment-clinic-item"
-         data-assignment-clinic-id="{{ $patientAssignmentClinicIdCurrentV15 }}">
-                        
-@if($patientAssignmentFormCurrentV15 || $patientAssignmentDoseCurrentV15)
-            <div class="patient-assignment-extra-meta">
-                @if($patientAssignmentFormCurrentV15)
-                    <span class="patient-assignment-extra-meta__chip patient-assignment-extra-meta__chip--form">
-                        <i class="bi bi-capsule"></i>
-                        {{ $patientAssignmentFormCurrentV15 }}
-                    </span>
-                @endif
-
-                @if($patientAssignmentDoseCurrentV15)
-                    <span class="patient-assignment-extra-meta__chip patient-assignment-extra-meta__chip--dose">
-                        <i class="bi bi-speedometer2"></i>
-                        {{ $patientAssignmentDoseCurrentV15 }}
-                    </span>
-                @endif
-            </div>
-        @endif
-<details class="patient-assignment-history">
+                        <details class="patient-assignment-history">
                             <summary>
-                                <div>
+                                <div class="patient-assignment-history__summary-copy">
                                     <strong>{{ $assignment->drug_name_snapshot }}</strong>
-                                    <span>
-                                        {{ $assignment->dosage }} · {{ $assignment->schedule }}
-                                    </span>
+
+                                    @if($historyForm || $historyDose)
+                                        <span class="patient-assignment-extra-meta patient-assignment-extra-meta--history">
+                                            @if($historyForm)
+                                                <span class="patient-assignment-extra-meta__chip patient-assignment-extra-meta__chip--form">
+                                                    {{ $historyForm }}
+                                                </span>
+                                            @endif
+                                            @if($historyDose)
+                                                <span class="patient-assignment-extra-meta__chip patient-assignment-extra-meta__chip--dose">
+                                                    {{ $historyDose }}
+                                                </span>
+                                            @endif
+                                        </span>
+                                    @endif
+
+                                    <span>{{ $assignment->schedule }}</span>
                                 </div>
+
                                 <span @class([
                                     'patient-assignment-status',
                                     'is-completed' => $assignment->status === 'completed',
@@ -532,134 +421,313 @@
                                 <div><b>Показание:</b> {{ $assignment->indication_text }}</div>
                                 <div><b>Инструкция врача:</b> {{ $assignment->doctor_instructions }}</div>
                                 <div><b>Противопоказания:</b> {{ $assignment->contraindications_text }}</div>
+
+                                @if($assignment->side_effects_text)
+                                    <div><b>Нежелательные реакции:</b> {{ $assignment->side_effects_text }}</div>
+                                @endif
+
+                                @if($assignment->missed_dose_instructions)
+                                    <div><b>Если пропущен приём:</b> {{ $assignment->missed_dose_instructions }}</div>
+                                @endif
+
                                 <div><b>Действия при передозировке:</b> {{ $assignment->overdose_actions }}</div>
-                                <div class="text-muted">
-                                    {{ $assignment->clinic_name_snapshot ?: 'Клиника не указана' }}
-                                    · {{ $assignment->doctor_name_snapshot }}
+                                <div class="patient-assignment-history__origin">
+                                    <i class="bi bi-hospital"></i>
+                                    {{ $assignment->clinic?->name ?: ($assignment->clinic_name_snapshot ?: 'Клиника не указана') }}
+                                    <span>·</span>
+                                    <i class="bi bi-person-badge"></i>
+                                    {{ $assignment->doctor_name_snapshot }}
+                                    <span>·</span>
+                                    Назначено {{ $assignment->created_at?->format('d.m.Y H:i') }}
                                 </div>
                             </div>
                         </details>
-                        </div>
-@endforeach
+                    @endforeach
                 </div>
             </section>
         @endif
     @endif
 </div>
 
-<style id="patient-assignments-v14-style">
-    .patient-assignment-card__title,
-    .patient-assignment-drug-title,
-    .patient-assignment-name,
-    .assignments-page .card h1,
-    .assignments-page .card h2,
-    .assignments-page .card h3,
-    .assignments-page .card h4 {
-        font-size: 1.8rem !important;
-        line-height: 1.2 !important;
+<style id="patient-assignments-clinic-style">
+    .patient-assignments-page {
+        --assignment-ink: #183b39;
+        --assignment-muted: #627b78;
+        --assignment-line: #dcebe7;
+        --assignment-accent: #0c9487;
+        font-size: 1rem;
+    }
+
+    .patient-assignments-page .patient-page-header h1 {
+        font-size: clamp(2rem, 2.5vw, 2.45rem) !important;
+        line-height: 1.12 !important;
         font-weight: 800 !important;
+        color: var(--assignment-ink);
     }
 
-    .patient-assignment-card__subtitle,
-    .patient-assignment-mnn,
-    .patient-assignment-secondary,
-    .assignments-page .card .small,
-    .assignments-page .card .text-muted {
-        font-size: 0.98rem !important;
-        line-height: 1.45 !important;
+    .patient-assignments-page .patient-page-header p {
+        font-size: 1rem !important;
+        line-height: 1.55 !important;
+        color: var(--assignment-muted);
     }
 
-    .patient-assignment-card__section-title,
-    .patient-assignment-card__label,
-    .assignments-page .card .fw-semibold {
-        font-size: 1.02rem !important;
-        line-height: 1.4 !important;
+    .patient-assignments-page .patient-eyebrow {
+        font-size: .78rem;
+        letter-spacing: .08em;
+        font-weight: 800;
     }
 
-    .patient-assignment-extra-meta {
+    .patient-assignment-safety {
+        padding: 1.05rem 1.15rem;
+        gap: .85rem;
+    }
+
+    .patient-assignment-safety strong {
+        font-size: 1rem;
+        line-height: 1.45;
+    }
+
+    .patient-assignment-safety p {
+        font-size: .92rem;
+        line-height: 1.55;
+        margin: .3rem 0 0;
+    }
+
+    .patient-assignment-clinic-preference {
         display: flex;
-        flex-wrap: wrap;
-        gap: .5rem;
-        margin: .45rem 0 .2rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.25rem;
+        padding: 1rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid var(--assignment-line);
+        border-radius: 1rem;
+        background: #fff;
+        box-shadow: 0 5px 18px rgba(24, 59, 57, .045);
     }
 
-    .patient-assignment-extra-meta__chip {
+    .patient-assignment-clinic-preference__copy h2 {
+        margin: .18rem 0 .2rem;
+        color: var(--assignment-ink);
+        font-size: 1.18rem;
+        font-weight: 800;
+    }
+
+    .patient-assignment-clinic-preference__copy p {
+        margin: 0;
+        color: var(--assignment-muted);
+        font-size: .9rem;
+        line-height: 1.45;
+    }
+
+    .patient-assignment-clinic-preference__form {
+        width: min(100%, 470px);
+    }
+
+    .patient-assignment-clinic-preference__form label {
+        display: block;
+        margin-bottom: .35rem;
+        color: #47625f;
+        font-size: .78rem;
+        font-weight: 800;
+    }
+
+    .patient-assignment-clinic-preference__controls {
+        display: flex;
+        gap: .5rem;
+    }
+
+    .patient-assignment-clinic-preference__controls select {
+        flex: 1 1 auto;
+        min-width: 0;
+        min-height: 42px;
+        padding: .55rem .75rem;
+        border: 1px solid #d4e5e0;
+        border-radius: .7rem;
+        background: #f9fcfb;
+        color: var(--assignment-ink);
+        font: inherit;
+        font-size: .9rem;
+    }
+
+    .patient-assignment-clinic-preference__controls button {
+        flex: 0 0 auto;
         display: inline-flex;
         align-items: center;
-        gap: .35rem;
-        padding: .35rem .65rem;
-        border-radius: 999px;
-        background: #eef7f6;
-        border: 1px solid #d3ebe8;
-        color: #1a5f58;
-        font-size: .95rem;
-        font-weight: 700;
-        line-height: 1.15;
-    }
-
-    .patient-assignment-dose-box__label {
-        font-size: .85rem !important;
-        color: #6d8590;
-        line-height: 1.2;
-        margin-bottom: .15rem;
-    }
-
-    .patient-assignment-dose-box__value {
-        font-size: 1.15rem !important;
+        justify-content: center;
+        gap: .4rem;
+        min-height: 42px;
+        padding: .55rem .85rem;
+        border: 0;
+        border-radius: .7rem;
+        background: #087f75;
+        color: #fff;
+        font-size: .85rem;
         font-weight: 800;
-        line-height: 1.15;
+        cursor: pointer;
     }
-</style>
 
-<style id="patient-assignments-v15-style">
+    .patient-assignment-clinic-preference__controls button:hover {
+        background: #066d65;
+    }
+
+    .patient-assignment-clinic-preference__error {
+        display: block;
+        margin-top: .35rem;
+        color: #b42318;
+        font-size: .78rem;
+        line-height: 1.4;
+    }
+
+    .patient-assignment-clinic-preference__saved {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin: -.35rem 0 1rem;
+        padding: .65rem .85rem;
+        border: 1px solid #cce9dd;
+        border-radius: .7rem;
+        background: #f0faf5;
+        color: #176b4a;
+        font-size: .88rem;
+        font-weight: 700;
+    }
+
     .patient-assignment-clinic-tabs {
         display: flex;
         flex-wrap: wrap;
-        gap: .5rem;
-        margin: 0 0 1rem;
+        gap: .65rem;
+        margin: 1rem 0 1.25rem;
     }
 
     .patient-assignment-clinic-tab {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: .45rem;
-        padding: .55rem .85rem;
-        border: 1px solid #d8e6e3;
-        border-radius: .7rem;
+        gap: .7rem;
+        min-width: min(250px, 100%);
+        max-width: 100%;
+        padding: .7rem .9rem;
+        border: 1px solid #dce9e6;
+        border-radius: .85rem;
         background: #fff;
-        color: #31514d;
-        font-size: .95rem;
-        font-weight: 750;
-        cursor: pointer;
-        transition: .15s ease;
+        color: #34524f;
+        text-decoration: none;
+        transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
     }
 
     .patient-assignment-clinic-tab:hover {
-        border-color: #9dcfc8;
-        background: #f7fbfa;
+        border-color: #9ccfc6;
+        background: #f8fcfb;
+        color: #0b756b;
     }
 
     .patient-assignment-clinic-tab.is-active {
-        border-color: #57b9ae;
+        border-color: #55b9ad;
         background: #eaf8f5;
-        color: #0c7067;
-        box-shadow: 0 0 0 .12rem rgba(15, 140, 130, .06);
+        color: #086e65;
+        box-shadow: 0 0 0 2px rgba(12, 148, 135, .08);
+    }
+
+    .patient-assignment-clinic-tab__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        border-radius: .7rem;
+        background: #eaf5f3;
+        color: #0d8c81;
+        font-size: 1.05rem;
+    }
+
+    .patient-assignment-clinic-tab__copy {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-width: 0;
+        gap: .12rem;
+    }
+
+    .patient-assignment-clinic-tab__copy strong {
+        overflow-wrap: anywhere;
+        font-size: .9rem;
+        line-height: 1.3;
+        font-weight: 800;
+    }
+
+    .patient-assignment-clinic-tab__copy small {
+        color: #6b8580;
+        font-size: .73rem;
+        line-height: 1.3;
     }
 
     .patient-assignment-clinic-tab__count {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 1.45rem;
-        height: 1.45rem;
-        padding: 0 .35rem;
+        flex: 0 0 27px;
+        width: 27px;
+        height: 27px;
         border-radius: 999px;
-        background: rgba(15, 140, 130, .10);
+        background: rgba(12, 148, 135, .11);
         font-size: .78rem;
+        font-weight: 800;
     }
 
-    .patient-assignment-clinic-item[hidden] {
-        display: none !important;
+    .patient-assignment-section__head h2 {
+        font-size: 1.35rem !important;
+        line-height: 1.25 !important;
+        font-weight: 800 !important;
+        color: var(--assignment-ink);
+    }
+
+    .patient-assignment-count {
+        font-size: .85rem;
+        font-weight: 800;
+    }
+
+    .patient-assignment-card {
+        font-size: .98rem;
+    }
+
+    .patient-assignment-card__top h3 {
+        margin: .35rem 0 .15rem;
+        font-size: 1.55rem !important;
+        line-height: 1.25 !important;
+        font-weight: 850 !important;
+        color: #173c39;
+    }
+
+    .patient-assignment-card__eyebrow {
+        font-size: .78rem;
+        line-height: 1.4;
+    }
+
+    .patient-assignment-status {
+        font-size: .72rem;
+        font-weight: 800;
+    }
+
+    .patient-assignment-extra-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+        margin: .38rem 0 .15rem;
+    }
+
+    .patient-assignment-extra-meta__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .28rem;
+        padding: .22rem .48rem;
+        border-radius: 999px;
+        background: #eef7f6;
+        border: 1px solid #d3ebe8;
+        color: #1a5f58;
+        font-size: .72rem !important;
+        font-weight: 750;
+        line-height: 1.15;
     }
 
     .patient-assignment-extra-meta__chip--form {
@@ -673,48 +741,146 @@
         border-color: #cfece6;
         color: #116a61;
     }
-</style>
 
-<script>
-(() => {
-    const root = document.querySelector('[data-patient-assignment-clinic-tabs]');
-    if (!root) return;
-
-    const tabs = Array.from(
-        root.querySelectorAll('[data-clinic-tab]')
-    );
-
-    const items = Array.from(
-        document.querySelectorAll('[data-assignment-clinic-id]')
-    );
-
-    if (tabs.length <= 1 || items.length === 0) {
-        root.remove();
-        return;
+    .patient-assignment-generic {
+        margin: .2rem 0 0;
+        color: #718681;
+        font-size: .82rem;
     }
 
-    const selectClinic = (clinicId) => {
-        tabs.forEach((tab) => {
-            tab.classList.toggle(
-                'is-active',
-                tab.dataset.clinicTab === clinicId
-            );
-        });
+    .patient-assignment-primary {
+        padding: .85rem 1rem;
+    }
 
-        items.forEach((item) => {
-            item.hidden =
-                item.dataset.assignmentClinicId !== clinicId;
-        });
-    };
+    .patient-assignment-primary > div:last-child > span {
+        font-size: .78rem;
+        line-height: 1.35;
+    }
 
-    tabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-            selectClinic(tab.dataset.clinicTab);
-        });
-    });
+    .patient-assignment-primary strong {
+        font-size: 1.02rem;
+        line-height: 1.5;
+    }
 
-    selectClinic(tabs[0].dataset.clinicTab);
-})();
-</script>
+    .patient-assignment-info {
+        padding: .9rem 1rem;
+    }
+
+    .patient-assignment-info__title {
+        margin-bottom: .45rem;
+        font-size: .88rem !important;
+        line-height: 1.35;
+        font-weight: 800;
+    }
+
+    .patient-assignment-info__text {
+        font-size: .94rem !important;
+        line-height: 1.55 !important;
+        overflow-wrap: anywhere;
+    }
+
+    .patient-assignment-overdose {
+        padding: .9rem 1rem;
+        gap: .7rem;
+    }
+
+    .patient-assignment-overdose span {
+        font-size: .8rem;
+        line-height: 1.4;
+        font-weight: 800;
+    }
+
+    .patient-assignment-overdose strong {
+        font-size: .96rem;
+        line-height: 1.5;
+    }
+
+    .patient-assignment-overdose small {
+        font-size: .78rem;
+        line-height: 1.45;
+    }
+
+    .patient-assignment-card__footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .45rem 1rem;
+        font-size: .78rem;
+        line-height: 1.4;
+    }
+
+    .patient-assignment-history {
+        padding: .85rem 1rem;
+    }
+
+    .patient-assignment-history summary {
+        gap: .8rem;
+    }
+
+    .patient-assignment-history__summary-copy {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .2rem;
+        min-width: 0;
+    }
+
+    .patient-assignment-history__summary-copy > strong {
+        color: #183b39;
+        font-size: 1.02rem;
+        line-height: 1.35;
+    }
+
+    .patient-assignment-history__summary-copy > span:not(.patient-assignment-extra-meta) {
+        color: #607a75;
+        font-size: .88rem;
+        line-height: 1.4;
+    }
+
+    .patient-assignment-extra-meta--history {
+        margin: .15rem 0;
+    }
+
+    .patient-assignment-history__body {
+        display: grid;
+        gap: .55rem;
+        padding-top: .9rem;
+        font-size: .92rem;
+        line-height: 1.55;
+    }
+
+    .patient-assignment-history__origin {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .35rem;
+        margin-top: .25rem;
+        color: #68817c;
+        font-size: .78rem;
+    }
+
+    @media (max-width: 760px) {
+        .patient-assignment-clinic-preference {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .patient-assignment-clinic-preference__form {
+            width: 100%;
+        }
+
+        .patient-assignment-clinic-tab {
+            width: 100%;
+        }
+
+        .patient-assignment-card__top h3 {
+            font-size: 1.35rem !important;
+        }
+
+        .patient-assignment-info__text,
+        .patient-assignment-history__body {
+            font-size: .9rem !important;
+        }
+    }
+</style>
 
 @endsection

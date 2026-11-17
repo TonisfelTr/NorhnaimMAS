@@ -2016,6 +2016,102 @@
                 </div>
 
                 <div class="tab-pane fade mc-pane" id="pane-presc" role="tabpanel">
+    
+    <style id="patient-medication-workspace-tabs-v8-style">
+        #pane-presc .medication-workspace-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .35rem;
+            margin: .15rem 0 1rem;
+            padding: 0 .15rem;
+            border-bottom: 1px solid #dce8e5;
+        }
+
+        #pane-presc .medication-workspace-tabs .nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            min-height: 43px;
+            padding: .65rem 1rem;
+            border: 1px solid transparent;
+            border-bottom: 0;
+            border-radius: .7rem .7rem 0 0;
+            background: transparent;
+            color: #60736f;
+            font-size: .88rem;
+            font-weight: 700;
+            line-height: 1.25;
+            white-space: nowrap;
+            transition: color .15s ease, background .15s ease, border-color .15s ease;
+        }
+
+        #pane-presc .medication-workspace-tabs .nav-link i {
+            color: #168f84;
+            font-size: 1rem;
+        }
+
+        #pane-presc .medication-workspace-tabs .nav-link:hover {
+            color: #08776d;
+            background: #f4faf8;
+            border-color: #e2eeea;
+        }
+
+        #pane-presc .medication-workspace-tabs .nav-link.active {
+            position: relative;
+            color: #08776d;
+            background: #fff;
+            border-color: #dce8e5;
+            box-shadow: inset 0 -2px 0 #0c9487;
+        }
+
+        #pane-presc .medication-workspace-tabs .nav-link.active i {
+            color: #087f75;
+        }
+
+        #pane-presc .medication-workspace-content {
+            min-height: 110px;
+        }
+
+        #pane-presc .medication-workspace-content > .tab-pane {
+            outline: none;
+        }
+
+        #pane-presc .medication-workspace-content > .tab-pane > .medication-tab-section {
+            margin-bottom: 0;
+        }
+
+        #pane-presc .medication-workspace-content > .tab-pane > .medication-tab-section--history {
+            padding-top: .05rem;
+        }
+
+        @media (max-width: 680px) {
+            #pane-presc .medication-workspace-tabs {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: .35rem;
+                padding: 0;
+                border-bottom: 0;
+            }
+
+            #pane-presc .medication-workspace-tabs .nav-link {
+                justify-content: flex-start;
+                width: 100%;
+                min-height: 42px;
+                padding: .65rem .85rem;
+                border: 1px solid #dce8e5;
+                border-radius: .65rem;
+                white-space: normal;
+            }
+
+            #pane-presc .medication-workspace-tabs .nav-link.active {
+                background: #edf8f5;
+                border-color: #72c5b9;
+                box-shadow: inset 3px 0 0 #0c9487;
+            }
+        }
+    </style>
+
                     {{-- PATIENT_MEDICATION_TAB_V6_UI --}}
                     <div class="medication-tab-hero">
                         <div class="medication-tab-hero__main">
@@ -2082,7 +2178,57 @@
                         </button>
                     </div>
 
-                    <section class="medication-tab-section medication-tab-section--assignments">
+                    {{-- PATIENT_MEDICATION_WORKSPACE_TABS_V8 --}}
+                    <ul class="nav nav-tabs medication-workspace-tabs"
+                        id="patientMedicationWorkspaceTabs"
+                        role="tablist"
+                        aria-label="Разделы лекарственной терапии">
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link active"
+                                id="medication-current-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#medication-current-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="medication-current-pane"
+                                aria-selected="true">
+                                <i class="bi bi-capsule-pill" aria-hidden="true"></i>
+                                <span>Назначения</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link"
+                                id="medication-benefit-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#medication-benefit-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="medication-benefit-pane"
+                                aria-selected="false">
+                                <i class="bi bi-file-earmark-medical" aria-hidden="true"></i>
+                                <span>Льготные рецепты</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link"
+                                id="medication-history-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#medication-history-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="medication-history-pane"
+                                aria-selected="false">
+                                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                                <span>История выписок</span>
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content medication-workspace-content" id="patientMedicationWorkspaceContent">
+                    <div class="tab-pane fade show active medication-workspace-pane" id="medication-current-pane" role="tabpanel" aria-labelledby="medication-current-tab" tabindex="0">
+<section class="medication-tab-section medication-tab-section--assignments">
                         <div class="medication-tab-section__head">
                             <div class="medication-tab-section__icon">
                                 <i class="bi bi-clipboard2-pulse"></i>
@@ -2099,8 +2245,10 @@
                         @include('doctors.reception.partials.medication_assignments')
                     </div>
                     </section>
+                    </div>
 
-                    <section class="medication-tab-section medication-tab-section--benefit">
+                    <div class="tab-pane fade medication-workspace-pane" id="medication-benefit-pane" role="tabpanel" aria-labelledby="medication-benefit-tab" tabindex="0">
+<section class="medication-tab-section medication-tab-section--benefit">
                         <div class="medication-tab-section__head">
                             <div class="medication-tab-section__icon">
                                 <i class="bi bi-file-earmark-medical"></i>
@@ -2117,8 +2265,10 @@
                         @include('doctors.reception.partials.benefit_prescription_list')
                     </div>
                     </section>
+                    </div>
 
-                    <section class="medication-tab-section medication-tab-section--history">
+                    <div class="tab-pane fade medication-workspace-pane" id="medication-history-pane" role="tabpanel" aria-labelledby="medication-history-tab" tabindex="0">
+<section class="medication-tab-section medication-tab-section--history">
                         <div class="medication-tab-section__head medication-tab-section__head--history">
                             <div class="medication-tab-section__icon">
                                 <i class="bi bi-clock-history"></i>
@@ -2239,6 +2389,8 @@
                         @endforeach
                     </div>
                     </section>
+                    </div>
+                    </div>
                 </div>
 
                 <div class="tab-pane fade mc-pane" id="pane-epicrisis" role="tabpanel">
