@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone.css') }}?v=2">
     <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=2" defer></script>
     <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone-v2.css') }}?v=2">
-    <script src="{{ asset('js/patient-avatar-dropzone-v2.js') }}?v=2" defer></script>@endsection
+    <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=2" defer></script>@endsection
 
 @section('content')
     <div class="patient-page patient-profile-page">
