@@ -31,6 +31,8 @@
 
     @vite(['resources/sass/patients.sass'])
     @yield('assets')
+    <!-- PATIENT_PAGE_HEADER_V1 -->
+    <link rel="stylesheet" href="{{ asset('css/patient-page-header.css') }}?v=20261119-header1">
 </head>
 
 <body class="patient-panel-body">
@@ -157,13 +159,13 @@
                         </li>
 
                         <li>
-                            <span class="patient-sidebar__link is-disabled">
-                                <span class="patient-sidebar__link-icon">
-                                    <i class="bi bi-activity"></i>
-                                </span>
+                            <a href="{{ route('patients.research.index') }}"
+                               class="patient-sidebar__link {{ request()->routeIs('patients.research.*') ? 'is-active' : '' }}"
+                               title="Исследования" aria-label="Исследования"
+                               @if(request()->routeIs('patients.research.*')) aria-current="page" @endif>
+                                <span class="patient-sidebar__link-icon"><i class="bi bi-activity" aria-hidden="true"></i></span>
                                 <span>Исследования</span>
-                                <small>скоро</small>
-                            </span>
+                            </a>
                         </li>
                     </ul>
                 </nav>

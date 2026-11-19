@@ -1,0 +1,494 @@
+.patient-booking-page {
+  container-name: patient-calendar-page;
+  container-type: inline-size;
+}
+.patient-booking-page .patient-booking-layout {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+.patient-booking-page .patient-booking-card,
+.patient-booking-page .patient-booking-aside,
+.patient-booking-page .patient-booking-field {
+  min-width: 0;
+}
+.patient-booking-page .patient-booking-aside {
+  grid-template-columns: minmax(0, 1fr);
+}
+.patient-booking-page .patient-booking-field {
+  max-width: 100%;
+  align-self: start;
+}
+.patient-booking-page .patient-booking-field > label,
+.patient-booking-page .patient-booking-field > span {
+  overflow-wrap: break-word;
+}
+.patient-booking-page .patient-booking-field input,
+.patient-booking-page .patient-booking-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.patient-booking-page .patient-booking-date-field input {
+  max-width: 240px;
+}
+.patient-booking-page .patient-booking-format-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.patient-booking-page .patient-booking-format-switch > button {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+  min-height: 42px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+.patient-booking-page .patient-clinic-selected {
+  flex-wrap: wrap;
+}
+.patient-booking-page .patient-clinic-selected > div {
+  flex: 1 1 180px;
+}
+.patient-booking-page .patient-clinic-selected strong,
+.patient-booking-page .patient-clinic-selected small {
+  overflow-wrap: break-word;
+}
+.patient-booking-page .patient-clinic-search__results {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+.patient-booking-page .patient-clinic-search__result {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.patient-booking-page .patient-booking-layout > .patient-booking-card > .patient-booking-card__header {
+  flex-wrap: wrap;
+}
+.patient-booking-page .patient-booking-layout > .patient-booking-card > .patient-booking-card__header > div {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.patient-booking-page .patient-booking-week-nav {
+  flex-wrap: wrap;
+}
+.patient-booking-page .patient-booking-week-nav > div:first-child {
+  min-width: 0;
+}
+.patient-booking-page .patient-booking-week-nav > div:last-child {
+  flex: 0 0 auto;
+}
+.patient-booking-page .patient-booking-week {
+  grid-template-columns: repeat(7, minmax(160px, 1fr));
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.patient-booking-page .patient-booking-selection {
+  flex-wrap: wrap;
+}
+.patient-booking-page .patient-booking-selection > form {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+}
+.patient-booking-page .patient-booking-selection > form > .patient-booking-primary {
+  width: auto;
+  max-width: 100%;
+}
+.patient-booking-page .patient-booking-selection__body {
+  flex: 1 1 180px;
+}
+.patient-booking-page .patient-page-header p,
+.patient-booking-page .patient-booking-field > span,
+.patient-booking-page .patient-clinic-search > label,
+.patient-booking-page .patient-booking-field input,
+.patient-booking-page .patient-booking-field select,
+.patient-booking-page .patient-booking-format-switch > button,
+.patient-booking-page .patient-booking-back,
+.patient-booking-page .patient-booking-primary,
+.patient-booking-page .patient-clinic-selected strong,
+.patient-booking-page .patient-clinic-search__result strong,
+.patient-booking-page .patient-booking-week-nav > div:first-child strong,
+.patient-booking-page .patient-booking-day__header strong,
+.patient-booking-page .patient-booking-slot,
+.patient-booking-page .patient-booking-selection__body strong,
+.patient-booking-page .patient-booking-upcoming__item > div:last-child strong,
+.patient-booking-page .patient-booking-upcoming__date strong,
+.patient-booking-page .patient-booking-upcoming__date > span {
+  font-size: 15px;
+  line-height: 1.45;
+}
+.patient-booking-page .patient-booking-field > span,
+.patient-booking-page .patient-clinic-search > label,
+.patient-booking-page .patient-booking-format-switch > button,
+.patient-booking-page .patient-booking-back,
+.patient-booking-page .patient-booking-primary,
+.patient-booking-page .patient-clinic-selected strong,
+.patient-booking-page .patient-clinic-search__result strong,
+.patient-booking-page .patient-booking-week-nav > div:first-child strong,
+.patient-booking-page .patient-booking-day__header strong,
+.patient-booking-page .patient-booking-selection__body strong,
+.patient-booking-page .patient-booking-upcoming__item > div:last-child strong,
+.patient-booking-page .patient-booking-upcoming__date strong {
+  font-weight: 600;
+}
+.patient-booking-page .patient-booking-field input,
+.patient-booking-page .patient-booking-field select {
+  font-weight: 400;
+}
+.patient-booking-page .patient-booking-card__header p,
+.patient-booking-page .patient-clinic-selected small,
+.patient-booking-page .patient-clinic-search__hint,
+.patient-booking-page .patient-clinic-search__result small,
+.patient-booking-page .patient-clinic-search__empty,
+.patient-booking-page .patient-booking-timezone-legend,
+.patient-booking-page .patient-booking-week-nav > div:first-child span,
+.patient-booking-page .patient-booking-day__hours,
+.patient-booking-page .patient-booking-day__empty,
+.patient-booking-page .patient-booking-loading,
+.patient-booking-page .patient-booking-empty,
+.patient-booking-page .patient-booking-monthly-quota,
+.patient-booking-page .patient-booking-alert,
+.patient-booking-page .patient-booking-blocked p,
+.patient-booking-page .patient-booking-selection__body span,
+.patient-booking-page .patient-booking-info ol li,
+.patient-booking-page .patient-booking-info__note,
+.patient-booking-page .patient-booking-upcoming__item > div:last-child > span,
+.patient-booking-page .patient-booking-upcoming__empty {
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.patient-booking-page .patient-booking-monthly-quota .patient-booking-monthly-quota__line {
+  max-width: 100%;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: normal;
+}
+.patient-booking-page .patient-booking-monthly-quota .patient-booking-monthly-quota__line > span {
+  min-width: 0;
+  font-size: inherit;
+  line-height: inherit;
+  overflow-wrap: anywhere;
+}
+.patient-booking-page .patient-clinic-search__more,
+.patient-booking-page .patient-clinic-search__group-title,
+.patient-booking-page .patient-booking-duration,
+.patient-booking-page .patient-booking-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.patient-booking-page .patient-page-header .patient-eyebrow,
+.patient-booking-page .patient-booking-card .patient-eyebrow,
+.patient-booking-page .patient-clinic-selected > span,
+.patient-booking-page .patient-booking-day__header > span,
+.patient-booking-page .patient-booking-info ol li > span,
+.patient-booking-page .patient-booking-upcoming__date small,
+.patient-booking-page .patient-booking-upcoming__doctor-time {
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.patient-booking-page .patient-page-header .patient-eyebrow,
+.patient-booking-page .patient-booking-card .patient-eyebrow {
+  letter-spacing: 0.08em;
+}
+.patient-booking-page .patient-booking-day__hours,
+.patient-booking-page .patient-booking-day__empty {
+  overflow-wrap: anywhere;
+}
+.patient-booking-page .patient-booking-day__slots {
+  grid-template-columns: minmax(0, 1fr);
+}
+.patient-booking-page .patient-booking-slot {
+  min-width: 0;
+  min-height: 52px;
+  font-weight: 600;
+}
+.patient-booking-page .patient-booking-slot__patient-time {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.patient-booking-page .patient-booking-slot__doctor-time {
+  overflow: visible;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+.patient-booking-page .patient-booking-upcoming__date {
+  width: 80px;
+  flex: 0 0 80px;
+  overflow-wrap: anywhere;
+}
+
+.patient-calendar-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 18px;
+  container-name: patient-calendar-toolbar;
+  container-type: inline-size;
+}
+.patient-calendar-toolbar > .patient-calendar-toolbar__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+  min-width: 0;
+  margin: 0;
+}
+.patient-calendar-toolbar > .patient-calendar-toolbar__row > .patient-booking-field {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.patient-calendar-toolbar .patient-booking-field input,
+.patient-calendar-toolbar .patient-booking-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.patient-calendar-toolbar .patient-booking-date-field input {
+  max-width: 240px;
+}
+.patient-calendar-toolbar .patient-booking-format-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.patient-calendar-toolbar .patient-booking-format-switch > button {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+@container patient-calendar-page (min-width: 1000px) {
+  .patient-booking-page .patient-booking-layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+}
+@container patient-calendar-page (min-width: 640px) and (max-width: 999.98px) {
+  .patient-booking-page .patient-booking-aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container patient-calendar-toolbar (max-width: 579.98px) {
+  .patient-calendar-toolbar > .patient-calendar-toolbar__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@supports not (container-type: inline-size) {
+  @media (min-width: 1336px) {
+    .patient-booking-page .patient-booking-layout {
+      grid-template-columns: minmax(0, 1fr) 320px;
+    }
+  }
+  @media (min-width: 800px) and (max-width: 1335.98px) {
+    .patient-booking-page .patient-booking-aside {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 767.98px) {
+    .patient-calendar-toolbar > .patient-calendar-toolbar__row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+
+/* V5: balanced weekly-grid and sidebar captions */
+.patient-booking-page .patient-booking-card__header p,
+.patient-booking-page .patient-booking-info ol li,
+.patient-booking-page .patient-booking-info__note,
+.patient-booking-page .patient-booking-monthly-quota,
+.patient-booking-page .patient-booking-week-nav > div:first-child span,
+.patient-booking-page .patient-booking-timezone-legend,
+.patient-booking-page .patient-booking-day__empty,
+.patient-booking-page .patient-booking-day__hours {
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.patient-booking-page .patient-booking-card .patient-eyebrow,
+.patient-booking-page .patient-page-header .patient-eyebrow,
+.patient-booking-page .patient-booking-day__header > span {
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.patient-booking-page .patient-booking-slot__patient-time {
+  font-size: 15px;
+  line-height: 1.35;
+}
+.patient-booking-page .patient-booking-slot__doctor-time {
+  font-size: 11.5px;
+  line-height: 1.35;
+  white-space: normal;
+}
+.patient-booking-page .patient-booking-upcoming__empty {
+  font-size: 12.5px;
+}
+.patient-booking-page .patient-booking-day__empty,
+.patient-booking-page .patient-booking-monthly-quota,
+.patient-booking-page .patient-booking-info__note {
+  overflow-wrap: anywhere;
+}
+
+/* V5: compact messages inside the seven-day grid */
+.patient-booking-page .patient-booking-day__empty {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* V6: compact weekly availability; V9 has static labels. */
+.patient-booking-page .patient-booking-layout > .patient-booking-card { padding: 18px; }
+.patient-booking-page .patient-booking-card__header { margin-bottom: 12px; }
+.patient-booking-page .patient-calendar-toolbar { gap: 11px; margin-bottom: 11px; }
+.patient-booking-page .patient-calendar-toolbar > .patient-calendar-toolbar__row { gap: 11px; }
+.patient-booking-page .patient-booking-field { gap: 5px; }
+.patient-booking-page .patient-clinic-selected { padding: 9px 11px; border-radius: 10px; }
+.patient-booking-page .patient-clinic-selected strong { font-size: 13px; line-height: 1.3; }
+.patient-booking-page .patient-clinic-selected small { font-size: 11px; line-height: 1.35; }
+.patient-booking-page .patient-booking-week-nav { margin-bottom: 9px; }
+.patient-booking-page .patient-booking-week { grid-template-columns: repeat(7, minmax(102px, 1fr)); gap: 7px; align-items: start; scroll-snap-type: x proximity; }
+.patient-booking-page .patient-booking-day { min-width: 0; min-height: 0; height: auto; border-radius: 10px; scroll-snap-align: start; }
+.patient-booking-page .patient-booking-day__header { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 9px 8px; }
+.patient-booking-page .patient-booking-day__header > span { font-size: 10px; font-weight: 600; }
+.patient-booking-page .patient-booking-day__header strong { font-size: 12px; line-height: 1.2; font-weight: 650; white-space: nowrap; }
+.patient-booking-page .patient-booking-day__hours { padding: 7px 8px 0; font-size: 10px; line-height: 1.3; }
+.patient-booking-page .patient-booking-day__slots { box-sizing: border-box; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; padding: 7px; max-height: 260px; overflow-y: auto; overscroll-behavior: contain; }
+.patient-booking-page .patient-booking-slot { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 36px; padding: 5px 3px; line-height: 1.2; font-size: 11px; }
+.patient-booking-page .patient-booking-slot__patient-time { font-size: 11px; line-height: 1.2; font-weight: 650; }
+.patient-booking-page .patient-booking-slot__doctor-time { font-size: 9px; line-height: 1.25; font-weight: 400; }
+/* CALENDAR_STATIC_STATUS_V9: static statuses, no expandable details. */
+.patient-booking-page .patient-booking-day__empty {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 30px;
+  margin: 5px 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f3f7f5;
+  color: #667c78;
+  font-size: 10.5px;
+  line-height: 1.25;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.patient-booking-page .patient-booking-day__empty.is-limit {
+  color: #a05d25;
+  background: #fff6e9;
+}
+.patient-booking-page .patient-booking-day__empty.is-past {
+  color: #687b79;
+}
+@container patient-calendar-page (max-width: 590px) { .patient-booking-page .patient-booking-week { grid-template-columns: repeat(7, minmax(132px, 1fr)); } }
+@supports not (container-type: inline-size) { @media (max-width: 767.98px) { .patient-booking-page .patient-booking-week { grid-template-columns: repeat(7, minmax(132px, 1fr)); } } }
+
+
+/* V7: appointment format only — label and both choice buttons. */
+.patient-booking-page .patient-calendar-toolbar .patient-booking-field:has(> #bookingFormatSwitch) > span {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.patient-booking-page .patient-calendar-toolbar #bookingFormatSwitch > button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: normal;
+}
+.patient-booking-page .patient-calendar-toolbar #bookingFormatSwitch > button .bi {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* V8: unified compact typography for clinic, doctor, format, date, captions. */
+.patient-booking-page .patient-calendar-toolbar .patient-booking-field > span,
+.patient-booking-page .patient-calendar-toolbar .patient-clinic-search > label {
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.patient-booking-page .patient-calendar-toolbar .patient-booking-field input,
+.patient-booking-page .patient-calendar-toolbar .patient-booking-field select {
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 400;
+  min-height: 38px;
+}
+.patient-booking-page .patient-calendar-toolbar .patient-clinic-selected strong {
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.patient-booking-page .patient-calendar-toolbar .patient-clinic-selected small,
+.patient-booking-page .patient-calendar-toolbar .patient-clinic-search__hint {
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+.patient-booking-page .patient-calendar-toolbar .patient-clinic-selected > span {
+  font-size: 10.5px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.patient-booking-page .patient-calendar-toolbar #bookingFormatSwitch > button {
+  width: auto;
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.patient-booking-page .patient-calendar-toolbar #bookingFormatSwitch > button i {
+  font-size: 13px;
+}
+.patient-booking-page .patient-booking-timezone-legend,
+.patient-booking-page .patient-booking-week-nav > div:first-child span {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.patient-booking-page .patient-booking-week-nav > div:first-child strong {
+  font-size: 12px;
+  line-height: 1.35;
+}
+.patient-booking-page .patient-booking-monthly-quota,
+.patient-booking-page .patient-booking-monthly-quota .patient-booking-monthly-quota__line {
+  font-size: 11px;
+  line-height: 1.4;
+}
+.patient-booking-page .patient-booking-monthly-quota .patient-booking-monthly-quota__line > span {
+  font-size: inherit;
+}
+.patient-booking-page .patient-booking-back {
+  font-size: 12px;
+  line-height: 1.3;
+}

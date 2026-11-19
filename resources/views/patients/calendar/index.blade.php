@@ -3,6 +3,7 @@
 @section('title', 'Календарь и запись на приём')
 
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/patient-calendar-layout.css') }}?v=9">
 <div class="patient-page patient-booking-page">
     <header class="patient-page-header">
         <div>
@@ -63,83 +64,87 @@
                     </span>
                 </div>
 
-                <div class="patient-booking-controls">
-                    <div class="patient-booking-field patient-clinic-search">
-                        <label for="bookingClinicSearch">Клиника</label>
-                        <input
-                            type="search"
-                            id="bookingClinicSearch"
-                            class="patient-clinic-search__input"
-                            placeholder="Название клиники, город или адрес"
-                            autocomplete="off"
-                            minlength="2"
-                            aria-controls="bookingClinicSearchResults"
-                            aria-autocomplete="list"
-                        >
-                        <input type="hidden" id="bookingClinic" value="{{ $selectedClinicId ?: '' }}">
+                <div class="patient-calendar-toolbar d-flex flex-column gap-3" data-patient-calendar-toolbar="2">
+                    <div class="patient-calendar-toolbar__row row g-3">
+                        <div class="patient-booking-field patient-clinic-search col-12 col-md-6">
+                            <label for="bookingClinicSearch">Клиника</label>
+                            <input
+                                type="search"
+                                id="bookingClinicSearch"
+                                class="patient-clinic-search__input"
+                                placeholder="Название клиники, город или адрес"
+                                autocomplete="off"
+                                minlength="2"
+                                aria-controls="bookingClinicSearchResults"
+                                aria-autocomplete="list"
+                            >
+                            <input type="hidden" id="bookingClinic" value="{{ $selectedClinicId ?: '' }}">
 
-                        <div
-                            class="patient-clinic-selected"
-                            id="bookingClinicSelected"
-                            @if(!$clinic) hidden @endif
-                        >
-                            <div>
-                                <strong id="bookingClinicSelectedName">{{ $clinic?->name ?? '' }}</strong>
-                                <small id="bookingClinicSelectedAddress">
-                                    @if($clinic)
-                                        {{ $clinic->city }}{{ $clinic->city && $clinic->address ? ' · ' : '' }}{{ $clinic->address }}
-                                    @endif
-                                </small>
+                            <div
+                                class="patient-clinic-selected"
+                                id="bookingClinicSelected"
+                                @if(!$clinic) hidden @endif
+                            >
+                                <div>
+                                    <strong id="bookingClinicSelectedName">{{ $clinic?->name ?? '' }}</strong>
+                                    <small id="bookingClinicSelectedAddress">
+                                        @if($clinic)
+                                            {{ $clinic->city }}{{ $clinic->city && $clinic->address ? ' · ' : '' }}{{ $clinic->address }}
+                                        @endif
+                                    </small>
+                                </div>
+                                <span><i class="bi bi-check-circle-fill"></i> Выбрана</span>
                             </div>
-                            <span><i class="bi bi-check-circle-fill"></i> Выбрана</span>
+
+                            <div
+                                class="patient-clinic-search__results"
+                                id="bookingClinicSearchResults"
+                                role="listbox"
+                                hidden
+                            ></div>
+                            <small class="patient-clinic-search__hint">
+                                Поиск по всем амбулаторным клиникам. Стационары не отображаются.
+                            </small>
                         </div>
 
-                        <div
-                            class="patient-clinic-search__results"
-                            id="bookingClinicSearchResults"
-                            role="listbox"
-                            hidden
-                        ></div>
-                        <small class="patient-clinic-search__hint">
-                            Поиск по всем амбулаторным клиникам. Стационары не отображаются.
-                        </small>
+                        <label class="patient-booking-field col-12 col-md-6">
+                            <span>Врач</span>
+                            <select id="bookingDoctor" @disabled(!$clinic || empty($doctors))>
+                                @forelse($doctors as $doctor)
+                                    <option
+                                        value="{{ $doctor['id'] }}"
+                                        data-formats="{{ implode(',', $doctor['formats']) }}"
+                                        @selected((int) $doctor['id'] === (int) $selectedDoctorId)
+                                    >
+                                        {{ $doctor['name'] }} — {{ $doctor['speciality'] }}{{ $doctor['assigned'] ? ' · лечащий врач' : '' }}
+                                    </option>
+                                @empty
+                                    <option value="">
+                                        {{ $clinic ? 'Нет врачей для онлайн-записи' : 'Сначала выберите клинику' }}
+                                    </option>
+                                @endforelse
+                            </select>
+                        </label>
                     </div>
 
-                    <label class="patient-booking-field">
-                        <span>Врач</span>
-                        <select id="bookingDoctor" @disabled(!$clinic || empty($doctors))>
-                            @forelse($doctors as $doctor)
-                                <option
-                                    value="{{ $doctor['id'] }}"
-                                    data-formats="{{ implode(',', $doctor['formats']) }}"
-                                    @selected((int) $doctor['id'] === (int) $selectedDoctorId)
-                                >
-                                    {{ $doctor['name'] }} — {{ $doctor['speciality'] }}{{ $doctor['assigned'] ? ' · лечащий врач' : '' }}
-                                </option>
-                            @empty
-                                <option value="">
-                                    {{ $clinic ? 'Нет врачей для онлайн-записи' : 'Сначала выберите клинику' }}
-                                </option>
-                            @endforelse
-                        </select>
-                    </label>
-
-                    <div class="patient-booking-field">
-                        <span>Формат приёма</span>
-                        <div class="patient-booking-format-switch" id="bookingFormatSwitch">
-                            <button type="button" data-format="in_person" class="{{ $selectedFormat === 'in_person' ? 'is-active' : '' }}" @disabled(!in_array('in_person', $selectedFormats, true))>
-                                <i class="bi bi-hospital"></i> Очный приём
-                            </button>
-                            <button type="button" data-format="telemedicine" class="{{ $selectedFormat === 'telemedicine' ? 'is-active' : '' }}" @disabled(!in_array('telemedicine', $selectedFormats, true))>
-                                <i class="bi bi-camera-video"></i> Телемедицина
-                            </button>
+                    <div class="patient-calendar-toolbar__row row g-3">
+                        <div class="patient-booking-field col-12 col-md-6">
+                            <span>Формат приёма</span>
+                            <div class="patient-booking-format-switch" id="bookingFormatSwitch">
+                                <button type="button" data-format="in_person" class="{{ $selectedFormat === 'in_person' ? 'is-active' : '' }}" @disabled(!in_array('in_person', $selectedFormats, true))>
+                                    <i class="bi bi-hospital"></i> Очный приём
+                                </button>
+                                <button type="button" data-format="telemedicine" class="{{ $selectedFormat === 'telemedicine' ? 'is-active' : '' }}" @disabled(!in_array('telemedicine', $selectedFormats, true))>
+                                    <i class="bi bi-camera-video"></i> Телемедицина
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <label class="patient-booking-field patient-booking-date-field">
-                        <span>Дата внутри нужной недели</span>
-                        <input type="date" id="bookingFromDate" value="{{ $todayDate }}" min="{{ $todayDate }}">
-                    </label>
+                        <label class="patient-booking-field patient-booking-date-field col-12 col-md-6">
+                            <span>Дата внутри нужной недели</span>
+                            <input type="date" id="bookingFromDate" value="{{ $todayDate }}" min="{{ $todayDate }}">
+                        </label>
+                    </div>
                 </div>
 
                 <div class="patient-booking-timezone-legend">
@@ -534,7 +539,27 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!(day.slots || []).length) {
                 const empty = document.createElement('p');
                 empty.className = 'patient-booking-day__empty';
-                empty.textContent = day.message || 'Свободного времени нет.';
+                // CALENDAR_STATIC_STATUS_V9: static labels, no accordions or observers.
+                const unavailableMessage = String(day.message || '').toLowerCase();
+                let unavailableLabel = 'Нет времени';
+                let unavailableKind = '';
+
+                if (/прошедш|прошл[а-яё\s]*дат|дата.*прошл/.test(unavailableMessage)) {
+                    unavailableLabel = 'Дата прошла';
+                    unavailableKind = 'is-past';
+                } else if (/лимит|исчерпан|осталось\s*0|запис[ьи].*законч/.test(unavailableMessage)) {
+                    unavailableLabel = 'Лимит записей';
+                    unavailableKind = 'is-limit';
+                } else if (/длительност|нет предложенных вариантов времени|нет свободных слотов/.test(unavailableMessage)) {
+                    unavailableLabel = 'Нет слотов';
+                } else if (/нет.*рабоч|нет.*интервал|график клиники|рабочих интервалов|расписан/.test(unavailableMessage)) {
+                    unavailableLabel = 'Нет графика';
+                } else if (/занят|уже записан/.test(unavailableMessage)) {
+                    unavailableLabel = 'Время занято';
+                }
+
+                empty.textContent = unavailableLabel;
+                if (unavailableKind) empty.classList.add(unavailableKind);
                 slots.appendChild(empty);
             }
 

@@ -1,0 +1,41 @@
+// Компактный ряд «Сбросить / Сохранить изменения» в общей информации пациента.
+// Ширина самого ряда и каждой кнопки определяется содержимым.
+.patient-info-form-actions.patient-info-form-actions--compact,
+#medicalCardRoot.medical-card-page .patient-info-form-actions.patient-info-form-actions--compact
+    display: flex !important
+    flex-direction: row !important
+    flex-wrap: wrap !important
+    align-items: center !important
+    justify-content: flex-end !important
+    gap: .5rem !important
+    flex: 0 1 auto !important
+    width: fit-content !important
+    min-width: 0 !important
+    max-width: 100% !important
+    margin-inline-start: auto !important
+    margin-inline-end: 0 !important
+    align-self: flex-end !important
+    justify-self: end !important
+    box-sizing: border-box
+
+    > button.btn
+        display: inline-flex !important
+        align-items: center
+        justify-content: center
+        flex: 0 0 auto !important
+        width: max-content !important
+        min-width: 0 !important
+        max-width: 100% !important
+        padding-inline: .75rem !important
+        white-space: normal !important
+        box-sizing: border-box
+
+// При нехватке места переносится ряд, а кнопки сохраняют ширину по тексту.
+@media (max-width: 575.98px)
+    .patient-info-form-actions.patient-info-form-actions--compact,
+    #medicalCardRoot.medical-card-page .patient-info-form-actions.patient-info-form-actions--compact
+        justify-content: flex-start !important
+        margin-inline-start: 0 !important
+        margin-inline-end: auto !important
+        align-self: flex-start !important
+        justify-self: start !important

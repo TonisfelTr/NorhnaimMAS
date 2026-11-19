@@ -1,0 +1,57 @@
+// Общая шапка страниц кабинета пациента.
+// За основу взята компактная типографика страницы «Исследования».
+// Область действия ограничена шапкой: подписи секций и карточки не затрагиваются.
+.patient-panel-body .patient-page .patient-page-header
+    display: flex
+    align-items: flex-end
+    justify-content: space-between
+    gap: 1rem
+    margin-bottom: 1.1rem
+
+    > div:first-child
+        min-width: 0
+
+    h1
+        margin: .2rem 0 .35rem
+        color: #183b39
+        font-family: 'Montserrat', sans-serif
+        font-size: clamp(25px, 1.8vw, 30px)
+        font-weight: 750
+        line-height: 1.2
+        letter-spacing: -.015em
+        white-space: normal
+        overflow-wrap: anywhere
+
+    .patient-page-header__eyebrow,
+    .patient-eyebrow
+        display: block
+        margin: 0
+        color: #183b39
+        font-size: 12px
+        font-weight: 650
+        line-height: 1.4
+        letter-spacing: .025em
+        text-transform: uppercase
+
+    p
+        margin: 0
+        color: #627b78
+        font-size: 14px
+        font-weight: 400
+        line-height: 1.45
+        letter-spacing: normal
+
+// Дата или выбранная клиника переходят под текст шапки на узком экране.
+@media (max-width: 767.98px)
+    .patient-panel-body .patient-page .patient-page-header
+        flex-direction: column
+        align-items: flex-start
+        gap: .75rem
+
+        .patient-page-header__date
+            max-width: 100%
+            margin-top: 0
+            white-space: normal
+
+        .patient-research-current-clinic
+            max-width: 100%

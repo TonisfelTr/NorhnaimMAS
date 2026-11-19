@@ -172,6 +172,8 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
         Route::get('/calendar/availability', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'availability'])->middleware('throttle:60,1')->name('calendar.availability');
         Route::post('/calendar', [\App\Http\Controllers\Patients\AppointmentBookingController::class, 'store'])->middleware('throttle:5,1')->name('calendar.store');
         Route::get('/assignments', [\App\Http\Controllers\Patients\MedicationAssignmentsController::class, 'index'])->name('assignments.index');
+        Route::get('/research', [\App\Http\Controllers\Patients\ResearchController::class, 'index'])->name('research.index');
+        Route::post('/research/priority-clinic', [\App\Http\Controllers\Patients\ResearchController::class, 'setPriorityClinic'])->middleware('throttle:10,1')->name('research.priority-clinic');
         Route::post('/assignments/priority-clinic', [\App\Http\Controllers\Patients\MedicationAssignmentsController::class, 'setPriorityClinic'])->middleware('throttle:10,1')->name('assignments.priority-clinic');
     });
 

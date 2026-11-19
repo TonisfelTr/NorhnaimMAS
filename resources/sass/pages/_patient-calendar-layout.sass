@@ -1,0 +1,594 @@
+// PATIENT_CALENDAR_LAYOUT_V6
+// Compile to public/css/patient-calendar-layout.css or use in patients.sass.
+// Colours, font families and focus states come from the patient panel.
+
+$calendar-text-size: 15px
+$calendar-note-size: 12.5px
+$calendar-caption-size: 11.5px
+
+.patient-booking-page
+    container-name: patient-calendar-page
+    container-type: inline-size
+
+    .patient-booking-layout
+        min-width: 0
+        grid-template-columns: minmax(0, 1fr)
+        gap: 16px
+
+    .patient-booking-card,
+    .patient-booking-aside,
+    .patient-booking-field
+        min-width: 0
+
+    .patient-booking-aside
+        grid-template-columns: minmax(0, 1fr)
+
+    .patient-booking-field
+        max-width: 100%
+        align-self: start
+
+        > label,
+        > span
+            overflow-wrap: break-word
+
+        input,
+        select
+            box-sizing: border-box
+            width: 100%
+            min-width: 0
+            max-width: 100%
+
+    .patient-booking-date-field input
+        max-width: 240px
+
+    .patient-booking-format-switch
+        display: flex
+        flex-wrap: wrap
+        align-items: stretch
+        justify-content: flex-start
+        gap: 6px
+        min-width: 0
+
+        > button
+            flex: 0 0 auto
+            width: auto
+            max-width: 100%
+            min-height: 42px
+            white-space: normal
+            overflow-wrap: break-word
+
+    .patient-clinic-selected
+        flex-wrap: wrap
+
+        > div
+            flex: 1 1 180px
+
+        strong,
+        small
+            overflow-wrap: break-word
+
+    .patient-clinic-search__results
+        box-sizing: border-box
+        min-width: 0
+        max-width: 100%
+
+    .patient-clinic-search__result
+        min-width: 0
+        max-width: 100%
+        overflow-wrap: anywhere
+
+    .patient-booking-layout > .patient-booking-card > .patient-booking-card__header
+        flex-wrap: wrap
+
+        > div
+            flex: 1 1 240px
+            min-width: 0
+
+    .patient-booking-week-nav
+        flex-wrap: wrap
+
+        > div:first-child
+            min-width: 0
+
+        > div:last-child
+            flex: 0 0 auto
+
+    // Only the seven-day grid scrolls horizontally; filters stay in the card.
+    .patient-booking-week
+        grid-template-columns: repeat(7, minmax(160px, 1fr))
+        min-width: 0
+        max-width: 100%
+        overflow-x: auto
+
+    .patient-booking-selection
+        flex-wrap: wrap
+
+        > form
+            flex: 0 0 auto
+            width: auto
+            max-width: 100%
+
+            > .patient-booking-primary
+                width: auto
+                max-width: 100%
+
+    .patient-booking-selection__body
+        flex: 1 1 180px
+
+    // Form values, actions and dates use the same readable text size.
+    .patient-page-header p,
+    .patient-booking-field > span,
+    .patient-clinic-search > label,
+    .patient-booking-field input,
+    .patient-booking-field select,
+    .patient-booking-format-switch > button,
+    .patient-booking-back,
+    .patient-booking-primary,
+    .patient-clinic-selected strong,
+    .patient-clinic-search__result strong,
+    .patient-booking-week-nav > div:first-child strong,
+    .patient-booking-day__header strong,
+    .patient-booking-slot,
+    .patient-booking-selection__body strong,
+    .patient-booking-upcoming__item > div:last-child strong,
+    .patient-booking-upcoming__date strong,
+    .patient-booking-upcoming__date > span
+        font-size: $calendar-text-size
+        line-height: 1.45
+
+    .patient-booking-field > span,
+    .patient-clinic-search > label,
+    .patient-booking-format-switch > button,
+    .patient-booking-back,
+    .patient-booking-primary,
+    .patient-clinic-selected strong,
+    .patient-clinic-search__result strong,
+    .patient-booking-week-nav > div:first-child strong,
+    .patient-booking-day__header strong,
+    .patient-booking-selection__body strong,
+    .patient-booking-upcoming__item > div:last-child strong,
+    .patient-booking-upcoming__date strong
+        font-weight: 600
+
+    .patient-booking-field input,
+    .patient-booking-field select
+        font-weight: 400
+
+    // Descriptions, search details, notices and calendar messages.
+    .patient-booking-card__header p,
+    .patient-clinic-selected small,
+    .patient-clinic-search__hint,
+    .patient-clinic-search__result small,
+    .patient-clinic-search__empty,
+    .patient-booking-timezone-legend,
+    .patient-booking-week-nav > div:first-child span,
+    .patient-booking-day__hours,
+    .patient-booking-day__empty,
+    .patient-booking-loading,
+    .patient-booking-empty,
+    .patient-booking-monthly-quota,
+    .patient-booking-alert,
+    .patient-booking-blocked p,
+    .patient-booking-selection__body span,
+    .patient-booking-info ol li,
+    .patient-booking-info__note,
+    .patient-booking-upcoming__item > div:last-child > span,
+    .patient-booking-upcoming__empty
+        font-size: $calendar-note-size
+        font-weight: 400
+        line-height: 1.5
+
+    .patient-booking-monthly-quota .patient-booking-monthly-quota__line
+        max-width: 100%
+        font-size: $calendar-note-size
+        font-weight: 600
+        line-height: 1.5
+        white-space: normal
+
+        > span
+            min-width: 0
+            font-size: inherit
+            line-height: inherit
+            overflow-wrap: anywhere
+
+    .patient-clinic-search__more,
+    .patient-clinic-search__group-title,
+    .patient-booking-duration,
+    .patient-booking-count
+        font-size: $calendar-note-size
+        font-weight: 600
+        line-height: 1.4
+
+    // Short captions stay smaller than form text, without the old 6–9px sizes.
+    .patient-page-header .patient-eyebrow,
+    .patient-booking-card .patient-eyebrow,
+    .patient-clinic-selected > span,
+    .patient-booking-day__header > span,
+    .patient-booking-info ol li > span,
+    .patient-booking-upcoming__date small,
+    .patient-booking-upcoming__doctor-time
+        font-size: $calendar-caption-size
+        font-weight: 600
+        line-height: 1.4
+
+    .patient-page-header .patient-eyebrow,
+    .patient-booking-card .patient-eyebrow
+        letter-spacing: .08em
+
+    .patient-booking-day__hours,
+    .patient-booking-day__empty
+        overflow-wrap: anywhere
+
+    // A full-width slot gives both time labels room at the new font sizes.
+    .patient-booking-day__slots
+        grid-template-columns: minmax(0, 1fr)
+
+    .patient-booking-slot
+        min-width: 0
+        min-height: 52px
+        font-weight: 600
+
+    .patient-booking-slot__patient-time
+        font-size: $calendar-text-size
+        font-weight: 600
+        line-height: 1.25
+        font-variant-numeric: tabular-nums
+        white-space: nowrap
+
+    .patient-booking-slot__doctor-time
+        overflow: visible
+        font-size: $calendar-caption-size
+        font-weight: 500
+        line-height: 1.4
+        font-variant-numeric: tabular-nums
+        white-space: normal
+        text-overflow: clip
+        overflow-wrap: anywhere
+
+    .patient-booking-upcoming__date
+        width: 80px
+        flex: 0 0 80px
+        overflow-wrap: anywhere
+
+// The template contains two independent rows. It no longer uses the legacy
+// .patient-booking-controls four-column grid. Bootstrap row/col classes provide
+// the same two-row structure while this stylesheet is loading.
+.patient-calendar-toolbar
+    display: flex
+    flex-direction: column
+    gap: 16px
+    width: 100%
+    min-width: 0
+    margin-bottom: 18px
+    container-name: patient-calendar-toolbar
+    container-type: inline-size
+
+    > .patient-calendar-toolbar__row
+        display: grid
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        align-items: start
+        gap: 16px
+        min-width: 0
+        margin: 0
+
+        > .patient-booking-field
+            width: auto
+            min-width: 0
+            max-width: 100%
+            margin: 0
+            padding: 0
+
+    .patient-booking-field input,
+    .patient-booking-field select
+        box-sizing: border-box
+        width: 100%
+        min-width: 0
+        max-width: 100%
+
+    .patient-booking-date-field input
+        max-width: 240px
+
+    .patient-booking-format-switch
+        display: flex
+        flex-wrap: wrap
+        gap: 6px
+        min-width: 0
+
+        > button
+            flex: 0 0 auto
+            width: auto
+            min-width: 0
+            max-width: 100%
+
+// Breakpoints follow usable content width, including when the sidebar is open.
+@container patient-calendar-page (min-width: 1000px)
+    .patient-booking-page .patient-booking-layout
+        grid-template-columns: minmax(0, 1fr) 320px
+
+@container patient-calendar-page (min-width: 640px) and (max-width: 999.98px)
+    .patient-booking-page .patient-booking-aside
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+
+@container patient-calendar-toolbar (max-width: 579.98px)
+    .patient-calendar-toolbar > .patient-calendar-toolbar__row
+        grid-template-columns: minmax(0, 1fr)
+
+// Conservative fallback for browsers without container queries.
+@supports not (container-type: inline-size)
+    @media (min-width: 1336px)
+        .patient-booking-page .patient-booking-layout
+            grid-template-columns: minmax(0, 1fr) 320px
+
+    @media (min-width: 800px) and (max-width: 1335.98px)
+        .patient-booking-page .patient-booking-aside
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+
+    @media (max-width: 767.98px)
+        .patient-calendar-toolbar > .patient-calendar-toolbar__row
+            grid-template-columns: minmax(0, 1fr)
+
+
+// V5: balanced typography; explanations smaller than main controls.
+// Keep the normal page title size unchanged; only booking-area content is affected.
+.patient-booking-page
+    .patient-booking-card__header p,
+    .patient-booking-info ol li,
+    .patient-booking-info__note,
+    .patient-booking-monthly-quota,
+    .patient-booking-week-nav > div:first-child span,
+    .patient-booking-timezone-legend,
+    .patient-booking-day__empty,
+    .patient-booking-day__hours
+        font-size: $calendar-note-size
+        line-height: 1.55
+
+    .patient-booking-card .patient-eyebrow,
+    .patient-page-header .patient-eyebrow,
+    .patient-booking-day__header > span
+        font-size: $calendar-caption-size
+        line-height: 1.45
+
+    .patient-booking-slot__patient-time
+        font-size: $calendar-text-size
+        line-height: 1.35
+
+    .patient-booking-slot__doctor-time
+        font-size: $calendar-caption-size
+        line-height: 1.35
+        white-space: normal
+
+    .patient-booking-upcoming__empty
+        font-size: $calendar-note-size
+
+// Long notifications must wrap inside cards rather than overflow the timetable.
+.patient-booking-page .patient-booking-day__empty,
+.patient-booking-page .patient-booking-monthly-quota,
+.patient-booking-page .patient-booking-info__note
+    overflow-wrap: anywhere
+
+// Dense multi-line availability notices should stay compact.
+.patient-booking-page .patient-booking-day__empty
+    font-size: 12px
+    line-height: 1.45
+
+
+// V6: concise weekly availability. Keep the original server error details
+// available in an accessible native <details> element, but not repeated verbatim
+// across seven day cards. The companion JS only enhances rendered messages.
+.patient-booking-page
+    .patient-booking-layout > .patient-booking-card
+        padding: 18px
+
+    .patient-booking-card__header
+        margin-bottom: 12px
+
+    .patient-calendar-toolbar
+        gap: 11px
+        margin-bottom: 11px
+
+    .patient-calendar-toolbar > .patient-calendar-toolbar__row
+        gap: 11px
+
+    .patient-booking-field
+        gap: 5px
+
+    .patient-clinic-selected
+        padding: 9px 11px
+        border-radius: 10px
+
+    .patient-clinic-selected strong
+        font-size: 13px
+        line-height: 1.3
+
+    .patient-clinic-selected small
+        font-size: 11px
+        line-height: 1.35
+
+    .patient-booking-week-nav
+        margin-bottom: 9px
+
+    .patient-booking-week
+        grid-template-columns: repeat(7, minmax(102px, 1fr))
+        gap: 7px
+        align-items: start
+        scroll-snap-type: x proximity
+
+    .patient-booking-day
+        min-width: 0
+        min-height: 0
+        height: auto
+        border-radius: 10px
+        scroll-snap-align: start
+
+    .patient-booking-day__header
+        flex-direction: row
+        align-items: center
+        justify-content: space-between
+        flex-wrap: wrap
+        gap: 4px
+        padding: 9px 8px
+
+        > span
+            font-size: 10px
+            font-weight: 600
+
+        strong
+            font-size: 12px
+            line-height: 1.2
+            font-weight: 650
+            white-space: nowrap
+
+    .patient-booking-day__hours
+        padding: 7px 8px 0
+        font-size: 10px
+        line-height: 1.3
+
+    .patient-booking-day__slots
+        box-sizing: border-box
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+        gap: 5px
+        padding: 7px
+        max-height: 260px
+        overflow-y: auto
+        overscroll-behavior: contain
+
+    .patient-booking-slot
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        gap: 2px
+        min-width: 0
+        min-height: 36px
+        padding: 5px 3px
+        line-height: 1.2
+        font-size: 11px
+
+    .patient-booking-slot__patient-time
+        font-size: 11px
+        line-height: 1.2
+        font-weight: 650
+
+    .patient-booking-slot__doctor-time
+        font-size: 9px
+        line-height: 1.25
+        font-weight: 400
+
+    // CALENDAR_STATIC_STATUS_V9: short static statuses, no spoilers.
+    .patient-booking-day__empty
+        display: flex
+        align-items: center
+        min-width: 0
+        min-height: 30px
+        margin: 5px 4px
+        padding: 6px 8px
+        border-radius: 8px
+        background: #f3f7f5
+        color: #667c78
+        font-size: 10.5px
+        line-height: 1.25
+        font-weight: 600
+        overflow-wrap: anywhere
+
+        &.is-limit
+            color: #a05d25
+            background: #fff6e9
+
+        &.is-past
+            color: #687b79
+
+@container patient-calendar-page (max-width: 590px)
+    .patient-booking-page .patient-booking-week
+        grid-template-columns: repeat(7, minmax(132px, 1fr))
+
+@supports not (container-type: inline-size)
+    @media (max-width: 767.98px)
+        .patient-booking-page .patient-booking-week
+            grid-template-columns: repeat(7, minmax(132px, 1fr))
+
+
+// V7: only the appointment-format label and its two buttons become compact.
+// No other text sizes, calendar grid or booking behaviour are changed.
+.patient-booking-page
+    .patient-calendar-toolbar .patient-booking-field:has(> #bookingFormatSwitch) > span
+        font-size: 12px
+        font-weight: 600
+        line-height: 1.35
+
+    .patient-calendar-toolbar #bookingFormatSwitch > button
+        min-height: 34px
+        padding: 7px 10px
+        border-radius: 9px
+        font-size: 12px
+        font-weight: 600
+        line-height: 1.25
+        white-space: normal
+
+        .bi
+            font-size: 13px
+            line-height: 1
+
+// V8: uniform compact typography in the booking toolbar and clinic picker.
+// Limited to this page; does not affect the calendar grid or other screens.
+.patient-booking-page
+    .patient-calendar-toolbar .patient-booking-field > span,
+    .patient-calendar-toolbar .patient-clinic-search > label
+        font-size: 12px
+        line-height: 1.35
+        font-weight: 600
+
+    .patient-calendar-toolbar .patient-booking-field input,
+    .patient-calendar-toolbar .patient-booking-field select
+        font-size: 13px
+        line-height: 1.35
+        font-weight: 400
+        min-height: 38px
+
+    .patient-calendar-toolbar .patient-clinic-selected strong
+        font-size: 12px
+        line-height: 1.35
+        font-weight: 600
+
+    .patient-calendar-toolbar .patient-clinic-selected small,
+    .patient-calendar-toolbar .patient-clinic-search__hint
+        font-size: 11px
+        line-height: 1.4
+        font-weight: 400
+
+    .patient-calendar-toolbar .patient-clinic-selected > span
+        font-size: 10.5px
+        line-height: 1.35
+        font-weight: 600
+
+    .patient-calendar-toolbar #bookingFormatSwitch > button
+        width: auto
+        min-height: 34px
+        padding: 7px 10px
+        border-radius: 9px
+        font-size: 12px
+        font-weight: 600
+        line-height: 1.25
+
+        i
+            font-size: 13px
+
+    .patient-booking-timezone-legend,
+    .patient-booking-week-nav > div:first-child span
+        font-size: 11px
+        line-height: 1.4
+
+    .patient-booking-week-nav > div:first-child strong
+        font-size: 12px
+        line-height: 1.35
+
+    .patient-booking-monthly-quota,
+    .patient-booking-monthly-quota .patient-booking-monthly-quota__line
+        font-size: 11px
+        line-height: 1.4
+
+    .patient-booking-monthly-quota .patient-booking-monthly-quota__line > span
+        font-size: inherit
+
+    .patient-booking-back
+        font-size: 12px
+        line-height: 1.3

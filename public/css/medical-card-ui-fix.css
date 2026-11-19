@@ -1,0 +1,57 @@
+/* Norhnaim – компактные действия формы и строгая видимость вкладок. */
+#medicalCardRoot .patient-info-form-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+  padding-top: 12px;
+}
+#medicalCardRoot .patient-info-form-actions > .btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 36px;
+  padding: 7px 15px;
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 650;
+  white-space: nowrap;
+}
+#medicalCardRoot .patient-info-form-actions > .btn-light {
+  background: #f4f6f9;
+  border-color: #e3e8f0;
+  color: #40506a;
+}
+#medicalCardRoot .patient-info-form-actions > .btn-primary {
+  box-shadow: 0 2px 6px rgba(13, 110, 253, .12);
+}
+#medicalCardRoot #pane-presc.mc-pane:not(.active),
+#medicalCardRoot #pane-presc.mc-pane.active:not(.show),
+#medicalCardRoot #pane-presc[hidden] {
+  display: none !important;
+}
+#medicalCardRoot #pane-presc.mc-pane.active.show {
+  display: block !important;
+}
+#medicalCardRoot #patientMedicationWorkspaceContent > .medication-workspace-pane:not(.active),
+#medicalCardRoot #patientMedicationWorkspaceContent > .medication-workspace-pane.active:not(.show),
+#medicalCardRoot #patientMedicationWorkspaceContent > .medication-workspace-pane[hidden] {
+  display: none !important;
+}
+#medicalCardRoot #patientMedicationWorkspaceContent > .medication-workspace-pane.active.show {
+  display: block !important;
+}
+@media (max-width: 575px) {
+  #medicalCardRoot .patient-info-form-actions { justify-content: flex-start; }
+  #medicalCardRoot .patient-info-form-actions > .btn {
+    width: auto !important;
+    max-width: 100%;
+  }
+}

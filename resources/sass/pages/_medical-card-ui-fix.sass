@@ -1,0 +1,64 @@
+// Norhnaim – компактные действия формы и строгая видимость вкладок.
+// Отдельный файл: в Blade нет встроенных стилей и @php.
+
+#medicalCardRoot
+    .patient-info-form-actions
+        display: flex
+        flex-direction: row
+        flex-wrap: wrap
+        align-items: center
+        justify-content: flex-end
+        gap: 8px
+        width: 100%
+        padding-top: 12px
+
+        > .btn
+            display: inline-flex !important
+            align-items: center
+            justify-content: center
+            flex: 0 0 auto !important
+            width: auto !important
+            min-width: 0 !important
+            min-height: 36px
+            padding: 7px 15px
+            border-radius: 9px
+            font-size: 13px
+            line-height: 1.35
+            font-weight: 650
+            white-space: nowrap
+
+        > .btn-light
+            background: #f4f6f9
+            border-color: #e3e8f0
+            color: #40506a
+
+        > .btn-primary
+            box-shadow: 0 2px 6px rgba(13, 110, 253, .12)
+
+    // Даже если исходная вложенность не совпадает с селектором Bootstrap
+    // .tab-content > .tab-pane, не показываем неактивную вкладку.
+    #pane-presc.mc-pane:not(.active),
+    #pane-presc.mc-pane.active:not(.show),
+    #pane-presc[hidden]
+        display: none !important
+
+    #pane-presc.mc-pane.active.show
+        display: block !important
+
+    #patientMedicationWorkspaceContent
+        > .medication-workspace-pane:not(.active),
+        > .medication-workspace-pane.active:not(.show),
+        > .medication-workspace-pane[hidden]
+            display: none !important
+
+        > .medication-workspace-pane.active.show
+            display: block !important
+
+@media (max-width: 575px)
+    #medicalCardRoot
+        .patient-info-form-actions
+            justify-content: flex-start
+
+            > .btn
+                width: auto !important
+                max-width: 100%

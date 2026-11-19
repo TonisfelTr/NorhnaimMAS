@@ -190,7 +190,7 @@ services:
         profiles:
             - tools
         ports:
-            - "121.0.0.0:${FORWARD_PGADMIN_PORT:-5111}:8080"
+            - "127.0.0.1:${FORWARD_PGADMIN_PORT:-5111}:80"
         environment:
             PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL:-admin@example.com}"
             PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD:-password}"

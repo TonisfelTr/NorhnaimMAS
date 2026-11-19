@@ -1,0 +1,32 @@
+#medicalCardRoot.medical-card-page .patient-info-form-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.5rem;
+}
+#medicalCardRoot.medical-card-page .patient-info-form-actions > .btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+
+#medicalCardRoot.medical-card-page #pane-presc .medication-tab-primary-action {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+
+@media (max-width: 575.98px) {
+  #medicalCardRoot.medical-card-page .patient-info-form-actions {
+    justify-content: flex-start !important;
+  }
+}

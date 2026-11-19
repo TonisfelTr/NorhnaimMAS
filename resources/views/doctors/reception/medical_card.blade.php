@@ -8,6 +8,11 @@
     <script src="{{ asset('js/benefit-prescriptions.js') }}?v=1" defer></script>
 @endsection
 @section('sub-main')
+    <link
+        id="medical-card-tabs-and-actions-css"
+        rel="stylesheet"
+        href="{{ asset('css/medical-card-tabs-and-actions.css') }}?v=20261119-tabs2"
+    >
     <div id="medicalCardRoot"
          class="medical-card-page"
          data-active-tab="{{ $medicalCardErrorTab ?? session('active_tab') }}"
@@ -1009,11 +1014,16 @@
                             </section>
                         </div>
 
-                        <div class="patient-info-form-actions">
-                            <button type="reset" class="btn btn-light">
+                        <link
+                            id="patient-info-compact-buttons-css"
+                            rel="stylesheet"
+                            href="{{ asset('css/patient-info-compact-buttons.css') }}?v=20261119-buttons3"
+                        >
+                        <div class="patient-info-form-actions d-flex flex-row flex-wrap align-items-center justify-content-end gap-2 patient-info-form-actions--compact">
+                            <button type="reset" class="btn btn-light w-auto flex-grow-0 flex-shrink-0">
                                 <i class="bi bi-arrow-counterclockwise me-1"></i> Сбросить
                             </button>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary w-auto flex-grow-0 flex-shrink-0">
                                 <i class="bi bi-check2-circle me-1"></i> Сохранить изменения
                             </button>
                         </div>
@@ -2167,16 +2177,6 @@
                         </div>
                     </div>
 
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-sm"
-                            data-bs-toggle="modal"
-                            data-bs-target="#prescriptionModal"
-                            data-role="open-prescription-modal"
-                        >
-                            <i class="bi bi-file-earmark-plus me-1"></i> Выписать рецепт
-                        </button>
-                    </div>
 
                     {{-- PATIENT_MEDICATION_WORKSPACE_TABS_V8 --}}
                     <ul class="nav nav-tabs medication-workspace-tabs"

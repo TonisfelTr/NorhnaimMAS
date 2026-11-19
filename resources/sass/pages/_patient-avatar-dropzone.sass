@@ -1,0 +1,133 @@
+// Avatar uploader. Scoped to avoid affecting other patient profile forms.
+.nh-avatar-upload
+    display: grid
+    gap: 12px
+    color: #183b39
+
+    &__preview
+        width: 112px
+        height: 112px
+        margin: 0 auto 3px
+        border: 4px solid #fff
+        border-radius: 28px
+        background: #e6f3ef
+        box-shadow: 0 8px 22px rgba(19, 61, 55, .10)
+        position: relative
+        display: grid
+        place-items: center
+        overflow: hidden
+
+    &__image
+        width: 100%
+        height: 100%
+        object-fit: cover
+
+    &__initials
+        color: #087e77
+        font-size: 31px
+        font-weight: 750
+
+    .d-none
+        display: none !important
+
+    &__preview-check
+        display: none
+
+    &__zone
+        position: relative
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        min-height: 154px
+        padding: 18px 12px
+        gap: 5px
+        border: 1.5px dashed #b7dcd4
+        border-radius: 16px
+        background: #f7fbfa
+        text-align: center
+        cursor: pointer
+        transition: border-color .18s, background .18s, box-shadow .18s
+
+        &:hover, &:focus-within, &.is-dragover
+            border-color: #078c84
+            background: #edf8f5
+            box-shadow: 0 0 0 3px rgba(7, 140, 132, .09)
+
+        &.is-invalid
+            border-color: #db7777
+            background: #fff7f6
+
+    &__input
+        position: absolute
+        width: 1px
+        height: 1px
+        overflow: hidden
+        opacity: 0
+        pointer-events: none
+
+    &__zone-icon
+        display: grid
+        place-items: center
+        width: 38px
+        height: 38px
+        border-radius: 12px
+        background: #e3f3ef
+        color: #078c84
+        font-size: 20px
+
+    &__zone-title
+        margin-top: 4px
+        font-size: 13px
+        font-weight: 750
+
+    &__zone-subtitle
+        font-size: 12px
+        color: #627b78
+
+    &__zone-link
+        color: #078c84
+        font-weight: 700
+        text-decoration: underline
+        text-underline-offset: 2px
+
+    &__formats
+        margin-top: 4px
+        color: #809692
+        font-size: 11px
+
+    &__status
+        min-height: 18px
+        text-align: center
+        font-size: 11px
+        color: #69827e
+        overflow-wrap: anywhere
+
+        &.is-error
+            color: #ba3e3e
+
+    &__submit
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        gap: 8px
+        width: 100%
+        min-height: 40px
+        padding: 9px 14px
+        border: 1px solid #087f78
+        border-radius: 11px
+        background: #087f78
+        color: #fff
+        font-size: 12px
+        font-weight: 700
+        cursor: pointer
+        transition: background .18s
+
+        &:hover:not(:disabled)
+            background: #076d67
+
+        &:disabled
+            cursor: not-allowed
+            border-color: #dbe9e5
+            background: #eff5f3
+            color: #8ca49e

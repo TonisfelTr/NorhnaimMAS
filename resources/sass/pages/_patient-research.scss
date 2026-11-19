@@ -1,0 +1,631 @@
+// Styles for the patient research page.
+// Imported through resources/sass/app.scss (see README.md).
+// All selectors are scoped to .patient-research-page.
+
+$patient-research-mobile: 760px;
+
+.patient-research-page {
+    --research-ink: #183b39;
+    --research-muted: #627b78;
+    --research-line: #dcebe7;
+    --research-accent: #0c9487;
+    color: var(--research-ink);
+
+    .patient-research-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+
+        h1 {
+            margin: .2rem 0 .35rem;
+            color: var(--research-ink);
+            font-size: clamp(2rem, 2.5vw, 2.45rem);
+            line-height: 1.12;
+            font-weight: 800;
+        }
+
+        p {
+            margin: 0;
+            color: var(--research-muted);
+            font-size: 1rem;
+            line-height: 1.55;
+        }
+    }
+
+    .patient-research-current-clinic {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        max-width: 42%;
+        padding: .65rem .85rem;
+        border: 1px solid var(--research-line);
+        border-radius: .75rem;
+        background: #fff;
+        color: #38615c;
+        font-size: .84rem;
+        font-weight: 700;
+
+        span {
+            overflow-wrap: anywhere;
+        }
+    }
+
+    .patient-research-clinic-preference {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.25rem;
+        padding: 1rem 1.15rem;
+        margin: 1rem 0;
+        border: 1px solid var(--research-line);
+        border-radius: 1rem;
+        background: #fff;
+        box-shadow: 0 5px 18px rgba(24, 59, 57, .045);
+    }
+
+    .patient-research-clinic-preference__copy h2 {
+        margin: .18rem 0 .2rem;
+        color: var(--research-ink);
+        font-size: 1.18rem;
+        font-weight: 800;
+    }
+
+    .patient-research-clinic-preference__copy p {
+        margin: 0;
+        color: var(--research-muted);
+        font-size: .9rem;
+        line-height: 1.45;
+    }
+
+    .patient-research-clinic-preference__form {
+        width: min(100%, 470px);
+
+        label {
+            display: block;
+            margin-bottom: .35rem;
+            color: #47625f;
+            font-size: .78rem;
+            font-weight: 800;
+        }
+    }
+
+    .patient-research-clinic-preference__controls {
+        display: flex;
+        gap: .5rem;
+
+        select {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: .68rem .8rem;
+            border: 1px solid #cfe2dd;
+            border-radius: .7rem;
+            background: #fbfdfc;
+            color: #274c47;
+            font-size: .88rem;
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .4rem;
+            padding: .65rem .9rem;
+            border: 0;
+            border-radius: .7rem;
+            background: #0c857a;
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+    }
+
+    .patient-research-clinic-preference__error {
+        display: block;
+        margin-top: .35rem;
+        color: #b42318;
+        font-size: .78rem;
+    }
+
+    .patient-research-flash {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin: .75rem 0;
+        padding: .7rem .9rem;
+        border: 1px solid #cce9dd;
+        border-radius: .7rem;
+        background: #f0faf5;
+        color: #176b4a;
+        font-size: .88rem;
+        font-weight: 700;
+    }
+
+    .patient-research-clinic-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .65rem;
+        margin: 1rem 0 1.25rem;
+    }
+
+    .patient-research-clinic-tab {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        min-width: min(250px, 100%);
+        max-width: 100%;
+        padding: .7rem .9rem;
+        border: 1px solid #dce9e6;
+        border-radius: .85rem;
+        background: #fff;
+        color: #34524f;
+        text-decoration: none;
+        transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+
+        &:hover {
+            border-color: #9ccfc6;
+            background: #f8fcfb;
+            color: #0b756b;
+        }
+
+        &.is-active {
+            border-color: #55b9ad;
+            background: #eaf8f5;
+            color: #086e65;
+            box-shadow: 0 0 0 2px rgba(12, 148, 135, .08);
+        }
+    }
+
+    .patient-research-clinic-tab__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        border-radius: .7rem;
+        background: #eaf5f3;
+        color: #0d8c81;
+        font-size: 1.05rem;
+    }
+
+    .patient-research-clinic-tab__copy {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-width: 0;
+        gap: .12rem;
+
+        strong {
+            overflow-wrap: anywhere;
+            font-size: .9rem;
+            line-height: 1.3;
+            font-weight: 800;
+        }
+
+        small {
+            color: #6b8580;
+            font-size: .73rem;
+            line-height: 1.3;
+        }
+    }
+
+    .patient-research-clinic-tab__count, .patient-research-section-count, .patient-research-tabs__count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 27px;
+        height: 27px;
+        padding: 0 .4rem;
+        border-radius: 999px;
+        background: rgba(12, 148, 135, .11);
+        color: #176d64;
+        font-size: .78rem;
+        font-weight: 800;
+    }
+
+    .patient-research-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+        margin: .35rem 0 1rem;
+        padding: 0 .15rem;
+        border-bottom: 1px solid var(--research-line);
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: .55rem;
+            min-height: 45px;
+            padding: .7rem 1rem;
+            border: 1px solid transparent;
+            border-bottom: 0;
+            border-radius: .75rem .75rem 0 0;
+            color: #60736f;
+            background: transparent;
+            font-size: .9rem;
+            font-weight: 800;
+
+            i {
+                color: #168f84;
+                font-size: 1rem;
+            }
+
+            &.active {
+                color: #08776d;
+                background: #fff;
+                border-color: var(--research-line);
+                box-shadow: inset 0 -2px 0 #0c9487;
+
+                i {
+                    color: #087f75;
+                }
+            }
+        }
+    }
+
+    .patient-research-tab-content {
+        min-height: 180px;
+    }
+
+    .patient-research-section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 1.15rem 0 1rem;
+
+        h2 {
+            margin: .18rem 0 .25rem;
+            color: var(--research-ink);
+            font-size: 1.35rem;
+            line-height: 1.25;
+            font-weight: 800;
+        }
+
+        p {
+            margin: 0;
+            color: var(--research-muted);
+            font-size: .9rem;
+        }
+    }
+
+    .patient-research-card {
+        margin: 0 0 .9rem;
+        padding: 1.05rem 1.1rem;
+        border: 1px solid var(--research-line);
+        border-radius: .95rem;
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(24, 59, 57, .035);
+    }
+
+    .patient-research-card__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+
+        h3 {
+            margin: .1rem 0 .45rem;
+            color: #183b39;
+            font-size: 1.12rem;
+            line-height: 1.35;
+            font-weight: 800;
+        }
+    }
+
+    .patient-research-card__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem .85rem;
+        color: #6b8580;
+        font-size: .78rem;
+        line-height: 1.45;
+
+        span {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+        }
+    }
+
+    .patient-research-status {
+        display: inline-flex;
+        align-items: center;
+        padding: .3rem .6rem;
+        border-radius: 999px;
+        font-size: .72rem;
+        line-height: 1.2;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .patient-research-status--ready {
+        background: #e8f7ef;
+        color: #18794e;
+    }
+
+    .patient-research-status--processing {
+        background: #fff6df;
+        color: #92620a;
+    }
+
+    .patient-research-status--neutral {
+        background: #eef2f3;
+        color: #617477;
+    }
+
+    .patient-research-results-wrap {
+        overflow-x: auto;
+        margin-top: .9rem;
+        border: 1px solid #e2ece9;
+        border-radius: .75rem;
+    }
+
+    .patient-research-results {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+        font-size: .86rem;
+
+        th {
+            padding: .7rem .75rem;
+            background: #f4f9f7;
+            color: #57716c;
+            text-align: left;
+            font-size: .74rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: .72rem .75rem;
+            border-top: 1px solid #edf2f0;
+            color: #38534f;
+            vertical-align: middle;
+
+            strong {
+                display: block;
+                color: #23433e;
+                font-weight: 750;
+            }
+
+            small {
+                display: block;
+                margin-top: .15rem;
+                color: #81938f;
+                font-size: .72rem;
+            }
+        }
+    }
+
+    .patient-research-results__value {
+        font-weight: 850;
+        color: #173c39 !important;
+    }
+
+    .patient-research-result-flag {
+        display: inline-flex;
+        align-items: center;
+        padding: .25rem .45rem;
+        border-radius: 999px;
+        font-size: .7rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .patient-research-result-flag--warning {
+        background: #fff0e8;
+        color: #b54708;
+    }
+
+    .patient-research-result-flag--normal {
+        background: #e9f7ef;
+        color: #18794e;
+    }
+
+    .patient-research-result-flag--muted {
+        background: #f1f4f4;
+        color: #70817e;
+    }
+
+    .patient-research-card__footnote {
+        margin: .65rem 0 0;
+        color: #80918d;
+        font-size: .76rem;
+        line-height: 1.45;
+    }
+
+    .patient-research-inline-note {
+        display: flex;
+        align-items: flex-start;
+        gap: .55rem;
+        margin-top: .85rem;
+        padding: .75rem .85rem;
+        border: 1px solid #e1ece8;
+        border-radius: .7rem;
+        background: #f7faf9;
+        color: #627b76;
+        font-size: .84rem;
+        line-height: 1.5;
+
+        i {
+            margin-top: .08rem;
+            color: #168f84;
+        }
+    }
+
+    .patient-research-card__eyebrow {
+        color: #0d8c81;
+        font-size: .72rem;
+        font-weight: 850;
+        letter-spacing: .04em;
+    }
+
+    .patient-research-card__description {
+        margin: .75rem 0 0;
+        color: #627b76;
+        font-size: .88rem;
+        line-height: 1.5;
+    }
+
+    .patient-psych-results {
+        margin-top: .9rem;
+        padding: .9rem;
+        border: 1px solid #e2ece9;
+        border-radius: .75rem;
+        background: #fbfdfc;
+
+        h4 {
+            margin: 0 0 .55rem;
+            color: #294c46;
+            font-size: .9rem;
+            font-weight: 850;
+        }
+    }
+
+    .patient-psych-result {
+        padding: .65rem 0;
+        border-top: 1px solid #e9f0ed;
+
+        &:first-of-type {
+            border-top: 0;
+        }
+
+        small {
+            display: block;
+            margin-top: .2rem;
+            color: #718681;
+        }
+
+        p {
+            margin: .35rem 0 0;
+            color: #435e59;
+            font-size: .86rem;
+            line-height: 1.5;
+        }
+    }
+
+    .patient-psych-result__top {
+        display: flex;
+        justify-content: space-between;
+        gap: .8rem;
+        color: #35564f;
+        font-size: .86rem;
+
+        span {
+            color: #0b756b;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+    }
+
+    .patient-research-card__completed {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        margin-top: .75rem;
+        color: #18794e;
+        font-size: .8rem;
+        font-weight: 750;
+    }
+
+    .patient-research-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: .45rem;
+        min-height: 220px;
+        padding: 2rem 1.25rem;
+        border: 1px dashed #cdded9;
+        border-radius: .95rem;
+        background: #fbfdfc;
+        text-align: center;
+
+        p {
+            max-width: 620px;
+            margin: 0;
+            color: #718681;
+            font-size: .88rem;
+            line-height: 1.55;
+        }
+    }
+
+    .patient-research-empty--wide {
+        margin-top: 1rem;
+    }
+
+    .patient-research-empty__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 1rem;
+        background: #eaf5f3;
+        color: #0d8c81;
+        font-size: 1.35rem;
+    }
+
+    .patient-research-empty h2, .patient-research-empty h3 {
+        margin: .35rem 0 0;
+        color: #294c46;
+        font-size: 1.05rem;
+        font-weight: 850;
+    }
+
+    @media (max-width: $patient-research-mobile) {
+        .patient-research-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .patient-research-current-clinic {
+            max-width: 100%;
+        }
+
+        .patient-research-clinic-preference {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .patient-research-clinic-preference__form {
+            width: 100%;
+        }
+
+        .patient-research-clinic-tab {
+            width: 100%;
+        }
+
+        .patient-research-tabs {
+            display: grid;
+            grid-template-columns: 1fr;
+            border-bottom: 0;
+
+            .nav-link {
+                justify-content: flex-start;
+                width: 100%;
+                border: 1px solid var(--research-line);
+                border-radius: .7rem;
+
+                &.active {
+                    background: #edf8f5;
+                    border-color: #72c5b9;
+                    box-shadow: inset 3px 0 0 #0c9487;
+                }
+            }
+        }
+
+        .patient-research-card__header {
+            align-items: flex-start;
+            flex-direction: column;
+
+            h3 {
+                font-size: 1.02rem;
+            }
+        }
+    }
+}
