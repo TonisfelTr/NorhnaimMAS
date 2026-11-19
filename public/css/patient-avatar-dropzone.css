@@ -1,21 +1,21 @@
-/* Built companion CSS for the standalone avatar uploader. */
-.nh-avatar-upload{display:grid;gap:12px;color:#183b39}
-.nh-avatar-upload__preview{width:112px;height:112px;margin:0 auto 3px;border:4px solid #fff;border-radius:28px;background:#e6f3ef;box-shadow:0 8px 22px rgba(19,61,55,.10);position:relative;display:grid;place-items:center;overflow:hidden}
-.nh-avatar-upload__image{width:100%;height:100%;object-fit:cover}
-.nh-avatar-upload__initials{color:#087e77;font-size:31px;font-weight:750}
-.nh-avatar-upload .d-none{display:none!important}
-.nh-avatar-upload__preview-check{display:none}
-.nh-avatar-upload__zone{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:154px;padding:18px 12px;gap:5px;border:1.5px dashed #b7dcd4;border-radius:16px;background:#f7fbfa;text-align:center;cursor:pointer;transition:border-color .18s,background .18s,box-shadow .18s}
-.nh-avatar-upload__zone:hover,.nh-avatar-upload__zone:focus-within,.nh-avatar-upload__zone.is-dragover{border-color:#078c84;background:#edf8f5;box-shadow:0 0 0 3px rgba(7,140,132,.09)}
-.nh-avatar-upload__zone.is-invalid{border-color:#db7777;background:#fff7f6}
-.nh-avatar-upload__input{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
-.nh-avatar-upload__zone-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#e3f3ef;color:#078c84;font-size:20px}
-.nh-avatar-upload__zone-title{margin-top:4px;font-size:13px;font-weight:750}
-.nh-avatar-upload__zone-subtitle{font-size:12px;color:#627b78}
-.nh-avatar-upload__zone-link{color:#078c84;font-weight:700;text-decoration:underline;text-underline-offset:2px}
-.nh-avatar-upload__formats{margin-top:4px;color:#809692;font-size:11px}
-.nh-avatar-upload__status{min-height:18px;text-align:center;font-size:11px;color:#69827e;overflow-wrap:anywhere}
-.nh-avatar-upload__status.is-error{color:#ba3e3e}
-.nh-avatar-upload__submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:40px;padding:9px 14px;border:1px solid #087f78;border-radius:11px;background:#087f78;color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:background .18s}
-.nh-avatar-upload__submit:hover:not(:disabled){background:#076d67}
-.nh-avatar-upload__submit:disabled{cursor:not-allowed;border-color:#dbe9e5;background:#eff5f3;color:#8ca49e}
+/* Норхнейм: компактная Drag & Drop-загрузка аватара. Скомпилированный CSS. */
+.nh-avatar-v2{display:grid;gap:10px;min-width:0;color:#193c39}
+.nh-avatar-v2__zone{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;position:relative;min-height:218px;padding:16px 12px;border:1.5px dashed #b9dbd5;border-radius:16px;background:#f6faf9;cursor:pointer;text-align:center;transition:background-color .16s,border-color .16s,box-shadow .16s}
+.nh-avatar-v2__zone:hover,.nh-avatar-v2__zone:focus-within,.nh-avatar-v2__zone.is-dragover{background:#edf8f5;border-color:#0a9083;box-shadow:0 0 0 3px rgba(10,144,131,.09)}
+.nh-avatar-v2__input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.nh-avatar-v2__preview{position:relative;display:grid;place-items:center;width:86px;height:86px;margin-bottom:6px;border:3px solid #fff;border-radius:24px;background:#e3f2ed;box-shadow:0 5px 14px rgba(22,65,58,.09);overflow:hidden}
+.nh-avatar-v2__photo{display:block;width:100%;height:100%;object-fit:cover}
+.nh-avatar-v2__initials{font-size:27px;font-weight:700;color:#107b74}
+.nh-avatar-v2 .d-none{display:none!important}
+.nh-avatar-v2__camera{position:absolute;right:0;bottom:0;display:grid;place-items:center;width:24px;height:24px;border-radius:8px 0 0 0;background:rgba(255,255,255,.94);color:#0b8b80;font-size:12px}
+.nh-avatar-v2__title{font-size:12px;font-weight:700;line-height:1.4}
+.nh-avatar-v2__subtitle{font-size:11px;line-height:1.45;color:#647d78}
+.nh-avatar-v2__link{color:#087d74;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.nh-avatar-v2__hint{margin-top:2px;color:#859894;font-size:10px}
+.nh-avatar-v2__status{min-height:17px;margin:0;color:#667f7a;font-size:11px;text-align:center;overflow-wrap:anywhere}
+.nh-avatar-v2__save{display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:38px;padding:8px 12px;border:1px solid #0b8880;border-radius:11px;background:#0b8880;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.nh-avatar-v2__save:hover:not(:disabled){background:#09756d}
+.nh-avatar-v2__save:disabled{color:#93a7a3;border-color:#dbe8e4;background:#edf4f1;cursor:not-allowed}
+.nh-avatar-v2.has-file .nh-avatar-v2__zone{border-style:solid;border-color:#74c7b7}
+.nh-avatar-v2.has-error .nh-avatar-v2__zone{border-color:#d67c78;background:#fff8f7}
+.nh-avatar-v2.has-error .nh-avatar-v2__status{color:#b8453c}

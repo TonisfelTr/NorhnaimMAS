@@ -1,83 +1,133 @@
+// Внешний JS. Работает с существующей формой Laravel; новых маршрутов нет.
 (() => {
-    const types = new Set(['image/jpeg', 'image/png', 'image/webp']);
-    const extension = /\.(jpe?g|png|webp)$/i;
+    'use strict';
 
-    document.querySelectorAll('[data-avatar-upload]').forEach((root) => {
-        if (root.dataset.initialized === '1') return;
-        root.dataset.initialized = '1';
+    const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    const allowedExtensions = /\.(jpe?g|png|webp)$/i;
 
-        const input = root.querySelector('[data-avatar-file]');
+    function initialize(root) {
+        if (root.dataset.avatarReady === '1') return;
+        root.dataset.avatarReady = '1';
+
+        const input = root.querySelector('[data-avatar-input]');
         const zone = root.querySelector('[data-avatar-dropzone]');
-        const image = root.querySelector('[data-avatar-preview-image]');
-        const initials = root.querySelector('[data-avatar-preview-initials]');
+        const photo = root.querySelector('[data-avatar-photo]');
+        const initials = root.querySelector('[data-avatar-initials]');
         const status = root.querySelector('[data-avatar-status]');
-        const submit = root.querySelector('[data-avatar-submit]');
-        const max = Number(root.dataset.maxBytes) || 524288;
-        if (!input || !zone || !image || !status || !submit) return;
+        const button = root.querySelector('[data-avatar-save]');
+        const buttonText = root.querySelector('[data-avatar-save-text]');
+        const form = root.closest('form');
+        if (!input || !zone || !photo || !status || !button || !form) return;
 
-        let objectUrl = null;
-        let depth = 0;
-        const initialSrc = image.getAttribute('src') || '';
-        const hasExistingImage = !image.classList.contains('d-none') && !!initialSrc;
+        const maxBytes = Number(root.dataset.maxSize) || 5242880;
+        const initialSrc = photo.getAttribute('src') || '';
+        const hasInitialPhoto = Boolean(initialSrc);
+        let selected = false;
+        let currentUrl = null;
+        let requestSequence = 0;
+        let dragDepth = 0;
 
-        const revoke = () => {
-            if (objectUrl) URL.revokeObjectURL(objectUrl);
-            objectUrl = null;
-        };
-        const error = (message) => {
-            status.textContent = message;
-            status.classList.add('is-error');
-            zone.classList.add('is-invalid');
-            submit.disabled = true;
+        function revokePreview() {
+            if (currentUrl) URL.revokeObjectURL(currentUrl);
+            currentUrl = null;
+        }
+
+        function restorePreview() {
+            revokePreview();
+            photo.src = initialSrc;
+            photo.classList.toggle('d-none', !hasInitialPhoto);
+            initials?.classList.toggle('d-none', hasInitialPhoto);
+        }
+
+        function renderError(message) {
+            selected = false;
             input.value = '';
-            revoke();
-            image.src = initialSrc;
-            image.classList.toggle('d-none', !hasExistingImage);
-            initials?.classList.toggle('d-none', hasExistingImage);
-        };
-        const choose = (file) => {
-            if (!file) return;
-            if (!types.has(file.type) || !extension.test(file.name)) {
-                error('Поддерживаются только JPG, PNG или WEBP.');
-                return;
-            }
-            if (file.size > max) {
-                error('Файл слишком большой. Максимальный размер — 512 КБ.');
-                return;
-            }
-            if (file.size === 0) {
-                error('Нельзя загрузить пустой файл.');
-                return;
-            }
-            revoke();
-            objectUrl = URL.createObjectURL(file);
-            image.src = objectUrl;
-            image.classList.remove('d-none');
-            initials?.classList.add('d-none');
-            status.classList.remove('is-error');
-            zone.classList.remove('is-invalid');
-            status.textContent = `${file.name} · ${(file.size / 1024).toFixed(0)} КБ`;
-            submit.disabled = false;
-        };
+            button.disabled = true;
+            root.classList.remove('has-file', 'is-checking');
+            root.classList.add('has-error');
+            status.textContent = message;
+            restorePreview();
+        }
 
-        input.addEventListener('change', () => choose(input.files?.[0]));
+        function renderStatus(message) {
+            root.classList.remove('has-error');
+            status.textContent = message;
+        }
+
+        function validateFile(file) {
+            requestSequence += 1;
+            const sequence = requestSequence;
+            selected = false;
+            button.disabled = true;
+            root.classList.remove('has-file');
+
+            if (!file) {
+                renderError('Выберите фотографию.');
+                return;
+            }
+            if (!allowedTypes.has(file.type) || !allowedExtensions.test(file.name)) {
+                renderError('Выберите JPG, PNG или WEBP.');
+                return;
+            }
+            if (file.size < 1 || file.size > maxBytes) {
+                renderError('Размер фотографии должен быть от 1 байта до 5 МБ.');
+                return;
+            }
+
+            root.classList.add('is-checking');
+            renderStatus('Проверяем изображение…');
+
+            // Сервер дополнительно требует размеры 128–4000 px по каждой стороне.
+            const candidateUrl = URL.createObjectURL(file);
+            const probe = new Image();
+            probe.onload = () => {
+                if (sequence !== requestSequence) {
+                    URL.revokeObjectURL(candidateUrl);
+                    return;
+                }
+                if (probe.naturalWidth < 128 || probe.naturalHeight < 128 ||
+                    probe.naturalWidth > 4000 || probe.naturalHeight > 4000) {
+                    URL.revokeObjectURL(candidateUrl);
+                    renderError('Размер изображения: от 128×128 до 4000×4000 пикселей.');
+                    return;
+                }
+                revokePreview();
+                currentUrl = candidateUrl;
+                photo.src = candidateUrl;
+                photo.classList.remove('d-none');
+                initials?.classList.add('d-none');
+                selected = true;
+                root.classList.remove('is-checking');
+                root.classList.add('has-file');
+                renderStatus(`${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} МБ`);
+                button.disabled = false;
+            };
+            probe.onerror = () => {
+                URL.revokeObjectURL(candidateUrl);
+                if (sequence === requestSequence) renderError('Не удалось прочитать изображение.');
+            };
+            probe.src = candidateUrl;
+        }
+
+        input.addEventListener('change', () => validateFile(input.files?.[0]));
+
         zone.addEventListener('dragenter', (event) => {
             event.preventDefault();
-            depth++;
+            dragDepth += 1;
             zone.classList.add('is-dragover');
         });
         zone.addEventListener('dragover', (event) => {
             event.preventDefault();
-            event.dataTransfer.dropEffect = 'copy';
+            if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
         });
         zone.addEventListener('dragleave', (event) => {
             event.preventDefault();
-            depth = Math.max(0, depth - 1);
-            if (depth === 0) zone.classList.remove('is-dragover');
+            dragDepth = Math.max(0, dragDepth - 1);
+            if (dragDepth === 0) zone.classList.remove('is-dragover');
         });
         zone.addEventListener('drop', (event) => {
             event.preventDefault();
-            depth = 0;
+            dragDepth = 0;
             zone.classList.remove('is-dragover');
             const file = event.dataTransfer?.files?.[0];
             if (!file) return;
@@ -85,23 +135,31 @@
                 const transfer = new DataTransfer();
                 transfer.items.add(file);
                 input.files = transfer.files;
-                choose(file);
-            } catch {
-                error('Не удалось выбрать файл. Нажмите «выберите файл».');
+                validateFile(file);
+            } catch (_error) {
+                renderError('Не удалось обработать файл. Нажмите на область для выбора.');
             }
         });
 
-        const form = root.closest('form');
-        form?.addEventListener('submit', (event) => {
-            if (!input.files?.length || submit.disabled) {
+        form.addEventListener('submit', (event) => {
+            if (!selected || !input.files?.length) {
                 event.preventDefault();
-                status.textContent = 'Сначала выберите фотографию.';
-                status.classList.add('is-error');
+                renderStatus('Сначала выберите фотографию.');
+                root.classList.add('has-error');
                 return;
             }
-            submit.disabled = true;
-            submit.textContent = 'Загрузка…';
+            button.disabled = true;
+            if (buttonText) buttonText.textContent = 'Загружаем…';
         });
-        window.addEventListener('pagehide', revoke, { once: true });
-    });
+        window.addEventListener('pagehide', revokePreview, { once: true });
+    }
+
+    function start() {
+        document.querySelectorAll('[data-avatar-uploader]').forEach(initialize);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start, { once: true });
+    } else {
+        start();
+    }
 })();

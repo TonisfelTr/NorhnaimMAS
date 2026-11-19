@@ -2,6 +2,15 @@
 
 @section('title', 'Профиль пациента')
 
+@section('assets')
+    <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone.css') }}?v=2">
+    <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=2" defer></script>
+
+    <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone.css') }}?v=2">
+    <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=2" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone-v2.css') }}?v=2">
+    <script src="{{ asset('js/patient-avatar-dropzone-v2.js') }}?v=2" defer></script>@endsection
+
 @section('content')
     <div class="patient-page patient-profile-page">
         <header class="patient-profile-hero">
@@ -171,14 +180,6 @@
                         </div>
 
                         <div class="patient-profile-card__body">
-                            <div class="patient-profile-photo-preview">
-                                @if($avatarUrl)
-                                    <img src="{{ $avatarUrl }}" alt="Фотография профиля">
-                                @else
-                                    <span>{{ $initials }}</span>
-                                @endif
-                            </div>
-
                             <form
                                 method="POST"
                                 action="{{ route('patients.profile.avatar.store') }}"
@@ -186,27 +187,7 @@
                             >
                                 @csrf
 
-                                <label for="patientProfileAvatar" class="form-label">
-                                    Загрузить фотографию
-                                </label>
-
-                                <input
-                                    id="patientProfileAvatar"
-                                    type="file"
-                                    name="avatar"
-                                    class="form-control"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    required
-                                >
-
-                                <div class="patient-profile-hint mb-3">
-                                    JPG, PNG или WEBP. До 5 МБ.
-                                </div>
-
-                                <button type="submit" class="patient-profile-secondary w-100">
-                                    <i class="bi bi-upload"></i>
-                                    Загрузить
-                                </button>
+                                @include('patients.partials.avatar-dropzone-v2')
                             </form>
 
                             @if($avatarUrl)
