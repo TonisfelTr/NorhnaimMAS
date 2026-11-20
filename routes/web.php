@@ -64,6 +64,7 @@ use App\Http\Controllers\Main\IndexController as MainIndexController;
 use App\Http\Controllers\Main\JurisprudenceController;
 use App\Http\Controllers\Main\MedicineController;
 use App\Http\Controllers\Patients\DashboardController as PatientDashboardController;
+use App\Http\Controllers\Patients\PatientTestsController;
 use App\Http\Controllers\TelemedicineInvitationController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\ClinicSettingsAccessMiddleware;
@@ -175,6 +176,35 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
         Route::get('/research', [\App\Http\Controllers\Patients\ResearchController::class, 'index'])->name('research.index');
         Route::post('/research/priority-clinic', [\App\Http\Controllers\Patients\ResearchController::class, 'setPriorityClinic'])->middleware('throttle:10,1')->name('research.priority-clinic');
         Route::post('/assignments/priority-clinic', [\App\Http\Controllers\Patients\MedicationAssignmentsController::class, 'setPriorityClinic'])->middleware('throttle:10,1')->name('assignments.priority-clinic');
+
+        // Тестирования пациента: врачебные назначения и самостоятельный каталог.
+        Route::get('/tests', [PatientTestsController::class, 'index'])->name('tests.index');
+        Route::post('/tests/assignments/{assignment}/start', [PatientTestsController::class, 'startAssigned'])
+            ->whereNumber('assignment')
+            ->middleware('throttle:10,1')
+            ->name('tests.assignments.start');
+        Route::post('/tests/self/{test}/start', [PatientTestsController::class, 'startSelf'])
+            ->whereNumber('test')
+            ->middleware('throttle:10,1')
+            ->name('tests.self.start');
+        Route::get('/tests/sessions/{session}/run', [PatientTestsController::class, 'run'])
+            ->whereNumber('session')
+            ->name('tests.run');
+        Route::get('/tests/sessions/{session}/payload', [PatientTestsController::class, 'payload'])
+            ->whereNumber('session')
+            ->middleware('throttle:60,1')
+            ->name('tests.payload');
+        Route::post('/tests/sessions/{session}/save', [PatientTestsController::class, 'saveAnswer'])
+            ->whereNumber('session')
+            ->middleware('throttle:120,1')
+            ->name('tests.save');
+        Route::post('/tests/sessions/{session}/finish', [PatientTestsController::class, 'finish'])
+            ->whereNumber('session')
+            ->middleware('throttle:10,1')
+            ->name('tests.finish');
+        Route::get('/tests/sessions/{session}/result', [PatientTestsController::class, 'result'])
+            ->whereNumber('session')
+            ->name('tests.result');
     });
 
 Route::middleware([

@@ -179,13 +179,16 @@
                 <nav aria-label="Сервисы пациента">
                     <ul class="patient-sidebar__nav">
                         <li>
-                            <span class="patient-sidebar__link is-disabled">
+                            <a
+                                href="{{ route('patients.tests.index') }}"
+                                @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.tests.*')])
+                                @if(request()->routeIs('patients.tests.*')) aria-current="page" @endif
+                            >
                                 <span class="patient-sidebar__link-icon">
                                     <i class="bi bi-ui-checks-grid"></i>
                                 </span>
                                 <span>Тестирования</span>
-                                <small>скоро</small>
-                            </span>
+                            </a>
                         </li>
 
                         <li>

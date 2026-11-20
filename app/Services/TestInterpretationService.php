@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\TestSession;
+use App\Models\TestItem;
+use App\Services\Tests\ItemScoreResolver;
 use Illuminate\Support\Collection;
 use App\Helpers\Interpreters\DTO\TestResult as InterpretedTestResult;
 use App\Helpers\Interpreters\Support\InterpreterRegistry;
@@ -24,19 +26,25 @@ class TestInterpretationService
 
     private function buildSequentialAnswers(TestSession $session): array
     {
-        $orderedItems = $session->test->sections
-            ->sortBy(fn($section) => (int)($section->sort_order ?? 0))
-            ->flatMap(function ($section) {
-                return $section->items->sortBy(fn($item) => (int)($item->sort_order ?? 0));
-            })
-            ->values();
+        // Берём вопросы напрямую из test_items.test_id:
+        // старые тесты могут иметь section_id = NULL.
+        $orderedItems = TestItem::query()
+            ->where('test_id', $session->test_id)
+            ->with('options')
+            ->orderBy('order')
+            ->orderBy('id')
+            ->get();
 
         $responsesByItem = $session->responses->keyBy('item_id');
-
+        $resolver = app(ItemScoreResolver::class);
         $answers = [];
 
         foreach ($orderedItems as $index => $item) {
-            $answers['q' . ($index + 1)] = (int)($responsesByItem[$item->id]?->option?->value ?? 0);
+            $response = $responsesByItem->get($item->id);
+            $answers['q' . ($index + 1)] = $resolver->resolve(
+                $item,
+                $response?->option
+            );
         }
 
         return $answers;
@@ -56,8 +64,7 @@ class TestInterpretationService
     {
         $session->loadMissing([
             'test:id,code,name',
-            'test.sections.items:id,test_section_id,sort_order',
-            'responses.option:id,value',
+            'responses.option:id,item_id,value',
             'results.key:id,title',
         ]);
 
@@ -94,7 +101,7 @@ class TestInterpretationService
             'HADS'     => $this->hads($session, $byKey, $total),
             'PCL5', 'PCL-5' => $this->pcl5($total),
             'ASRS'     => $this->asrs($session, $byKey, $total),
-            'EPDS'     => $this->epds($total),
+            'EPDS'     => $this->epds($session, $total),
             'CAGEAID'  => $this->cageAid($total),
             'DAST10'   => $this->dast10($total),
             'AUDITC'   => $this->auditC($total),
@@ -239,14 +246,45 @@ class TestInterpretationService
         ];
     }
 
-    private function epds(int $score): array
+    private function epds(TestSession $session, int $score): array
     {
-        // Часто используют пороги 10 и 13, зависит от цели скрининга :contentReference[oaicite:5]{index=5}
-        return match (true) {
-            $score < 10 => ['title'=>'Трактовка','badge'=>$this->badge('ниже порога', 'success'),'text'=>"EPDS: {$score}. Обычно ниже пороговых значений скрининга.",'items'=>[]],
-            $score < 13 => ['title'=>'Трактовка','badge'=>$this->badge('повышен', 'warning'),'text'=>"EPDS: {$score}. Повышенный уровень симптомов — возможна лёгкая/умеренная выраженность.",'items'=>['Порог зависит от политики учреждения и контекста.']],
-            default => ['title'=>'Трактовка','badge'=>$this->badge('высокий риск', 'danger'),'text'=>"EPDS: {$score}. Выше часто используемых порогов скрининга.",'items'=>['Рекомендуется клиническая оценка.']],
+        $answers = $this->buildSequentialAnswers($session);
+        $selfHarmAnswer = (int) ($answers['q10'] ?? 0);
+
+        $items = [];
+        if ($selfHarmAnswer > 0) {
+            $items[] = 'Ответ на пункт 10 не равен нулю: необходима отдельная безотлагательная оценка безопасности независимо от общей суммы EPDS.';
+        }
+
+        $base = match (true) {
+            $score < 8 => [
+                'title' => 'Трактовка',
+                'badge' => $this->badge('ниже порога', 'success'),
+                'text' => "EPDS: {$score}. Результат ниже часто используемого порога скрининга.",
+                'items' => [],
+            ],
+            $score < 10 => [
+                'title' => 'Трактовка',
+                'badge' => $this->badge('повышенный результат', 'warning'),
+                'text' => "EPDS: {$score}. Повышенная вероятность послеродовой депрессии; требуется клиническая оценка.",
+                'items' => ['Результат скрининга не является диагнозом.'],
+            ],
+            $score <= 13 => [
+                'title' => 'Трактовка',
+                'badge' => $this->badge('требует оценки', 'danger'),
+                'text' => "EPDS: {$score}. Рекомендуется направление к медицинскому психологу или врачу.",
+                'items' => ['Результат скрининга не является диагнозом.'],
+            ],
+            default => [
+                'title' => 'Трактовка',
+                'badge' => $this->badge('очень высокий результат', 'danger'),
+                'text' => "EPDS: {$score}. Очень высокий результат скрининга; необходима очная клиническая оценка.",
+                'items' => ['Результат скрининга не является диагнозом.'],
+            ],
         };
+
+        $base['items'] = array_values(array_merge($base['items'], $items));
+        return $base;
     }
 
     private function cageAid(int $score): array

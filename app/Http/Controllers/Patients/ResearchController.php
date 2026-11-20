@@ -424,7 +424,11 @@ class ResearchController extends Controller
         if (Schema::hasTable('test_sessions')) {
             $sessionQuery = DB::table('test_sessions as ts')
                 ->leftJoin('tests as t', 't.id', '=', 'ts.test_id')
-                ->where('ts.patient_id', (int) $patient->id);
+                ->where('ts.patient_id', (int) $patient->id)
+                ->where(function ($sourceQuery): void {
+                    $sourceQuery->whereNull('ts.context->source')
+                        ->orWhere('ts.context->source', '!=', 'patient_self');
+                });
 
             if ($assignmentSessionIds !== []) {
                 $sessionQuery->whereNotIn('ts.id', $assignmentSessionIds);

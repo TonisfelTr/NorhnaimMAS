@@ -638,15 +638,29 @@ class TestPanelController extends Controller
                         $questionData['options'] ?? []
                         as $optionIndex => $optionData
                     ) {
+                        $optionLabel = trim((string) ($optionData['text'] ?? ''));
+
+                        if (
+                            $optionLabel === ''
+                            || preg_match('/^[+-]?\\d+(?:[.,]\\d+)?$/u', $optionLabel)
+                        ) {
+                            throw ValidationException::withMessages([
+                                "resource_profile.questions.{$questionIndex}.options.{$optionIndex}.text" =>
+                                    'Укажите текст варианта ответа. Числовой балл хранится отдельно.',
+                            ]);
+                        }
+
                         $option = new TestItemOption();
                         $option->item_id = $item->id;
-                        $option->label = $optionData['text'];
+                        $option->label = $optionLabel;
                         $option->value = $optionData['score'];
                         $option->order = $optionIndex + 1;
                         $option->save();
                     }
                 }
             });
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (Throwable $exception) {
             report($exception);
 

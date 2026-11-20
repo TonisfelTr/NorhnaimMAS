@@ -44,13 +44,60 @@ class TestSessionController extends Controller
             ? Carbon::parse($startedRaw)
             : null;
 
+        $isPatientPortal = in_array(
+            (string) data_get($session->context, 'source'),
+            ['patient_self', 'doctor_assigned_patient_portal'],
+            true
+        );
+
         return [
             'minutes' => $minutes,
             'started_at' => $startedAt,
-            'expires_at' => $startedAt
+            // В личном кабинете пациента нет таймера, привязанного к созданию сессии:
+            // пациент может сохранить прогресс, перейти в другой раздел и вернуться.
+            'expires_at' => !$isPatientPortal && $startedAt
                 ? $startedAt->copy()->addMinutes($minutes)
                 : null,
         ];
+    }
+
+    private function isPatientPortalSession(TestSession $session): bool
+    {
+        return in_array(
+            (string) data_get($session->context, 'source'),
+            ['patient_self', 'doctor_assigned_patient_portal'],
+            true
+        );
+    }
+
+    private function guardPatientSelfSession(TestSession $session): void
+    {
+        if (
+            data_get($session->context, 'source') === 'patient_self'
+            && !request()->routeIs('patients.tests.*')
+        ) {
+            abort(404);
+        }
+    }
+
+    private function isSortTestType(?string $type): bool
+    {
+        return in_array($type, ['sort', 'card_sort'], true);
+    }
+
+    /**
+     * Старые официальные опросники могут иметь tests.type = NULL.
+     * Совместимый тип по умолчанию — questionnaire.
+     */
+    private function normalizeTestType(?string $type): string
+    {
+        $type = mb_strtolower(trim((string) $type));
+
+        return match ($type) {
+            'image' => 'image',
+            'sort', 'card_sort' => 'sort',
+            default => 'questionnaire',
+        };
     }
 
     /**
@@ -59,6 +106,10 @@ class TestSessionController extends Controller
      */
     private function enforceTimeout(TestSession $session): bool
     {
+        if ($this->isPatientPortalSession($session)) {
+            return false;
+        }
+
         if (!$session->in_progress) {
             return false;
         }
@@ -283,6 +334,8 @@ class TestSessionController extends Controller
      */
     public function run(TestSession $session): View|RedirectResponse
     {
+        $this->guardPatientSelfSession($session);
+
         if ($this->enforceTimeout($session)) {
             return view('doctors.reception.tests.run', compact('session'))
                 ->with(
@@ -299,8 +352,16 @@ class TestSessionController extends Controller
         }
 
         $finalOk = (bool) data_get($session->context, 'final_pin_ok', false);
+        $isPatientPortalAssignment = data_get(
+            $session->context,
+            'source'
+        ) === 'doctor_assigned_patient_portal';
 
-        if ($session->status === 'submitted' && !$finalOk) {
+        if (
+            $session->status === 'submitted'
+            && !$finalOk
+            && !$isPatientPortalAssignment
+        ) {
             return redirect()->route('doctors.tests.final_pin.form', $session->id);
         }
 
@@ -316,6 +377,8 @@ class TestSessionController extends Controller
      */
     public function payload(TestSession $session): JsonResponse
     {
+        $this->guardPatientSelfSession($session);
+
         if ($this->enforceTimeout($session)) {
             return response()->json([
                 'ok' => false,
@@ -331,6 +394,7 @@ class TestSessionController extends Controller
              * Обычный опросник.
              */
             'test.sections.items.options',
+            'test.items.options',
 
             /*
              * Карточки с изображением и текстовым ответом:
@@ -349,6 +413,7 @@ class TestSessionController extends Controller
         ]);
 
         $test = $session->test;
+        $testType = $test ? $this->normalizeTestType($test->type) : 'questionnaire';
         $timeout = $this->resolveSessionTimeout($session);
 
         $expiresAt = $timeout['expires_at'];
@@ -372,7 +437,7 @@ class TestSessionController extends Controller
          */
         $cards = [];
 
-        if ($test->type === 'image') {
+        if ($testType === 'image') {
             $cards = $test->testCards
                 ->sortBy(static fn ($card) => (int) $card->sort)
                 ->values()
@@ -417,7 +482,7 @@ class TestSessionController extends Controller
          */
         $sortCards = [];
 
-        if ($test->type === 'sort') {
+        if ($this->isSortTestType($testType)) {
             $sortCards = $test->sortCards
                 ->sortBy(static fn ($card) => (int) $card->sort)
                 ->values()
@@ -471,35 +536,34 @@ class TestSessionController extends Controller
          */
         $items = [];
 
-        if ($test->type === 'questionnaire') {
-            foreach ($test->sections as $section) {
-                foreach ($section->items as $item) {
-                    $hasOptions = $item->options
-                        && $item->options->isNotEmpty();
+        if ($testType === 'questionnaire') {
+            foreach ($test->items as $item) {
+                $hasOptions = $item->options
+                    && $item->options->isNotEmpty();
 
-                    $items[] = [
-                        'id' => (int) $item->id,
-                        'type' => $hasOptions
-                            ? 'radio'
-                            : 'text',
+                $items[] = [
+                    'id' => (int) $item->id,
+                    'stimulus_id' => $item->stimulus_id ?? null,
+                    'type' => $hasOptions
+                        ? 'radio'
+                        : 'text',
 
-                        'title' => (string) ($item->text ?? ''),
-                        'required' => true,
-                        'help' => null,
+                    'title' => (string) ($item->text ?? ''),
+                    'required' => true,
+                    'help' => null,
 
-                        'options' => $hasOptions
-                            ? $item->options
-                                ->map(static fn ($option): array => [
-                                    'value' => (int) $option->id,
-                                    'label' => (string) (
-                                        $option->label ?? ''
-                                    ),
-                                ])
-                                ->values()
-                                ->all()
-                            : [],
-                    ];
-                }
+                    'options' => $hasOptions
+                        ? $item->options
+                            ->map(static fn ($option): array => [
+                                'value' => (int) $option->id,
+                                'label' => (string) (
+                                    $option->label ?? ''
+                                ),
+                            ])
+                            ->values()
+                            ->all()
+                        : [],
+                ];
             }
         }
 
@@ -522,7 +586,7 @@ class TestSessionController extends Controller
          * Для обычного опросника восстанавливаем ответы
          * из связанных таблиц.
          */
-        if ($test->type === 'questionnaire') {
+        if ($testType === 'questionnaire') {
             foreach ($session->responses as $response) {
                 if (!$response->item_id) {
                     continue;
@@ -568,7 +632,7 @@ class TestSessionController extends Controller
          * Удаляем из sort_order идентификаторы карточек,
          * которых больше нет в данном тесте.
          */
-        if ($test->type === 'sort') {
+        if ($this->isSortTestType($testType)) {
             $allowedSortCardIds = collect($sortCards)
                 ->pluck('id')
                 ->map(static fn ($id) => (int) $id)
@@ -590,13 +654,13 @@ class TestSessionController extends Controller
          * КОЛИЧЕСТВО ШАГОВ И ТЕКУЩИЙ ИНДЕКС
          * =========================================================
          */
-        $total = match ($test->type) {
+        $total = match ($testType) {
             'image' => count($cards),
             'sort' => count($sortCards),
             default => count($items),
         };
 
-        if ($test->type === 'sort') {
+        if ($this->isSortTestType($testType)) {
             /*
              * В сортировке прогресс определяется количеством
              * уже выбранных карточек.
@@ -640,7 +704,7 @@ class TestSessionController extends Controller
                 'id' => (int) $test->id,
                 'code' => (string) $test->code,
                 'title' => (string) $test->name,
-                'type' => (string) $test->type,
+                'type' => $testType,
                 'description' => (string) (
                     $test->description ?? ''
                 ),
@@ -719,6 +783,8 @@ class TestSessionController extends Controller
         TestSession $session,
         Request $request
     ): JsonResponse {
+        $this->guardPatientSelfSession($session);
+
         if ($this->enforceTimeout($session)) {
             return response()->json([
                 'ok' => false,
@@ -737,11 +803,13 @@ class TestSessionController extends Controller
 
         $session->loadMissing([
             'test:id,type',
+            'test.items',
             'test.testCards:id,test_id',
             'test.sortCards:id,test_id',
         ]);
 
         $test = $session->test;
+        $testType = $test ? $this->normalizeTestType($test->type) : 'questionnaire';
 
         if (!$test) {
             return response()->json([
@@ -750,12 +818,56 @@ class TestSessionController extends Controller
             ], 404);
         }
 
+        // В кабинете пациента можно сохранять позицию отдельно от ответа:
+        // например, когда пациент перешёл на следующий вопрос, но ещё не ответил.
+        if (
+            request()->routeIs('patients.tests.*')
+            && $request->has('current_index')
+            && !$request->has('item_id')
+            && !$request->has('card_id')
+            && !$request->has('sort_order')
+        ) {
+            $progressData = $request->validate([
+                'current_index' => ['required', 'integer', 'min:0'],
+            ]);
+
+            if ($testType === 'questionnaire') {
+                $test->loadMissing('items');
+            }
+
+            $total = match ($testType) {
+                'image' => $test->testCards->count(),
+                'sort' => $test->sortCards->count(),
+                default => $test->items->count(),
+            };
+
+            $maxIndex = $this->isSortTestType($testType)
+                ? $total
+                : max(0, $total - 1);
+
+            $context = (array) ($session->context ?? []);
+            $context['current_index'] = min(
+                (int) $progressData['current_index'],
+                $maxIndex
+            );
+
+            $session->context = $context;
+            $session->save();
+
+            return response()->json([
+                'ok' => true,
+                'saved' => true,
+                'type' => 'progress',
+                'current_index' => $context['current_index'],
+            ]);
+        }
+
         /*
          * =========================================================
          * СОРТИРОВКА КАРТОЧЕК
          * =========================================================
          */
-        if ($test->type === 'sort') {
+        if ($this->isSortTestType($testType)) {
             $data = $request->validate([
                 /*
                  * present позволяет отправить пустой массив при сбросе.
@@ -850,7 +962,7 @@ class TestSessionController extends Controller
          * ТЕСТ С ИЗОБРАЖЕНИЯМИ И ОТКРЫТЫМ ОТВЕТОМ
          * =========================================================
          */
-        if ($test->type === 'image') {
+        if ($testType === 'image') {
             $data = $request->validate([
                 'card_id' => [
                     'required',
@@ -917,7 +1029,7 @@ class TestSessionController extends Controller
          * ОБЫЧНЫЙ ОПРОСНИК
          * =========================================================
          */
-        if ($test->type !== 'questionnaire') {
+        if ($testType !== 'questionnaire') {
             return response()->json([
                 'ok' => false,
                 'message' =>
@@ -948,15 +1060,12 @@ class TestSessionController extends Controller
         ]);
 
         $session->loadMissing([
-            'test.sections.items.options',
+            'test.items.options',
         ]);
 
         $test = $session->test;
 
-        $item = $test->sections
-            ->flatMap(
-                static fn ($section) => $section->items
-            )
+        $item = $test->items
             ->firstWhere('id', (int) $data['item_id']);
 
         if (!$item) {
@@ -1044,6 +1153,8 @@ class TestSessionController extends Controller
      */
     public function finish(TestSession $session): JsonResponse
     {
+        $this->guardPatientSelfSession($session);
+
         if ($this->enforceTimeout($session)) {
             return response()->json([
                 'ok' => true,
@@ -1061,6 +1172,9 @@ class TestSessionController extends Controller
         ]);
 
         $test = $session->test;
+        $testType = $test ? $this->normalizeTestType($test->type) : 'questionnaire';
+        $isPatientSelf = data_get($session->context, 'source') === 'patient_self';
+        $isPatientPortal = $this->isPatientPortalSession($session);
 
         if (!$test) {
             return response()->json([
@@ -1074,7 +1188,7 @@ class TestSessionController extends Controller
          * ПРОВЕРКА СОРТИРОВКИ
          * =========================================================
          */
-        if ($test->type === 'sort') {
+        if ($this->isSortTestType($testType)) {
             $expectedIds = $test->sortCards
                 ->pluck('id')
                 ->map(static fn ($id): int => (int) $id)
@@ -1140,7 +1254,7 @@ class TestSessionController extends Controller
          * ПРОВЕРКА ОТВЕТОВ ТЕСТА С ИЗОБРАЖЕНИЯМИ
          * =========================================================
          */
-        if ($test->type === 'image') {
+        if ($testType === 'image') {
             $answers = (array) data_get(
                 $session->context,
                 'answers',
@@ -1172,16 +1286,40 @@ class TestSessionController extends Controller
             }
         }
 
+        if ($isPatientPortal && $testType === 'questionnaire') {
+            $test->loadMissing('items');
+
+            $answers = (array) data_get($session->context, 'answers', []);
+            $hasMissingRequired = $test->items
+                ->contains(static function ($item) use ($answers): bool {
+                    if (isset($item->is_required) && !$item->is_required) {
+                        return false;
+                    }
+
+                    $value = $answers[(string) $item->id] ?? null;
+
+                    if (is_array($value)) {
+                        return count($value) === 0;
+                    }
+
+                    return $value === null || trim((string) $value) === '';
+                });
+
+            if ($hasMissingRequired) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Ответьте на все обязательные вопросы перед завершением.',
+                ], 422);
+            }
+        }
+
         $session->update([
             'in_progress' => false,
-            'status' => 'submitted',
+            'status' => $isPatientSelf ? 'completed' : 'submitted',
             'completed_at' => now(),
-
-            /*
-             * Блокировку пока сохраняем — она будет снята
-             * после финального PIN врача.
-             */
-            'locked_at' => now(),
+            // Пациентский портал не устанавливает блокировку врача.
+            'locked_at' => $isPatientPortal ? null : now(),
+            'locked_by' => $isPatientPortal ? null : $session->locked_by,
         ]);
 
         /*
@@ -1199,13 +1337,14 @@ class TestSessionController extends Controller
          * и варианты ответов. Для image и sort
          * автоматический подсчёт пока не запускаем.
          */
-        if ($test->type === 'questionnaire') {
+        if ($testType === 'questionnaire') {
             app(TestScoringService::class)
                 ->scoreAndPersist($session->fresh());
         }
 
         return response()->json([
             'ok' => true,
+            'status' => $isPatientSelf ? 'completed' : 'submitted',
         ]);
     }
 
@@ -1303,6 +1442,8 @@ class TestSessionController extends Controller
             ]);
         }
 
+        $this->guardPatientSelfSession($session);
+
         $doctorId = optional(auth()->user()->doctor)->id;
         if (!$doctorId) abort(403);
 
@@ -1326,6 +1467,12 @@ class TestSessionController extends Controller
         Request $request,
         TestSession $session
     ): View|RedirectResponse {
+        $this->guardPatientSelfSession($session);
+
+        if ($this->isPatientPortalSession($session)) {
+            abort(404);
+        }
+
         /*
          * Сначала обрабатываем таймаут.
          */
@@ -1414,6 +1561,12 @@ class TestSessionController extends Controller
         Request $request,
         TestSession $session
     ): RedirectResponse {
+        $this->guardPatientSelfSession($session);
+
+        if ($this->isPatientPortalSession($session)) {
+            abort(404);
+        }
+
         $doctorId = (int) optional(
             $request->user()?->doctor
         )->id;

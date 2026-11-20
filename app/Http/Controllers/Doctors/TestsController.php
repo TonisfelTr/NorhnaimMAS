@@ -30,30 +30,121 @@ use App\Services\QualitativeScoringService;
 
 class TestsController extends Controller
 {
+    private function guardNotPatientSelfSession(TestSession $session): void
+    {
+        abort_if(
+            data_get($session->context, 'source') === 'patient_self',
+            404
+        );
+    }
+
     private function buildSectionsViewData(TestSession $session): array
     {
-        $answersByItem = $session->responses
-            ->filter(fn($r) => $r->item_id)
-            ->mapWithKeys(fn($r) => [(string)$r->item_id => ($r->option?->label ?? null)]);
+        /*
+         * Для отображения ответа читаем label прямым JOIN из БД.
+         *
+         * Eloquent-связь TestAnswer::option() в некоторых старых сессиях
+         * возвращала числовое значение ответа вместо подписи варианта.
+         * Прямой JOIN гарантирует, что на странице врача будет показан
+         * именно test_item_options.label, а не test_item_options.value.
+         */
+        $answersByItem = DB::table('test_answers as ta')
+            ->leftJoin('test_item_options as tio', 'tio.id', '=', 'ta.option_id')
+            ->where('ta.session_id', $session->id)
+            ->orderBy('ta.id')
+            ->get([
+                'ta.item_id',
+                'ta.option_id',
+                'ta.value as answer_value',
+                'ta.raw as answer_raw',
+                'tio.label as option_label',
+            ])
+            ->mapWithKeys(function ($response): array {
+                $answer = $response->option_label;
 
-        return $session->test->sections
-            ->map(function ($sec) use ($answersByItem) {
-                return [
-                    'title' => (string)($sec->title ?? 'Раздел'),
-                    'items' => $sec->items
-                        ->map(function ($item) use ($answersByItem) {
-                            return [
-                                'id' => $item->id,
-                                'text' => (string)($item->text ?? ''),
-                                'answer' => $answersByItem[(string)$item->id] ?? null,
-                            ];
-                        })
-                        ->values()
-                        ->all(),
-                ];
+                // Для открытых/нестандартных ответов сохраняем исходный текст.
+                if (($answer === null || trim((string) $answer) === '')
+                    && $response->answer_raw !== null) {
+                    $answer = is_string($response->answer_raw)
+                        ? $response->answer_raw
+                        : json_encode(
+                            $response->answer_raw,
+                            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                        );
+                }
+
+                // Значение value — только последний fallback, когда текстового
+                // варианта и raw-ответа действительно нет.
+                if (($answer === null || trim((string) $answer) === '')
+                    && $response->answer_value !== null) {
+                    $answer = (string) $response->answer_value;
+                }
+
+                return [(string) $response->item_id => $answer];
+            });
+
+        // Не полагаемся на Test::items(): в старой модели такой relation отсутствует.
+        // test_items.test_id — источник вопросов; section_id может быть NULL.
+        $items = TestItem::query()
+            ->where('test_id', $session->test_id)
+            ->orderBy('order')
+            ->orderBy('id')
+            ->get();
+
+        $sections = $session->test->sections
+            ->sortBy('order')
+            ->values();
+
+        $result = [];
+
+        foreach ($sections as $section) {
+            $sectionItems = $items->where('section_id', $section->id)->values();
+
+            if ($sectionItems->isEmpty()) {
+                continue;
+            }
+
+            $result[] = [
+                'title' => (string) ($section->title ?: 'Раздел'),
+                'items' => $sectionItems
+                    ->map(function ($item) use ($answersByItem): array {
+                        return [
+                            'id' => $item->id,
+                            'text' => (string) ($item->text ?? ''),
+                            'answer' => $answersByItem->get((string) $item->id),
+                        ];
+                    })
+                    ->all(),
+            ];
+        }
+
+        $knownSectionIds = $sections->pluck('id')->map(
+            static fn ($id): int => (int) $id
+        )->all();
+
+        $unassignedItems = $items
+            ->reject(static function ($item) use ($knownSectionIds): bool {
+                return $item->section_id !== null
+                    && in_array((int) $item->section_id, $knownSectionIds, true);
             })
-            ->values()
-            ->all();
+            ->values();
+
+        if ($unassignedItems->isNotEmpty()) {
+            $result[] = [
+                'title' => 'Вопросы',
+                'items' => $unassignedItems
+                    ->map(function ($item) use ($answersByItem): array {
+                        return [
+                            'id' => $item->id,
+                            'text' => (string) ($item->text ?? ''),
+                            'answer' => $answersByItem->get((string) $item->id),
+                        ];
+                    })
+                    ->all(),
+            ];
+        }
+
+        return $result;
     }
 
     private function calculateProgress(array $sections): array
@@ -245,9 +336,12 @@ class TestsController extends Controller
         }
 
         try {
-            $items = $session->test->sections
-                ->flatMap(fn($s) => $s->items ?? collect())
-                ->values();
+            $items = TestItem::query()
+                ->where('test_id', $session->test_id)
+                ->with('options')
+                ->orderBy('order')
+                ->orderBy('id')
+                ->get();
 
             $questionsCount = $items->count();
 
@@ -376,6 +470,7 @@ class TestsController extends Controller
     /** Отменить назначение */
     public function cancelSession(TestSession $session)
     {
+        $this->guardNotPatientSelfSession($session);
         $session->update([
             'status'      => 'cancelled',
             'in_progress' => false,
@@ -397,6 +492,7 @@ class TestsController extends Controller
     /** Краткий результат (для всплывашки) */
     public function sessionResult(TestSession $session)
     {
+        $this->guardNotPatientSelfSession($session);
         $session->load(['test:id,name,code', 'results.key:id,title']);
 
         return response()->json([
@@ -418,47 +514,65 @@ class TestsController extends Controller
 
     public function show(TestSession $session)
     {
+        $this->guardNotPatientSelfSession($session);
+
+        /*
+         * В старых/официальных тестах test_items.section_id может быть NULL.
+         * Поэтому загружаем вопросы непосредственно через test.items,
+         * а не только через test.sections.items.
+         */
         $session->load([
-            'test.sections.items.options',
+            'test.sections',
+            'test.testCards.media',
+            'test.sortCards.media',
             'responses.option',
+            'openResponses',
         ]);
 
-        $finalOk = (bool) data_get($session->context, 'final_pin_ok', false);
+        abort_if(!$session->test, 404, 'Тест не найден.');
 
-// Если сессия уже дошла до стадии врача, но финальный PIN не введён — просим PIN
-        if (in_array($session->status, ['submitted', 'in_review', 'complete'], true) && !$finalOk) {
-            return redirect()->route('doctors.tests.final_pin.form', $session->id);
+        $finalOk = (bool) data_get(
+            $session->context,
+            'final_pin_ok',
+            false
+        );
+
+        $isPatientPortalAssignment = data_get(
+            $session->context,
+            'source'
+        ) === 'doctor_assigned_patient_portal';
+
+        // Для авторизованного прохождения из личного кабинета PIN киоска не нужен.
+        if (
+            in_array(
+                $session->status,
+                ['submitted', 'in_review', 'complete'],
+                true
+            )
+            && !$finalOk
+            && !$isPatientPortalAssignment
+        ) {
+            return redirect()->route(
+                'doctors.tests.final_pin.form',
+                $session->id
+            );
         }
 
-        $answersByItemId = $session->responses->keyBy('item_id');
+        /*
+         * Единый сборщик учитывает:
+         * - вопросы, привязанные к разделам;
+         * - вопросы без раздела (section_id IS NULL);
+         * - сохранённые ответы TestAnswer.
+         */
+        $sections = $this->buildSectionsViewData($session);
+        [$total, $answered] = $this->calculateProgress($sections);
+        $missed = max(0, $total - $answered);
 
-        $sections = $session->test->sections->map(function ($section) use ($answersByItemId) {
-            $items = $section->items->map(function ($item) use ($answersByItemId) {
-                $resp = $answersByItemId->get($item->id);
+        $assignmentId = data_get(
+            $session->context,
+            'assignment_id'
+        );
 
-                return [
-                    'id' => $item->id,
-                    'text' => (string)($item->text ?? ''),
-                    'answer_label' => $resp?->option?->label, // <-- если поле иначе, поправь
-                ];
-            })->values()->all();
-
-            return [
-                'title' => (string)($section->title ?? 'Раздел'),
-                'items' => $items,
-            ];
-        })->values()->all();
-
-        $total = 0; $answered = 0;
-        foreach ($sections as $sec) {
-            foreach ($sec['items'] as $it) {
-                $total++;
-                if (!empty($it['answer_label'])) $answered++;
-            }
-        }
-        $missed = $total - $answered;
-
-        $assignmentId = data_get($session->context, 'assignment_id');
         $unlockToken = null;
 
         if ($assignmentId) {
@@ -471,27 +585,36 @@ class TestsController extends Controller
             session: $session,
             sections: $sections,
             stats: [
-                'total' => $total ?? null,
-                'answered' => $answered ?? null,
-                'missed' => $missed ?? null,
+                'total' => $total,
+                'answered' => $answered,
+                'missed' => $missed,
             ],
         );
 
-        return view('doctors.reception.tests.session_show', array_merge([
-            'session'  => $session,
-            'test'     => $session->test,
-            'sections' => $sections,
-            'total'    => $total,
-            'answered' => $answered,
-            'missed'   => $missed,
-            'unlockToken' => $unlockToken,
-            'canRestart' => in_array($session->status, ['submitted','in_progress'], true)], $resultView));
+        return view(
+            'doctors.reception.tests.session_show',
+            array_merge([
+                'session' => $session,
+                'test' => $session->test,
+                'sections' => $sections,
+                'total' => $total,
+                'answered' => $answered,
+                'missed' => $missed,
+                'unlockToken' => $unlockToken,
+                'canRestart' => in_array(
+                    $session->status,
+                    ['submitted', 'in_progress'],
+                    true
+                ),
+            ], $resultView)
+        );
     }
 
     /** Кодирование ответа (врач) */
     public function saveResponseCode(TestOpenResponse $response, Request $r)
     {
         $session = $response->session;          // belongsTo
+        abort_if(data_get($session?->context, 'source') === 'patient_self', 404);
 
         $data = $r->validate([
             'code_type'  => ['required','string','max:100'],
@@ -522,6 +645,7 @@ class TestsController extends Controller
     public function saveRubricScore(TestOpenResponse $response, Request $r)
     {
         $session = $response->session;
+        abort_if(data_get($session?->context, 'source') === 'patient_self', 404);
         $this->authorize('update', $session);
 
         $data = $r->validate([
@@ -548,6 +672,7 @@ class TestsController extends Controller
      */
     public function finish(TestSession $session, TestScoringService $scoring)
     {
+        $this->guardNotPatientSelfSession($session);
         // Финализация врачом: снять блок панели + зафиксировать результаты
         $session->update([
             'in_progress'  => false,
@@ -559,6 +684,13 @@ class TestsController extends Controller
 
         // пересчёт и сохранение интерпретаций/результатов
         $scoring->scoreAndPersist($session->fresh());
+
+        if ($session->assignment) {
+            $session->assignment->update([
+                'status' => 'completed',
+                'finished_at' => $session->assignment->finished_at ?? now(),
+            ]);
+        }
 
         $patientId = $session->patient_id ?? data_get($session->context, 'patient_id');
         $redirectUrl = $patientId
@@ -576,6 +708,7 @@ class TestsController extends Controller
 
     public function submit(TestSession $session, TestScoringService $scoring): JsonResponse
     {
+        $this->guardNotPatientSelfSession($session);
         $session->update([
             'in_progress'  => false,
             'status'       => 'submitted',
@@ -590,6 +723,7 @@ class TestsController extends Controller
 
     public function restart(TestSession $session)
     {
+        $this->guardNotPatientSelfSession($session);
         abort_unless(in_array($session->status, ['submitted','in_progress'], true), 403);
 
         TestAnswer::where('session_id', $session->id)->delete();
@@ -614,6 +748,7 @@ class TestsController extends Controller
 
     public function resultsPage(TestSession $session)
     {
+        $this->guardNotPatientSelfSession($session);
         $session->load([
             'test',
             'test.sections.items.options',

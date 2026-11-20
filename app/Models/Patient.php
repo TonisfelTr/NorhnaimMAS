@@ -96,7 +96,25 @@ class Patient extends Model
 
     public function testSessions(): HasMany
     {
-        return $this->hasMany(TestSession::class);
+        $sessions = $this->hasMany(TestSession::class);
+        $user = auth()->user();
+
+        // Самостоятельные прохождения принадлежат пациенту и не входят
+        // в медицинскую карту или врачебный контекст.
+        $isClinicalStaff = $user && (
+            $user->hasRole('doctors')
+            || $user->hasRole('doctor')
+            || $user->hasRole('admins')
+        );
+
+        if ($isClinicalStaff) {
+            $sessions->where(function ($query): void {
+                $query->whereNull('context->source')
+                    ->orWhere('context->source', '!=', 'patient_self');
+            });
+        }
+
+        return $sessions;
     }
 
     public function conditions(): HasMany

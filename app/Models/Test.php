@@ -15,6 +15,36 @@ class Test extends Model
 
     protected $guarded = [];
 
+    /**
+     * Подстраховка для всех путей создания теста через Eloquent:
+     * если тест создаёт авторизованный врач и владелец явно не задан,
+     * записываем первичный ключ записи doctors, а не users.
+     *
+     * Основной TestPanelController уже передаёт owner_doctor_id
+     * явно через createOwnedTest(); этот hook защищает и другие
+     * будущие вызовы Test::create().
+     */
+    protected static function booted(): void
+    {
+        static::creating(static function (Test $test): void {
+            if (!empty($test->owner_doctor_id)) {
+                return;
+            }
+
+            $user = auth()->user();
+
+            if (!$user) {
+                return;
+            }
+
+            $doctor = $user->doctor;
+
+            if ($doctor) {
+                $test->owner_doctor_id = $doctor->getKey();
+            }
+        });
+    }
+
     protected $casts = [
         'resource_profile' => 'array',
     ];
@@ -22,6 +52,18 @@ class Test extends Model
     public function sections(): HasMany
     {
         return $this->hasMany(TestSection::class);
+    }
+
+    /**
+     * Все вопросы теста. test_items.test_id — основная связь;
+     * section_id является необязательной группировкой и может быть NULL
+     * у старых/официальных опросников.
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(TestItem::class, 'test_id')
+            ->orderBy('order')
+            ->orderBy('id');
     }
 
     public function ownerDoctor()

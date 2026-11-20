@@ -11,7 +11,11 @@ final class TestSessionPolicy
 {
     public function view(User $user, TestSession $session): bool
     {
-        return $user->hasRole('doctor')
+        if (data_get($session->context, 'source') === 'patient_self') {
+            return false;
+        }
+
+        return ($user->hasRole('doctor') || $user->hasRole('doctors'))
             && $user->doctor
             && $session->patient
             && (int) $session->patient->doctor_id === (int) $user->doctor->id;

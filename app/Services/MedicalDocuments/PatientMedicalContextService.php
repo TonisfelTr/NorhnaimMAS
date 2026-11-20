@@ -259,6 +259,12 @@ final class PatientMedicalContextService
     {
         try {
             return $patient->testSessions()
+                // Медицинский контекст предназначен врачу: самостоятельные
+                // прохождения пациента в него не включаются даже в queue без auth().
+                ->where(function ($query): void {
+                    $query->whereNull('context->source')
+                        ->orWhere('context->source', '!=', 'patient_self');
+                })
                 ->with('test')
                 ->orderBy('created_at')
                 ->get()

@@ -11,17 +11,17 @@ class TestScoringService
 {
     public function scoreAndPersist(TestSession $session): void
     {
-        // Важно: нам нужен порядок items внутри sections, чтобы item_ids в key понимались как "номер вопроса"
-        $session->load(['test.sections.items.options']);
+        // Вопросы связаны с тестом через test_items.test_id.
+        // section_id может быть NULL у официальных/старых опросников.
+        $session->load(['test.items.options']);
 
         if (!$session->test) {
             return;
         }
 
-        // 1) item_id -> порядковый номер (1..N) по реальному порядку в тесте
-        $orderedItems = $session->test->sections
-            ->sortBy(fn($s) => (int)($s->order ?? 0))
-            ->flatMap(fn($s) => $s->items->sortBy(fn($i) => (int)($i->order ?? 0)))
+        // 1) item_id -> порядковый номер (1..N) по order в самом тесте.
+        $orderedItems = $session->test->items
+            ->sortBy(fn($item) => (int)($item->order ?? 0))
             ->values();
 
         $seqByItemId = [];
