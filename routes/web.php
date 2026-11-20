@@ -179,6 +179,12 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
 
         // Тестирования пациента: врачебные назначения и самостоятельный каталог.
         Route::get('/tests', [PatientTestsController::class, 'index'])->name('tests.index');
+        Route::get('/documents', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'index'])->name('documents.index');
+        Route::post('/documents', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'upload'])->middleware('throttle:20,1')->name('documents.upload');
+        Route::get('/documents/{document}/preview', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'preview'])->whereNumber('document')->name('documents.preview');
+        Route::get('/documents/{document}/download', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'download'])->whereNumber('document')->name('documents.download');
+        Route::delete('/documents/{document}', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'destroy'])->whereNumber('document')->middleware('throttle:20,1')->name('documents.destroy');
+
         Route::post('/tests/assignments/{assignment}/start', [PatientTestsController::class, 'startAssigned'])
             ->whereNumber('assignment')
             ->middleware('throttle:10,1')
@@ -432,6 +438,7 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
             Route::post('/documents/store', [DocumentController::class, 'upload'])->name('documents.upload');
             Route::get('/documents/{document:id}', [DocumentController::class, 'download'])->name('documents.download');
             Route::post('/documents/{document:id}/delete', [DocumentController::class, 'delete'])->name('documents.delete');
+            Route::post('/documents/{document:id}/review', [\App\Http\Controllers\Doctors\PatientUploadedDocumentReviewController::class, 'store'])->name('documents.review');
 
             Route::post('/medication-assignments', [\App\Http\Controllers\Doctors\MedicationAssignmentController::class, 'store'])->name('medication-assignments.store');
             Route::patch('/medication-assignments/{assignment}', [\App\Http\Controllers\Doctors\MedicationAssignmentController::class, 'updateStatus'])->whereNumber('assignment')->name('medication-assignments.status');

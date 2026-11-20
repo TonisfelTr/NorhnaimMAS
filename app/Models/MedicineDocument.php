@@ -14,7 +14,9 @@ class MedicineDocument extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'medical_file' => 'boolean'
+        'reviewed_at' => 'datetime',
+        'medical_file' => 'boolean',
+        'file_size' => 'integer',
     ];
 
     public function scopeMedicalFile(Builder $query): void
@@ -30,6 +32,16 @@ class MedicineDocument extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'reviewed_by_doctor_id');
+    }
+
+    public function uploader(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'uploaded_by_user_id');
     }
 
     public function fileExtension(): string

@@ -1152,6 +1152,18 @@
                                                     <div
                                                         class="fw-semibold">{{ $document->name ?? $document->title ?? 'Документ' }}</div>
                                                     <div class="small mc-document-medical">{{ $document->medical_file ? 'Медицинский документ' : '' }}</div>
+                                                    @if(($document->source ?? 'clinic') === 'patient')
+                                                        <div class="mt-1">
+                                                            <span class="badge bg-info-subtle text-info-emphasis">Загружено пациентом</span>
+                                                            @if($document->reviewed_at)
+                                                                <span class="badge bg-success-subtle text-success-emphasis">Врач ознакомился {{ $document->reviewed_at->format('d.m.Y') }}</span>
+                                                            @else
+                                                                <span class="badge bg-warning-subtle text-warning-emphasis">Ожидает ознакомления</span>
+                                                            @endif
+                                                        </div>
+                                                    @else
+                                                        <div class="small text-muted">Источник: клиника</div>
+                                                    @endif
                                                     @include('doctors.reception.partials.clinical_origin', [
                                                         'origin' => $document->clinical_origin ?? null,
                                                     ])
@@ -1172,6 +1184,14 @@
                                                             <i class="bi bi-download"></i>
                                                         </a>
                                                     </form>
+                                                    @if(($document->source ?? 'clinic') === 'patient' && !$document->reviewed_at)
+                                                        <form method="POST" action="{{ route('doctors.patients.documents.review', [$patient->id, $document->id]) }}" class="mt-1">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Отметить ознакомление">
+                                                                <i class="bi bi-check2-circle me-1"></i> Ознакомлен
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

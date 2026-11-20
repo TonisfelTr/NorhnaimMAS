@@ -192,13 +192,16 @@
                         </li>
 
                         <li>
-                            <span class="patient-sidebar__link is-disabled">
+                            <a
+                                href="{{ route('patients.documents.index') }}"
+                                @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.documents.*')])
+                                @if(request()->routeIs('patients.documents.*')) aria-current="page" @endif
+                            >
                                 <span class="patient-sidebar__link-icon">
                                     <i class="bi bi-file-earmark-medical"></i>
                                 </span>
                                 <span>Документы</span>
-                                <small>скоро</small>
-                            </span>
+                            </a>
                         </li>
 
                         <li>
