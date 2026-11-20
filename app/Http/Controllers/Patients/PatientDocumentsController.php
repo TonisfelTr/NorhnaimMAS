@@ -37,23 +37,41 @@ class PatientDocumentsController extends Controller
         $patient = $this->currentPatient($request);
         $tab = $request->query('tab', 'clinic');
 
-        if (!in_array($tab, ['clinic', 'mine'], true)) {
+        if (!in_array($tab, ['clinic', 'mine', 'history'], true)) {
             $tab = 'clinic';
         }
 
-        $source = $tab === 'mine' ? 'patient' : 'clinic';
         $query = trim((string) $request->query('q', ''));
 
         $documentsQuery = $patient->documents()
-            ->where('source', $source)
             ->orderByDesc('created_at')
             ->orderByDesc('id');
 
+        if ($tab === 'clinic') {
+            $documentsQuery->where('source', 'clinic');
+        } elseif ($tab === 'mine') {
+            $documentsQuery->where('source', 'patient');
+        } else {
+            // In the history tab, show every document regardless of uploader.
+            // doctor_id identifies the doctor who uploaded clinic documents.
+            $documentsQuery->with('doctor');
+        }
+
         if ($query !== '') {
-            $documentsQuery->where(function ($builder) use ($query): void {
-                $builder->where('name', 'ilike', '%' . $query . '%')
-                    ->orWhere('description', 'ilike', '%' . $query . '%')
-                    ->orWhere('original_name', 'ilike', '%' . $query . '%');
+            $documentsQuery->where(function ($builder) use ($query, $tab): void {
+                $like = '%' . $query . '%';
+
+                $builder->where('name', 'ilike', $like)
+                    ->orWhere('description', 'ilike', $like)
+                    ->orWhere('original_name', 'ilike', $like);
+
+                if ($tab === 'history') {
+                    $builder->orWhereHas('doctor', function ($doctorQuery) use ($like): void {
+                        $doctorQuery->where('surname', 'ilike', $like)
+                            ->orWhere('name', 'ilike', $like)
+                            ->orWhere('patronym', 'ilike', $like);
+                    });
+                }
             });
         }
 
@@ -67,6 +85,7 @@ class PatientDocumentsController extends Controller
             'categories' => self::CATEGORIES,
             'clinicCount' => $patient->documents()->where('source', 'clinic')->count(),
             'patientCount' => $patient->documents()->where('source', 'patient')->count(),
+            'historyCount' => $patient->documents()->count(),
             'pendingReviewCount' => $patient->documents()
                 ->where('source', 'patient')
                 ->whereNull('reviewed_at')
