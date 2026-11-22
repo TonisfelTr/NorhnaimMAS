@@ -1,0 +1,114 @@
+/* NORHNAIM_NOTIFICATION_ACTIONS_V5
+   Scoped action buttons for patient notifications.
+   Does not change notification reading, clinic filtering or WS logic. */
+
+.patient-notifications-list .patient-notification-card__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+    padding-left: 12px;
+    flex-shrink: 0;
+}
+
+.patient-notifications-list .patient-notification-card__actions form {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+}
+
+.patient-notifications-list .patient-notification-card__actions a.patient-notification-action,
+.patient-notifications-list .patient-notification-card__actions button.patient-notification-action,
+.patient-notifications-list .patient-notification-card__actions .patient-notification-manual-read-state {
+    appearance: none;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 9px 13px;
+    border: 1px solid #c7e5df;
+    border-radius: 10px;
+    background: #edf8f5;
+    color: #087d77;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: 0;
+    text-decoration: none !important;
+    white-space: nowrap;
+    box-shadow: none;
+    vertical-align: middle;
+}
+
+.patient-notifications-list .patient-notification-card__actions a.patient-notification-action,
+.patient-notifications-list .patient-notification-card__actions button.patient-notification-action {
+    cursor: pointer;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+.patient-notifications-list .patient-notification-card__actions a.patient-notification-action:hover,
+.patient-notifications-list .patient-notification-card__actions button.patient-notification-action:hover {
+    background: #dff2ee;
+    color: #075f5a;
+    border-color: #8fcfc4;
+    text-decoration: none !important;
+}
+
+.patient-notifications-list .patient-notification-card__actions a.patient-notification-action:focus-visible,
+.patient-notifications-list .patient-notification-card__actions button.patient-notification-action:focus-visible {
+    outline: 2px solid #0e9693;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+.patient-notifications-list .patient-notification-card__actions button.patient-notification-action--mark {
+    background: #fff;
+    color: #304b56;
+    border-color: #d6e2e6;
+}
+
+.patient-notifications-list .patient-notification-card__actions button.patient-notification-action--mark:hover {
+    background: #f1f6f8;
+    color: #193a46;
+    border-color: #b6cbd2;
+}
+
+.patient-notifications-list .patient-notification-card__actions .patient-notification-manual-read-state {
+    background: #f4f7f8;
+    border-color: #e1e9ed;
+    color: #607581;
+    cursor: default;
+    user-select: none;
+}
+
+.patient-notifications-list .patient-notification-card__actions .bi {
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+@media (max-width: 760px) {
+    .patient-notifications-list .patient-notification-card {
+        flex-wrap: wrap;
+    }
+    .patient-notifications-list .patient-notification-card__actions {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+        margin-left: 0;
+        padding: 8px 0 0;
+    }
+}
+
+@media (max-width: 410px) {
+    .patient-notifications-list .patient-notification-card__actions a.patient-notification-action,
+    .patient-notifications-list .patient-notification-card__actions button.patient-notification-action,
+    .patient-notifications-list .patient-notification-card__actions .patient-notification-manual-read-state {
+        white-space: normal;
+        text-align: center;
+    }
+}

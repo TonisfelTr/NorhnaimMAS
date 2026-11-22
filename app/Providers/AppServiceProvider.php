@@ -26,6 +26,37 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Private patient-only channel; a user may NEVER subscribe to another patient's counter.
+        if (config('broadcasting.connections.reverb.key')) {
+            \Illuminate\Support\Facades\Broadcast::connection('reverb')->channel(
+                'patient.notifications.{userId}',
+                static function ($user, $userId): bool {
+                    return $user instanceof \App\Models\User
+                        && $user->hasRole('patients')
+                        && (string) $user->getAuthIdentifier() === (string) $userId;
+                },
+                ['guards' => ['web']]
+            );
+        }
+
+        // Standard database notifications fire NotificationSent.
+        // Direct SQL inserts are covered separately by PatientPortalEventNotifier.
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Notifications\Events\NotificationSent::class,
+            static function (\Illuminate\Notifications\Events\NotificationSent $event): void {
+                if ($event->channel !== 'database'
+                    || !$event->notification instanceof \App\Notifications\PatientPortalNotification) {
+                    return;
+                }
+                $user = $event->notifiable;
+                if (!$user instanceof \App\Models\User || !$user->hasRole('patients')) {
+                    return;
+                }
+                app(\App\Services\PatientNotificationRealtimePublisher::class)
+                    ->publishAfterCommit((int) $user->getKey());
+            }
+        );
+
         \App\Models\RegistryRecord::observe(\App\Observers\PatientPortalRegistryRecordObserver::class);
         \App\Models\MedicalEncounter::observe(\App\Observers\PatientPortalMedicalEncounterObserver::class);
 
@@ -37,6 +68,18 @@ class AppServiceProvider extends ServiceProvider
                     : 0;
             $view->with('patientNotificationUnreadCount', $count);
         });
+        foreach ([
+            \App\Models\LabResearch::class,
+            \App\Models\LabResearchResult::class,
+            \App\Models\InstrumentalResearch::class,
+            \App\Models\MedicineDocument::class,
+            \App\Models\PatientMedicationAssignment::class,
+            \App\Models\TestAssignment::class,
+            \App\Models\TestSession::class,
+        ] as $model) {
+            $model::observe(\App\Observers\PatientPortalClinicalEventObserver::class);
+        }
+
         // PATIENT_PORTAL_V1_END
 
         // DOCTOR_MEDICAL_CARD_PROVENANCE_V1

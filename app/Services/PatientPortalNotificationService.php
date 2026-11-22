@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Models\Patient;
 use App\Models\RegistryRecord;
-use App\Notifications\PatientPortalNotification;
+use Illuminate\Support\Str;
 use App\Support\ClinicAppointmentTime;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
@@ -31,13 +31,18 @@ final class PatientPortalNotificationService
             return;
         }
 
-        $user->notify(new PatientPortalNotification(
+        // NORHNAIM_NOTIFICATION_CLINICS_V1: event is saved with clinic_id.
+        // UUID keeps legacy behavior: each actual appointment change is a new notice.
+        app(PatientPortalEventNotifier::class)->notifyOnce(
+            (int) $record->patient_id,
+            'appointment:record:' . (int) $record->getKey() . ':' . Str::uuid(),
             $category,
             $title,
             $message,
             route('patients.history.index', [], false),
-            $icon
-        ));
+            $icon,
+            (int) $record->clinic_id
+        );
     }
 
     public function appointmentDateLabel(RegistryRecord $record): string
