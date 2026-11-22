@@ -179,6 +179,18 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
 
         // Тестирования пациента: врачебные назначения и самостоятельный каталог.
         Route::get('/tests', [PatientTestsController::class, 'index'])->name('tests.index');
+        Route::get('/telemedicine', [\App\Http\Controllers\Patients\PatientTelemedicineController::class, 'index'])->name('telemedicine.index');
+        Route::get('/history', [\App\Http\Controllers\Patients\PatientVisitHistoryController::class, 'index'])->name('history.index');
+        Route::get('/notifications', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/unread-count', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'unreadCount'])->name('notifications.unread-count');
+        Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'markRead'])
+            ->whereUuid('notification')
+            ->name('notifications.read');
+        Route::post('/notifications/read-all', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::post('/telemedicine/{record}/join', [\App\Http\Controllers\Patients\PatientTelemedicineController::class, 'join'])
+            ->whereNumber('record')
+            ->middleware('throttle:10,1')
+            ->name('telemedicine.join');
         Route::get('/documents', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'index'])->name('documents.index');
         Route::post('/documents', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'upload'])->middleware('throttle:20,1')->name('documents.upload');
         Route::get('/documents/{document}/preview', [\App\Http\Controllers\Patients\PatientDocumentsController::class, 'preview'])->whereNumber('document')->name('documents.preview');

@@ -21,8 +21,11 @@ final class DoctorAppointmentIntervals
     /** Database TIME values with zero seconds are accepted without rounding. */
     public static function parseClock(mixed $clock): ?int
     {
+        // PostgreSQL `timetz` may be serialized as `08:00:00+00` or
+        // `08:00:00+05:30`. Clinic schedules are local wall-clock values:
+        // keep HH:MM and ignore the serialized offset, just as the schedule UI does.
         if (!is_string($clock)
-            || !preg_match('/\A([01][0-9]|2[0-3]):([0-5][0-9])(?::00(?:\.0{1,6})?)?\z/', $clock, $match)) {
+            || !preg_match('/\A([01][0-9]|2[0-3]):([0-5][0-9])(?::00(?:\.0{1,6})?)?(?:Z|[+-](?:0[0-9]|1[0-5])(?::?[0-5][0-9])?(?::?[0-5][0-9])?)?\z/', $clock, $match)) {
             return null;
         }
 

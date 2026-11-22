@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  
+  <meta name="robots" content="noindex,nofollow">
+  <title>НОРХНЕЙМ · Видеосеанс</title>
+  <link rel="stylesheet" href="/style.css?v=session-v2">
+  <script src="/app.js?v=session-v2" defer></script>
+</head>
+<body>
+  <main class="layout">
+    <header class="masthead">
+      <div class="logo" aria-hidden="true">Н<span>·</span></div>
+      <div class="masthead-text"><b>НОРХНЕЙМ</b><span>Сеанс видеосвязи WebRTC</span></div>
+      <div class="stage">Тестовая среда</div>
+    </header>
+
+    <section class="intro" aria-label="Информация о сеансе">
+      <p class="eyebrow">ВИДЕОКОНСУЛЬТАЦИЯ</p>
+      <h1>Связь врача и пациента</h1>
+      <p>Персональная видеосессия один на один. Для подключения используйте свою пригласительную ссылку и разрешите браузеру доступ к камере и микрофону.</p>
+    </section>
+
+    <section class="video-grid" aria-label="Видеозвонок">
+      <div class="video-card">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <div class="placeholder" id="remotePlaceholder">
+          <div class="avatar" aria-hidden="true">◎</div>
+          <strong>Собеседник ещё не подключился</strong>
+          <small>Ожидаем второго участника видеосеанса.</small>
+        </div>
+        <div class="video-label">Собеседник</div>
+      </div>
+      <div class="video-card video-card--local">
+        <video id="localVideo" autoplay muted playsinline></video>
+        <div class="placeholder" id="localPlaceholder">
+          <div class="avatar" aria-hidden="true">◉</div>
+          <strong>Ваша камера выключена</strong>
+          <small>Нажмите «Начать звонок» и разрешите доступ к камере и микрофону.</small>
+        </div>
+        <div class="video-label">Вы</div>
+      </div>
+    </section>
+
+    <section class="control-bar" aria-label="Управление звонком">
+      <div class="status" role="status" aria-live="polite">
+        <span id="statusDot" class="status-dot" aria-hidden="true"></span>
+        <span id="statusText">Ожидаем приглашение</span>
+      </div>
+      <div class="buttons">
+        <button id="startButton" class="button button--primary" type="button">Начать звонок</button>
+        <button id="muteButton" class="button" type="button" disabled title="Выключить микрофон" aria-label="Выключить микрофон">Выключить микрофон</button>
+        <button id="cameraButton" class="button" type="button" disabled title="Выключить камеру" aria-label="Выключить камеру">Выключить камеру</button>
+        <button id="endButton" class="button button--danger" type="button" disabled title="Завершить" aria-label="Завершить">Завершить</button>
+      </div>
+    </section>
+
+    <section class="details" aria-label="Параметры сеанса">
+      <div><span>Участник</span><strong id="roleText">—</strong></div>
+      <div><span>Канал</span><strong id="channelText">—</strong></div>
+      <div><span>Режим</span><strong>Один на один</strong></div>
+    </section>
+    <p class="warning"><b>Тестовый режим.</b> Эта страница пока не интегрирована с авторизацией Laravel, записью на приём и медицинскими документами. Не используйте реальные персональные или медицинские данные.</p>
+  </main></body>
+</html>

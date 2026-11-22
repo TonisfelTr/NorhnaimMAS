@@ -43,6 +43,5 @@ docker-compose.yml
 /.telemedicine-journal-backups/
 /qa/
 /patches/
-/telemedicine/
 /clean_project.py
 /docker/

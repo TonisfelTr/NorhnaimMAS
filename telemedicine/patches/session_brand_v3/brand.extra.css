@@ -1,0 +1,53 @@
+
+/* Original NORHNAIM viking symbol from public/assets/images/home.
+   This section only changes the page header; WebRTC UI/handlers are untouched. */
+.masthead .logo {
+  display: flex !important;
+  width: 54px !important;
+  height: 54px !important;
+  flex: 0 0 54px !important;
+  padding: 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+.masthead .logo img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+}
+.masthead-text {
+  justify-content: center !important;
+  gap: 2px !important;
+}
+.masthead-text b {
+  font-size: 19px !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.02em !important;
+  text-transform: none !important;
+  color: #174a45 !important;
+}
+.masthead-text span {
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+  font-weight: 600 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: #83928c !important;
+}
+@media (max-width: 640px) {
+  .masthead .logo {
+    width: 47px !important;
+    height: 47px !important;
+    flex-basis: 47px !important;
+  }
+  .masthead-text b { font-size: 17px !important; }
+  .masthead-text span { font-size: 9px !important; }
+}
+

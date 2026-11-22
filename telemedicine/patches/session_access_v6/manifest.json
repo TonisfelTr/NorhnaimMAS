@@ -1,0 +1,36 @@
+{
+  "package": "norhnaim_session_auth_v6",
+  "version": "6.0",
+  "files": {
+    "telemedicine/signaling/server.py": {
+      "original_sha256": "45b9ed99f38f60a09f76aa4ee652c8826ddd3671a7ee5f52ccea13c3521a3e02",
+      "installed_sha256": "7796cbb04eb35fc11c201b0c390821377f930352ce99bb5441045ee49cfabcd6",
+      "mode": 493
+    },
+    "telemedicine/signaling/app.js": {
+      "original_sha256": "d4774e68eaf2be127642dfb4c4d21e7698fbb15b77d6a0c19b86b22196075d77",
+      "installed_sha256": "0f382b19f01a448f0dca69be89e8fe4a6c0bad8438863cea8c64fa5edc3c3430",
+      "mode": 420
+    },
+    "telemedicine/signaling/index.html": {
+      "original_sha256": "639a3bcde4309ac4308b1ceeabb5b53c42357345dfd393aa92df1f0dfe4048e7",
+      "installed_sha256": "aca70851982182a61d750c9ef7d8afa17f2d6541c704269ad110dd884cb8b176",
+      "mode": 420
+    },
+    "telemedicine/signaling/session_denied.html": {
+      "original_sha256": null,
+      "installed_sha256": "53adf18f451fa745d8148b4203c639853207a782944f056265d04783011683ea",
+      "mode": 420
+    },
+    "telemedicine/mobile/nginx.conf": {
+      "original_sha256": "ada63cc6a2c6d1abf968b5822cc4fd80ae3586dae183287567dd6176b3aa642a",
+      "installed_sha256": "b4d66344758df50666c47d9c039d87888841b5f563c8951f127ebd825843f492",
+      "mode": 420
+    },
+    "telemedicine/scripts/make_demo_links.py": {
+      "original_sha256": "4cfb7a46b64fa28c1d1f3922c03f2da24beeac35b2e5e2d46bab98cdec3751a7",
+      "installed_sha256": "f1945571aae51ff80cb7659f10546e38703d7d209ae49f53d0883a6475d4342c",
+      "mode": 493
+    }
+  }
+}

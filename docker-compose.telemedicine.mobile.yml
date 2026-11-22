@@ -3,14 +3,15 @@
 services:
   telemedicine-signaling:
     environment:
-      TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_LAN_IP:?Configure telemedicine LAN IP first}"
-      TELEMEDICINE_ALLOWED_ORIGINS: "http://localhost:${TELEMEDICINE_UI_PORT:-3100},http://127.0.0.1:${TELEMEDICINE_UI_PORT:-3100},https://${TELEMEDICINE_LAN_IP}:${TELEMEDICINE_HTTPS_PORT:-3443}"
+      TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_TURN_HOST:?Configure public TURN hostname first}"
+      TELEMEDICINE_ALLOWED_ORIGINS: "http://localhost:${TELEMEDICINE_UI_PORT:-3100},http://127.0.0.1:${TELEMEDICINE_UI_PORT:-3100},https://${TELEMEDICINE_LAN_IP}:${TELEMEDICINE_HTTPS_PORT:-3443},https://video-norhnaim.duckdns.org"
 
   telemedicine-turn:
     # Uses host networking from the base compose (UDP relay ports need LAN access).
     environment:
       TELEMEDICINE_LAN_IP: "${TELEMEDICINE_LAN_IP:?Configure telemedicine LAN IP first}"
-      TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_LAN_IP}"
+      TELEMEDICINE_TURN_HOST: "${TELEMEDICINE_TURN_HOST:?Configure public TURN hostname first}"
+      TELEMEDICINE_PUBLIC_IP: "${TELEMEDICINE_PUBLIC_IP:?Configure public IPv4 first}"
       TELEMEDICINE_RELAY_MIN_PORT: "${TELEMEDICINE_RELAY_MIN_PORT:-49160}"
       TELEMEDICINE_RELAY_MAX_PORT: "${TELEMEDICINE_RELAY_MAX_PORT:-49259}"
     entrypoint: ["/bin/sh", "/srv/telemedicine/turn-mobile-entrypoint.sh"]
@@ -31,6 +32,8 @@ services:
       - "./telemedicine/mobile/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
       - "./telemedicine/certs/mobile.crt:/etc/nginx/tls/mobile.crt:ro"
       - "./telemedicine/certs/mobile.key:/etc/nginx/tls/mobile.key:ro"
+      - "/root/.norhnaim-secrets/telemedicine/public.crt:/etc/nginx/tls/public.crt:ro"
+      - "/root/.norhnaim-secrets/telemedicine/public.key:/etc/nginx/tls/public.key:ro"
     depends_on:
       telemedicine-signaling:
         condition: service_healthy

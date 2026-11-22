@@ -26,6 +26,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \App\Models\RegistryRecord::observe(\App\Observers\PatientPortalRegistryRecordObserver::class);
+        \App\Models\MedicalEncounter::observe(\App\Observers\PatientPortalMedicalEncounterObserver::class);
+
+        \Illuminate\Support\Facades\View::composer('layouts.patient', static function ($view): void {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $count = $user && $user->hasRole('patients')
+                && \Illuminate\Support\Facades\Schema::hasTable('notifications')
+                    ? $user->unreadNotifications()->count()
+                    : 0;
+            $view->with('patientNotificationUnreadCount', $count);
+        });
+        // PATIENT_PORTAL_V1_END
+
         // DOCTOR_MEDICAL_CARD_PROVENANCE_V1
         foreach ([
             \App\Models\Anamnesis::class,

@@ -33,6 +33,9 @@
     @yield('assets')
     <!-- PATIENT_PAGE_HEADER_V1 -->
     <link rel="stylesheet" href="{{ asset('css/patient-page-header.css') }}?v=20261119-header1">
+    
+    <link rel="stylesheet" href="{{ asset('css/patient-activity.css') }}?v=20261121-portal1">
+    
 </head>
 
 <body class="patient-panel-body">
@@ -143,7 +146,14 @@
                                 <span>Календарь</span>
                             </a>
                         </li>
-
+                        <li>
+                            <a href="{{ route('patients.history.index') }}"
+                               @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.history.*')])
+                               @if(request()->routeIs('patients.history.*')) aria-current="page" @endif>
+                                <span class="patient-sidebar__link-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></span>
+                                <span>История обращений</span>
+                            </a>
+                        </li>
 
                         <li>
                             <a
@@ -205,13 +215,27 @@
                         </li>
 
                         <li>
-                            <span class="patient-sidebar__link is-disabled">
+                            <a
+                                href="{{ route('patients.telemedicine.index') }}"
+                                @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.telemedicine.*')])
+                                @if(request()->routeIs('patients.telemedicine.*')) aria-current="page" @endif
+                            >
                                 <span class="patient-sidebar__link-icon">
                                     <i class="bi bi-camera-video"></i>
                                 </span>
                                 <span>Телемедицина</span>
-                                <small>скоро</small>
-                            </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('patients.notifications.index') }}"
+                               @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.notifications.*')])
+                               @if(request()->routeIs('patients.notifications.*')) aria-current="page" @endif>
+                                <span class="patient-sidebar__link-icon"><i class="bi bi-bell" aria-hidden="true"></i></span>
+                                <span>Уведомления</span>
+                                @if(($patientNotificationUnreadCount ?? 0) > 0)
+                                    <span class="patient-notification-count">{{ $patientNotificationUnreadCount > 99 ? '99+' : $patientNotificationUnreadCount }}</span>
+                                @endif
+                            </a>
                         </li>
                     </ul>
                 </nav>
