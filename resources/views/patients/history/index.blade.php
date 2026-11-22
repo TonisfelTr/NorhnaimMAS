@@ -80,6 +80,14 @@
                     <span><i class="bi bi-hospital" aria-hidden="true"></i>{{ $visit['clinic_name'] }}</span>
                     <span><i class="bi bi-clock" aria-hidden="true"></i>{{ $visit['duration'] }} минут</span>
                 </div>
+                @if($visit['diagnosis_code'] !== '' || $visit['diagnosis_title'] !== '')
+                    <div class="mt-2 small text-muted">
+                        <i class="bi bi-clipboard2-pulse me-1" aria-hidden="true"></i>
+                        <strong>Диагноз приёма:</strong>
+                        @if($visit['diagnosis_code'] !== '')<span>МКБ-10 {{ $visit['diagnosis_code'] }}</span>@endif
+                        @if($visit['diagnosis_title'] !== '')<span>{{ $visit['diagnosis_title'] }}</span>@endif
+                    </div>
+                @endif
                 @if($visit['is_telemedicine'])
                     <div class="patient-visit-card__actions">
                         <a href="{{ route('patients.telemedicine.index', ['tab' => 'history']) }}">

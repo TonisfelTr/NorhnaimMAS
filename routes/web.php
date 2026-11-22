@@ -181,6 +181,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
         Route::get('/tests', [PatientTestsController::class, 'index'])->name('tests.index');
         Route::get('/telemedicine', [\App\Http\Controllers\Patients\PatientTelemedicineController::class, 'index'])->name('telemedicine.index');
         Route::get('/history', [\App\Http\Controllers\Patients\PatientVisitHistoryController::class, 'index'])->name('history.index');
+        Route::get('/diagnoses', [\App\Http\Controllers\Patients\PatientDiagnosesController::class, 'index'])->name('diagnoses.index');
         Route::get('/notifications', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'index'])->name('notifications.index');
         Route::get('/notifications/unread-count', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'unreadCount'])->name('notifications.unread-count');
         Route::get('/notifications/realtime-config', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'realtimeConfig'])
@@ -319,6 +320,15 @@ Route::middleware(['auth', DoctorOrHospitalAdmin::class])
     ->group(function (): void {
         Route::get('/', [DoctorsIndexController::class, 'index'])->name('main');
         Route::get('/patients/{patient:id}', [MedicalCardController::class, 'index'])->whereNumber('patient')->name('patients.medical_card');
+        // A doctor's clinic is determined server-side; client cannot choose it.
+        Route::get('/patients/{patient:id}/diagnoses/search',
+            [\App\Http\Controllers\Doctors\PatientClinicDiagnosisController::class, 'search'])
+            ->whereNumber('patient')->middleware('throttle:60,1')
+            ->name('patients.diagnosis.search');
+        Route::post('/patients/{patient:id}/diagnosis',
+            [\App\Http\Controllers\Doctors\PatientClinicDiagnosisController::class, 'store'])
+            ->whereNumber('patient')->middleware('throttle:12,1')
+            ->name('patients.diagnosis.store');
 
         Route::get('/patients/{patient:id}/doctor-transfer/candidates', [PatientDoctorTransferController::class, 'candidates'])
             ->whereNumber('patient')->middleware('throttle:60,1')

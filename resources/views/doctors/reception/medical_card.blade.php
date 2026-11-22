@@ -3,6 +3,8 @@
 @section('assets')
     @parent
     @vite('resources/js/medical_card.js')
+    <link rel="stylesheet" href="{{ asset('css/doctor-clinic-diagnosis.css') }}?v=5-redesign">
+    <script src="{{ asset('js/doctor-clinic-diagnosis.js') }}?v=3-fg" defer></script>
     
     <link rel="stylesheet" href="{{ asset('css/benefit-prescriptions.css') }}?v=1">
     <script src="{{ asset('js/benefit-prescriptions.js') }}?v=1" defer></script>
@@ -22,6 +24,12 @@
                 <div class="alert alert-success mc-patient-transfer-alert" role="status">
                     <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
                     {{ session('patient_transfer_success') }}
+                </div>
+            @endif
+
+            @if(session('clinic_diagnosis_saved'))
+                <div class="alert alert-success" role="status">
+                    <i class="bi bi-check-circle me-2" aria-hidden="true"></i>{{ session('clinic_diagnosis_saved') }}
                 </div>
             @endif
 
@@ -136,38 +144,56 @@
                         </div>
                     </div>
 
-                    <div class="mc-patient-meta-card">
-                        <div class="mc-patient-meta-icon">
+                    <div class="mc-patient-meta-card mc-clinic-diagnosis-summary">
+                        <div class="mc-patient-meta-icon" aria-hidden="true">
                             <i class="bi bi-activity"></i>
                         </div>
 
-                        <div class="mc-patient-meta-value">
+                        <div class="mc-clinic-diagnosis-summary__body">
+                            <div class="mc-clinic-diagnosis-summary__head">
+                                <span class="mc-clinic-diagnosis-summary__eyebrow"
+                                      title="{{ $currentDiagnosisClinicName ?: ($currentDiagnosisOrigin['clinic_name'] ?? 'Клиника не указана') }}">
+                                    Основной диагноз
+                                </span>
+                                @if($canSetClinicDiagnosis)
+                                    <button type="button"
+                                            class="mc-clinic-diagnosis__edit mc-clinic-diagnosis-summary__edit"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#mcClinicDiagnosisModal"
+                                            aria-label="{{ $currentDiagnosisCode ? 'Изменить' : 'Установить' }} основной диагноз для текущей клиники"
+                                            title="{{ $currentDiagnosisCode ? 'Изменить' : 'Установить' }} основной диагноз">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                        <span>{{ $currentDiagnosisCode ? 'Изменить' : 'Установить' }}</span>
+                                    </button>
+                                @endif
+                            </div>
+
                             @if($currentDiagnosisCode)
-                                <div class="fw-bold fs-5">
-                                    {{ $currentDiagnosisCode }}
+                                <div class="mc-clinic-diagnosis-summary__code">{{ $currentDiagnosisCode }}</div>
+                                <div class="mc-clinic-diagnosis-summary__title"
+                                     title="{{ $currentDiagnosisTitle ?: 'Наименование диагноза не указано' }}">
+                                    {{ $currentDiagnosisTitle ?: 'Наименование диагноза не указано' }}
                                 </div>
 
-                                @if($currentDiagnosisTitle)
-                                    <div class="mt-1">
-                                        {{ $currentDiagnosisTitle }}
+                                @if(($currentDiagnosisOrigin['exact'] ?? false)
+                                    && (!empty($currentDiagnosisOrigin['doctor_name']) || !empty($currentDiagnosisOrigin['captured_at'])))
+                                    <div class="mc-clinic-diagnosis-summary__details"
+                                         title="Клиника: {{ $currentDiagnosisOrigin['clinic_name'] ?? $currentDiagnosisClinicName ?? 'Не указана' }}">
+                                        @if(!empty($currentDiagnosisOrigin['doctor_name']))
+                                            <span class="mc-clinic-diagnosis-summary__doctor"
+                                                  title="{{ $currentDiagnosisOrigin['doctor_name'] }}">
+                                                {{ $currentDiagnosisOrigin['doctor_name'] }}
+                                            </span>
+                                        @endif
+                                        @if(!empty($currentDiagnosisOrigin['captured_at']))
+                                            <span class="mc-clinic-diagnosis-summary__date">{{ $currentDiagnosisOrigin['captured_at'] }}</span>
+                                        @endif
                                     </div>
                                 @endif
-
-                                <div class="mt-2">
-            <span class="badge rounded-pill text-bg-light border">
-                Основной диагноз
-            </span>
-                                </div>
-                                @include('doctors.reception.partials.clinical_origin', [
-                                    'origin' => $currentDiagnosisOrigin ?? null,
-                                ])
                             @else
-                                <div class="is-warning fw-semibold">
-                                    Диагноз не установлен
-                                </div>
-
-                                <div class="small text-muted mt-1">
-                                    Нет установленного основного диагноза
+                                <div class="mc-clinic-diagnosis-summary__empty">Не установлен</div>
+                                <div class="mc-clinic-diagnosis-summary__empty-hint">
+                                    В этой клинике диагноз ещё не указан
                                 </div>
                             @endif
                         </div>
@@ -2202,7 +2228,6 @@
                             </div>
                         </div>
                     </div>
-
 
                     {{-- PATIENT_MEDICATION_WORKSPACE_TABS_V8 --}}
                     <ul class="nav nav-tabs medication-workspace-tabs"
@@ -10043,4 +10068,76 @@
     </script>
     {{-- PATIENT_DOCTOR_TRANSFER_MODAL_INCLUDE --}}
     @include('doctors.reception.partials.patient_doctor_transfer_modal')
+
+    @if($canSetClinicDiagnosis)
+        <div class="modal fade" id="mcClinicDiagnosisModal" tabindex="-1"
+             aria-labelledby="mcClinicDiagnosisTitle" aria-hidden="true"
+             data-open-on-error="{{ $errors->clinicDiagnosis->any() ? '1' : '0' }}">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content mc-clinic-diagnosis__modal">
+                    <form method="POST"
+                          action="{{ route('doctors.patients.diagnosis.store', ['patient' => $patient->getKey()]) }}"
+                          data-clinic-diagnosis-form
+                          data-search-url="{{ route('doctors.patients.diagnosis.search', ['patient' => $patient->getKey()]) }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h2 class="modal-title" id="mcClinicDiagnosisTitle">
+                                {{ $currentDiagnosisCode ? 'Изменить основной диагноз' : 'Установить основной диагноз' }}
+                            </h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Закрыть"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mc-clinic-diagnosis__scope">
+                                <i class="bi bi-hospital" aria-hidden="true"></i>
+                                <strong>{{ $currentDiagnosisClinicName }}</strong>
+                                <div>Диагноз будет изменён только в этой клинике. История прежних диагнозов сохранится.</div>
+                            </div>
+                            <label for="mcClinicDiagnosisSearch" class="form-label mc-clinic-diagnosis__search-label">
+                                Поиск по МКБ-10 или названию диагноза
+                            </label>
+                            <div class="mc-clinic-diagnosis__allowed" aria-label="Допустимые группы МКБ-10">
+                                <span>Только группы:</span>
+                                <button type="button" data-clinic-diagnosis-group="F" title="Показать диагнозы группы F">F · Психические расстройства</button>
+                                <button type="button" data-clinic-diagnosis-group="G" title="Показать диагнозы группы G">G · Болезни нервной системы</button>
+                            </div>
+                            <div class="mc-clinic-diagnosis__combobox" data-clinic-diagnosis-combobox>
+                                <input type="search" id="mcClinicDiagnosisSearch"
+                                       data-clinic-diagnosis-search class="form-control mc-clinic-diagnosis__search"
+                                       role="combobox" aria-autocomplete="list" aria-haspopup="listbox"
+                                       aria-controls="mcClinicDiagnosisOptions" aria-expanded="false"
+                                       autocomplete="off" maxlength="100"
+                                       placeholder="Начните вводить код или название диагноза">
+                                <div id="mcClinicDiagnosisOptions" class="mc-clinic-diagnosis__results"
+                                     data-clinic-diagnosis-results role="listbox" hidden
+                                     aria-label="Выберите диагноз МКБ-10">
+                                    <div class="mc-clinic-diagnosis__message">Выберите диагноз F или G.</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="diagnose_id" data-clinic-diagnosis-id value="">
+                            <div class="mc-clinic-diagnosis__selected" data-clinic-diagnosis-chosen hidden>
+                                <small>Выбранный диагноз</small>
+                                <strong data-clinic-diagnosis-chosen-name></strong>
+                            </div>
+                            @if($errors->clinicDiagnosis->any())
+                                <div class="alert alert-danger mt-3 mb-0" role="alert">
+                                    {{ $errors->clinicDiagnosis->first('diagnose_id') ?: 'Выберите диагноз из справочника.' }}
+                                </div>
+                            @endif
+                            <p class="mc-clinic-diagnosis__tip">
+                                Изменение фиксируется в истории с датой, врачом и клиникой.
+                                Диагнозы других клиник не изменяются.
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    data-bs-dismiss="modal">Отмена</button>
+                            <button type="submit" class="mc-clinic-diagnosis__save"
+                                    data-clinic-diagnosis-save disabled>Сохранить диагноз</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection

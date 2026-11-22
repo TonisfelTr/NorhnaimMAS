@@ -156,56 +156,31 @@ final class ClinicalRecordOriginService
         ]);
     }
 
-    public function currentDiagnosisOrigin(Patient $patient): array
+    /** The current diagnosis origin must be scoped to a proven clinic. */
+    public function currentDiagnosisOrigin(Patient $patient, ?int $clinicId = null): array
     {
-        if ($patient->diagnose_id && Schema::hasTable('patient_diagnosis_history')) {
-            $history = PatientDiagnosisHistory::query()
-                ->where('patient_id', (int) $patient->getKey())
-                ->where('diagnose_id', (int) $patient->diagnose_id)
-                ->latest('set_at')
-                ->latest('id')
-                ->first();
+        $history = $clinicId !== null && $clinicId > 0
+            ? app(PatientClinicDiagnosisService::class)
+                ->currentForClinic((int) $patient->getKey(), $clinicId)
+            : null;
 
-            if ($history) {
-                return [
-                    'doctor_name' => $history->doctor_name_snapshot
-                        ?: 'Врач не зафиксирован',
-                    'clinic_name' => $history->clinic_name_snapshot
-                        ?: 'Клиника не зафиксирована',
-                    'captured_at' => $history->set_at?->format('d.m.Y H:i'),
-                    'exact' => true,
-                    'source' => (string) $history->source,
-                ];
-            }
+        if ($history) {
+            return [
+                'doctor_name' => $history->doctor_name_snapshot ?: 'Врач не зафиксирован',
+                'clinic_name' => $history->clinic_name_snapshot ?: 'Клиника не зафиксирована',
+                'captured_at' => $history->set_at?->format('d.m.Y H:i'),
+                'exact' => true,
+                'source' => (string) $history->source,
+            ];
         }
 
-        if ($patient->diagnose_id) {
-            $anamnesis = Anamnesis::query()
-                ->with('doctor')
-                ->where('patient_id', (int) $patient->getKey())
-                ->where('diagnose_id', (int) $patient->diagnose_id)
-                ->where('is_current', true)
-                ->latest('created_at')
-                ->first();
-
-            if ($anamnesis) {
-                return [
-                    'doctor_name' => $this->doctorName($anamnesis->doctor)
-                        ?: 'Врач не зафиксирован',
-                    'clinic_name' => 'Клиника не зафиксирована',
-                    'captured_at' => $anamnesis->created_at?->format('d.m.Y H:i'),
-                    'exact' => false,
-                    'source' => 'legacy_current_anamnesis',
-                ];
-            }
-        }
-
+        // No fallback to patients.diagnose_id: it may belong to a different clinic.
         return [
             'doctor_name' => 'Врач не зафиксирован',
-            'clinic_name' => 'Клиника не зафиксирована',
+            'clinic_name' => 'Клиника не определена',
             'captured_at' => null,
             'exact' => false,
-            'source' => 'legacy',
+            'source' => 'unassigned',
         ];
     }
 

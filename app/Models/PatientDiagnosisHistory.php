@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PatientDiagnosisHistory extends Model
 {
@@ -13,4 +14,9 @@ class PatientDiagnosisHistory extends Model
     protected $casts = [
         'set_at' => 'datetime',
     ];
+
+    public function diagnose(): BelongsTo
+    {
+        return $this->belongsTo(Diagnose::class, 'diagnose_id');
+    }
 }

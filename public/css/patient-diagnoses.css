@@ -1,0 +1,127 @@
+.patient-diagnoses { color: #203c3b; }
+.patient-diagnoses__heading { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.patient-diagnoses__heading-icon { flex:0 0 52px; height:52px; display:grid; place-items:center; border-radius:15px; background:#eaf7f4; color:#0e9287; font-size:24px; }
+.patient-diagnoses__selector { display:flex; gap:22px; flex-wrap:wrap; align-items:center; justify-content:space-between; padding:20px; margin:22px 0 26px; border:1px solid #e1ebe8; border-radius:16px; background:#fff; }
+.patient-diagnoses__selector h2 { margin:4px 0; color:#24443f; font-size:18px; font-weight:750; }
+.patient-diagnoses__selector p,.patient-diagnoses__muted { margin:4px 0 0; font-size:13px; color:#708580; }
+.patient-diagnoses__selector form { display:flex; align-items:end; gap:9px; flex:0 1 410px; flex-wrap:wrap; }
+.patient-diagnoses__selector label { width:100%; font-size:12px; font-weight:750; color:#56736c; }
+.patient-diagnoses__selector select { flex:1; min-width:190px; font-size:13px; min-height:40px; border-radius:9px; border-color:#cddfdb; }
+.patient-diagnoses__submit { min-height:40px; padding:9px 14px; background:#0c9387; border:0; border-radius:9px; font-weight:700; font-size:12px; color:#fff; }
+.patient-diagnoses__submit:hover { background:#07796f; }
+.patient-diagnoses__eyebrow { font-size:10px; letter-spacing:.09em; font-weight:800; color:#108e83; text-transform:uppercase; }
+.patient-diagnoses__section { margin:20px 0 26px; }
+.patient-diagnoses__section-head { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:12px; }
+.patient-diagnoses__section-head h2 { margin:3px 0 0; font-size:18px; font-weight:800; color:#25423e; }
+.patient-diagnoses__total { padding:5px 10px; border-radius:20px; background:#eaf7f4; color:#088b81; font-size:12px; font-weight:800; }
+.patient-diagnoses__current,.patient-diagnoses__entry { border:1px solid #e0ebe7; border-radius:14px; background:#fff; padding:17px 19px; }
+.patient-diagnoses__current { border-color:#b9ded4; background:#fcfffe; }
+.patient-diagnoses__current-top,.patient-diagnoses__entry { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; }
+.patient-diagnoses__current h3,.patient-diagnoses__entry h3 { margin:7px 0 10px; font-size:16px; font-weight:800; line-height:1.4; color:#234642; }
+.patient-diagnoses__entry h3 { font-size:14px; }
+.patient-diagnoses__entry-main { min-width:0; flex:1; }
+.patient-diagnoses__code { font-size:12px; font-weight:800; color:#0d867c; }
+.patient-diagnoses__tag { white-space:nowrap; flex-shrink:0; padding:6px 9px; border-radius:8px; color:#187552; background:#e8f7ef; font-size:10px; font-weight:750; }
+.patient-diagnoses__tag--secondary { color:#547274; background:#f0f5f4; }
+.patient-diagnoses__meta { display:flex; flex-wrap:wrap; gap:9px 18px; font-size:11px; color:#7c928b; }
+.patient-diagnoses__meta span { display:inline-flex; align-items:center; gap:6px; }
+.patient-diagnoses__list { display:grid; gap:10px; }
+.patient-diagnoses__empty { border:1px dashed #cbded7; background:#fbfdfc; border-radius:14px; min-height:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px; padding:24px; }
+.patient-diagnoses__empty--compact { min-height:105px; }
+.patient-diagnoses__empty i { font-size:26px; color:#168f83; }
+.patient-diagnoses__empty h2 { font-size:17px; margin:0; font-weight:800; }
+.patient-diagnoses__empty p { font-size:13px; color:#738b83; margin:0; }
+.patient-diagnoses__muted { margin:0; border:1px dashed #d6e7df; border-radius:12px; padding:20px; background:#fbfdfc; }
+.patient-diagnoses__pagination { margin:20px 0 6px; display:flex; justify-content:center; }
+.patient-diagnoses__notice { padding:12px 16px; font-size:12px; line-height:1.6; border-radius:11px; background:#f5f9f8; color:#5f7973; }
+@media(max-width:720px){.patient-diagnoses__selector form{flex:1 1 100%;}.patient-diagnoses__entry{flex-wrap:wrap}.patient-diagnoses__section-head h2{font-size:16px}.patient-diagnoses__heading-icon{display:none}}
+
+
+/* Three patient diagnosis tab panels; clinic selector styling stays untouched. */
+.patient-diagnoses__tabs {
+    display: flex;
+    gap: 7px;
+    padding: 5px;
+    margin: 0 0 17px;
+    overflow-x: auto;
+    border: 1px solid #deebe7;
+    border-radius: 13px;
+    background: #eff5f3;
+    scrollbar-width: thin;
+}
+.patient-diagnoses__tab {
+    display: inline-flex;
+    flex: 1 0 auto;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    min-height: 43px;
+    padding: 9px 14px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: #4e7069;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.patient-diagnoses__tab i {font-size: 15px; line-height: 1; color: #6b9a91;}
+.patient-diagnoses__tab:hover {color: #0b8177; background: #f8fcfa; text-decoration: none;}
+.patient-diagnoses__tab.is-active {
+    border-color: #c7e2dc;
+    background: #fff;
+    color: #087e75;
+    box-shadow: 0 1px 4px rgba(22, 78, 69, .07);
+}
+.patient-diagnoses__tab.is-active i {color: #087e75;}
+.patient-diagnoses__tab:focus-visible {outline: 2px solid #0b9589; outline-offset: -3px;}
+.patient-diagnoses__tab-count {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #e2efeb;
+    color: #397f75;
+    font-size: 11px;
+    font-weight: 800;
+}
+.patient-diagnoses__tab.is-active .patient-diagnoses__tab-count {background: #dff3ed; color: #087d73;}
+.patient-diagnoses__panel {margin-top: 0;}
+.patient-diagnoses__panel[hidden] {display: none !important;}
+@media(max-width: 730px) {
+    .patient-diagnoses__tabs {gap: 4px; padding: 4px;}
+    .patient-diagnoses__tab {flex: 0 0 auto; min-height: 40px; padding: 8px 11px; font-size: 12px;}
+}
+
+/* One compact current-diagnosis / clinic context in every diagnosis panel. */
+.patient-diagnoses__clinic-context {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 3px 8px;
+    min-width: 0;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: .01em;
+    text-transform: none;
+}
+.patient-diagnoses__clinic-context-code {
+    color: #088c81;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.patient-diagnoses__clinic-context-divider {color: #a0bbb4;}
+.patient-diagnoses__clinic-context-name {
+    min-width: 0;
+    color: #488077;
+    overflow-wrap: anywhere;
+}
+@media (max-width: 560px) {
+    .patient-diagnoses__clinic-context {font-size: 10.5px;}
+}

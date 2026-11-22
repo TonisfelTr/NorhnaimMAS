@@ -177,6 +177,11 @@ final class PatientVisitHistoryController extends Controller
                 'duration' => max(1, (int) ($record->appointment_duration_minutes ?: 30)),
                 'status' => $status,
                 'status_class' => $statusClass,
+                // Only an actually completed visit can reveal its diagnosis.
+                'diagnosis_code' => (!$cancelled && $attendance === 'present' && $consultation === 'completed')
+                    ? trim((string) ($encounter->diagnosis_code ?? '')) : '',
+                'diagnosis_title' => (!$cancelled && $attendance === 'present' && $consultation === 'completed')
+                    ? trim((string) ($encounter->diagnosis_title ?? '')) : '',
             ];
         }));
 
@@ -216,7 +221,7 @@ final class PatientVisitHistoryController extends Controller
 
         return DB::table('medical_encounters')->whereIn('registry_record_id', $ids)
             ->orderByDesc('id')
-            ->get(['registry_record_id', 'attendance_status', 'consultation_status'])
+            ->get(['registry_record_id', 'attendance_status', 'consultation_status', 'diagnosis_code', 'diagnosis_title'])
             ->groupBy('registry_record_id');
     }
 

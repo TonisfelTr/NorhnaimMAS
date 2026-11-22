@@ -49,7 +49,7 @@
             <a href="{{ route('patients.notifications.index', ['filter' => 'all', 'clinic_id' => $selectedClinicId]) }}"
                @class(['is-active' => $filter === 'all'])
                aria-label="Прочитанные уведомления: {{ $allCount }}" title="Только прочитанные">
-                Все <span data-notification-count="read">{{ $allCount }}</span>
+                Прочитанные <span data-notification-count="read">{{ $allCount }}</span>
             </a>
             <a href="{{ route('patients.notifications.index', ['filter' => 'unread', 'clinic_id' => $selectedClinicId]) }}"
                @class(['is-active' => $filter === 'unread'])
@@ -81,7 +81,7 @@
                     </div>
                     <p>{{ data_get($notification->data, 'message', '') }}</p>
                     <div class="patient-notification-card__footer">
-                        
+
                         <time datetime="{{ $notification->created_at?->toIso8601String() }}">
                             {{ $notification->created_at?->timezone(config('app.timezone'))->format('d.m.Y H:i') }}
                         </time>

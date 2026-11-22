@@ -156,6 +156,14 @@
                         </li>
 
                         <li>
+                            <a href="{{ route('patients.diagnoses.index') }}"
+                               @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.diagnoses.*')])
+                               @if(request()->routeIs('patients.diagnoses.*')) aria-current="page" @endif>
+                                <span class="patient-sidebar__link-icon"><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i></span>
+                                <span>Мои диагнозы</span>
+                            </a>
+                        </li>
+                        <li>
                             <a
                                 href="{{ route('patients.assignments.index') }}"
                                 @class(['patient-sidebar__link', 'is-active' => request()->routeIs('patients.assignments.*')])

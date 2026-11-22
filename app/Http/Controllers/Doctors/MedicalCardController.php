@@ -589,7 +589,14 @@ class MedicalCardController extends Controller
 
         $originService = app(\App\Services\ClinicalRecordOriginService::class);
         $originService->decorate($patient->epicrises);
-        $currentDiagnosisOrigin = $originService->currentDiagnosisOrigin($patient);
+        // Never use the patient-global diagnose_id in a clinic-specific medical card.
+        $currentDiagnosisClinicId = (int) ($user?->doctor()->first()?->clinic_id ?? 0);
+        $currentDiagnosisOrigin = $originService->currentDiagnosisOrigin($patient, $currentDiagnosisClinicId);
+        $canSetClinicDiagnosis = $user !== null
+            && app(\App\Services\PatientClinicDiagnosisService::class)->canAssign($user, $patient);
+        $currentDiagnosisClinicName = $canSetClinicDiagnosis
+            ? Clinic::query()->whereKey($currentDiagnosisClinicId)->value('name')
+            : null;
 
         $assignedDoctor = $patient->doctor;
         $assignedDoctorName = $assignedDoctor
@@ -761,7 +768,9 @@ class MedicalCardController extends Controller
         $representativeIdentityIssuedLabel = $dateLabel($representativeIdentityDocument?->issued_at);
         $representativeAuthorityIssuedLabel = $dateLabel($representativeAuthorityDocument?->issued_at);
 
-        $currentDiagnosis = $patient->diagnose;
+        $currentDiagnosis = app(\App\Services\PatientClinicDiagnosisService::class)
+            ->currentForClinic((int) $patient->getKey(), $currentDiagnosisClinicId)
+            ?->diagnose;
         $currentDiagnosisCode = $currentDiagnosis?->code;
         $currentDiagnosisTitle = $currentDiagnosis?->title ?? $currentDiagnosis?->name ?? null;
         $patientAvatarInitials = mb_substr((string) $patient->name, 0, 1)
@@ -790,8 +799,7 @@ class MedicalCardController extends Controller
         $prescriptionBirthDate = $patientBirthDateObject?->format('d.m.Y')
             ?? 'дата рождения не указана';
         $prescriptionBirthDateValue = $patientBirthDateObject?->format('Y-m-d') ?? '';
-        $prescriptionDiagnosisCode = data_get($patient, 'prescription_diagnosis_code')
-            ?: $currentDiagnosis?->code;
+        $prescriptionDiagnosisCode = $currentDiagnosis?->code;
 
         return compact(
             'assignedDoctor', 'assignedDoctorName', 'canTransferPatient', 'currentDoctorId',
@@ -804,7 +812,7 @@ class MedicalCardController extends Controller
             'primaryRepresentativeFullName', 'patientIdentityIssuedLabel',
             'primaryRepresentativeBirthLabel', 'representativeIdentityIssuedLabel',
             'representativeAuthorityIssuedLabel', 'currentDiagnosisCode', 'currentDiagnosisTitle',
-            'currentDiagnosisOrigin',
+            'currentDiagnosisOrigin', 'canSetClinicDiagnosis', 'currentDiagnosisClinicName',
             'patientAvatarInitials', 'medicalCardTitle', 'patientDocumentsCount', 'lastPatientDocumentUpdateLabel',
             'epicrisesCount', 'epicrisesWithDiagnosisCount', 'lastEpicrisisDateLabel',
             'prescriptionPatientName', 'prescriptionPatientInitials', 'prescriptionBirthDate',
