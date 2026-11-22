@@ -318,6 +318,6 @@
 
     @yield('scripts')
     
-    <script src="{{ asset('js/norhnaim-patient-notifications-ws-v1.js') }}?v=1" defer></script>
+    <script src="{{ asset('js/norhnaim-patient-notifications-ws.js') }}?v=1" defer></script>
 </body>
 </html>

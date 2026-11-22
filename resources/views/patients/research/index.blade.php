@@ -419,5 +419,5 @@
         </div>
     @endif
 </div>
-<script src="{{ asset('js/patient-research.js') }}?v=20261119-compact" defer></script>
+<script src="{{ asset('js/patient-research.js') }}?v=20261123-tabs1" defer></script>
 @endsection

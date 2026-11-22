@@ -3,10 +3,10 @@
 @section('title', 'Уведомления')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/norhnaim-notification-clinic-search-v1.css') }}?v=1">
-<script defer src="{{ asset('js/norhnaim-notification-clinic-search-v1.js') }}?v=1"></script>
-<link rel="stylesheet" href="{{ asset('css/norhnaim-patient-notification-actions-v5.css') }}?v=5">
-<link rel="stylesheet" href="{{ asset('css/norhnaim-notification-clinics-v1.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/norhnaim-notification-clinic-search.css') }}?v=1">
+<script defer src="{{ asset('js/norhnaim-notification-clinic-search.js') }}?v=1"></script>
+<link rel="stylesheet" href="{{ asset('css/norhnaim-patient-notification-actions.css') }}?v=5">
+<link rel="stylesheet" href="{{ asset('css/norhnaim-notification-clinics.css') }}?v=1">
 <div class="patient-activity-page">
     <div class="patient-activity-heading">
         <div>
