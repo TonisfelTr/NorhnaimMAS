@@ -1177,6 +1177,12 @@
                                                         <button type="submit" class="btn btn-link p-1">
                                                             <i class="bi bi-trash text-danger"></i>
                                                         </button>
+                                                        <a href="{{ route('doctors.patients.documents.preview', [$patient->id, $document->id]) }}"
+                                                           class="btn btn-link p-1"
+                                                           target="_blank" rel="noopener noreferrer"
+                                                           title="Просмотреть документ" aria-label="Просмотреть документ">
+                                                            <i class="bi bi-eye" aria-hidden="true"></i>
+                                                        </a>
                                                         <a href="{{ route('doctors.patients.documents.download', [$patient->id, $document->id]) }}"
                                                            class="btn btn-link p-1"
                                                            target="_blank"

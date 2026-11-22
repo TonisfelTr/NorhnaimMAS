@@ -162,6 +162,70 @@
             .ptm-history-range { font-size:9px; }
             .ptm-pagination { justify-content:center; }
         }
+
+        .ptm-page .ptm-history-preview .ptm-history-row,
+        .ptm-page .ptm-history-page .ptm-history-row {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(160px, .63fr) !important;
+            align-items: center !important;
+            column-gap: 16px !important;
+            row-gap: 10px !important;
+        }
+        .ptm-page .ptm-history-preview .ptm-history-row > .ptm-history-date,
+        .ptm-page .ptm-history-page .ptm-history-row > .ptm-history-date {
+            grid-column: 1 !important;
+            min-width: 0;
+        }
+        .ptm-page .ptm-history-preview .ptm-history-row > .ptm-history-date > div:last-child,
+        .ptm-page .ptm-history-page .ptm-history-row > .ptm-history-date > div:last-child {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        .ptm-page .ptm-history-preview .ptm-history-row > .ptm-history-doctor,
+        .ptm-page .ptm-history-page .ptm-history-row > .ptm-history-doctor {
+            grid-column: 2 !important;
+            justify-self: start !important;
+            min-width: 0;
+            margin: 0 !important;
+            overflow-wrap: anywhere;
+        }
+        .ptm-page .ptm-history-preview .ptm-history-row > .ptm-status,
+        .ptm-page .ptm-history-page .ptm-history-row > .ptm-status {
+            grid-column: 3 !important;
+            justify-self: end !important;
+            min-width: 0;
+            max-width: 100%;
+            text-align: center;
+        }
+        .ptm-page .ptm-history-preview .ptm-history-row > .ptm-result,
+        .ptm-page .ptm-history-page .ptm-history-row > .ptm-result {
+            grid-column: 1 / -1 !important;
+            min-width: 0;
+            justify-self: stretch;
+        }
+        @media (max-width: 820px) {
+            .ptm-page .ptm-history-preview .ptm-history-row,
+            .ptm-page .ptm-history-page .ptm-history-row {
+                grid-template-columns: minmax(0, 1fr) !important;
+                gap: 8px !important;
+            }
+            .ptm-page .ptm-history-preview .ptm-history-row > .ptm-history-date,
+            .ptm-page .ptm-history-preview .ptm-history-row > .ptm-history-doctor,
+            .ptm-page .ptm-history-preview .ptm-history-row > .ptm-status,
+            .ptm-page .ptm-history-preview .ptm-history-row > .ptm-result,
+            .ptm-page .ptm-history-page .ptm-history-row > .ptm-history-date,
+            .ptm-page .ptm-history-page .ptm-history-row > .ptm-history-doctor,
+            .ptm-page .ptm-history-page .ptm-history-row > .ptm-status,
+            .ptm-page .ptm-history-page .ptm-history-row > .ptm-result {
+                grid-column: 1 !important;
+                justify-self: start !important;
+            }
+            .ptm-page .ptm-history-preview .ptm-history-row > .ptm-result,
+            .ptm-page .ptm-history-page .ptm-history-row > .ptm-result {
+                justify-self: stretch !important;
+                width: 100%;
+            }
+        }
     </style>
 @endsection
 

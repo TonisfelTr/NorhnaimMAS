@@ -57,6 +57,8 @@ class TelemedicineJournalController extends Controller
         int $registryRecord,
         TelemedicineJournalService $journal
     ): RedirectResponse {
+        // NORHNAIM_RECEPTION_TELEMED_ARCHIVE_V1: keep reception navigation after cancellation.
+        $fromReception = $request->routeIs('doctors.reception.destroy');
         $journal->authorize($request->user(), $patient);
         try {
             $data = Validator::make([
@@ -73,8 +75,17 @@ class TelemedicineJournalController extends Controller
             ])->validate();
             $journal->cancel($request->user(), $patient, $registryRecord, $data['telemed_delete_reason']);
         } catch (ValidationException $e) {
+            if ($fromReception) {
+                return redirect()->route('doctors.reception.index')
+                    ->withErrors($e->errors(), 'telemedDelete')
+                    ->with('reception_archive_error', collect($e->errors())->flatten()->implode(' '));
+            }
             return redirect($this->journalUrl($patient, ['telemed_open' => $registryRecord]))
                 ->withErrors($e->errors(), 'telemedDelete')->with('active_tab', 'telemedicine-log');
+        }
+        if ($fromReception) {
+            return redirect()->route('doctors.reception.index')
+                ->with('success', 'Телемедицинский сеанс перенесён в архив. Причина удаления сохранена в журнале.');
         }
         return redirect($this->journalUrl($patient))
             ->with('telemed_journal_success', 'Сеанс удалён из действующего расписания. История сохранена в архиве.')

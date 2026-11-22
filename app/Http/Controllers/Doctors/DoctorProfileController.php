@@ -217,8 +217,6 @@ public function update(
         );
 }
 
-
-
     public function photo(
         Request $request,
         DoctorProfileAuditService $audit

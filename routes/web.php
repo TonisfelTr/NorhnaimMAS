@@ -183,6 +183,11 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
         Route::get('/history', [\App\Http\Controllers\Patients\PatientVisitHistoryController::class, 'index'])->name('history.index');
         Route::get('/notifications', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'index'])->name('notifications.index');
         Route::get('/notifications/unread-count', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'unreadCount'])->name('notifications.unread-count');
+        Route::get('/notifications/realtime-config', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'realtimeConfig'])
+            ->middleware('throttle:30,1')->name('notifications.realtime-config');
+        Route::post('/notifications/broadcasting/auth', static function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Support\Facades\Broadcast::connection('reverb')->auth($request);
+        })->middleware('throttle:120,1')->name('notifications.ws-auth');
         Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'markRead'])
             ->whereUuid('notification')
             ->name('notifications.read');
@@ -449,6 +454,7 @@ Route::middleware([RoleMiddleware::class . (config('app.debug') ? ':admins|docto
 
             Route::post('/documents/store', [DocumentController::class, 'upload'])->name('documents.upload');
             Route::get('/documents/{document:id}', [DocumentController::class, 'download'])->name('documents.download');
+            Route::get('/documents/{document:id}/preview', \App\Http\Controllers\Doctors\DocumentPreviewController::class)->name('documents.preview');
             Route::post('/documents/{document:id}/delete', [DocumentController::class, 'delete'])->name('documents.delete');
             Route::post('/documents/{document:id}/review', [\App\Http\Controllers\Doctors\PatientUploadedDocumentReviewController::class, 'store'])->name('documents.review');
 

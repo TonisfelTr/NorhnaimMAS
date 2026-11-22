@@ -188,6 +188,9 @@ final class TelemedicineProviderSessionService
             ]);
             $this->event($record, $ready ? 'provider_prepared' : 'provider_creation_requested', $user,
                 $provider, $publicId, $room);
+            if ($ready) {
+                $this->queuePortalReadyNotification($record, (int) $sessionId);
+            }
             return ['create_api' => !$ready, 'id' => $sessionId, 'token' => $token];
         }, 3);
         if (!$reservation['create_api']) return;
@@ -208,6 +211,7 @@ final class TelemedicineProviderSessionService
                 ]);
                 // A cancellation during HTTP is preserved; every subsequent join checks it.
                 $this->event($record, 'provider_prepared', $user, 'telemost', $session->public_id);
+                $this->queuePortalReadyNotification($record, (int) $session->id);
             }, 3);
         } catch (\Throwable) {
             // Even a timeout may have created a remote meeting. Never retry it automatically.
@@ -247,7 +251,30 @@ final class TelemedicineProviderSessionService
                 'prepared_at' => now(), 'updated_at' => now(),
             ]);
             $this->event($record, 'provider_prepared_manually', $user, 'telemost', $session->public_id);
+            $this->queuePortalReadyNotification($record, (int) $session->id);
         }, 3);
+    }
+
+    private function queuePortalReadyNotification(RegistryRecord $record, int $sessionId): void
+    {
+        $patientId = (int) $record->patient_id;
+        $deliver = static function () use ($patientId, $sessionId): void {
+            app(\App\Services\PatientPortalEventNotifier::class)->notifyOnce(
+                $patientId,
+                'telemedicine:ready:' . $sessionId,
+                'telemedicine',
+                'Видеоконсультация подготовлена',
+                'Клиника подготовила видеосеанс. Подключиться можно будет в установленное время.',
+                '/patient/telemedicine',
+                'camera-video'
+            );
+        };
+
+        if (DB::transactionLevel() > 0) {
+            DB::afterCommit($deliver);
+        } else {
+            $deliver();
+        }
     }
 
     private function canRecover(object $session): bool

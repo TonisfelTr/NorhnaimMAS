@@ -773,6 +773,37 @@
             line-height: 1.55;
         }
 
+        /* NORHNAIM_RECEPTION_TELEMED_ARCHIVE_V1: secure cancellation modal */
+        .archive-modal .archive-telemedicine-fields[hidden] {
+            display: none !important;
+        }
+        .archive-modal .archive-telemedicine-fields {
+            margin-top: 20px;
+            padding: 16px;
+            border: 1px solid #fecaca;
+            border-radius: 14px;
+            background: #fffafa;
+        }
+        .archive-modal .archive-telemedicine-fields .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .archive-modal .archive-telemedicine-fields textarea {
+            min-height: 102px;
+            resize: vertical;
+            border-radius: 10px;
+        }
+        .archive-modal .archive-telemedicine-help {
+            margin-top: 7px;
+            color: #667085;
+            font-size: 12px;
+        }
+        .archive-modal .archive-telemedicine-check {
+            margin-top: 14px;
+        }
+
         .archive-modal .modal-content {
             border: 0;
             border-radius: 22px;
@@ -1347,24 +1378,61 @@
             const modal = document.getElementById('confirmArchiveModal');
 
             if (modal) {
+                const form = document.getElementById('archiveForm');
+                const title = document.getElementById('confirmArchiveModalLabel');
+                const patientNameNode = document.getElementById('archivePatientName');
+                const message = document.getElementById('archiveMessage');
+                const fields = document.getElementById('archiveTelemedicineFields');
+                const reason = document.getElementById('archiveTelemedicineReason');
+                const confirmed = document.getElementById('archiveTelemedicineConfirmed');
+                const submit = document.getElementById('archiveSubmit');
+
                 modal.addEventListener('show.bs.modal', function (event) {
                     const button = event.relatedTarget;
+                    const action = button?.getAttribute('data-delete-url') || '';
+                    const recordId = button?.getAttribute('data-record-id') || '';
 
-                    if (!button) {
+                    if (!form || !action || !/^\d+$/.test(recordId)) {
+                        event.preventDefault();
                         return;
                     }
 
-                    const recordId = button.getAttribute('data-record-id');
-                    const patientName = button.getAttribute('data-patient-name') || 'эту запись';
-                    const form = document.getElementById('archiveForm');
-                    const modalPatientName = document.getElementById('archivePatientName');
-
-                    if (form && recordId) {
-                        form.action = `reception/delete/${recordId}`;
+                    const isTelemedicine = button.dataset.appointmentFormat === 'telemedicine';
+                    form.reset();
+                    form.action = action;
+                    form.dataset.telemedicine = isTelemedicine ? '1' : '0';
+                    if (patientNameNode) patientNameNode.textContent = button.dataset.patientName || '—';
+                    if (title) title.textContent = isTelemedicine
+                        ? 'Отменить телемедицинский сеанс?'
+                        : 'Перенести запись в архив?';
+                    if (message) message.textContent = isTelemedicine
+                        ? 'Сеанс будет снят с расписания. Причина сохранится в журнале событий; история консультации не удаляется.'
+                        : 'Запись исчезнет из текущего списка регистратуры.';
+                    if (fields) fields.hidden = !isTelemedicine;
+                    if (reason) {
+                        reason.disabled = !isTelemedicine;
+                        reason.required = isTelemedicine;
+                        reason.setCustomValidity('');
                     }
+                    if (confirmed) {
+                        confirmed.disabled = !isTelemedicine;
+                        confirmed.required = isTelemedicine;
+                        confirmed.checked = false;
+                    }
+                    if (submit) submit.textContent = isTelemedicine ? 'Отменить сеанс' : 'Да, перенести';
+                });
 
-                    if (modalPatientName) {
-                        modalPatientName.textContent = patientName;
+                reason?.addEventListener('input', function () {
+                    reason.setCustomValidity('');
+                });
+
+                form?.addEventListener('submit', function (event) {
+                    if (form.dataset.telemedicine !== '1' || !reason) return;
+                    reason.value = reason.value.trim();
+                    if (reason.value.length < 5) {
+                        event.preventDefault();
+                        reason.setCustomValidity('Укажите причину удаления не короче 5 символов.');
+                        reason.reportValidity();
                     }
                 });
             }
@@ -2554,6 +2622,12 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </div>
 
+        @if(session('reception_archive_error'))
+            <div class="alert alert-danger" role="alert">
+                {{ session('reception_archive_error') }}
+            </div>
+        @endif
+
         <div class="reception-grid">
             <form class="reception-card reception-search" method="get" action="{{ $receptionPage['form_action'] }}">
                 <div class="reception-card-header">
@@ -3066,6 +3140,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                                     data-bs-target="#confirmArchiveModal"
                                                     data-record-id="{{ $receptionRow['id'] }}"
                                                     data-patient-name="{{ $receptionRow['patient_name'] }}"
+                                                    data-appointment-format="{{ $receptionRow['appointment_format'] ?? 'in_person' }}"
+                                                    data-delete-url="{{ route('doctors.reception.destroy', ['id' => $receptionRow['id']]) }}"
                                                     title="Перенести в архив">
                                                 <i class="bi bi-archive"></i>
                                             </button>
@@ -3261,10 +3337,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
 
                     <div class="modal-body">
-                        Вы действительно хотите перенести в архив запись пациента
-                        <strong id="archivePatientName">—</strong>?
-                        <br>
-                        Запись исчезнет из текущего списка регистратуры.
+                        <p class="mb-2">Пациент: <strong id="archivePatientName">—</strong></p>
+                        <p id="archiveMessage" class="mb-0">Запись исчезнет из текущего списка регистратуры.</p>
+                        <div class="archive-telemedicine-fields" id="archiveTelemedicineFields" hidden>
+                            <label class="form-label" for="archiveTelemedicineReason">Причина удаления сеанса *</label>
+                            <textarea id="archiveTelemedicineReason"
+                                      name="telemed_delete_reason"
+                                      class="form-control"
+                                      minlength="5"
+                                      maxlength="1000"
+                                      placeholder="Например: запись отменена по просьбе пациента"
+                                      disabled></textarea>
+                            <p class="archive-telemedicine-help">Не менее 5 и не более 1000 символов. Причина останется в журнале телемедицины.</p>
+                            <div class="form-check archive-telemedicine-check">
+                                <input class="form-check-input" id="archiveTelemedicineConfirmed"
+                                       type="checkbox" name="telemed_delete_confirmed" value="1" disabled>
+                                <label class="form-check-label" for="archiveTelemedicineConfirmed">
+                                    Подтверждаю отмену сеанса и сохранение причины в журнале
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -3272,7 +3364,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             Отмена
                         </button>
 
-                        <button type="submit" class="btn btn-danger rounded-3 fw-bold px-4">
+                        <button type="submit" id="archiveSubmit" class="btn btn-danger rounded-3 fw-bold px-4">
                             Да, перенести
                         </button>
                     </div>
