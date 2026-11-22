@@ -31,7 +31,6 @@ final class PatientPortalNotificationService
             return;
         }
 
-        // NORHNAIM_NOTIFICATION_CLINICS_V1: event is saved with clinic_id.
         // UUID keeps legacy behavior: each actual appointment change is a new notice.
         app(PatientPortalEventNotifier::class)->notifyOnce(
             (int) $record->patient_id,

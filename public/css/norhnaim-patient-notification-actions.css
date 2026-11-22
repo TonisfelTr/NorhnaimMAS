@@ -1,6 +1,4 @@
-/* NORHNAIM_NOTIFICATION_ACTIONS_V5
-   Scoped action buttons for patient notifications.
-   Does not change notification reading, clinic filtering or WS logic. */
+
 
 .patient-notifications-list .patient-notification-card__actions {
     display: flex;

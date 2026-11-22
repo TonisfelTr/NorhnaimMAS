@@ -12,13 +12,7 @@ use Illuminate\Support\Collection;
 /** Only clinics to which the current patient belongs can be selected. */
 final class PatientNotificationClinicScope
 {
-    /**
-     * NORHNAIM_NOTIFICATION_CLINICS_WITH_EVENTS_V1
-     * Only clinics with at least one notification of this authenticated user.
-     * Keep the active patient-clinic membership security boundary.
-     * Read and unread notifications both count; NULL clinic_id is available
-     * only in the global "Все клиники" list until safely attributed.
-     */
+    
     public function options(Patient $patient, User $user): Collection
     {
         $clinicIdsWithNotifications = $user->notifications()

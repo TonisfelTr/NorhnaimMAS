@@ -1,7 +1,4 @@
-/* NORHNAIM_NOTIFICATION_CLINIC_SEARCH_V1
- * Searchable enhancement for clinic notification select.
- * The original select and its GET form remain the no-JS fallback.
- */
+
 (() => {
     'use strict';
 

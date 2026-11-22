@@ -48,7 +48,6 @@ final class PatientPortalEventNotifier
                 return false;
             }
 
-            // NORHNAIM_NOTIFICATION_CLINICS_V1: clinic belongs to the originating event.
             $clinicId = app(PatientNotificationClinicResolver::class)
                 ->resolve($patientId, $eventKey, $clinicId);
 

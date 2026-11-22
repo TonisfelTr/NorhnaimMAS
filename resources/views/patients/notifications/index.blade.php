@@ -23,7 +23,6 @@
         <div class="alert alert-success" role="status">{{ session('status') }}</div>
     @endif
 
-    {{-- NORHNAIM_NOTIFICATION_CLINICS_V1 --}}
     @if($clinicOptions->isNotEmpty())
         <section class="patient-notifications-clinic-switcher" aria-label="Фильтр уведомлений по клинике">
             <div class="patient-notifications-clinic-copy">

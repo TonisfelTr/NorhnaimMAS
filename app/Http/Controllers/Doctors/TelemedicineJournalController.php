@@ -57,7 +57,6 @@ class TelemedicineJournalController extends Controller
         int $registryRecord,
         TelemedicineJournalService $journal
     ): RedirectResponse {
-        // NORHNAIM_RECEPTION_TELEMED_ARCHIVE_V1: keep reception navigation after cancellation.
         $fromReception = $request->routeIs('doctors.reception.destroy');
         $journal->authorize($request->user(), $patient);
         try {

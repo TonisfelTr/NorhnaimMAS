@@ -773,7 +773,6 @@
             line-height: 1.55;
         }
 
-        /* NORHNAIM_RECEPTION_TELEMED_ARCHIVE_V1: secure cancellation modal */
         .archive-modal .archive-telemedicine-fields[hidden] {
             display: none !important;
         }

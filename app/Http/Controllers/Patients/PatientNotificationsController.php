@@ -20,7 +20,6 @@ final class PatientNotificationsController extends Controller
     {
         $user = $this->patientUser($request);
         $patient = $user->patient()->firstOrFail();
-        // NORHNAIM_NOTIFICATION_CLINICS_V1: authorized patient memberships only.
         $clinicScope = app(PatientNotificationClinicScope::class);
         $clinicOptions = $clinicScope->options($patient, $user);
         $selectedClinicId = $clinicScope->selected($request, $clinicOptions);

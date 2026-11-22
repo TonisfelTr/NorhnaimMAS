@@ -1,7 +1,4 @@
-/* NORHNAIM_PATIENT_NOTIFICATIONS_WS_V1
- * Private Laravel Reverb channel, Pusher protocol v7, native WebSocket.
- * No extra npm dependencies; only aggregate counts are sent by the server.
- */
+
 (() => {
   'use strict';
 
@@ -9,7 +6,6 @@
   window.__norhnaimPatientNotificationsWsV1 = true;
 
   const configUrl = '/patient/notifications/realtime-config';
-  // NORHNAIM_NOTIFICATION_CLINICS_V1
   // Sidebar counts are GLOBAL. Tabs reflect the selected clinic.
   function clinicConfigUrl() {
     const uri = new URL(configUrl, location.origin);

@@ -1,4 +1,4 @@
-/* NORHNAIM_NOTIFICATION_CLINIC_SEARCH_V1 */
+
 .patient-notifications-clinic-switcher .ncs-select { position:relative; width:100%; min-width:0; font-size:13px; }
 .patient-notifications-clinic-switcher .ncs-select__native-hidden { display:none !important; }
 .patient-notifications-clinic-switcher .ncs-select__trigger { box-sizing:border-box; width:100%; min-height:42px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 13px; border:1px solid #cadbd9; background:#f8fbfa; color:#193c45; border-radius:10px; font:inherit; font-size:13px; cursor:pointer; text-align:left; }

@@ -39,7 +39,6 @@ final class PatientAppointmentReminderService
                 'У вас запланирован приём примерно через сутки. Уточните время в разделе «История обращений».',
                 '/patient/history',
                 'alarm',
-                // NORHNAIM_NOTIFICATION_CLINICS_V1
                 (int) $row->clinic_id
             )) {
                 ++$sent;
