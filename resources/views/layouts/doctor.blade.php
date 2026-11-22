@@ -221,9 +221,9 @@
                     @else
                         <li>
                             <a href="{{ route('doctors.prescriptions.index') }}"
-                               class="doctor-sidebar__link {{ request()->routeIs('doctors.prescriptions.*') ? 'is-active' : '' }}"
+                               class="doctor-sidebar__link {{ (request()->routeIs('doctors.prescriptions.*') && !request()->routeIs('doctors.prescriptions.base')) ? 'is-active' : '' }}"
                                title="Выписки" aria-label="Выписки"
-                               @if(request()->routeIs('doctors.prescriptions.*')) aria-current="page" @endif>
+                               @if((request()->routeIs('doctors.prescriptions.*') && !request()->routeIs('doctors.prescriptions.base'))) aria-current="page" @endif>
                                 <span class="doctor-sidebar__link-icon"><i class="bi bi-file-earmark-medical-fill" aria-hidden="true"></i></span>
                                 <span class="doctor-sidebar__link-text">Выписки</span>
                                 <span class="doctor-sidebar__link-active-dot" aria-hidden="true"></span>
@@ -233,6 +233,27 @@
                 </ul>
             </nav>
         </div>
+
+        @if(!session(\App\Http\Controllers\Doctors\HospitalImpersonationController::SESSION_KEY)
+            && auth()->user()?->doctor?->clinic?->clinic_type !== \App\Models\Clinic::TYPE_INPATIENT)
+        <div class="doctor-sidebar__group">
+            <div class="doctor-sidebar__heading"><span>Справочники</span></div>
+            <nav aria-label="Справочники">
+                <ul class="doctor-sidebar__nav">
+                    <li>
+                        <a href="{{ route('doctors.prescriptions.base') }}"
+                           class="doctor-sidebar__link {{ request()->routeIs('doctors.prescriptions.base') ? 'is-active' : '' }}"
+                           title="База препаратов" aria-label="База препаратов"
+                           @if(request()->routeIs('doctors.prescriptions.base')) aria-current="page" @endif>
+                            <span class="doctor-sidebar__link-icon"><i class="bi bi-capsule-pill" aria-hidden="true"></i></span>
+                            <span class="doctor-sidebar__link-text">База препаратов</span>
+                            <span class="doctor-sidebar__link-active-dot" aria-hidden="true"></span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        @endif
 
         @if(\App\Http\Middleware\ClinicSettingsAccessMiddleware::allows(auth()->user()))
         <div class="doctor-sidebar__group">

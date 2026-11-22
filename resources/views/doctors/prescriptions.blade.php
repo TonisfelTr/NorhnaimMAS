@@ -2922,7 +2922,6 @@
             'doctors.analyses.assignments*'
         );
 
-        $isReferenceSection = request()->routeIs('doctors.prescriptions.base');
     @endphp
 
     <nav class="navbar navbar-expand-lg rx-topbar">
@@ -3253,38 +3252,7 @@
                         </div>
                     </li>
 
-                    <li class="nav-item dropdown rx-nav__dropdown">
-                        <a
-                            class="nav-link rx-nav__link dropdown-toggle {{ $isReferenceSection ? 'active' : '' }}"
-                            href="#"
-                            role="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            <span>
-                                <i class="bi bi-journal-bookmark me-2"></i>
-                                Справочники
-                            </span>
-                        </a>
 
-                        <div class="dropdown-menu rx-nav__dropdown-menu">
-                            <a
-                                class="rx-nav__dropdown-item {{ request()->routeIs('doctors.prescriptions.base') ? 'active' : '' }}"
-                                href="{{ route('doctors.prescriptions.base') }}"
-                            >
-                                <span class="rx-nav__dropdown-icon">
-                                    <i class="bi bi-capsule-pill"></i>
-                                </span>
-
-                                <span class="rx-nav__dropdown-copy">
-                                    <span class="rx-nav__dropdown-title">База препаратов</span>
-                                    <span class="rx-nav__dropdown-hint">
-                                        Формы, дозировки, показания и противопоказания
-                                    </span>
-                                </span>
-                            </a>
-                        </div>
-                    </li>
                 </ul>
 
                 @if (!is_route('doctors.referrals.hospital.planned') && !is_route('doctors.referrals.hospital.emergency'))
