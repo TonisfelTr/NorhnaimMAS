@@ -1149,7 +1149,7 @@
                                                 <span>
                                                     <strong>Готов к телемедицине</strong>
                                                     <small>
-                                                        Разрешить использование врача в телемедицинских сценариях.
+                                                        Пациенты смогут записываться к вам на онлайн-приём, если клиника также разрешает телемедицину.
                                                     </small>
                                                 </span>
 
@@ -1169,7 +1169,7 @@
                                             <label class="cab-switch" for="telemedicineSmsEnabled">
                                                 <span>
                                                     <strong>Присылать SMS о видеосеансах</strong>
-                                                    <small>Необязательно. Уведомления в панели врача остаются включёнными.</small>
+                                                    <small>SMS будут приходить на указанный ниже личный номер. Уведомления в панели врача остаются включёнными независимо от этой настройки.</small>
                                                 </span>
                                                 <span class="form-check form-switch m-0">
                                                     <input id="telemedicineSmsEnabled" class="form-check-input" type="checkbox"
