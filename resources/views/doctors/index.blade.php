@@ -147,7 +147,6 @@
         }
         .nh-workbench__institution small { color: #5e7f8e; font-size: 11px; font-weight: 600; }
 
-
         .nh-workbench__grid {
             display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(290px, 1fr);
             gap: 18px; align-items: stretch;
@@ -393,6 +392,8 @@
 
     <div class="nh-workbench">
         <div class="nh-workbench__container">
+            
+            @include('doctors.partials.telemedicine_notification_banner')
             @if(session('success'))
                 <div class="alert alert-success" role="status">{{ session('success') }}</div>
             @endif
@@ -438,10 +439,6 @@
                     <i class="bi {{ $workbenchMode === 'inpatient' ? 'bi-hospital' : 'bi-person-lines-fill' }}"></i>
                 </span>
             </header>
-
-
-
-
 
             @if($workbenchMode === 'outpatient')
                 @include('doctors.partials.workbench.outpatient-dashboard')

@@ -317,6 +317,17 @@ final class TelemedicineProviderSessionService
                     'meeting' => $session->public_id, 'start' => $window['start'],
                 ]);
         }
+        $doctorShortUrl = null;
+        $patientShortUrl = null;
+        if ($ready && $reason === null && $window) {
+            $shortener = app(\App\Services\TelemedicineShortLinkService::class);
+            $patientShortUrl = $shortener->url((string) $session->public_id,
+                'patient', (int) $window['start']);
+            // A manager may copy the doctor link for the assigned specialist.
+            // Opening it still requires the specialist's authenticated account.
+            $doctorShortUrl = $shortener->url((string) $session->public_id,
+                'doctor', (int) $window['start']);
+        }
         $routeArgs = ['patient' => $patient->getKey(), 'recordId' => $record->getKey()];
         return [
             'record_id' => (int) $record->getKey(), 'clinic_name' => (string) $clinic->name,
@@ -333,6 +344,8 @@ final class TelemedicineProviderSessionService
             'can_doctor_join' => $mayJoin && $this->isAssignedDoctor($user, $record),
             'assigned_doctor_user' => $this->isAssignedDoctor($user, $record),
             'patient_invitation_url' => $patientUrl,
+            'doctor_short_url' => $doctorShortUrl,
+            'patient_short_url' => $patientShortUrl,
             'prepare_url' => route('doctors.telemedicine-session.prepare', $routeArgs),
             'recover_url' => route('doctors.telemedicine-session.recover', $routeArgs),
             'doctor_join_url' => route('doctors.telemedicine-session.doctor-join', $routeArgs),

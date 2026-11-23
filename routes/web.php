@@ -180,6 +180,10 @@ Route::middleware(['auth', RoleMiddleware::class . ':patients'])
         // Тестирования пациента: врачебные назначения и самостоятельный каталог.
         Route::get('/tests', [PatientTestsController::class, 'index'])->name('tests.index');
         Route::get('/telemedicine', [\App\Http\Controllers\Patients\PatientTelemedicineController::class, 'index'])->name('telemedicine.index');
+        Route::get('/telemedicine/short/{meeting}/{stamp}',
+            [\App\Http\Controllers\TelemedicineShortSessionController::class, 'patient'])
+            ->whereUuid('meeting')->where('stamp', '[0-9a-f]{32}')
+            ->middleware('throttle:20,1')->name('telemedicine.short');
         Route::get('/history', [\App\Http\Controllers\Patients\PatientVisitHistoryController::class, 'index'])->name('history.index');
         Route::get('/diagnoses', [\App\Http\Controllers\Patients\PatientDiagnosesController::class, 'index'])->name('diagnoses.index');
         Route::get('/notifications', [\App\Http\Controllers\Patients\PatientNotificationsController::class, 'index'])->name('notifications.index');
@@ -319,6 +323,13 @@ Route::middleware(['auth', DoctorOrHospitalAdmin::class])
     ->as('doctors.')
     ->group(function (): void {
         Route::get('/', [DoctorsIndexController::class, 'index'])->name('main');
+        Route::get('/telemedicine-reminders',
+            [\App\Http\Controllers\Doctors\TelemedicineReminderInboxController::class, 'index'])
+            ->name('telemedicine-reminders.index');
+        Route::post('/telemedicine-reminders/{id}/read',
+            [\App\Http\Controllers\Doctors\TelemedicineReminderInboxController::class, 'markRead'])
+            ->whereUuid('id')->middleware('throttle:60,1')
+            ->name('telemedicine-reminders.read');
         Route::get('/patients/{patient:id}', [MedicalCardController::class, 'index'])->whereNumber('patient')->name('patients.medical_card');
         // A doctor's clinic is determined server-side; client cannot choose it.
         Route::get('/patients/{patient:id}/diagnoses/search',
@@ -835,6 +846,10 @@ Route::middleware('auth')->prefix('doctors')->as('doctors.')->group(function ():
 
     Route::middleware([DoctorHardLockMiddleware::class, 'throttle:30,1'])->group(function (): void {
         $telemedicineConnectionPath = 'patients/{patient}/telemedicine-connection/{recordId}';
+        Route::get('telemedicine/short/{meeting}/{stamp}',
+            [\App\Http\Controllers\TelemedicineShortSessionController::class, 'doctor'])
+            ->whereUuid('meeting')->where('stamp', '[0-9a-f]{32}')
+            ->name('telemedicine-session.short');
 
         Route::get($telemedicineConnectionPath, [TelemedicineProviderSessionController::class, 'show'])
             ->whereNumber(['patient', 'recordId'])

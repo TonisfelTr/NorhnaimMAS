@@ -86,10 +86,22 @@
         <div class="ctm-grid">
             <section class="ctm-card">
                 <h2>Вход врача</h2>
+                
+                @if(!empty($doctor_short_url))
+                    <label class="ctm-label" for="ctm-doctor-short-url">Короткая ссылка врача (clck.ru)</label>
+                    <input class="ctm-input ctm-link" id="ctm-doctor-short-url" type="text" readonly
+                           value="{{ $doctor_short_url }}" autocomplete="off" spellcheck="false">
+                    <p class="ctm-muted">Открыть может только назначенный врач после входа в Норхнейм. Подключение доступно в назначенное время.</p>
+                @endif
                 @if($assigned_doctor_user)
-                    <form method="post" action="{{ $doctor_join_url }}">@csrf
-                        <button class="ctm-button" type="submit" @disabled(!$can_doctor_join)>Войти в консультацию</button>
-                    </form>
+                    
+                    @if($can_doctor_join && !empty($doctor_short_url))
+                        <a class="ctm-button" href="{{ $doctor_short_url }}" rel="noreferrer noopener">Войти по короткой ссылке</a>
+                    @else
+                        <form method="post" action="{{ $doctor_join_url }}">@csrf
+                            <button class="ctm-button" type="submit" @disabled(!$can_doctor_join)>Войти в консультацию</button>
+                        </form>
+                    @endif
                     @if(!$can_doctor_join)<p class="ctm-muted">Кнопка станет доступна в окне подключения. Обновите страницу ближе к началу приёма.</p>@endif
                 @else
                     <p>Вход под ролью врача доступен пользователю специалиста, назначенного на этот приём.</p>
@@ -101,9 +113,17 @@
             <section class="ctm-card">
                 <h2>Приглашение пациента</h2>
                 @if($patient_invitation_url)
-                    <label class="ctm-label" for="ctm-patient-link">Скопируйте ссылку и передайте пациенту</label>
-                    <input class="ctm-input ctm-link" id="ctm-patient-link" type="text" readonly value="{{ $patient_invitation_url }}" autocomplete="off" spellcheck="false">
-                    <p class="ctm-muted">Ссылка действует для одного приёма. После переноса времени выдайте новое приглашение. Автоматическая отправка не выполняется.</p>
+                    
+                    <label class="ctm-label" for="ctm-patient-link">
+                        {{ $patient_short_url ? 'Короткая ссылка пациента (clck.ru)' : 'Приглашение пациента (clck.ru временно недоступен)' }}
+                    </label>
+                    <input class="ctm-input ctm-link" id="ctm-patient-link" type="text" readonly value="{{ $patient_short_url ?: $patient_invitation_url }}" autocomplete="off" spellcheck="false">
+                    
+                    @if($patient_short_url)
+                        <p class="ctm-muted">Пациент войдёт через свой личный кабинет. После переноса времени нужна новая ссылка. Секретный WebRTC-токен в clck.ru не передаётся.</p>
+                    @else
+                        <p class="ctm-muted">Короткая ссылка требует публичного HTTPS APP_URL и доступного clck.ru. Пока показано обычное защищённое приглашение (не переданное в сокращатель).</p>
+                    @endif
                 @endif
             </section>
         </div>

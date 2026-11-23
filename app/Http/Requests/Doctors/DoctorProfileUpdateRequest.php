@@ -39,6 +39,7 @@ final class DoctorProfileUpdateRequest extends FormRequest
             'snils' => $snils,
             'ready_for_telemedicine' =>
                 $this->boolean('ready_for_telemedicine'),
+            'telemedicine_sms_enabled' => $this->boolean('telemedicine_sms_enabled'),
         ]);
     }
 
@@ -124,6 +125,13 @@ final class DoctorProfileUpdateRequest extends FormRequest
             'ready_for_telemedicine' => [
                 'required',
                 'boolean',
+            ],
+
+            'telemedicine_sms_enabled' => ['required', 'boolean'],
+            'telemedicine_sms_phone' => [
+                'required_if:telemedicine_sms_enabled,1',
+                'nullable', 'string', 'max:32',
+                'regex:/^\+[1-9][0-9]{7,14}$/',
             ],
         ];
     }

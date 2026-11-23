@@ -178,6 +178,24 @@
                             <span class="doctor-sidebar__link-active-dot" aria-hidden="true"></span>
                         </a>
                     </li>
+                    
+                    @if(auth()->user()?->hasRole('doctors'))
+                        @php
+                            $tmrnUnread = \Illuminate\Support\Facades\Schema::hasTable('notifications')
+                                ? auth()->user()->unreadNotifications()
+                                    ->where('type', \App\Notifications\DoctorTelemedicineReminderNotification::class)
+                                    ->count() : 0;
+                        @endphp
+                        <li>
+                            <a href="{{ route('doctors.telemedicine-reminders.index') }}"
+                               class="doctor-sidebar__link {{ request()->routeIs('doctors.telemedicine-reminders.*') ? 'is-active' : '' }}"
+                               title="Напоминания о видеосеансах">
+                                <span class="doctor-sidebar__link-icon"><i class="bi bi-bell" aria-hidden="true"></i></span>
+                                <span class="doctor-sidebar__link-text">Видеосеансы</span>
+                                @if($tmrnUnread > 0)<span class="badge bg-danger ms-auto">{{ $tmrnUnread }}</span>@endif
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </nav>
         </div>

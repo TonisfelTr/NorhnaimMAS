@@ -1164,6 +1164,29 @@
                                             </label>
                                         </div>
 
+                                        <div class="cab-col-6">
+                                            <input type="hidden" name="telemedicine_sms_enabled" value="0">
+                                            <label class="cab-switch" for="telemedicineSmsEnabled">
+                                                <span>
+                                                    <strong>Присылать SMS о видеосеансах</strong>
+                                                    <small>Необязательно. Уведомления в панели врача остаются включёнными.</small>
+                                                </span>
+                                                <span class="form-check form-switch m-0">
+                                                    <input id="telemedicineSmsEnabled" class="form-check-input" type="checkbox"
+                                                           name="telemedicine_sms_enabled" value="1"
+                                                           @checked(old('telemedicine_sms_enabled', $doctor->telemedicine_sms_enabled ?? false))>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="cab-field cab-col-6">
+                                            <label for="telemedicineSmsPhone">Личный мобильный для SMS</label>
+                                            <input id="telemedicineSmsPhone" name="telemedicine_sms_phone"
+                                                   type="tel" class="form-control" maxlength="32"
+                                                   autocomplete="tel" placeholder="+79991234567"
+                                                   value="{{ old('telemedicine_sms_phone', $doctor->telemedicine_sms_phone ?? '') }}">
+                                            <div class="cab-field__hint">Только международный формат, например +79991234567. Телефон кабинета не используется.</div>
+                                        </div>
+
                                         <div class="cab-field cab-col-12">
                                             <label for="profileAbout">О себе</label>
                                             <textarea id="profileAbout"

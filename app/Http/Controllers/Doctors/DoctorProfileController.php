@@ -116,8 +116,6 @@ public function index(Request $request): View
     );
 }
 
-
-
 public function update(
     \App\Http\Requests\Doctors\DoctorProfileUpdateRequest $request
 ): RedirectResponse {
@@ -162,6 +160,9 @@ public function update(
 
         'ready_for_telemedicine' =>
             (bool) $data['ready_for_telemedicine'],
+
+        'telemedicine_sms_enabled' => (bool) ($data['telemedicine_sms_enabled'] ?? false),
+        'telemedicine_sms_phone' => trim((string) ($data['telemedicine_sms_phone'] ?? '')) ?: null,
     ];
 
     /*
@@ -990,8 +991,6 @@ private function nullableText(
         ? $value
         : null;
 }
-
-
 
     private function doctor(
         Request $request,

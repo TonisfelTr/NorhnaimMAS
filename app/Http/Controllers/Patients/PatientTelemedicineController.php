@@ -65,6 +65,7 @@ final class PatientTelemedicineController extends Controller
                 ->where('patient_id', $patient->getKey())
                 ->get([
                     'registry_record_id',
+                    'public_id',
                     'patient_id',
                     'clinic_id',
                     'doctor_id',
@@ -300,6 +301,15 @@ final class PatientTelemedicineController extends Controller
                 default => 'Видеосвязь клиники',
             };
 
+            // clck.ru gets only a protected Norhnaim URL; no WebRTC bearer token.
+            $shortJoinUrl = null;
+            if ($session && $session->status === 'ready'
+                && $clinicTelemedicineEnabled && $doctorIsValid
+                && !$cancelled && !$isHistory && $startEpoch !== null) {
+                $shortJoinUrl = app(\App\Services\TelemedicineShortLinkService::class)
+                    ->url((string) $session->public_id, 'patient', (int) $startEpoch);
+            }
+
             return [
                 'id' => $recordId,
                 'date' => $time['date'] ?? 'Дата не определена',
@@ -315,6 +325,7 @@ final class PatientTelemedicineController extends Controller
                 'status_type' => $statusType,
                 'status_hint' => $statusHint,
                 'can_join' => $canJoin,
+                'short_join_url' => $shortJoinUrl,
                 'join_opens_at' => $session?->status === 'ready'
                     && $startEpoch !== null
                     && $opensAt !== null

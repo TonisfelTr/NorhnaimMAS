@@ -351,7 +351,15 @@
 
                             <div class="ptm-next__actions">
                                 <span class="ptm-provider"><i class="bi bi-camera-video me-1"></i>{{ $nearestUpcoming['provider_label'] }}</span>
-                                @if($nearestUpcoming['can_join'])
+                                
+                                @if(!empty($nearestUpcoming['short_join_url']))
+                                    <a href="{{ $nearestUpcoming['short_join_url'] }}" rel="noreferrer noopener" class="ptm-provider">Ссылка пациента: {{ $nearestUpcoming['short_join_url'] }}</a>
+                                @endif
+                                @if($nearestUpcoming['can_join'] && !empty($nearestUpcoming['short_join_url']))
+                                    <a class="ptm-join" href="{{ $nearestUpcoming['short_join_url'] }}" rel="noreferrer noopener">
+                                        <i class="bi bi-camera-video"></i> Войти в сеанс
+                                    </a>
+                                @elseif($nearestUpcoming['can_join'])
                                     <form method="POST" action="{{ route('patients.telemedicine.join', ['record' => $nearestUpcoming['id']]) }}">
                                         @csrf
                                         <button type="submit" class="ptm-join">
@@ -391,7 +399,12 @@
                                         </div>
                                         <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
                                             <span class="ptm-status is-{{ $appointment['status_type'] }}">{{ $appointment['status'] }}</span>
-                                            @if($appointment['can_join'])
+                                            
+                                    @if($appointment['can_join'] && !empty($appointment['short_join_url']))
+                                        <a href="{{ $appointment['short_join_url'] }}" class="ptm-join" rel="noreferrer noopener">
+                                            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Войти в сеанс
+                                        </a>
+                                    @elseif($appointment['can_join'])
                                                 <form method="POST" action="{{ route('patients.telemedicine.join', ['record' => $appointment['id']]) }}">
                                                     @csrf
                                                     <button type="submit" class="ptm-join" style="min-height:32px;padding:7px 10px;font-size:10px;">Подключиться</button>

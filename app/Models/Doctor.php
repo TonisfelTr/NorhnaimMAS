@@ -22,6 +22,8 @@ class Doctor extends Model implements HasMedia
         'accreditation_valid_until' => 'date',
         'professional_verified_at' => 'datetime',
         'professional_verification_payload' => 'array',
+        'telemedicine_sms_phone' => 'encrypted',
+        'telemedicine_sms_enabled' => 'boolean',
     ];
 
     protected $appends = ['photo_url', 'experience'];
@@ -157,7 +159,6 @@ class Doctor extends Model implements HasMedia
         $media = $this->getFirstMedia('photos');
         return $media ? $media->getUrl('webp') : asset('assets/images/backgrounds/feedback_placeholder.webp');
     }
-
 
     public function getInitialsAttribute(): string
     {
