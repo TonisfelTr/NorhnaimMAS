@@ -1,31 +1,47 @@
-{{-- Place inside the EXISTING avatar upload <form>. Do not create a second form. --}}
-<div class="nh-avatar-upload" data-avatar-upload data-max-bytes="524288">
-    <div class="nh-avatar-upload__preview">
-        <img class="nh-avatar-upload__image {{ empty($avatarUrl) ? 'd-none' : '' }}"
-             data-avatar-preview-image
-             src="{{ $avatarUrl ?: '' }}"
-             alt="Предпросмотр фотографии профиля">
-        <span class="nh-avatar-upload__initials {{ !empty($avatarUrl) ? 'd-none' : '' }}"
-              data-avatar-preview-initials>{{ $avatarInitials ?? '' }}</span>
-        <span class="nh-avatar-upload__preview-check" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
-    </div>
+{{-- Этот partial располагается внутри существующей формы загрузки аватара. --}}
+<div class="nh-avatar-v2" data-avatar-uploader data-max-size="5242880">
+    <label class="nh-avatar-v2__zone" for="patientProfileAvatar" data-avatar-dropzone>
+        <input
+            id="patientProfileAvatar"
+            class="nh-avatar-v2__input"
+            type="file"
+            name="avatar"
+            accept="image/jpeg,image/png,image/webp"
+            aria-describedby="patientAvatarV2Hint patientAvatarV2Status"
+            data-avatar-input
+            required
+        >
 
-    <label class="nh-avatar-upload__zone" data-avatar-dropzone>
-        <input class="nh-avatar-upload__input"
-               type="file"
-               name="{{ $avatarFieldName ?? 'avatar' }}"
-               accept="image/jpeg,image/png,image/webp"
-               data-avatar-file
-               aria-describedby="avatarUploadHelp avatarUploadStatus">
-        <span class="nh-avatar-upload__zone-icon" aria-hidden="true"><i class="bi bi-cloud-arrow-up"></i></span>
-        <span class="nh-avatar-upload__zone-title">Перетащите фотографию сюда</span>
-        <span class="nh-avatar-upload__zone-subtitle">или <span class="nh-avatar-upload__zone-link">выберите файл</span></span>
-        <span class="nh-avatar-upload__formats" id="avatarUploadHelp">JPG, PNG, WEBP · до 512 КБ</span>
+        <span class="nh-avatar-v2__preview" aria-hidden="true">
+            <img
+                class="nh-avatar-v2__photo {{ $avatarUrl ? '' : 'd-none' }}"
+                src="{{ $avatarUrl ?: '' }}"
+                alt=""
+                data-avatar-photo
+            >
+            <span class="nh-avatar-v2__initials {{ $avatarUrl ? 'd-none' : '' }}" data-avatar-initials>
+                {{ $initials }}
+            </span>
+            <span class="nh-avatar-v2__camera"><i class="bi bi-camera-fill"></i></span>
+        </span>
+
+        <span class="nh-avatar-v2__title">{{ $avatarUrl ? 'Заменить фотографию' : 'Добавить фотографию' }}</span>
+        <span class="nh-avatar-v2__subtitle">
+            или <span class="nh-avatar-v2__link">нажмите для выбора</span>
+        </span>
+        <span class="nh-avatar-v2__hint" id="patientAvatarV2Hint">JPG, PNG или WEBP · до 5 МБ</span>
     </label>
 
-    <div class="nh-avatar-upload__status" id="avatarUploadStatus" data-avatar-status aria-live="polite">Файл не выбран</div>
-    <button class="nh-avatar-upload__submit" data-avatar-submit type="submit" disabled>
+    <p class="nh-avatar-v2__status" id="patientAvatarV2Status" data-avatar-status role="status" aria-live="polite">
+        @if($avatarUrl)
+            Текущая фотография сохранена. Для замены выберите новую.
+        @else
+            Выберите фотографию для загрузки.
+        @endif
+    </p>
+
+    <button class="nh-avatar-v2__save" data-avatar-save type="submit" disabled>
         <i class="bi bi-check2-circle" aria-hidden="true"></i>
-        Сохранить фотографию
+        <span data-avatar-save-text>{{ $avatarUrl ? 'Сохранить замену' : 'Сохранить фотографию' }}</span>
     </button>
 </div>

@@ -3,13 +3,9 @@
 @section('title', 'Профиль пациента')
 
 @section('assets')
-    <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone.css') }}?v=2">
-    <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=2" defer></script>
-
-    <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone.css') }}?v=2">
-    <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=2" defer></script>
-    <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone-v2.css') }}?v=2">
-    <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=2" defer></script>@endsection
+    <link rel="stylesheet" href="{{ asset('css/patient-avatar-dropzone.css') }}?v=20261123-avatar3">
+    <script src="{{ asset('js/patient-avatar-dropzone.js') }}?v=20261123-avatar3" defer></script>
+@endsection
 
 @section('content')
     <div class="patient-page patient-profile-page">
