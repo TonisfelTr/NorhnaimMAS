@@ -3,7 +3,7 @@
 @section('title', 'Мои диагнозы')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/patient-diagnoses.css') }}?v=20261123-context2">
+<link rel="stylesheet" href="{{ asset('css/patient-diagnoses.css') }}?v=20261123-layout3">
 <script defer src="{{ asset('js/patient-diagnoses-tabs.js') }}?v=20261123-tabs1"></script>
 <div class="patient-page patient-diagnoses">
     <header class="patient-page-header patient-diagnoses__heading">
@@ -59,17 +59,6 @@
                 <i class="bi bi-clipboard2-pulse" aria-hidden="true"></i>
                 <span>Основной диагноз</span>
             </a>
-            <a id="patient-diagnoses-tab-history"
-               class="patient-diagnoses__tab {{ $diagnosesActiveTab === 'history' ? 'is-active' : '' }}"
-               href="{{ route('patients.diagnoses.index', ['clinic_id' => $clinicId, 'tab' => 'history']) }}"
-               role="tab" data-diagnoses-tab="history"
-               aria-controls="patient-diagnoses-panel-history"
-               aria-selected="{{ $diagnosesActiveTab === 'history' ? 'true' : 'false' }}"
-               tabindex="{{ $diagnosesActiveTab === 'history' ? '0' : '-1' }}">
-                <i class="bi bi-clock-history" aria-hidden="true"></i>
-                <span>История диагнозов</span>
-                <span class="patient-diagnoses__tab-count">{{ $history->total() }}</span>
-            </a>
             <a id="patient-diagnoses-tab-visits"
                class="patient-diagnoses__tab {{ $diagnosesActiveTab === 'visits' ? 'is-active' : '' }}"
                href="{{ route('patients.diagnoses.index', ['clinic_id' => $clinicId, 'tab' => 'visits']) }}"
@@ -81,7 +70,31 @@
                 <span>Диагнозы по приёмам</span>
                 <span class="patient-diagnoses__tab-count">{{ $visitDiagnoses->total() }}</span>
             </a>
+            <a id="patient-diagnoses-tab-history"
+               class="patient-diagnoses__tab {{ $diagnosesActiveTab === 'history' ? 'is-active' : '' }}"
+               href="{{ route('patients.diagnoses.index', ['clinic_id' => $clinicId, 'tab' => 'history']) }}"
+               role="tab" data-diagnoses-tab="history"
+               aria-controls="patient-diagnoses-panel-history"
+               aria-selected="{{ $diagnosesActiveTab === 'history' ? 'true' : 'false' }}"
+               tabindex="{{ $diagnosesActiveTab === 'history' ? '0' : '-1' }}">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                <span>История диагнозов</span>
+                <span class="patient-diagnoses__tab-count">{{ $history->total() }}</span>
+            </a>
         </nav>
+
+        <div class="patient-diagnoses__contextbar" aria-label="Текущий диагноз и клиника">
+            <span class="patient-diagnoses__context-diagnosis" title="Основной диагноз выбранной клиники">
+                <i class="bi bi-clipboard2-pulse" aria-hidden="true"></i>
+                <span>Основной</span>
+                <strong>{{ $current?->diagnose?->code ?: '—' }}</strong>
+            </span>
+            <span class="patient-diagnoses__context-rule" aria-hidden="true"></span>
+            <span class="patient-diagnoses__context-clinic" title="{{ $selectedClinic?->name }}">
+                <i class="bi bi-hospital" aria-hidden="true"></i>
+                <span>{{ $selectedClinic?->name }}</span>
+            </span>
+        </div>
 
         <section class="patient-diagnoses__section patient-diagnoses__panel"
                  id="patient-diagnoses-panel-current" role="tabpanel"
@@ -89,13 +102,6 @@
                  @if($diagnosesActiveTab !== 'current') hidden @endif>
             <div class="patient-diagnoses__section-head">
                 <div>
-                    <div class="patient-diagnoses__clinic-context">
-                        @if($current?->diagnose?->code)
-                            <span class="patient-diagnoses__clinic-context-code">{{ $current->diagnose->code }}</span>
-                            <span class="patient-diagnoses__clinic-context-divider" aria-hidden="true">·</span>
-                        @endif
-                        <span class="patient-diagnoses__clinic-context-name">{{ $selectedClinic?->name }}</span>
-                    </div>
                     <h2 id="patient-diagnoses-current-title">Основной диагноз клиники</h2>
                 </div>
             </div>
@@ -120,18 +126,55 @@
         </section>
 
         <section class="patient-diagnoses__section patient-diagnoses__panel"
+                 id="patient-diagnoses-panel-visits" role="tabpanel"
+                 aria-labelledby="patient-diagnoses-tab-visits" tabindex="0"
+                 @if($diagnosesActiveTab !== 'visits') hidden @endif>
+            <div class="patient-diagnoses__section-head">
+                <div>
+                    <h2 id="patient-diagnoses-visits-title">Диагнозы по завершённым приёмам</h2>
+                </div>
+                <span class="patient-diagnoses__total">{{ $visitDiagnoses->total() }}</span>
+            </div>
+            <div class="patient-diagnoses__list">
+                @forelse($visitDiagnoses as $visit)
+                    <article class="patient-diagnoses__entry patient-diagnoses__entry--visit">
+                        <div class="patient-diagnoses__entry-main">
+                            @if($visit['code'] !== '')<span class="patient-diagnoses__code">{{ $visit['code'] }}</span>@endif
+                            <h3>{{ $visit['title'] !== '' ? $visit['title'] : 'Диагноз в протоколе приёма' }}</h3>
+                            <div class="patient-diagnoses__meta">
+                                <span><i class="bi bi-calendar3" aria-hidden="true"></i> {{ $visit['date'] }}</span>
+                                <span><i class="bi bi-person-badge" aria-hidden="true"></i> {{ $visit['doctor'] }}</span>
+                            </div>
+                        </div>
+                        <span class="patient-diagnoses__tag patient-diagnoses__tag--secondary">Протокол приёма</span>
+                    </article>
+                @empty
+                    <div class="patient-diagnoses__visits-empty" role="status">
+                        <span class="patient-diagnoses__visits-empty-icon" aria-hidden="true">
+                            <i class="bi bi-journal-medical"></i>
+                        </span>
+                        <div class="patient-diagnoses__visits-empty-content">
+                            <h3>Пока нет диагнозов по завершённым приёмам</h3>
+                            <p>Когда врач завершит консультацию и сохранит диагноз в протоколе, он появится здесь.</p>
+                        </div>
+                        <a class="patient-diagnoses__visits-empty-link"
+                           href="{{ route('patients.history.index', ['clinic_id' => $clinicId]) }}">
+                            История обращений <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                @endforelse
+            </div>
+            @if($visitDiagnoses->hasPages())
+                <div class="patient-diagnoses__pagination">{{ $visitDiagnoses->appends(['tab' => 'visits'])->links() }}</div>
+            @endif
+        </section>
+
+        <section class="patient-diagnoses__section patient-diagnoses__panel"
                  id="patient-diagnoses-panel-history" role="tabpanel"
                  aria-labelledby="patient-diagnoses-tab-history" tabindex="0"
                  @if($diagnosesActiveTab !== 'history') hidden @endif>
             <div class="patient-diagnoses__section-head">
                 <div>
-                    <div class="patient-diagnoses__clinic-context">
-                        @if($current?->diagnose?->code)
-                            <span class="patient-diagnoses__clinic-context-code">{{ $current->diagnose->code }}</span>
-                            <span class="patient-diagnoses__clinic-context-divider" aria-hidden="true">·</span>
-                        @endif
-                        <span class="patient-diagnoses__clinic-context-name">{{ $selectedClinic?->name }}</span>
-                    </div>
                     <h2 id="patient-diagnoses-history-title">История установленных диагнозов</h2>
                 </div>
                 <span class="patient-diagnoses__total">{{ $history->total() }}</span>
@@ -157,45 +200,6 @@
             </div>
             @if($history->hasPages())
                 <div class="patient-diagnoses__pagination">{{ $history->appends(['tab' => 'history'])->links() }}</div>
-            @endif
-        </section>
-
-        <section class="patient-diagnoses__section patient-diagnoses__panel"
-                 id="patient-diagnoses-panel-visits" role="tabpanel"
-                 aria-labelledby="patient-diagnoses-tab-visits" tabindex="0"
-                 @if($diagnosesActiveTab !== 'visits') hidden @endif>
-            <div class="patient-diagnoses__section-head">
-                <div>
-                    <div class="patient-diagnoses__clinic-context">
-                        @if($current?->diagnose?->code)
-                            <span class="patient-diagnoses__clinic-context-code">{{ $current->diagnose->code }}</span>
-                            <span class="patient-diagnoses__clinic-context-divider" aria-hidden="true">·</span>
-                        @endif
-                        <span class="patient-diagnoses__clinic-context-name">{{ $selectedClinic?->name }}</span>
-                    </div>
-                    <h2 id="patient-diagnoses-visits-title">Диагнозы по завершённым приёмам</h2>
-                </div>
-                <span class="patient-diagnoses__total">{{ $visitDiagnoses->total() }}</span>
-            </div>
-            <div class="patient-diagnoses__list">
-                @forelse($visitDiagnoses as $visit)
-                    <article class="patient-diagnoses__entry">
-                        <div class="patient-diagnoses__entry-main">
-                            @if($visit['code'] !== '')<span class="patient-diagnoses__code">{{ $visit['code'] }}</span>@endif
-                            <h3>{{ $visit['title'] !== '' ? $visit['title'] : 'Диагноз в протоколе приёма' }}</h3>
-                            <div class="patient-diagnoses__meta">
-                                <span><i class="bi bi-calendar3" aria-hidden="true"></i> {{ $visit['date'] }}</span>
-                                <span><i class="bi bi-person-badge" aria-hidden="true"></i> {{ $visit['doctor'] }}</span>
-                            </div>
-                        </div>
-                        <span class="patient-diagnoses__tag patient-diagnoses__tag--secondary">Протокол приёма</span>
-                    </article>
-                @empty
-                    <p class="patient-diagnoses__muted">Диагнозов в завершённых протоколах этой клиники пока нет.</p>
-                @endforelse
-            </div>
-            @if($visitDiagnoses->hasPages())
-                <div class="patient-diagnoses__pagination">{{ $visitDiagnoses->appends(['tab' => 'visits'])->links() }}</div>
             @endif
         </section>
 

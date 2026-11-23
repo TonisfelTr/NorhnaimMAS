@@ -226,6 +226,7 @@
 
         <form class="vh-toolbar" method="get" action="{{ route('doctors.patients.medical_card', $patient->id) }}">
             <input type="hidden" name="tab" value="visits">
+            <input type="hidden" name="visit_section" value="history">
             <div class="vh-field">
                 <label for="vhFormat">Формат</label>
                 <select class="form-select" id="vhFormat" name="visit_format" @disabled(!$visitHistoryHasFormat)>
@@ -503,7 +504,7 @@
                 @endforeach
             </div>
             @if($visitHistory->hasPages())
-                <div class="mt-4">{{ $visitHistory->links('pagination::bootstrap-5') }}</div>
+                <div class="mt-4">{{ $visitHistory->appends(['tab' => 'visits', 'visit_section' => 'history'])->links('pagination::bootstrap-5') }}</div>
             @endif
         @else
             <div class="vh-empty">

@@ -125,3 +125,157 @@
 @media (max-width: 560px) {
     .patient-diagnoses__clinic-context {font-size: 10.5px;}
 }
+
+
+/* Clinic diagnosis context shared by all three tabs. */
+.patient-diagnoses .patient-diagnoses__contextbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin: -2px 0 20px;
+    padding: 11px 14px;
+    border: 1px solid #e0ebe7;
+    border-radius: 13px;
+    background: #fbfdfc;
+}
+.patient-diagnoses .patient-diagnoses__context-diagnosis {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 8px;
+    min-height: 32px;
+    padding: 5px 10px;
+    border-radius: 9px;
+    color: #39766e;
+    background: #ecf7f3;
+    font-size: 11px;
+    font-weight: 650;
+}
+.patient-diagnoses .patient-diagnoses__context-diagnosis i {
+    color: #108c80;
+    font-size: 14px;
+}
+.patient-diagnoses .patient-diagnoses__context-diagnosis strong {
+    color: #087a71;
+    font-size: 13px;
+    font-weight: 850;
+    letter-spacing: .015em;
+}
+.patient-diagnoses .patient-diagnoses__context-rule {
+    flex: 0 0 1px;
+    align-self: stretch;
+    min-height: 18px;
+    background: #dce9e5;
+}
+.patient-diagnoses .patient-diagnoses__context-clinic {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    flex: 1 1 260px;
+    gap: 8px;
+    color: #58756f;
+    font-size: 12px;
+    font-weight: 650;
+}
+.patient-diagnoses .patient-diagnoses__context-clinic i {
+    color: #7fa49a;
+    font-size: 14px;
+    flex: 0 0 auto;
+}
+.patient-diagnoses .patient-diagnoses__context-clinic span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Empty state for visit-based diagnoses; not used by history or current diagnosis. */
+.patient-diagnoses .patient-diagnoses__visits-empty {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    min-height: 148px;
+    padding: 24px;
+    border: 1px solid #deebe6;
+    border-radius: 16px;
+    background: linear-gradient(115deg, #fff 42%, #f7fbf9 100%);
+}
+.patient-diagnoses .patient-diagnoses__visits-empty-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #eaf6f2;
+    color: #108e83;
+    font-size: 22px;
+}
+.patient-diagnoses .patient-diagnoses__visits-empty-content {
+    min-width: 0;
+    flex: 1 1 290px;
+}
+.patient-diagnoses .patient-diagnoses__visits-empty-content h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 800;
+    color: #294c45;
+}
+.patient-diagnoses .patient-diagnoses__visits-empty-content p {
+    margin: 0;
+    max-width: 610px;
+    color: #708680;
+    font-size: 12px;
+    line-height: 1.65;
+}
+.patient-diagnoses .patient-diagnoses__visits-empty-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid #c4ded6;
+    border-radius: 9px;
+    color: #0b8175;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 750;
+    text-decoration: none;
+    transition: border-color .15s ease, background .15s ease;
+}
+.patient-diagnoses .patient-diagnoses__visits-empty-link:hover {
+    border-color: #88c6b6;
+    background: #eff9f5;
+    color: #096c63;
+    text-decoration: none;
+}
+.patient-diagnoses .patient-diagnoses__visits-empty-link:focus-visible {
+    outline: 2px solid #10968b;
+    outline-offset: 2px;
+}
+.patient-diagnoses .patient-diagnoses__entry--visit {
+    border-color: #dceae5;
+    background: #fff;
+}
+.patient-diagnoses .patient-diagnoses__entry--visit .patient-diagnoses__code {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #eaf7f2;
+    color: #087f74;
+    border-radius: 6px;
+}
+@media (max-width: 700px) {
+    .patient-diagnoses .patient-diagnoses__contextbar {align-items: flex-start; margin-bottom: 18px; padding: 10px 12px;}
+    .patient-diagnoses .patient-diagnoses__context-rule {display: none;}
+    .patient-diagnoses .patient-diagnoses__context-clinic {flex: 1 1 100%;}
+    .patient-diagnoses .patient-diagnoses__context-clinic span {white-space: normal; overflow-wrap: anywhere;}
+    .patient-diagnoses .patient-diagnoses__visits-empty {padding: 19px; gap: 12px;}
+    .patient-diagnoses .patient-diagnoses__visits-empty-link {margin-left: 60px;}
+}
+@media (max-width: 420px) {
+    .patient-diagnoses .patient-diagnoses__visits-empty-link {margin-left: 0; width: 100%;}
+}

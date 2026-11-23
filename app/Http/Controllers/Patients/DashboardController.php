@@ -7,6 +7,7 @@ use App\Models\Clinic;
 use App\Models\Doctor;
 use App\Models\PatientClinic;
 use App\Models\RegistryRecord;
+use App\Services\PatientClinicDiagnosisService;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -69,6 +70,15 @@ class DashboardController extends Controller
         ) {
             $assignedDoctor = $patient->doctor;
         }
+
+        // Only the actively selected patient-clinic membership is in scope.
+        // Never use the legacy patient-global patients.diagnose_id here.
+        $clinicDiagnosis = $patient && $selectedMembership && $selectedClinicId > 0
+            ? app(PatientClinicDiagnosisService::class)->currentForClinic(
+                (int) $patient->getKey(),
+                $selectedClinicId
+            )
+            : null;
 
         $assignedDoctorSpeciality = $this->doctorSpeciality($assignedDoctor);
         $assignedDoctorCabinet = $this->findDoctorCabinet(
@@ -165,6 +175,7 @@ class DashboardController extends Controller
             'patient' => $patient,
             'clinicOptions' => $clinicOptions,
             'selectedClinic' => $selectedClinic,
+            'clinicDiagnosis' => $clinicDiagnosis,
             'selectedClinicId' => $selectedClinicId,
             'assignedDoctor' => $assignedDoctor,
             'assignedDoctorSpeciality' => $assignedDoctorSpeciality,

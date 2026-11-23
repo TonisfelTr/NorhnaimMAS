@@ -101,6 +101,11 @@
                 </div>
             @endforeach
         </div>
+        @if($visitHistory->hasPages())
+            <div class="mc-visit-workspace__pagination">
+                {{ $visitHistory->appends(['tab' => 'visits', 'visit_section' => 'confirmation'])->links('pagination::bootstrap-5') }}
+            </div>
+        @endif
         <p class="mc-audit-panel__footnote">Показаны приёмы текущей страницы истории с выбранными фильтрами. Срок и результат фиксируются отдельно от протокола осмотра.</p>
     @endif
 </section>

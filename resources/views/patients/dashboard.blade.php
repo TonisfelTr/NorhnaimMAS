@@ -2,6 +2,10 @@
 
 @section('title', 'Личный кабинет')
 
+@section('assets')
+<link rel="stylesheet" href="{{ asset('css/patient-dashboard-diagnosis.css') }}?v=20261123-1">
+@endsection
+
 @section('content')
     @php
         $patientName = $patient?->name ?: auth()->user()->login;
@@ -217,6 +221,38 @@
                 </div>
             </article>
         </section>
+
+        @if($patient && $selectedClinic && $selectedClinicId > 0)
+            <section class="patient-overview-diagnosis" aria-label="Основной диагноз выбранной клиники">
+                <span class="patient-overview-diagnosis__icon" aria-hidden="true">
+                    <i class="bi bi-clipboard2-pulse"></i>
+                </span>
+                <div class="patient-overview-diagnosis__body">
+                    <div class="patient-overview-diagnosis__eyebrow">Основной диагноз в выбранной клинике</div>
+                    @if($clinicDiagnosis?->diagnose)
+                        <div class="patient-overview-diagnosis__main">
+                            <span class="patient-overview-diagnosis__code">{{ $clinicDiagnosis->diagnose->code }}</span>
+                            <h2 class="patient-overview-diagnosis__name">{{ $clinicDiagnosis->diagnose->title }}</h2>
+                        </div>
+                        <div class="patient-overview-diagnosis__meta">
+                            @if($clinicDiagnosis->doctor_name_snapshot)
+                                <span><i class="bi bi-person-badge" aria-hidden="true"></i> {{ $clinicDiagnosis->doctor_name_snapshot }}</span>
+                            @endif
+                            @if($clinicDiagnosis->set_at)
+                                <span><i class="bi bi-calendar3" aria-hidden="true"></i> {{ $clinicDiagnosis->set_at->format('d.m.Y') }}</span>
+                            @endif
+                        </div>
+                    @else
+                        <h2 class="patient-overview-diagnosis__empty">Диагноз пока не установлен</h2>
+                        <p class="patient-overview-diagnosis__empty-note">В этой клинике врач ещё не установил основной диагноз.</p>
+                    @endif
+                </div>
+                <a class="patient-overview-diagnosis__action"
+                   href="{{ route('patients.diagnoses.index', ['clinic_id' => $selectedClinicId, 'tab' => 'current']) }}">
+                    Мои диагнозы <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                </a>
+            </section>
+        @endif
 
         <div class="patient-dashboard-grid">
             <section

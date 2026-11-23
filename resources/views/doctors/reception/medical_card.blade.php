@@ -3,6 +3,8 @@
 @section('assets')
     @parent
     @vite('resources/js/medical_card.js')
+    <link rel="stylesheet" href="{{ asset('css/medical-card-visit-tabs.css') }}?v=20261123-1">
+    <script defer src="{{ asset('js/medical-card-visit-tabs.js') }}?v=20261123-1"></script>
     <link rel="stylesheet" href="{{ asset('css/doctor-clinic-diagnosis.css') }}?v=5-redesign">
     <script src="{{ asset('js/doctor-clinic-diagnosis.js') }}?v=3-fg" defer></script>
     
@@ -1380,8 +1382,62 @@
 
                 <div class="tab-pane fade mc-pane" id="pane-visits" role="tabpanel"
                      aria-labelledby="tab-visits" tabindex="0">
-                    @include('doctors.reception.partials.medical_visit_confirmation')
-                    @include('doctors.reception.partials.visit_history')
+                    @php
+                        $visitWorkspaceActive = (string) request()->query('visit_section', 'history');
+                        if (!in_array($visitWorkspaceActive, ['history', 'confirmation'], true)) {
+                            $visitWorkspaceActive = 'history';
+                        }
+                        if (session('visit_confirmation_success') || $errors->getBag('visitConfirmation')->any()) {
+                            $visitWorkspaceActive = 'confirmation';
+                        } elseif (session('visit_notice') || $errors->getBag('encounter')->any() || request()->filled('visit_open')) {
+                            $visitWorkspaceActive = 'history';
+                        }
+                    @endphp
+
+                    <div class="mc-visit-workspace">
+                        <nav class="nav mc-visit-workspace__tabs" id="mcVisitWorkspaceTabs"
+                             role="tablist" aria-label="История и подтверждение приёмов">
+                            <button class="nav-link {{ $visitWorkspaceActive === 'history' ? 'active' : '' }}"
+                                    type="button" id="mcVisitWorkspaceHistoryTab" role="tab"
+                                    data-bs-toggle="tab" data-bs-target="#mcVisitWorkspaceHistoryPane"
+                                    data-visit-workspace="history"
+                                    aria-controls="mcVisitWorkspaceHistoryPane"
+                                    aria-selected="{{ $visitWorkspaceActive === 'history' ? 'true' : 'false' }}"
+                                    tabindex="{{ $visitWorkspaceActive === 'history' ? '0' : '-1' }}">
+                                <i class="bi bi-journal-medical" aria-hidden="true"></i>
+                                <span class="mc-visit-workspace__tab-text">
+                                    <strong>История и протоколы</strong>
+                                    <small>Обращения, диагнозы и заключения</small>
+                                </span>
+                            </button>
+                            <button class="nav-link {{ $visitWorkspaceActive === 'confirmation' ? 'active' : '' }}"
+                                    type="button" id="mcVisitWorkspaceConfirmationTab" role="tab"
+                                    data-bs-toggle="tab" data-bs-target="#mcVisitWorkspaceConfirmationPane"
+                                    data-visit-workspace="confirmation"
+                                    aria-controls="mcVisitWorkspaceConfirmationPane"
+                                    aria-selected="{{ $visitWorkspaceActive === 'confirmation' ? 'true' : 'false' }}"
+                                    tabindex="{{ $visitWorkspaceActive === 'confirmation' ? '0' : '-1' }}">
+                                <i class="bi bi-patch-check" aria-hidden="true"></i>
+                                <span class="mc-visit-workspace__tab-text">
+                                    <strong>Подтверждение приёмов</strong>
+                                    <small>Состоялся или не состоялся</small>
+                                </span>
+                            </button>
+                        </nav>
+
+                        <div class="tab-content mc-visit-workspace__content" id="mcVisitWorkspaceContent">
+                            <div class="tab-pane fade {{ $visitWorkspaceActive === 'history' ? 'show active' : '' }}"
+                                 id="mcVisitWorkspaceHistoryPane" role="tabpanel"
+                                 aria-labelledby="mcVisitWorkspaceHistoryTab" tabindex="0">
+                                @include('doctors.reception.partials.visit_history')
+                            </div>
+                            <div class="tab-pane fade {{ $visitWorkspaceActive === 'confirmation' ? 'show active' : '' }}"
+                                 id="mcVisitWorkspaceConfirmationPane" role="tabpanel"
+                                 aria-labelledby="mcVisitWorkspaceConfirmationTab" tabindex="0">
+                                @include('doctors.reception.partials.medical_visit_confirmation')
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="tab-pane fade mc-pane" id="pane-telemedicine-log" role="tabpanel"
