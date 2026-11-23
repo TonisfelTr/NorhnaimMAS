@@ -1322,7 +1322,6 @@ $today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId))-
         if (!$clinicId || $clinicId <= 0) {
             return [
                 self::APPOINTMENT_FORMAT_IN_PERSON,
-                self::APPOINTMENT_FORMAT_TELEMEDICINE,
             ];
         }
 
@@ -1334,12 +1333,11 @@ $today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId))-
 
         $services = $clinic->services;
 
-        // Старые клиники без заполненного поля используют тот же fallback,
-        // который уже применяется на странице настроек клиники.
+        // Старая клиника без явных форматов может принимать очно,
+        // но телемедицина должна быть разрешена явно.
         if ($services === null || $services === '') {
             return [
                 self::APPOINTMENT_FORMAT_IN_PERSON,
-                self::APPOINTMENT_FORMAT_TELEMEDICINE,
             ];
         }
 
@@ -1363,6 +1361,12 @@ $today = Carbon::today(\App\Support\ClinicAppointmentTime::timezone($clinicId))-
                     ],
                     true
                 )
+            )
+            // Общая проверка разрешения клиники: не полагаться на UI.
+            ->filter(
+                static fn (string $format): bool =>
+                    $format !== self::APPOINTMENT_FORMAT_TELEMEDICINE
+                    || \App\Services\ClinicTelemedicineSettings::enabled($clinic)
             )
             ->unique()
             ->values()

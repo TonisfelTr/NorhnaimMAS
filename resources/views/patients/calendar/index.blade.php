@@ -136,9 +136,11 @@
                                 <button type="button" data-format="in_person" class="{{ $selectedFormat === 'in_person' ? 'is-active' : '' }}" @disabled(!in_array('in_person', $selectedFormats, true))>
                                     <i class="bi bi-hospital"></i> Очный приём
                                 </button>
+                                @if($clinic && \App\Services\ClinicTelemedicineSettings::enabled($clinic))
                                 <button type="button" data-format="telemedicine" class="{{ $selectedFormat === 'telemedicine' ? 'is-active' : '' }}" @disabled(!in_array('telemedicine', $selectedFormats, true))>
                                     <i class="bi bi-camera-video"></i> Телемедицина
                                 </button>
+                                @endif
                             </div>
                             <p id="bookingTelemedicineNote"
                                class="patient-booking-telemedicine-note"
