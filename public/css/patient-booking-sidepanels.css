@@ -1,0 +1,244 @@
+/* Booking sidebar: shared visual language for the instruction and upcoming-visit panels.
+   Page-scoped overrides, loaded after the existing calendar stylesheet. */
+.patient-booking-page .patient-booking-aside {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+}
+
+.patient-booking-page .patient-booking-aside > .patient-booking-card {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid #dfeae6;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 22px rgba(26, 61, 54, .035);
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-aside__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 51px;
+    margin: 0 0 16px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid #e4eeea;
+}
+
+.patient-booking-page .patient-booking-aside__header > div {
+    min-width: 0;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-aside__header .patient-eyebrow {
+    display: block;
+    margin: 0 0 4px;
+    color: #0a8d81;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: .08em;
+    line-height: 1.35;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-aside__header h2 {
+    margin: 0;
+    color: #233c39;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 750;
+    letter-spacing: -.015em;
+    line-height: 1.35;
+}
+
+.patient-booking-page .patient-booking-aside__header-symbol,
+.patient-booking-page .patient-booking-aside .patient-booking-count {
+    display: grid;
+    place-items: center;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: #e9f6f2;
+    color: #0c8b80;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1;
+}
+
+.patient-booking-page .patient-booking-aside__header-symbol i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-info ol {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-info ol li {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    color: #647b75;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-info ol li > span {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+    background: #e9f6f2;
+    color: #0d867d;
+    font-size: 11px;
+    font-weight: 750;
+    line-height: 1;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-info__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 17px 0 0;
+    padding: 12px;
+    border: 1px solid #e5efeb;
+    border-radius: 11px;
+    background: #f7faf9;
+    color: #658079;
+    font-size: 11.5px;
+    font-weight: 400;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-info__note i {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: #108e82;
+    font-size: 14px;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__item {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #e8efec;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__item:first-of-type {
+    padding-top: 0;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__item:last-of-type {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+    width: 72px;
+    min-height: 78px;
+    padding: 9px;
+    border-radius: 11px;
+    background: #edf7f4;
+    overflow-wrap: anywhere;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__date strong {
+    color: #0c8c80;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.2;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__date > span {
+    color: #587c75;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__date small {
+    color: #79928a;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__item > div:last-child {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 5px;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__item > div:last-child strong {
+    color: #28433f;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__item > div:last-child > span {
+    color: #718781;
+    font-size: 11.5px;
+    font-weight: 400;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__doctor-time {
+    color: #0d8077;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 76px;
+    margin: 0;
+    padding: 12px 2px;
+    color: #748b84;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__empty i {
+    color: #149589;
+    font-size: 18px;
+}
+
+.patient-booking-page .patient-booking-aside .patient-booking-upcoming__empty p {
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .patient-booking-page .patient-booking-aside > .patient-booking-card {
+        padding: 16px;
+    }
+    .patient-booking-page .patient-booking-aside .patient-booking-aside__header h2 {
+        font-size: 15px;
+    }
+}

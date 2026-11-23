@@ -4,6 +4,7 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/patient-calendar-layout.css') }}?v=9">
+<link rel="stylesheet" href="{{ asset('css/patient-booking-sidepanels.css') }}?v=20261123-1">
 <div class="patient-page patient-booking-page">
     <header class="patient-page-header">
         <div>
@@ -194,8 +195,15 @@
 
             <aside class="patient-booking-aside">
                 <section class="patient-booking-card patient-booking-info">
-                    <span class="patient-eyebrow">ВАШ ВЫБОР</span>
-                    <h2>Как проходит запись</h2>
+                    <div class="patient-booking-card__header patient-booking-aside__header">
+                        <div>
+                            <span class="patient-eyebrow">ВАШ ВЫБОР</span>
+                            <h2>Как проходит запись</h2>
+                        </div>
+                        <span class="patient-booking-aside__header-symbol" aria-hidden="true">
+                            <i class="bi bi-list-ol"></i>
+                        </span>
+                    </div>
                     <ol>
                         <li><span>1</span>Выберите клинику, врача и формат консультации.</li>
                         <li><span>2</span>Найдите свободное время в сетке.</li>
@@ -208,7 +216,7 @@
                 </section>
 
                 <section class="patient-booking-card patient-booking-upcoming">
-                    <div class="patient-booking-card__header">
+                    <div class="patient-booking-card__header patient-booking-aside__header">
                         <div>
                             <span class="patient-eyebrow">ВАШЕ РАСПИСАНИЕ</span>
                             <h2>Предстоящие приёмы</h2>
