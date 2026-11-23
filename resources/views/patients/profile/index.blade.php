@@ -183,7 +183,7 @@
                             >
                                 @csrf
 
-                                @include('patients.partials.avatar-dropzone-v2')
+                                @include('patients.partials.avatar-dropzone')
                             </form>
 
                             @if($avatarUrl)
