@@ -4,6 +4,7 @@
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/patient-calendar-layout.css') }}?v=9">
+<link rel="stylesheet" href="{{ asset('css/patient-booking-telemedicine-hint.css') }}?v=20261123-telemedicine-eligibility">
 <link rel="stylesheet" href="{{ asset('css/patient-booking-sidepanels.css') }}?v=20261123-1">
 <div class="patient-page patient-booking-page">
     <header class="patient-page-header">
@@ -131,7 +132,7 @@
                     <div class="patient-calendar-toolbar__row row g-3">
                         <div class="patient-booking-field col-12 col-md-6">
                             <span>Формат приёма</span>
-                            <div class="patient-booking-format-switch" id="bookingFormatSwitch">
+                            <div class="patient-booking-format-switch" id="bookingFormatSwitch" data-clinic-telemedicine="{{ $clinic && \App\Services\ClinicTelemedicineSettings::enabled($clinic) ? '1' : '0' }}">
                                 <button type="button" data-format="in_person" class="{{ $selectedFormat === 'in_person' ? 'is-active' : '' }}" @disabled(!in_array('in_person', $selectedFormats, true))>
                                     <i class="bi bi-hospital"></i> Очный приём
                                 </button>
@@ -139,6 +140,14 @@
                                     <i class="bi bi-camera-video"></i> Телемедицина
                                 </button>
                             </div>
+                            <p id="bookingTelemedicineNote"
+                               class="patient-booking-telemedicine-note"
+                               role="status"
+                               aria-live="polite"
+                               hidden>
+                                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                                <span id="bookingTelemedicineNoteText"></span>
+                            </p>
                         </div>
 
                         <label class="patient-booking-field patient-booking-date-field col-12 col-md-6">
@@ -319,18 +328,52 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateFormatButtons() {
         const allowed = allowedFormats();
 
-        formatSwitch.querySelectorAll('[data-format]').forEach((button) => {
-            const enabled = allowed.includes(button.dataset.format);
-            button.disabled = !enabled;
-            button.classList.toggle('is-active', enabled && button.dataset.format === activeFormat);
-            button.setAttribute('aria-pressed', enabled && button.dataset.format === activeFormat ? 'true' : 'false');
-        });
-
+        // The old format must not remain selected after changing the doctor.
         if (!allowed.includes(activeFormat)) {
-            activeFormat = allowed[0] || '';
+            activeFormat = allowed.includes('in_person')
+                ? 'in_person'
+                : (allowed[0] || '');
         }
 
+        formatSwitch.querySelectorAll('[data-format]').forEach((button) => {
+            const enabled = allowed.includes(button.dataset.format);
+            const selected = enabled && button.dataset.format === activeFormat;
+            button.disabled = !enabled;
+            button.classList.toggle('is-active', selected);
+            button.setAttribute('aria-pressed', String(selected));
+        });
+
         selectedFormatInput.value = activeFormat;
+
+        // Clinic permission and doctor eligibility are independent conditions.
+        // The server also enforces both when checking availability and saving.
+        const hint = document.getElementById('bookingTelemedicineNote');
+        const hintText = document.getElementById('bookingTelemedicineNoteText');
+        const button = formatSwitch.querySelector('[data-format="telemedicine"]');
+        if (!hint || !hintText || !button) return;
+
+        let reason = '';
+        if (!clinicSelect.value) {
+            reason = 'Выберите клинику и врача, чтобы проверить возможность телемедицины.';
+        } else if (!doctorSelect.value) {
+            reason = 'Выберите врача, чтобы проверить возможность телемедицинской записи.';
+        } else if (formatSwitch.dataset.clinicTelemedicine !== '1') {
+            reason = 'В выбранной клинике телемедицинская запись отключена.';
+        } else if (!allowed.includes('telemedicine')) {
+            reason = allowed.includes('in_person')
+                ? 'Выбранный врач не проводит телемедицинские консультации. Можно выбрать очный приём или другого врача.'
+                : 'Выбранный врач не проводит телемедицинские консультации. Выберите другого врача.';
+        }
+
+        hintText.textContent = reason;
+        hint.hidden = reason === '';
+        if (reason) {
+            button.setAttribute('title', reason);
+            button.setAttribute('aria-describedby', 'bookingTelemedicineNote');
+        } else {
+            button.removeAttribute('title');
+            button.removeAttribute('aria-describedby');
+        }
     }
 
     function clearSelection() {

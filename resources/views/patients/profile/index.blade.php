@@ -24,10 +24,9 @@
                     <h1>{{ $patientName }}</h1>
                     <p>
                         Управление личными данными, клиниками, врачами и настройками учётной записи.
-                        @if($patient)
-                            <span class="patient-profile-hero__clinic-count"
-                                  title="Уникальные клиники, в которые пациент записывался; отменённые записи не учитываются">
-                                Клиник: {{ $contactedClinicCount }}
+                        @if($patient && $clinicCards->isNotEmpty())
+                            <span class="patient-profile-hero__clinic-count">
+                                Клиник: {{ $clinicCards->count() }}
                             </span>
                         @endif
                     </p>

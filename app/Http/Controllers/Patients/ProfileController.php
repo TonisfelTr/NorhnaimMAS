@@ -12,8 +12,6 @@ use App\Models\PatientProfileEvent;
 use App\Services\PatientProfileAuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -137,9 +135,6 @@ class ProfileController extends Controller
             : collect();
 
         return view('patients.profile.index', [
-            'contactedClinicCount' => $patient
-                ? $this->contactedClinicCount((int) $patient->getKey())
-                : 0,
             'patient' => $patient,
             'user' => $user,
             'tab' => $tab,
@@ -153,36 +148,6 @@ class ProfileController extends Controller
             'birthAt' => $patient?->getRawOriginal('birth_at'),
             'clinicCards' => $clinicCards,
         ]);
-    }
-
-    /**
-     * Unique clinics the patient contacted through an existing non-cancelled
-     * registry booking. A clinic membership by itself is NOT a contact.
-     * Legacy appointments without rr.clinic_id use the assigned doctor's clinic.
-     */
-    private function contactedClinicCount(int $patientId): int
-    {
-        if ($patientId <= 0
-            || !Schema::hasTable('registry_records')
-            || !Schema::hasTable('doctors')
-        ) {
-            return 0;
-        }
-
-        $query = DB::table('registry_records as rr')
-            ->leftJoin('doctors as d', 'd.id', '=', 'rr.doctor_id')
-            ->where('rr.patient_id', $patientId);
-
-        if (Schema::hasColumn('registry_records', 'deleted_at')) {
-            $query->whereNull('rr.deleted_at');
-        }
-
-        return $query
-            ->whereRaw('COALESCE(rr.clinic_id, d.clinic_id) > 0')
-            ->selectRaw('COALESCE(rr.clinic_id, d.clinic_id) AS contacted_clinic_id')
-            ->distinct()
-            ->get()
-            ->count();
     }
 
     private function doctorSpeciality(?Doctor $doctor): string

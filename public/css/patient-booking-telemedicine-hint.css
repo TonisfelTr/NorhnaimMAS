@@ -1,0 +1,28 @@
+/* Booking format notice: always scoped to the patient calendar page. */
+.patient-booking-page .patient-booking-telemedicine-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 9px 0 0;
+    padding: 9px 11px;
+    border: 1px solid #dce9e5;
+    border-radius: 10px;
+    background: #f7fbf9;
+    color: #55736e;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+.patient-booking-page .patient-booking-telemedicine-note[hidden] {
+    display: none !important;
+}
+.patient-booking-page .patient-booking-telemedicine-note i {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: #0b8b80;
+    font-size: 14px;
+}
+.patient-booking-page .patient-booking-telemedicine-note span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
